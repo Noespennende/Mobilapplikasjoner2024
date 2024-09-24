@@ -1,13 +1,5 @@
 package com.movielist.composables
 
-<<<<<<< Updated upstream
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import com.movielist.ui.theme.DarkGray
-=======
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -34,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Purple
->>>>>>> Stashed changes
 
 @Composable
 fun Background () {
@@ -43,9 +34,6 @@ fun Background () {
             .background(DarkGray)
             .fillMaxSize()
     )
-<<<<<<< Updated upstream
-}
-=======
 }
 
 
@@ -117,4 +105,3 @@ fun ProgressBar (
 
 }
 
->>>>>>> Stashed changes

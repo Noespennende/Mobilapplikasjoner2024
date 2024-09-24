@@ -1,13 +1,7 @@
 package com.movielist.composables
 
 import androidx.compose.foundation.Image
-<<<<<<< Updated upstream
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-=======
-import androidx.compose.foundation.layout.Arrangement
->>>>>>> Stashed changes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,27 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-<<<<<<< Updated upstream
-import androidx.compose.material3.ButtonColors
-=======
->>>>>>> Stashed changes
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-<<<<<<< Updated upstream
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-=======
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
->>>>>>> Stashed changes
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -58,11 +42,7 @@ fun FrontPage () {
             .fillMaxSize()
     ) {
         CurrentlyWatchingCard(
-<<<<<<< Updated upstream
-            imageId = R.drawable.noimage,
-=======
             imageId = R.drawable.silo,
->>>>>>> Stashed changes
             imageDescription = "No Image",
             title = "Chernobyl",
             showLenght = 12,
@@ -89,8 +69,6 @@ fun CurrentlyWatchingCard (
     modifier: Modifier = Modifier
 
     ) {
-<<<<<<< Updated upstream
-=======
 
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
@@ -103,7 +81,6 @@ fun CurrentlyWatchingCard (
 
 
     //Card container
->>>>>>> Stashed changes
     Card (
         modifier = modifier
             .fillMaxWidth(.9f),
@@ -111,14 +88,9 @@ fun CurrentlyWatchingCard (
         colors = CardDefaults.cardColors(containerColor = Gray)
 
     ){
-<<<<<<< Updated upstream
-        Column(modifier = Modifier
-            .height(280.dp)
-=======
         //card content
         Column(modifier = Modifier
             .height(260.dp)
->>>>>>> Stashed changes
             .padding(horizontal = 20.dp, vertical = 5.dp))
         {
             //Main image
@@ -154,11 +126,7 @@ fun CurrentlyWatchingCard (
                     )
                     //Episodes watched
                     Text (
-<<<<<<< Updated upstream
-                        "Ep $episodesWatched of $showLenght",
-=======
                         "Ep $watchedEpisodesCount of $showLenght",
->>>>>>> Stashed changes
                         style = TextStyle(
                             color = White,
                             fontSize = 18.sp,
@@ -167,11 +135,6 @@ fun CurrentlyWatchingCard (
                     )
                 }
 
-<<<<<<< Updated upstream
-                //Mark as watched button
-                Button(
-                    onClick = {/**/},
-=======
                 //Progress bar
                 ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLenght)
 
@@ -185,7 +148,6 @@ fun CurrentlyWatchingCard (
 
                         buttonText = generateButtonText(watchedEpisodesCount, showLenght)
                     },
->>>>>>> Stashed changes
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Purple),
                     modifier = Modifier
@@ -193,14 +155,9 @@ fun CurrentlyWatchingCard (
                         .height(50.dp)
                         .padding(vertical = 5.dp)
                 ) {
-<<<<<<< Updated upstream
-                    Text(
-                        "Mark episode ${episodesWatched+1} as watched",
-=======
                     //Button text
                     Text(
                         buttonText,
->>>>>>> Stashed changes
                         fontSize = 16.sp,
                         fontWeight = weightRegular,
                         color = DarkGray
@@ -210,8 +167,6 @@ fun CurrentlyWatchingCard (
 
         }
     }
-<<<<<<< Updated upstream
-=======
 }
 
 //Utility Functions
@@ -225,5 +180,4 @@ fun generateButtonText(episodesWatched: Int, showLenght: Int): String {
         return "Mark episode ${episodesWatched + 1} as watched"
     }
 
->>>>>>> Stashed changes
 }
