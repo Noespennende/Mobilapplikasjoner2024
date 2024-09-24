@@ -12,6 +12,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FrontPage()
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
         }
     }
 }
