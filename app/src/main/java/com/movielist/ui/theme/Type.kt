@@ -29,6 +29,10 @@ val weightRegular = FontWeight(400)
 val weightLight = FontWeight(300)
 val weightBold = FontWeight(700)
 
+//Font size
+val headerSize = 16.sp
+val paragraphSize = 12.sp
+
 // Set of Material typography styles to start with
 val Typography = Typography(
     bodyLarge = TextStyle(

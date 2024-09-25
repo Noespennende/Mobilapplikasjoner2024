@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -31,10 +32,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
+import com.movielist.data.Review
 import com.movielist.data.Show
+import com.movielist.data.User
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
+import java.util.Calendar
+import java.util.Date
 import kotlin.random.Random
 
 @Composable
@@ -48,21 +53,63 @@ fun FrontPage () {
                 length = 12,
                 imageID = R.drawable.silo,
                 currentEpisode = i,
-                imageDescription = "Silo TV Show"
+                imageDescription = "Silo TV Show",
+                releaseDate = Calendar.getInstance()
+            )
+        )
+    }
+
+    val reviewList = mutableListOf<Review>()
+    val user = User(
+        userName = "User Userson",
+        profileImageID = R.drawable.profilepicture,
+        completedShows = showList,
+        wantToWatchShows = showList,
+        droppedShows = showList,
+        currentlyWatchingShows = showList
+    )
+    for (i in 0..6) {
+        reviewList.add(
+            Review(
+                score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
+                reviewer = user,
+                show = showList[1],
+                reviewBody = "It’s reasonably well-made, and visually compelling," +
+                        "but it’s ultimately too derivative, and obvious in its thematic execution," +
+                        "to recommend..",
+                postDate = Calendar.getInstance(),
+                likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
             )
         )
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
     //Front page graphics
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
         //Front page content
-        CurrentlyWatchingScroller(showList)
-        PopularShowsAndMovies(showList)
-        YourFriendsJustWatched(showList)
+        item {
+            CurrentlyWatchingScroller(showList)
+        }
+
+        item {
+            PopularShowsAndMovies(showList)
+        }
+
+        item {
+            YourFriendsJustWatched(showList)
+        }
+
+        item {
+            //Top reviews this week:
+            ReviewsSection(
+                reviewList = reviewList,
+                header = "Top reviews this week"
+            )
+        }
+
     }
 
 }
@@ -186,7 +233,7 @@ fun CurrentlyWatchingCard (
                     //Button text
                     Text(
                         buttonText,
-                        fontSize = 16.sp,
+                        fontSize = headerSize,
                         fontWeight = weightRegular,
                         color = DarkGray
                     )
@@ -205,13 +252,13 @@ fun PopularShowsAndMovies (
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 30.dp)
+            .padding(top = verticalPadding)
     ) {
         //Header
         Text(
             "Popular shows and movies",
             fontFamily = fontFamily,
-            fontSize = 16.sp,
+            fontSize = headerSize,
             fontWeight = weightBold,
             color = White,
             modifier = Modifier
@@ -241,13 +288,13 @@ fun YourFriendsJustWatched (
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(top = 15.dp)
+            .padding(top = verticalPadding)
     ) {
         //Header
         Text(
             "Your friends just watched",
             fontFamily = fontFamily,
-            fontSize = 16.sp,
+            fontSize = headerSize,
             fontWeight = weightBold,
             color = White,
             modifier = Modifier

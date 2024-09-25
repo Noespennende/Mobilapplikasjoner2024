@@ -6,7 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -42,7 +47,10 @@ import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightBlack
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
+import com.movielist.ui.theme.White
 import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.paragraphSize
+import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
 @Composable
@@ -62,7 +70,7 @@ fun ProgressBar (
     lenght: Dp = 50.dp,
     foregroundColor: Color = Purple,
     backgroundColor: Color = DarkPurple,
-    strokeWith: Dp = 8.dp,
+    strokeWith: Float = 20f,
     animationDuration: Int = 1000,
     animationDelay: Int = 0
 )
@@ -106,7 +114,7 @@ fun ProgressBar (
                 color = backgroundColor,
                 start = Offset(x = lineStart, y= lineY),
                 end = Offset(x= size.width , y= lineY),
-                strokeWidth = 20f,
+                strokeWidth = strokeWith,
                 StrokeCap.Round,
             )
             //foreground line
@@ -114,7 +122,47 @@ fun ProgressBar (
                 color = foregroundColor,
                 start = Offset(x = lineStart, y= lineY),
                 end = Offset(x= lineEnd , y= lineY),
-                strokeWidth = 20f,
+                strokeWidth = strokeWith,
+                StrokeCap.Round,
+            )
+        }
+
+    }
+
+}
+
+@Composable
+fun LineDevider (
+    lenght: Dp = 50.dp,
+    foregroundColor: Color = Gray,
+    backgroundColor: Color = DarkPurple,
+    strokeWith: Float = 5f,
+)
+{
+    //Progress bar graphics
+    //ProgressBarContainer
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(20.dp)
+            .padding(top = 5.dp, bottom = 5.dp)
+    ){
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.5f)
+        )  {
+            //Line parameters
+            val lineStart = 4.dp.toPx()
+            val lineEnd = size.width
+            val lineY = size.height/2
+            //line
+            drawLine(
+                color = foregroundColor,
+                start = Offset(x = lineStart, y= lineY),
+                end = Offset(x= lineEnd , y= lineY),
+                strokeWidth = 5f,
                 StrokeCap.Round,
             )
         }
@@ -219,5 +267,57 @@ fun ScoreGraphics(
             fontSize = 12.sp,
             color = LightGray
         )
+    }
+}
+
+@Composable
+fun LikeButton (
+    sizeMultiplier: Float = 1f
+) {
+    var buttonText by remember {
+        mutableStateOf("Like")
+    }
+
+    var buttonColor by remember {
+        mutableStateOf(LightGray)
+    }
+
+    var buttonClicked by remember {
+        mutableStateOf(false)
+    }
+
+    Button(
+        onClick = {
+            if (buttonClicked) {
+                buttonColor = LightGray
+                buttonClicked = false
+                buttonText = "Like"
+
+            } else {
+                buttonColor = Purple
+                buttonClicked = true
+                buttonText = "Liked"
+            }
+        },
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        shape = RoundedCornerShape(5.dp),
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier
+            .height((20*sizeMultiplier).dp)
+            .wrapContentWidth()
+    )
+    {
+        Row(
+        ) {
+            Text(
+                text = buttonText,
+                fontSize = (15*sizeMultiplier).sp,
+                fontFamily = fontFamily,
+                fontWeight = weightBold,
+                color = buttonColor,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+            )
+        }
     }
 }
