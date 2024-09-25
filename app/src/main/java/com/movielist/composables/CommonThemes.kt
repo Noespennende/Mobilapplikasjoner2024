@@ -3,13 +3,20 @@ package com.movielist.composables
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -18,14 +25,25 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.movielist.R
 import com.movielist.ui.theme.DarkGray
+import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple
+import com.movielist.ui.theme.Gray
+import com.movielist.ui.theme.LightBlack
+import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
+import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.weightRegular
 
 @Composable
 fun Background () {
@@ -105,3 +123,101 @@ fun ProgressBar (
 
 }
 
+@Composable
+fun TopMobileIconsBackground () {
+    Box(
+        modifier = Modifier
+            .background(DarkGrayTransparent)
+            .fillMaxWidth()
+            .height(25.dp)
+    )
+}
+
+@Composable
+fun BottomMobileIconsBackground () {
+    Box(
+        modifier = Modifier
+            .background(DarkGray)
+            .fillMaxWidth()
+            .height(20.dp)
+    )
+}
+
+@Composable
+fun ShowImage (
+    imageID: Int  = R.drawable.noimage,
+    imageDescription: String = "Image not available",
+    sizeMultiplier: Float = 1.0f
+) {
+    Image(
+        painter = painterResource(id = imageID),
+        contentDescription = imageDescription,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .width((90*sizeMultiplier).dp)
+            .height((133*sizeMultiplier).dp)
+    )
+}
+
+@Composable
+fun ProfileImage(
+    imageID: Int,
+    userName: String,
+    sizeMultiplier: Float = 1.0f
+) {
+    Image(
+        painter = painterResource(id = imageID),
+        contentDescription = userName,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier
+            .size((30*sizeMultiplier).dp)
+            .clip(CircleShape)
+    )
+}
+
+@Composable
+fun ScoreGraphics(
+    score: Int,
+    sizeMultiplier: Float = 1.0f
+) {
+    //Generate stars if score is greater than 0
+    if (score > 0){
+        var scoreNumber: Int = score
+        if (scoreNumber > 10) { scoreNumber = 10}
+        //Graphics
+        Row (
+        ) {
+            //Generate full stars
+            for (i in 1..score) {
+                if (i % 2 == 0) {
+                    Image(
+                        painter = painterResource(id = R.drawable.star),
+                        contentDescription = "Star",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size((11*sizeMultiplier).dp)
+                    )
+                }
+            }
+            //add half star at the end for half scores
+            if (score % 2 != 0)  {
+                Image(
+                    painter = painterResource(id = R.drawable.half_star),
+                    contentDescription = "Star",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size((11*sizeMultiplier).dp)
+                )
+            }
+
+        }
+    } else {
+        Text(
+            text = "No score",
+            fontFamily = fontFamily,
+            fontWeight = weightRegular,
+            fontSize = 12.sp,
+            color = LightGray
+        )
+    }
+}
