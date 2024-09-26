@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -15,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -40,16 +42,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
+import com.movielist.data.NavbarOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightBlack
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.bottomNavBarHeight
+import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
-import com.movielist.ui.theme.paragraphSize
+import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -133,9 +137,7 @@ fun ProgressBar (
 
 @Composable
 fun LineDevider (
-    lenght: Dp = 50.dp,
     foregroundColor: Color = Gray,
-    backgroundColor: Color = DarkPurple,
     strokeWith: Float = 5f,
 )
 {
@@ -162,7 +164,7 @@ fun LineDevider (
                 color = foregroundColor,
                 start = Offset(x = lineStart, y= lineY),
                 end = Offset(x= lineEnd , y= lineY),
-                strokeWidth = 5f,
+                strokeWidth = strokeWith,
                 StrokeCap.Round,
             )
         }
@@ -172,23 +174,255 @@ fun LineDevider (
 }
 
 @Composable
-fun TopMobileIconsBackground () {
+fun TopMobileIconsBackground (
+    color: Color = DarkGrayTransparent,
+) {
     Box(
         modifier = Modifier
-            .background(DarkGrayTransparent)
+            .background(color)
             .fillMaxWidth()
-            .height(25.dp)
+            .height(topPhoneIconsBackgroundHeight)
     )
 }
 
 @Composable
-fun BottomMobileIconsBackground () {
+fun BottomNavbarAndMobileIconsBackground (
+    color: Color = Gray
+) {
+
     Box(
-        modifier = Modifier
-            .background(DarkGray)
-            .fillMaxWidth()
-            .height(20.dp)
+        modifier = Modifier.fillMaxSize()
+    ){
+        Box(
+            modifier = Modifier
+                .background(color)
+                .fillMaxWidth()
+                .height(bottomNavBarHeight)
+                .align(Alignment.BottomCenter)
+        )
+    }
+
+}
+
+@Composable
+fun BottomNavBar(
+    activeColor: Color = Purple,
+    inactiveColor: Color = LightGray,
+    sizeMultiplier: Float = 1f
+){
+    val buttonSize: Dp = (35*sizeMultiplier).dp
+
+
+
+    var homeButtonColor by remember {
+        mutableStateOf(activeColor)
+    }
+    var listButtonColor by remember {
+        mutableStateOf(inactiveColor)
+    }
+    var searchButtonColor by remember {
+        mutableStateOf(inactiveColor)
+    }
+    var reviewButtonColor by remember {
+        mutableStateOf(inactiveColor)
+    }
+    var profileButtonColor by remember {
+        mutableStateOf(inactiveColor)
+    }
+    var activeButton by remember {
+        mutableStateOf(NavbarOptions.HOME)
+    }
+
+
+    //wrapper
+    Box (
+        modifier = Modifier.fillMaxSize()
     )
+    {
+        //Navbar content
+        Row (
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .align(Alignment.BottomCenter)
+            .padding(
+                bottom = bottomPhoneIconsOffset,
+                start = horizontalPadding-10.dp,
+                end = horizontalPadding-10.dp
+            )
+        ) {
+            //Home button
+            Button(
+                onClick = {
+                    //Home button onClick logic
+                    if(activeButton != NavbarOptions.HOME){
+                        homeButtonColor = activeColor
+                        listButtonColor = inactiveColor
+                        searchButtonColor = inactiveColor
+                        reviewButtonColor = inactiveColor
+                        profileButtonColor = inactiveColor
+                        activeButton = NavbarOptions.HOME
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .height(buttonSize)
+                    .wrapContentWidth()
+            )
+            {
+                //Home button icon
+                Image(
+                    painter = painterResource(id = R.drawable.home),
+                    contentDescription = "Home",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(homeButtonColor),
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+
+            }
+
+            //List button
+            Button(
+                onClick = {
+                    //List button onClick logic
+                    if(activeButton != NavbarOptions.LIST){
+                        homeButtonColor = inactiveColor
+                        listButtonColor = activeColor
+                        searchButtonColor = inactiveColor
+                        reviewButtonColor = inactiveColor
+                        profileButtonColor = inactiveColor
+                        activeButton = NavbarOptions.LIST
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .height(buttonSize)
+                    .wrapContentWidth()
+            )
+            {
+                //List button icon
+                Image(
+                    painter = painterResource(id = R.drawable.list),
+                    contentDescription = "List",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(listButtonColor),
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+
+            }
+
+            //Search button
+            Button(
+                onClick = {
+                    //Search button onClick logic
+                    if(activeButton != NavbarOptions.SEARCH){
+                        homeButtonColor = inactiveColor
+                        listButtonColor = inactiveColor
+                        searchButtonColor = activeColor
+                        reviewButtonColor = inactiveColor
+                        profileButtonColor = inactiveColor
+                        activeButton = NavbarOptions.SEARCH
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .height(buttonSize)
+                    .wrapContentWidth()
+            )
+            {
+                //Search button icon
+                Image(
+                    painter = painterResource(id = R.drawable.search),
+                    contentDescription = "Search",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(searchButtonColor),
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+
+            }
+
+            //Review button
+            Button(
+                onClick = {
+                    //Review button onClick logic
+                    if(activeButton != NavbarOptions.REVIEW){
+                        homeButtonColor = inactiveColor
+                        listButtonColor = inactiveColor
+                        searchButtonColor = inactiveColor
+                        reviewButtonColor = activeColor
+                        profileButtonColor = inactiveColor
+                        activeButton = NavbarOptions.REVIEW
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .height(buttonSize)
+                    .wrapContentWidth()
+            )
+            {
+                //Review button icon
+                Image(
+                    painter = painterResource(id = R.drawable.review),
+                    contentDescription = "Review",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(reviewButtonColor),
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+            }
+
+            //Profile button
+            Button(
+                onClick = {
+                    //Profile button onClick logic
+                    if(activeButton != NavbarOptions.PROFILE){
+                        homeButtonColor = inactiveColor
+                        listButtonColor = inactiveColor
+                        searchButtonColor = inactiveColor
+                        reviewButtonColor = inactiveColor
+                        profileButtonColor = activeColor
+                        activeButton = NavbarOptions.PROFILE
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(Color.Transparent),
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .height(buttonSize)
+                    .wrapContentWidth()
+            )
+            {
+                //Profile button icon
+                Image(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Review",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(profileButtonColor),
+                    modifier = Modifier
+                        .size(buttonSize)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+            }
+        }
+    }
+
+
 }
 
 @Composable
@@ -286,17 +520,23 @@ fun LikeButton (
         mutableStateOf(false)
     }
 
+    var heartIcon by remember {
+        mutableStateOf(R.drawable.heart_hollow)
+    }
+
     Button(
         onClick = {
             if (buttonClicked) {
                 buttonColor = LightGray
                 buttonClicked = false
                 buttonText = "Like"
+                heartIcon = R.drawable.heart_hollow
 
             } else {
                 buttonColor = Purple
                 buttonClicked = true
                 buttonText = "Liked"
+                heartIcon = R.drawable.heart_filled
             }
         },
         colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -309,15 +549,33 @@ fun LikeButton (
     {
         Row(
         ) {
-            Text(
-                text = buttonText,
-                fontSize = (15*sizeMultiplier).sp,
-                fontFamily = fontFamily,
-                fontWeight = weightBold,
-                color = buttonColor,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
+            //Button content
+            Row (
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
             )
+            {
+                Image(
+                    painter = painterResource(id = heartIcon),
+                    contentDescription = "heart icon",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(buttonColor),
+                    modifier = Modifier
+                        .size((15*sizeMultiplier).dp)
+                        .clip(CircleShape)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+
+                Text(
+                    text = buttonText,
+                    fontSize = (15*sizeMultiplier).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    color = buttonColor,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                )
+            }
+
         }
     }
 }

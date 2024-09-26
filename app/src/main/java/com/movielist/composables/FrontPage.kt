@@ -1,10 +1,12 @@
 package com.movielist.composables
 
+import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -110,6 +112,12 @@ fun FrontPage () {
             )
         }
 
+        item {
+            /*Adds empty space the size of the bottom nav bar to ensure content don't dissapear
+            behind it*/
+            Spacer(modifier = Modifier.height(bottomNavBarHeight))
+        }
+
     }
 
 }
@@ -166,7 +174,11 @@ fun CurrentlyWatchingCard (
         //card content
         Column(modifier = Modifier
             .height(290.dp)
-            .padding(start = 20.dp, end = 20.dp, top = 35.dp, bottom = 10.dp))
+            .padding(
+                start = 20.dp,
+                end = 20.dp,
+                top = (topPhoneIconsBackgroundHeight+10.dp),
+                bottom = 10.dp))
         {
             //Main image
             Image(
