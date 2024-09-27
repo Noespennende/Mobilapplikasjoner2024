@@ -173,7 +173,7 @@ fun CurrentlyWatchingCard (
     ){
         //card content
         Column(modifier = Modifier
-            .height(290.dp)
+            .height(265.dp+ topPhoneIconsBackgroundHeight)
             .padding(
                 start = 20.dp,
                 end = 20.dp,

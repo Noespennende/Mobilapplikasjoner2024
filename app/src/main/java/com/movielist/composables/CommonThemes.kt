@@ -561,7 +561,6 @@ fun LikeButton (
                     colorFilter = ColorFilter.tint(buttonColor),
                     modifier = Modifier
                         .size((15*sizeMultiplier).dp)
-                        .clip(CircleShape)
                         .align(alignment = Alignment.CenterVertically)
                 )
 
