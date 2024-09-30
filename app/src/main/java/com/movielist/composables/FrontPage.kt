@@ -378,7 +378,11 @@ fun FriendsWatchedInfo(
 }
 
 //Utility Functions
-fun generateButtonText(episodesWatched: Int, showLenght: Int): String {
+fun generateButtonText(
+    episodesWatched: Int,
+    showLenght: Int)
+: String
+{
     if (episodesWatched+1 == showLenght) {
         return "Mark as completed"
     } else if ( episodesWatched == showLenght){

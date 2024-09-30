@@ -9,5 +9,4 @@ data class Review (
     val reviewBody: String,
     val postDate: Calendar,
     var likes: Int
-
 )
