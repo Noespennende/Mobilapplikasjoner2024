@@ -49,10 +49,12 @@ import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
+import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
@@ -199,6 +201,25 @@ fun BottomNavbarAndMobileIconsBackground (
                 .fillMaxWidth()
                 .height(bottomNavBarHeight)
                 .align(Alignment.BottomCenter)
+        )
+    }
+
+}
+
+@Composable
+fun TopNavbarBackground (
+    color: Color = Gray
+) {
+
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Box(
+            modifier = Modifier
+                .background(color)
+                .fillMaxWidth()
+                .height(topPhoneIconsBackgroundHeight+ topNavBaHeight)
+                .align(Alignment.TopCenter)
         )
     }
 
@@ -460,7 +481,9 @@ fun ProfileImage(
 @Composable
 fun ScoreGraphics(
     score: Int,
-    sizeMultiplier: Float = 1.0f
+    sizeMultiplier: Float = 1.0f,
+    color: Color = White,
+    loggedInUsersScore: Boolean = false
 ) {
     //Generate stars if score is greater than 0
     if (score > 0){
@@ -476,6 +499,7 @@ fun ScoreGraphics(
                         painter = painterResource(id = R.drawable.star),
                         contentDescription = "Star",
                         contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(color),
                         modifier = Modifier
                             .size((11*sizeMultiplier).dp)
                     )
@@ -487,12 +511,34 @@ fun ScoreGraphics(
                     painter = painterResource(id = R.drawable.half_star),
                     contentDescription = "Star",
                     contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(color),
                     modifier = Modifier
                         .size((11*sizeMultiplier).dp)
                 )
             }
 
         }
+    } else if (loggedInUsersScore) {
+        Row (
+            horizontalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.empty_star),
+                contentDescription = "Star",
+                contentScale = ContentScale.Crop,
+                colorFilter = ColorFilter.tint(LightGray),
+                modifier = Modifier
+                    .size((11*sizeMultiplier).dp)
+            )
+            Text(
+                text = "Unrated",
+                fontFamily = fontFamily,
+                fontWeight = weightBold,
+                fontSize = 16.sp,
+                color = LightGray
+            )
+        }
+
     } else {
         Text(
             text = "No score",

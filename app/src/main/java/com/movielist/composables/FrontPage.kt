@@ -1,6 +1,5 @@
 package com.movielist.composables
 
-import android.content.ClipData.Item
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
+import com.movielist.data.ListItem
 import com.movielist.data.Review
 import com.movielist.data.Show
 import com.movielist.data.User
@@ -41,22 +41,38 @@ import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
 import java.util.Calendar
-import java.util.Date
 import kotlin.random.Random
 
 @Composable
 fun FrontPage () {
     //Temporary code: DELETE THIS CODE
+    val listItemList = mutableListOf<ListItem>()
+    for (i in 0..12) {
+        listItemList.add(
+            ListItem(
+                currentEpisode = i,
+                score = Random.nextInt(0, 10),
+                show =  Show(
+                    title = "Silo",
+                    length = 12,
+                    imageID = R.drawable.silo,
+                    imageDescription = "Silo TV Show",
+                    releaseDate = Calendar.getInstance()
+                )
+            )
+        )
+    }
+
     val showList = mutableListOf<Show>()
+
     for (i in 0..12) {
         showList.add(
             Show(
-                title = "Silo",
-                length = 12,
-                imageID = R.drawable.silo,
-                currentEpisode = i,
-                imageDescription = "Silo TV Show",
-                releaseDate = Calendar.getInstance()
+            title = "Silo",
+            length = 12,
+            imageID = R.drawable.silo,
+            imageDescription = "Silo TV Show",
+            releaseDate = Calendar.getInstance()
             )
         )
     }
@@ -65,17 +81,17 @@ fun FrontPage () {
     val user = User(
         userName = "User Userson",
         profileImageID = R.drawable.profilepicture,
-        completedShows = showList,
-        wantToWatchShows = showList,
-        droppedShows = showList,
-        currentlyWatchingShows = showList
+        completedShows = listItemList,
+        wantToWatchShows = listItemList,
+        droppedShows = listItemList,
+        currentlyWatchingShows = listItemList
     )
     for (i in 0..6) {
         reviewList.add(
             Review(
                 score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
                 reviewer = user,
-                show = showList[1],
+                show = listItemList[1].show,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
                         "to recommend..",
@@ -93,7 +109,7 @@ fun FrontPage () {
     ) {
         //Front page content
         item {
-            CurrentlyWatchingScroller(showList)
+            CurrentlyWatchingScroller(listItemList)
         }
 
         item {
@@ -101,7 +117,7 @@ fun FrontPage () {
         }
 
         item {
-            YourFriendsJustWatched(showList)
+            YourFriendsJustWatched(listItemList)
         }
 
         item {
@@ -124,7 +140,7 @@ fun FrontPage () {
 
 @Composable
 fun CurrentlyWatchingScroller (
-    listOfShows: List<Show>
+    listOfShows: List<ListItem>
 ) {
 
     LazyRow (
@@ -133,10 +149,10 @@ fun CurrentlyWatchingScroller (
     ) {
         items (listOfShows.size) {i ->
             CurrentlyWatchingCard(
-                imageId = listOfShows[i].imageID,
-                imageDescription = listOfShows[i].imageDescription,
-                title = listOfShows[i].title,
-                showLenght = listOfShows[i].length,
+                imageId = listOfShows[i].show.imageID,
+                imageDescription = listOfShows[i].show.imageDescription,
+                title = listOfShows[i].show.title,
+                showLenght = listOfShows[i].show.length,
                 episodesWatched = listOfShows[i].currentEpisode)
         }
     }
@@ -160,8 +176,6 @@ fun CurrentlyWatchingCard (
     var buttonText by remember {
         mutableStateOf(generateButtonText(episodesWatched, showLenght))
     }
-
-
 
     //Card container
     Card (
@@ -293,7 +307,7 @@ fun PopularShowsAndMovies (
 
 @Composable
 fun YourFriendsJustWatched (
-    listOfShows: List<Show>
+    listOfShows: List<ListItem>
 ) {
     //Container collumn
     Column (
@@ -323,16 +337,16 @@ fun YourFriendsJustWatched (
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     ShowImage(
-                        imageID = listOfShows[i].imageID,
-                        imageDescription = listOfShows[i].imageDescription
+                        imageID = listOfShows[i].show.imageID,
+                        imageDescription = listOfShows[i].show.imageDescription
                     )
                     //Friend Info
                     FriendsWatchedInfo(
                         profileImageID = R.drawable.profilepicture,
-                        profileName = "User Userson",
+                        profileName = "User Userson", //TEMP DELETE THIS
                         episodesWatched = i,
-                        showLenght = 12,
-                        score = Random.nextInt(0, 11) //<---TEMP CODE DELETE
+                        showLenght = listOfShows[i].show.length,
+                        score = listOfShows[i].score
                     )
                 }
 

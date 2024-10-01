@@ -7,7 +7,6 @@ data class Show (
     val length: Int,
     val imageID: Int,
     val releaseDate: Calendar,
-    val currentEpisode: Int = 0,
     val imageDescription: String
 )
 
