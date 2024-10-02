@@ -139,7 +139,7 @@ fun ProgressBar (
 
 @Composable
 fun LineDevider (
-    foregroundColor: Color = Gray,
+    color: Color = Gray,
     strokeWith: Float = 5f,
 )
 {
@@ -163,7 +163,7 @@ fun LineDevider (
             val lineY = size.height/2
             //line
             drawLine(
-                color = foregroundColor,
+                color = color,
                 start = Offset(x = lineStart, y= lineY),
                 end = Offset(x= lineEnd , y= lineY),
                 strokeWidth = strokeWith,
@@ -208,7 +208,8 @@ fun BottomNavbarAndMobileIconsBackground (
 
 @Composable
 fun TopNavbarBackground (
-    color: Color = Gray
+    color: Color = Gray,
+    sizeMultiplier: Float = 1f
 ) {
 
     Box(
@@ -218,7 +219,7 @@ fun TopNavbarBackground (
             modifier = Modifier
                 .background(color)
                 .fillMaxWidth()
-                .height(topPhoneIconsBackgroundHeight+ topNavBaHeight)
+                .height((topPhoneIconsBackgroundHeight+ topNavBaHeight)*sizeMultiplier)
                 .align(Alignment.TopCenter)
         )
     }

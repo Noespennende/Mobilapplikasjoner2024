@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
             Background()
 
             //main content
-            LoginPage()
+            SearchPage()
 
             //menu backgrounds
             TopMobileIconsBackground()

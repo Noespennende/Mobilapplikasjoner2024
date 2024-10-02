@@ -28,6 +28,7 @@ import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
+import com.movielist.ui.theme.textFieldColors
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -74,6 +75,7 @@ fun LoginPage (){
                 value = username,
                 onValueChange = { username = it},
                 singleLine = true,
+                colors = textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
@@ -96,6 +98,7 @@ fun LoginPage (){
                 value = password,
                 onValueChange = { username = it},
                 singleLine = true,
+                colors = textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
