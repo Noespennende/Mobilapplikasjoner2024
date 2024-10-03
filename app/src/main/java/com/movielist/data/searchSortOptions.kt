@@ -1,5 +1,5 @@
 package com.movielist.data
 
-enum class searchSortOptions {
-    NAME, GENRE, MOVIE, SHOW, USER
+enum class SearchSortOptions {
+    MOVIESANDSHOWS, GENRE, MOVIE, SHOW, USER
 }

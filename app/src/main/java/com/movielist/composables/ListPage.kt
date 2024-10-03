@@ -49,7 +49,7 @@ import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.topContentStart
+import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
@@ -140,7 +140,7 @@ fun TopNavBarListPage(){
         Column (
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .padding(top = topContentStart)
+                .padding(top = topNavBarContentStart)
         ) {
             MovieShowSortingOptions()
             ListCategoryOptions()

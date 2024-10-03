@@ -54,6 +54,8 @@ import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.showImageHeight
+import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
@@ -458,8 +460,8 @@ fun ShowImage (
         contentDescription = imageDescription,
         contentScale = ContentScale.Crop,
         modifier = Modifier
-            .width((90*sizeMultiplier).dp)
-            .height((133*sizeMultiplier).dp)
+            .width(showImageWith*sizeMultiplier)
+            .height(showImageHeight*sizeMultiplier)
     )
 }
 

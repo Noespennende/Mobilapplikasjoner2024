@@ -3,52 +3,30 @@ package com.movielist.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.movielist.R
+import com.movielist.data.SearchSortOptions
 import com.movielist.data.Show
-import com.movielist.data.searchSortOptions
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
-import com.movielist.ui.theme.fontFamily
-import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.textFieldColors
-import com.movielist.ui.theme.topContentStart
-import com.movielist.ui.theme.weightBold
-import com.movielist.ui.theme.weightLight
-import com.movielist.ui.theme.weightRegular
+import com.movielist.ui.theme.*
 import java.util.Calendar
 
 
@@ -58,10 +36,10 @@ fun SearchPage () {
 
     val showList = mutableListOf<Show>()
 
-    for (i in 0..12) {
+    for (i in 0..50) {
         showList.add(
             Show(
-                title = "Silo",
+                title = "The lord of the rings: The return of the king",
                 length = 12,
                 imageID = R.drawable.silo,
                 imageDescription = "Silo TV Show",
@@ -73,18 +51,70 @@ fun SearchPage () {
 
 
     //Graphics:
+    //Search result content
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = showImageWith),
+        contentPadding = PaddingValues(
+            top = topNavBaHeight + 100.dp,
+            start = horizontalPadding,
+            end = horizontalPadding,
+            bottom = bottomNavBarHeight + 20.dp
+        ),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        items(showList) { show ->
+            //Individual show search result items
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .clickable {
+                        //Button logic when clicking search result items
+                    }
+                    .fillMaxWidth()
+            ){
+                ShowImage(
+                    imageID = show.imageID,
+                    imageDescription = show.imageDescription
+                )
+
+                Text(
+                    text = show.title,
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }
+
+        }
+    }
+
+
     TopNavBarSearchPage()
+
 
 }
 
 @Composable
 fun TopNavBarSearchPage (){
 
+    //Nesessary variables
     var searchQuery by remember { mutableStateOf("") }
     var dropDownExpanded by remember { mutableStateOf(false) }
-    val sortOptions = listOf(searchSortOptions.NAME, searchSortOptions.MOVIE, searchSortOptions.SHOW,
-        searchSortOptions.GENRE, searchSortOptions.USER)
-    var dropDownButtonText by remember {mutableStateOf(sortOptions[0].toString())}
+    val sortOptions = listOf(
+        SearchSortOptions.MOVIESANDSHOWS, SearchSortOptions.MOVIE, SearchSortOptions.SHOW,
+        SearchSortOptions.GENRE, SearchSortOptions.USER)
+    var dropDownButtonText by remember {
+        mutableStateOf(GenerateSearchOptionName(sortOptions[0]))
+    }
+
 
     //Graphics
     Box(
@@ -96,7 +126,7 @@ fun TopNavBarSearchPage (){
         Column (
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
-                .padding(top = topContentStart)
+                .padding(top = topNavBarContentStart)
         ) {
             //Search bar and button
             Row(
@@ -172,12 +202,12 @@ fun TopNavBarSearchPage (){
                 //Category button
                 Box(
                     modifier = Modifier
-                        .height(40.dp)
-                        .width(100.dp)
-                        .padding(top = 8.dp)
+                        .height(50.dp)
+                        .width(200.dp)
+                        .padding(top = 15.dp)
                         .align(Alignment.Center)
                         .background(
-                            color = Color.Transparent,
+                            color = Gray,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .clickable {
@@ -201,6 +231,7 @@ fun TopNavBarSearchPage (){
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
                             color = Purple,
+                            textAlign = TextAlign.Center
                         )
                         Text(
                             text = "V",
@@ -216,6 +247,7 @@ fun TopNavBarSearchPage (){
                     DropdownMenu(
                         expanded = dropDownExpanded,
                         onDismissRequest = {dropDownExpanded = false},
+                        offset = DpOffset(x = 50.dp, y= 0.dp),
                         modifier = Modifier
                             .background(color = DarkPurple)
                             .width(100.dp)
@@ -226,12 +258,14 @@ fun TopNavBarSearchPage (){
                                 Box(modifier = Modifier
                                     .fillMaxWidth()
                                 ){
+
                                     Text(
-                                        text = option.toString(),
+                                        text = GenerateSearchOptionName(option),
                                         fontSize = headerSize,
                                         fontWeight = weightBold,
                                         fontFamily = fontFamily,
                                         color = White,
+                                        textAlign = TextAlign.Center,
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                     )
@@ -240,7 +274,7 @@ fun TopNavBarSearchPage (){
                             onClick = {
                                 //On click logic for dropdown menu
                                 dropDownExpanded = false
-                                dropDownButtonText = option.toString()
+                                dropDownButtonText = GenerateSearchOptionName(option)
                             })
                         }
                     }
@@ -251,3 +285,17 @@ fun TopNavBarSearchPage (){
     }
 }
 
+
+fun GenerateSearchOptionName (
+    searchOption: SearchSortOptions,
+): String
+{
+    if(searchOption== SearchSortOptions.MOVIESANDSHOWS)
+    {
+        return "Movies and Shows"
+    }
+    else
+    {
+        return searchOption.toString().lowercase().replaceFirstChar { it.uppercase() }
+    }
+}
