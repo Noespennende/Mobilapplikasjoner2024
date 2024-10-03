@@ -1,5 +1,6 @@
 package com.movielist.data
 
+import java.util.Calendar
 import java.util.UUID
 
 val userList = mutableListOf<User>()
@@ -85,5 +86,39 @@ fun removeFriend(user: User, friend: User) : User{
     }
 
     return user.copy(friendList =  updatedFriendList)
+}
+/* Hvilke filmer skal være common, favorites, completed etc
+fun moviesInCommon(user: User, friend: User) : User {
+    val commonMovies: List<ListItem> = emptyList()
+
+    val userMovies =
+}*/
+/* må skrives når vi får inn filmer etc
+fun wantToWatchInCommon(user: User, friend: User) : User{
+    val commonWatchList: List<ListItem> = emptyList()
+
+    val userWatchList = user.wantToWatchShows.toMutableList()
+    val friendWatchList = friend.wantToWatchShows.toMutableList()
+
+
+    }
+}*/
+
+fun writeReview(reviewer: User, score: Int, show:Show, reviewBody: String,
+                postDate: Calendar, likes: Int ) : User{
+    val newReview = Review(
+        score = score,
+        show = show,
+        reviewBody = reviewBody,
+        postDate = postDate,
+        likes = likes,
+        reviewer = reviewer
+    )
+
+    val updatedReviewList = reviewer.myReviews.toMutableList()
+
+    updatedReviewList.add(newReview)
+
+    return reviewer.copy(myReviews = updatedReviewList)
 }
 
