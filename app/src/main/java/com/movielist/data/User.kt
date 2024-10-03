@@ -57,4 +57,24 @@ fun deleteUser(uuid: UUID){
     }
 }
 
+fun addFriend(user: User, friend: User): User{
+    val updatedFriendList = user.friendList.toMutableList()
+
+    if(updatedFriendList.find { it.id != friend.id } == null) {
+        updatedFriendList.add(friend)
+        println("Bruker ${friend.userName} har blitt lagt til vennelisten din :)")
+    }else{
+        println("Brukeren ${friend.userName} er allerede i vennelisten din:)")
+    }
+
+
+    return user.copy(friendList = updatedFriendList)
+}
+
+
+fun removeFriend(user: User, friend: User) : User{
+    val updatedFriendList = user.friendList.toMutableList()
+
+
+}
 
