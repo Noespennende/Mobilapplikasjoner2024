@@ -75,6 +75,15 @@ fun addFriend(user: User, friend: User): User{
 fun removeFriend(user: User, friend: User) : User{
     val updatedFriendList = user.friendList.toMutableList()
 
+    val friendToRemove = updatedFriendList.find { it.id == friend.id}
 
+    if(friendToRemove != null){
+        updatedFriendList.remove(friend)
+        println("Brukeren ${friend.userName} har blitt slettet")
+    }else{
+        println("Brukeren ${friend.userName} finnes ikke i listen din")
+    }
+
+    return user.copy(friendList =  updatedFriendList)
 }
 
