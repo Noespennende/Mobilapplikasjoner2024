@@ -2,6 +2,8 @@ package com.movielist.data
 
 import java.util.UUID
 
+val userList = mutableListOf<User>()
+
 data class User (
     val id: UUID = UUID.randomUUID(),
     val userName: String,
@@ -28,11 +30,11 @@ fun createNewUser(
     droppedShows: List<ListItem> = emptyList(),
     currentlyWatchingShows: List<ListItem> = emptyList()
 ): User {
-    return User(
+    val newUser = User(
         userName = userName,
         email = email,
         friendList = friendList,
-        myReviews = myReviews, 
+        myReviews = myReviews,
         favoriteCollection = favoriteCollection,
         profileImageID = profileImageID,
         completedShows = completedShows,
@@ -40,6 +42,19 @@ fun createNewUser(
         droppedShows = droppedShows,
         currentlyWatchingShows = currentlyWatchingShows
     )
+    userList.add(newUser)
+    return newUser
+}
+
+fun deleteUser(uuid: UUID){
+    val userToDelete = userList.find{it.id == uuid}
+
+    if(userToDelete != null){
+        userList.remove(userToDelete)
+        println("User ${userToDelete.userName} har blitt slettet")
+    }else{
+        println("Brukeren med ${uuid} ikke funnet")
+    }
 }
 
 
