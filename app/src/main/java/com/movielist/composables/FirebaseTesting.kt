@@ -17,6 +17,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import backend.getUserInfo
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -33,8 +34,12 @@ fun FirebaseTesting() {
 
     var userData by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
+    val userid = "qwVPkcZhvKooSRfDHpIV"
+
     // Henter bruker-info fra "backend" som henter fra databasen
-    getUserInfo { data -> userData = data }
+    getUserInfo(userid) { data ->
+        userData = data
+    }
 
     //Front page graphics
     LazyColumn(
@@ -74,42 +79,5 @@ fun FirebaseTesting() {
             )
         }
     }
-
-}
-
-private fun getUserInfo(onSuccess: (Map<String, String?>) -> Unit) {
-
-    val db = Firebase.firestore
-
-    //val docRef: DocumentReference = FirebaseFirestore.getInstance().document("users/testuser")
-    /*
-    *  Kan også bruke denne i stedet for db.collection().document().get()
-    *  Så blir det basically docRef.get().addOnsuccessListener
-    * */
-
-    db.collection("users")
-        .document("testuser")
-        .get()
-        .addOnSuccessListener { document ->
-            val documentID = document.id
-            val firstName = document.getString("firstName")
-            val lastName = document.getString("lastName")
-
-            Log.d("FirebaseSuccess", "Document ID: $documentID, First Name: $firstName, Last Name: $lastName")
-
-            val userData = mapOf(
-                "documentID" to documentID,
-                "firstName" to firstName,
-                "lastName" to lastName
-            )
-
-            onSuccess(userData)
-
-        }
-        .addOnFailureListener { exception ->
-        Log.w("FirebaseFailure", "Error getting document", exception)
-        }
-
-
 
 }
