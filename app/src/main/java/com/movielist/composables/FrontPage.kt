@@ -45,6 +45,7 @@ import kotlin.random.Random
 
 @Composable
 fun FrontPage () {
+    /*
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
     for (i in 0..12) {
@@ -135,7 +136,7 @@ fun FrontPage () {
         }
 
     }
-
+*/
 }
 
 @Composable

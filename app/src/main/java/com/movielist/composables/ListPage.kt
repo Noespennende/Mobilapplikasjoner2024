@@ -58,8 +58,9 @@ import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
 import kotlin.random.Random
 
-
+/*
 @Composable
+
 fun ListPage ()
 {
     //Temporary code: DELETE THIS CODE
@@ -618,3 +619,4 @@ fun ListPageListItem (
     }
 }
 
+*/

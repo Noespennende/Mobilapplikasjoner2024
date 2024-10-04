@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
             Background()
 
             //main content
-            SearchPage()
+            FirebaseTesting()
 
             //menu backgrounds
             TopMobileIconsBackground()

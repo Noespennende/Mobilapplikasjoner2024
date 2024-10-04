@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1017980811558",
+    "project_id": "movielist-h24-group8-575hd",
+    "storage_bucket": "movielist-h24-group8-575hd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017980811558:android:8b7c2efacf442f54b5e9e7",
+        "android_client_info": {
+          "package_name": "com.movielist"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA9fInqjT-S2PQubqsMelYInyTLcCBmS38"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
