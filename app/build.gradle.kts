@@ -1,6 +1,10 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -47,6 +51,34 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    // Må bygge en ny google-services.json fil, som inneholder api-nøkkelen.
+    // det vil si at google-services.json IKKE skal med i git, mens google-services-template.json
+    // må være med i git.
+    tasks.register("generateGoogleServicesJson") {
+        doLast {
+            // Lese API-nøkkel fra keys.properties
+            val propertiesFile = file("../keys.properties")
+            val properties = Properties().apply { load(propertiesFile.inputStream()) }
+            val apiKey = properties.getProperty("FIREBASE_API_KEY") ?: "default_value"
+
+            // Les malen
+            val templateFile = file("google-services-template.json")
+            var jsonText = templateFile.readText(Charsets.UTF_8)
+
+            // Erstatt plassen for API-nøkkelen med den faktiske nøkkelen
+            jsonText = jsonText.replace("REPLACE_WITH_API_KEY", apiKey)
+
+            // Lagre som google-services.json
+            val outputFile = file("google-services.json")
+            outputFile.writeText(jsonText, Charsets.UTF_8)
+        }
+    }
+
+    // Kjør oppgaven før preBuild
+    tasks.preBuild {
+        dependsOn("generateGoogleServicesJson")
+    }
 }
 
 dependencies {
@@ -67,4 +99,19 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Import the Firebase BoM
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+
+    // When using the BoM, don't specify versions in Firebase dependencies
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Declare the dependency for the Cloud Firestore library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-firestore")
+
+    // Add the dependency for the Firebase Authentication library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-auth")
+
 }

@@ -1,6 +1,6 @@
 *.iml
 .gradle
-/local.properties
+
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
@@ -12,4 +12,15 @@
 /captures
 .externalNativeBuild
 .cxx
+
 local.properties
+keys.properties
+
+.idea/compiler.xml
+.idea/deploymentTargetSelector.xml
+.idea/gradle.xml
+.idea/misc.xml
+.idea/other.xml
+
+# ignorerer den genererte filen, som vil inneholde API-nøkkelen
+app/google-services.json

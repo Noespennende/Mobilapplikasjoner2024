@@ -79,6 +79,7 @@ fun FrontPage() {
 
     val reviewList = mutableListOf<Review>()
     val user = User(
+        id = "testid",
         userName = "User Userson",
         email = "test@email.no",
         friendList = emptyList(),
