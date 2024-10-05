@@ -44,7 +44,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun FrontPage () {
+fun FrontPage() {
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
     for (i in 0..12) {
@@ -80,6 +80,10 @@ fun FrontPage () {
     val reviewList = mutableListOf<Review>()
     val user = User(
         userName = "User Userson",
+        email = "test@email.no",
+        friendList = emptyList(),
+        myReviews = emptyList(),
+        favoriteCollection = emptyList(),
         profileImageID = R.drawable.profilepicture,
         completedShows = listItemList,
         wantToWatchShows = listItemList,

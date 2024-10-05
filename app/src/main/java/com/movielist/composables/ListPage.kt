@@ -84,6 +84,10 @@ fun ListPage ()
     val reviewList = mutableListOf<Review>()
     val user = User(
         userName = "User Userson",
+        email = "test@email.no",
+        friendList = emptyList(),
+        myReviews = emptyList(),
+        favoriteCollection = emptyList(),
         profileImageID = R.drawable.profilepicture,
         completedShows = listItems,
         wantToWatchShows = listItems,
