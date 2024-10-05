@@ -3,6 +3,7 @@ package backend
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.firestore
 
 fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
@@ -64,4 +65,25 @@ fun createUserWithEmailAndPassword(
                 Log.w("FirebaseAuth", "User creation failed", task.exception)
             }
         }
+}
+
+
+// Funksjon for innlogging
+fun logInWithEmailAndPassword(email: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+    val auth = FirebaseAuth.getInstance()
+
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onSuccess()
+            } else {
+                onFailure(task.exception?.message ?: "Innlogging mislyktes.")
+            }
+        }
+}
+
+fun getSignedInUser(): FirebaseUser? {
+    val auth = FirebaseAuth.getInstance()
+
+    return auth.currentUser
 }

@@ -1,7 +1,5 @@
 package com.movielist.composables
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,44 +9,162 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import backend.createUserWithEmailAndPassword
+import backend.getSignedInUser
 import backend.getUserInfo
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
+import backend.logInWithEmailAndPassword
+import com.google.firebase.auth.FirebaseUser
+import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.weightRegular
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.White
-import com.movielist.ui.theme.*
 
 @Preview
 @Composable
 fun FirebaseTesting() {
 
     // Komponenter for testing.
-    // Bytt på hvilket komponent som vises for testing
+    // Bytt på hvilket komponent du vil teste, eller vis dem alle
 
-    CreateUser()
-    //GetData()
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally, // Juster horisontalt
+        verticalArrangement = Arrangement.Center // Sentrer vertikalt
+    ) {
+
+        LogInLogic()
+
+        //CreateUser()
+
+        //GetData()
+
+    }
+
 }
+
+@Composable
+fun LogInLogic() {
+
+    // Variabel for å kontrollere om innlogging er vellykket
+    var isLoggedIn by remember { mutableStateOf(false) }
+
+        // Vis LogInUser hvis ikke innlogget
+        if (!isLoggedIn) {
+
+            LogInUser(onLoginSuccess = { isLoggedIn = true })
+
+        }
+        // Viser LoginSuccessful hvis logget inn
+        if (isLoggedIn) {
+            LoginSuccessful()
+        }
+
+}
+
+@Composable
+fun LogInUser(onLoginSuccess: () -> Unit) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    // UI for input og knapp
+    Column(
+        modifier = Modifier
+            .padding(16.dp),
+    ) {
+        // Tekstfelt for e-post
+        TextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text(text = "Email") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Tekstfelt for passord
+        TextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text(text = "Password") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Knapp for innlogging
+        Button(
+            onClick = {
+                logInWithEmailAndPassword(email, password, {
+                    // Hvis innloggingen er vellykket, kaller vi callback
+                    onLoginSuccess()
+                }, { errorMessage = it })
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Log In")
+        }
+
+        // Viser feilmelding hvis innlogging mislykkes
+        // Akkurat nå viser den bare det Firebase returnerer for testing
+        errorMessage?.let {
+            Text(
+                text = "Error: $it",
+                color = Purple,
+                modifier = Modifier.padding(top = 16.dp)
+            )
+        }
+    }
+}
+@Composable
+fun LoginSuccessful() {
+
+    val user: FirebaseUser? = getSignedInUser()
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        if (user != null) {
+            Text(
+                text = "Login successful",
+                color = White,
+                fontSize = 25.sp,
+                fontWeight = weightRegular,
+            )
+            Text(
+                text = user.uid,
+                color = White,
+                fontSize = 25.sp,
+                fontWeight = weightRegular,
+            )
+        }
+        else {
+            Text(
+                text = "Login successful but no user?",
+                color = White,
+                fontSize = 25.sp,
+                fontWeight = weightRegular,
+            )
+        }
+    }
+
+}
+
 
 @Composable
 fun CreateUser() {
@@ -62,9 +178,7 @@ fun CreateUser() {
     // UI for input og knapp
     Column(
         modifier = Modifier
-            .fillMaxSize()
             .padding(16.dp),
-        verticalArrangement = Arrangement.Center
     ) {
         // Tekstfelt for e-post
         TextField(
@@ -74,7 +188,7 @@ fun CreateUser() {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        //Spacer(modifier = Modifier.height(16.dp))
 
         // Tekstfelt for passord
         TextField(
@@ -100,7 +214,7 @@ fun CreateUser() {
         errorMessage?.let {
             Text(
                 text = "Error: $it",
-                color = MaterialTheme.colorScheme.error,
+                color = Purple,
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
@@ -109,7 +223,7 @@ fun CreateUser() {
         successMessage?.let {
             Text(
                 text = "Success: $it",
-                color = MaterialTheme.colorScheme.primary,
+                color = White,
                 modifier = Modifier.padding(top = 16.dp)
             )
         }
@@ -126,7 +240,7 @@ fun GetData() {
 
     var userData by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
-    val userid = "qwVPkcZhvKooSRfDHpIV"
+    val userid = "qwVPkcZhvKooSRfDHpIV" // <-- Eksempel brukerid
 
     // Henter bruker-info fra "backend" som henter fra databasen
     getUserInfo(userid) { data ->
