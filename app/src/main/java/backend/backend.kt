@@ -2,6 +2,7 @@ package backend
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
 
 fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
@@ -39,4 +40,28 @@ fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
 
 
 
+}
+
+fun createUserWithEmailAndPassword(
+    email: String,
+    password: String,
+    onSuccess: (String) -> Unit,
+    onFailure: (String) -> Unit
+) {
+    val auth = FirebaseAuth.getInstance()
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                // Brukeren ble opprettet
+                val user = auth.currentUser
+                onSuccess("User created with UID: ${user?.uid}")
+                Log.d("FirebaseAuth", "User created with UID: ${user?.uid}")
+            } else {
+                // Opprettelse feilet
+                val exceptionMessage = task.exception?.message ?: "Unknown error"
+                onFailure(exceptionMessage)
+                Log.w("FirebaseAuth", "User creation failed", task.exception)
+            }
+        }
 }
