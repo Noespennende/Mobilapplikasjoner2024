@@ -39,6 +39,7 @@ fun SearchPage () {
     for (i in 0..50) {
         showList.add(
             Show(
+                email = "lagt til for test", //fjern denne etter hvert
                 title = "The lord of the rings: The return of the king",
                 length = 12,
                 imageID = R.drawable.silo,

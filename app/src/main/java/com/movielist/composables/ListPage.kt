@@ -68,6 +68,7 @@ fun ListPage ()
         listItems.add(
             ListItem(
                 show = Show(
+                    email = "lagt til for test", //fjern denne etter hvert
                     title = "Silo",
                     length = 12,
                     imageID = R.drawable.silo,

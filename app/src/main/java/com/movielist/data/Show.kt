@@ -7,6 +7,7 @@ data class Show (
     val length: Int,
     val imageID: Int,
     val releaseDate: Calendar,
-    val imageDescription: String
+    val imageDescription: String,
+    val email: String //lagt til for test av annen api
 )
 

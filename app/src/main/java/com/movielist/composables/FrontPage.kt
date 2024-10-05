@@ -1,5 +1,7 @@
 package com.movielist.composables
 
+import android.graphics.Color
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,10 +44,61 @@ import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
 import java.util.Calendar
 import kotlin.random.Random
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import com.movielist.MyApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
+
+
+private val BASE_URL = "https://jsonplaceholder.typicode.com/"
+private val TAG: String = "CHECK_RESPONSE"
+
+private fun getAllShows() {
+    val api = Retrofit.Builder()
+        .baseUrl(com.movielist.composables.BASE_URL)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(MyApi::class.java)
+    api.getTitles().enqueue(object : Callback<List<Show>>{
+        override fun onResponse(
+            call: Call<List<Show>?>,
+            response: Response<List<Show>?>
+        ) {
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    for (show in it) {
+                        Log.i(TAG, "onResponse: ${show.email}")
+                    }
+                }
+            }
+        }
+
+        override fun onFailure(
+            call: Call<List<Show>?>,
+            t: Throwable
+        ) {
+            Log.i(TAG, "onFailure: ${t.message}")
+        }
+
+    })
+}
+
 
 @Composable
 fun FrontPage () {
+
+    getAllShows()
+
     //Temporary code: DELETE THIS CODE
+    /*
     val listItemList = mutableListOf<ListItem>()
     for (i in 0..12) {
         listItemList.add(
@@ -100,6 +153,7 @@ fun FrontPage () {
             )
         )
     }
+    */
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
     //Front page graphics
@@ -109,23 +163,23 @@ fun FrontPage () {
     ) {
         //Front page content
         item {
-            CurrentlyWatchingScroller(listItemList)
+            //CurrentlyWatchingScroller(listItemList)
         }
 
         item {
-            PopularShowsAndMovies(showList)
+           // PopularShowsAndMovies(showList)
         }
 
         item {
-            YourFriendsJustWatched(listItemList)
+           // YourFriendsJustWatched(listItemList)
         }
 
         item {
             //Top reviews this week:
-            ReviewsSection(
-                reviewList = reviewList,
-                header = "Top reviews this week"
-            )
+            //ReviewsSection(
+             //   reviewList = reviewList,
+                //header = "Top reviews this week"
+           // )
         }
 
         item {
@@ -141,6 +195,7 @@ fun FrontPage () {
 @Composable
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>
+    //listOfShows: List<ListItem>
 ) {
 
     LazyRow (
