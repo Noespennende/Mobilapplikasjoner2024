@@ -6,7 +6,7 @@ import java.util.UUID
 val userList = mutableListOf<User>()
 
 data class User (
-    val id: UUID = UUID.randomUUID(),
+    val id: String,
     val userName: String,
     val email: String,
     val friendList: List<User> = emptyList(),
@@ -20,6 +20,7 @@ data class User (
 )
 
 fun createNewUser(
+    id: String,
     userName: String,
     email: String,
     friendList: List<User> = emptyList(),
@@ -32,6 +33,7 @@ fun createNewUser(
     currentlyWatchingShows: List<ListItem> = emptyList()
 ): User {
     val newUser = User(
+        id = id,
         userName = userName,
         email = email,
         friendList = friendList,
@@ -47,7 +49,7 @@ fun createNewUser(
     return newUser
 }
 
-fun deleteUser(uuid: UUID){
+fun deleteUser(uuid: String){
     val userToDelete = userList.find{it.id == uuid}
 
     if(userToDelete != null){
