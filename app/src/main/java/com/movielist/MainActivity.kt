@@ -17,7 +17,8 @@ class MainActivity : ComponentActivity() {
             //main content
             //SearchPage()
 
-            com.movielist.composables.FrontPage()
+            //com.movielist.composables.FrontPage()
+            ListPage()
 
             //menu backgrounds
             TopMobileIconsBackground()

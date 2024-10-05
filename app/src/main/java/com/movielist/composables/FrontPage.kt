@@ -48,8 +48,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.movielist.MyApi
+import com.movielist.data.Movie
+import com.movielist.data.MovieResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -58,43 +62,65 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 
 
-private val BASE_URL = "https://jsonplaceholder.typicode.com/"
-private val TAG: String = "CHECK_RESPONSE"
+//private val BASE_URL = "https://jsonplaceholder.typicode.com/" -> test api
+private val BASE_URL ="https://moviesdatabase.p.rapidapi.com/"
+private val API_KEY = "09f23523ebmshad9f7b2ebe7b44bp1ecd5bjsn35bb315b63a3" // api key, må være med! Har med autentisering å gjøre
+private val API_HOST = "moviesdatabase.p.rapidapi.com" // host link, må være med! Har med autentisering å gjøre, lik for alle
+private val TAG: String = "CHECK_RESPONSE" // Skriv inn i LogCat for å se output fra api
 
-private fun getAllShows() {
-    val api = Retrofit.Builder()
-        .baseUrl(com.movielist.composables.BASE_URL)
-        .addConverterFactory(GsonConverterFactory.create())
+// Autentiserer API nøkkelen. Gis i rapidAPI sin code snippet (tror man måtte opprette bruker for å få den)
+private val apiKeyInterceptor = Interceptor { chain ->
+    val original = chain.request()
+    val request = original.newBuilder()
+        .addHeader("x-rapidapi-key", API_KEY)
+        .addHeader("x-rapidapi-host", API_HOST)
         .build()
-        .create(MyApi::class.java)
-    api.getTitles().enqueue(object : Callback<List<Show>>{
-        override fun onResponse(
-            call: Call<List<Show>?>,
-            response: Response<List<Show>?>
-        ) {
-            if (response.isSuccessful) {
-                response.body()?.let {
-                    for (show in it) {
-                        Log.i(TAG, "onResponse: ${show.email}")
-                    }
-                }
-            }
-        }
-
-        override fun onFailure(
-            call: Call<List<Show>?>,
-            t: Throwable
-        ) {
-            Log.i(TAG, "onFailure: ${t.message}")
-        }
-
-    })
+    chain.proceed(request)
 }
 
+// Oppretter en OkHttpClient med apiKeyInterceptor
+private val okHttpClient = OkHttpClient.Builder()
+    .addInterceptor(apiKeyInterceptor)
+    .build()
+
+// Oppretter en Retrofit instans for å gjøre et API call
+private val retrofit = Retrofit.Builder()
+    .baseUrl(BASE_URL)
+    .client(okHttpClient)
+    .addConverterFactory(GsonConverterFactory.create())
+    .build()
+
+// Henter filmer (bare titler for øyeblikket)
+private fun getAllShows() {
+    val api = retrofit.create(MyApi::class.java)
+
+    api.getTitles().enqueue(object : Callback<MovieResponse> {
+
+        override fun onResponse(
+            call: Call<MovieResponse>,
+            response: Response<MovieResponse>
+        ) {
+            if (response.isSuccessful) {
+                response.body()?.let { movieResponse ->
+                    val movieList = movieResponse.results
+                    for (movie in movieList) {
+                        Log.i(TAG, "Movie Title: ${movie.titleText.text}")
+                    }
+                }
+            } else {
+                Log.i(TAG, "onResponse: Failed with response code ${response.code()}")
+            }
+        }
+        override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
+            Log.i(TAG, "onFailure: ${t.message}")
+        }
+    })
+}
 
 @Composable
 fun FrontPage () {
 
+    // Metoden som henter filmer/shows fra APIet
     getAllShows()
 
     //Temporary code: DELETE THIS CODE
