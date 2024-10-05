@@ -45,9 +45,9 @@ fun FirebaseTesting() {
         verticalArrangement = Arrangement.Center // Sentrer vertikalt
     ) {
 
-        LogInLogic()
+        //LogInLogic()
 
-        //CreateUser()
+        CreateUser()
 
         //GetData()
 
@@ -169,7 +169,7 @@ fun LoginSuccessful() {
 @Composable
 fun CreateUser() {
 
-
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -180,6 +180,15 @@ fun CreateUser() {
         modifier = Modifier
             .padding(16.dp),
     ) {
+
+        // Tekstfelt for brukernavn
+        TextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text(text = "Username") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
         // Tekstfelt for e-post
         TextField(
             value = email,
@@ -203,7 +212,7 @@ fun CreateUser() {
         // Knapp for å opprette bruker
         Button(
             onClick = {
-                createUserWithEmailAndPassword(email, password, { successMessage = it }, { errorMessage = it })
+                createUserWithEmailAndPassword(username, email, password, { successMessage = it }, { errorMessage = it })
             },
             modifier = Modifier.fillMaxWidth()
         ) {

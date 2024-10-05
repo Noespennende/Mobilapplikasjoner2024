@@ -1,9 +1,11 @@
 package backend
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.firestore
 
 fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
@@ -44,6 +46,7 @@ fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
 }
 
 fun createUserWithEmailAndPassword(
+    username: String,
     email: String,
     password: String,
     onSuccess: (String) -> Unit,
@@ -56,8 +59,21 @@ fun createUserWithEmailAndPassword(
             if (task.isSuccessful) {
                 // Brukeren ble opprettet
                 val user = auth.currentUser
-                onSuccess("User created with UID: ${user?.uid}")
-                Log.d("FirebaseAuth", "User created with UID: ${user?.uid}")
+
+                val profileUpdates = userProfileChangeRequest {
+                    displayName = username
+                }
+
+                user!!.updateProfile(profileUpdates)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            onSuccess("User created with UID: ${user.uid} and username: ${user.displayName}")
+                            Log.d("FirebaseAuth", "User created with UID: ${user.uid}")
+                        }
+                    }
+
+
+
             } else {
                 // Opprettelse feilet
                 val exceptionMessage = task.exception?.message ?: "Unknown error"
