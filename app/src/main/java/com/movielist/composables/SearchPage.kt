@@ -96,7 +96,6 @@ fun SearchPage () {
         }
     }
 
-
     TopNavBarSearchPage()
 
 
@@ -120,8 +119,8 @@ fun TopNavBarSearchPage (){
     Box(
         modifier = Modifier.wrapContentSize()
     ){
-        TopNavbarBackground(
-        )
+        TopNavbarBackground()
+
         //Search bar and submit button button
         Column (
             verticalArrangement = Arrangement.spacedBy(10.dp),
