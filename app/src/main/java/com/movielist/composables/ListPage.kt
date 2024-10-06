@@ -58,7 +58,7 @@ import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
 import kotlin.random.Random
 
-/*
+
 @Composable
 
 fun ListPage ()
@@ -111,6 +111,11 @@ fun ListPage ()
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
+
+    val loggedInUser by remember {
+        mutableStateOf(true)
+    }
+
     //Graphics
 
     //List
@@ -126,7 +131,7 @@ fun ListPage ()
     ) {
         item {
             ListPageList(
-                loggedInUsersList = true,
+                loggedInUsersList = loggedInUser,
                 listItemList = listItems
             )
         }
@@ -623,4 +628,3 @@ fun ListPageListItem (
     }
 }
 
-*/

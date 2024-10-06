@@ -6,48 +6,19 @@ import java.util.UUID
 val userList = mutableListOf<User>()
 
 data class User (
-    val id: String,
+    val id: String = UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
     val friendList: List<User> = emptyList(),
     val myReviews: List<Review> = emptyList(),
-    val favoriteCollection: List<ListItem>,
+    val favoriteCollection: List<ListItem> = emptyList(),
     val profileImageID: Int,
-    val completedShows: List<ListItem>,
-    val wantToWatchShows: List<ListItem>,
-    val droppedShows: List<ListItem>,
-    val currentlyWatchingShows: List<ListItem>
+    val completedShows: List<ListItem> = emptyList(),
+    val wantToWatchShows: List<ListItem> = emptyList(),
+    val droppedShows: List<ListItem> = emptyList(),
+    val currentlyWatchingShows: List<ListItem> = emptyList()
 )
 
-fun createNewUser(
-    id: String,
-    userName: String,
-    email: String,
-    friendList: List<User> = emptyList(),
-    myReviews: List<Review> = emptyList(),
-    favoriteCollection: List<ListItem> = emptyList(),
-    profileImageID: Int,
-    completedShows: List<ListItem> = emptyList(),
-    wantToWatchShows: List<ListItem> = emptyList(),
-    droppedShows: List<ListItem> = emptyList(),
-    currentlyWatchingShows: List<ListItem> = emptyList()
-): User {
-    val newUser = User(
-        id = id,
-        userName = userName,
-        email = email,
-        friendList = friendList,
-        myReviews = myReviews,
-        favoriteCollection = favoriteCollection,
-        profileImageID = profileImageID,
-        completedShows = completedShows,
-        wantToWatchShows = wantToWatchShows,
-        droppedShows = droppedShows,
-        currentlyWatchingShows = currentlyWatchingShows
-    )
-    userList.add(newUser)
-    return newUser
-}
 
 fun deleteUser(uuid: String){
     val userToDelete = userList.find{it.id == uuid}

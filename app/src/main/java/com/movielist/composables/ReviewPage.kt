@@ -33,7 +33,8 @@ fun ReviewPage () {
                 completedShows = emptyList,
                 wantToWatchShows = emptyList,
                 droppedShows = emptyList,
-                currentlyWatchingShows = emptyList
+                currentlyWatchingShows = emptyList,
+                email = "user@email.com",
             ),
             likes = Random.nextInt(0, 200),
             show = Show(

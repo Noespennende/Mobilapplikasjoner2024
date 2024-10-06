@@ -96,7 +96,7 @@ fun LoginPage (){
             //Password
             OutlinedTextField(
                 value = password,
-                onValueChange = { username = it},
+                onValueChange = { password = it},
                 singleLine = true,
                 colors = textFieldColors,
                 textStyle = TextStyle(
