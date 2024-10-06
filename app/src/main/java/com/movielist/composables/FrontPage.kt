@@ -123,6 +123,7 @@ fun FrontPage () {
     // Metoden som henter filmer/shows fra APIet
     getAllShows()
 
+
     //Temporary code: DELETE THIS CODE
     /*
     val listItemList = mutableListOf<ListItem>()
@@ -158,7 +159,12 @@ fun FrontPage () {
 
     val reviewList = mutableListOf<Review>()
     val user = User(
+        id = "testid",
         userName = "User Userson",
+        email = "test@email.no",
+        friendList = emptyList(),
+        myReviews = emptyList(),
+        favoriteCollection = emptyList(),
         profileImageID = R.drawable.profilepicture,
         completedShows = listItemList,
         wantToWatchShows = listItemList,
