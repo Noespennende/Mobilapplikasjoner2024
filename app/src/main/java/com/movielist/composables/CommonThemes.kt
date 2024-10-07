@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
+import com.movielist.data.SearchSortOptions
+import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple
@@ -625,5 +627,19 @@ fun LikeButton (
             }
 
         }
+    }
+}
+
+fun GenerateShowSortOptionName (
+    showSortOptions: ShowSortOptions
+): String
+{
+    if(showSortOptions== ShowSortOptions.MOVIESANDSHOWS)
+    {
+        return "Movies & Shows"
+    }
+    else
+    {
+        return showSortOptions.toString().lowercase().replaceFirstChar { it.uppercase() }
     }
 }
