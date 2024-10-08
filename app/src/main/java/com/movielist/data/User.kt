@@ -20,6 +20,14 @@ data class User (
 )
 
 
+fun getUniqueShows (user: User): List<ListItem>{
+    val allShows = user.completedShows + user.wantToWatchShows + user.droppedShows + user.currentlyWatchingShows
+
+    val uniqueShows = allShows.distinctBy { it.id }
+
+    return uniqueShows
+}
+
 fun deleteUser(uuid: String){
     val userToDelete = userList.find{it.id == uuid}
 
@@ -115,17 +123,6 @@ fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
     return commonShows
 }
 
-
-/* må skrives når vi får inn filmer etc
-fun wantToWatchInCommon(user: User, friend: User) : User{
-    val commonWatchList: List<ListItem> = emptyList()
-
-    val userWatchList = user.wantToWatchShows.toMutableList()
-    val friendWatchList = friend.wantToWatchShows.toMutableList()
-
-
-    }
-}*/
 
 fun writeReview(reviewer: User, score: Int, show:Show, reviewBody: String,
                 postDate: Calendar, likes: Int ) : User{
