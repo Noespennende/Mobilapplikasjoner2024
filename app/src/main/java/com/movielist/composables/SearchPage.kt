@@ -24,8 +24,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.movielist.R
+import com.movielist.data.Production
 import com.movielist.data.SearchSortOptions
-import com.movielist.data.Show
+import com.movielist.data.TVShow
 import com.movielist.ui.theme.*
 import java.util.Calendar
 
@@ -34,17 +35,24 @@ import java.util.Calendar
 fun SearchPage () {
     //TEMP CODE DELETE THIS
 
-    val showList = mutableListOf<Show>()
+    val showList = mutableListOf<Production>()
 
     for (i in 0..50) {
         showList.add(
-            Show(
-                title = "The lord of the rings: The return of the king",
-                length = 12,
-                imageID = R.drawable.silo,
-                imageDescription = "Silo TV Show",
-                releaseDate = Calendar.getInstance()
-            )
+            TVShow(
+                imdbID = "123",
+                title = "Silo",
+                description = "TvShow Silo description here",
+                genre = "Action",
+                releaseDate = Calendar.getInstance(),
+                actors = emptyList(),
+                rating = 4,
+                reviews = ArrayList(),
+                posterUrl = R.drawable.silo,
+                episodes = listOf("01", "02", "03", "04", "05", "06",
+                    "07", "08", "09", "10", "11", "12"),
+                seasons = listOf("1", "2", "3")
+            ),
         )
     }
     //TEMP CODE DELETE ABOVE
@@ -65,7 +73,7 @@ fun SearchPage () {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        items(showList) { show ->
+        items(showList) { prod ->
             //Individual show search result items
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -76,12 +84,12 @@ fun SearchPage () {
                     .fillMaxWidth()
             ){
                 ShowImage(
-                    imageID = show.imageID,
-                    imageDescription = show.imageDescription
+                    imageID = prod.posterUrl,
+                    imageDescription = prod.title + " Poster"
                 )
 
                 Text(
-                    text = show.title,
+                    text = prod.title,
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,

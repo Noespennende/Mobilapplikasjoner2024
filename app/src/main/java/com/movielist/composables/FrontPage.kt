@@ -36,8 +36,8 @@ import com.movielist.R
 import com.movielist.data.Episode
 import com.movielist.data.ListItem
 import com.movielist.data.Movie
+import com.movielist.data.Production
 import com.movielist.data.Review
-import com.movielist.data.Show
 import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.Gray
@@ -73,16 +73,23 @@ fun FrontPage() {
         )
     }
 
-    val showList = mutableListOf<Show>()
+    val showList = mutableListOf<Production>()
 
     for (i in 0..12) {
         showList.add(
-            Show(
-            title = "Silo",
-            length = 12,
-            imageID = R.drawable.silo,
-            imageDescription = "Silo TV Show",
-            releaseDate = Calendar.getInstance()
+            TVShow(
+                imdbID = "123",
+                title = "Silo",
+                description = "TvShow Silo description here",
+                genre = "Action",
+                releaseDate = Calendar.getInstance(),
+                actors = emptyList(),
+                rating = 4,
+                reviews = ArrayList(),
+                posterUrl = R.drawable.silo,
+                episodes = listOf("01", "02", "03", "04", "05", "06",
+                    "07", "08", "09", "10", "11", "12"),
+                seasons = listOf("1", "2", "3")
             )
         )
     }
@@ -295,7 +302,7 @@ fun CurrentlyWatchingCard (
 
 @Composable
 fun PopularShowsAndMovies (
-    listOfShows: List<Show>
+    listOfShows: List<Production>
 ) {
     Column (
         modifier = Modifier
@@ -319,8 +326,8 @@ fun PopularShowsAndMovies (
         ){
             items (listOfShows.size) {i ->
                 ShowImage(
-                    imageID = listOfShows[i].imageID,
-                    imageDescription = listOfShows[i].imageDescription
+                    imageID = listOfShows[i].posterUrl,
+                    imageDescription = listOfShows[i].title + " Poster"
                     )
             }
         }
