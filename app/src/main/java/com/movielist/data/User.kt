@@ -1,5 +1,6 @@
 package com.movielist.data
 
+import androidx.browser.browseractions.BrowserActionsIntent.BrowserActionsItemId
 import java.util.Calendar
 import java.util.UUID
 
@@ -19,6 +20,25 @@ data class User (
     val currentlyWatchingShows:  MutableList<ListItem> = mutableListOf()
 )
 
+
+fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
+    val targetList = when(listType){
+        "completed" -> user.completedShows
+        "wantToWatch" -> user.wantToWatchShows
+        "dropped" -> user.droppedShows
+        "currentlyWatching" -> user.currentlyWatchingShows
+        else -> return false
+    }
+
+    val listItem = targetList.find { it.id == itemId }
+
+    return if (listItem != null) {
+        listItem.score = newScore
+        true
+    } else {
+        false
+    }
+}
 
 fun getUniqueShows (user: User): List<ListItem>{
     val allShows = user.completedShows + user.wantToWatchShows + user.droppedShows + user.currentlyWatchingShows
@@ -70,7 +90,6 @@ fun removeFriend(user: User, friend: User) : User{
 }
 
 
- //Hvilke filmer skal være common, favorites, completed etc
 
 fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
     val commonMovies: MutableList<ListItem> = mutableListOf()
