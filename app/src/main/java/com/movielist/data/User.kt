@@ -60,12 +60,27 @@ fun removeFriend(user: User, friend: User) : User{
 
     return user.copy(friendList =  updatedFriendList)
 }
-/* Hvilke filmer skal være common, favorites, completed etc
-fun moviesInCommon(user: User, friend: User) : User {
-    val commonMovies: List<ListItem> = emptyList()
 
-    val userMovies =
-}*/
+
+ //Hvilke filmer skal være common, favorites, completed etc
+
+fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
+    val commonMovies: MutableList<ListItem> = mutableListOf()
+
+    val userMovies = user.favoriteCollection
+    val friendMovies = friend.favoriteCollection
+
+    userMovies.forEach { movie ->
+        friendMovies.forEach { friendMovie ->
+            if (movie.id == friendMovie.id) {
+                commonMovies.add(movie)
+            }
+        }
+    }
+    return commonMovies 
+}
+
+
 /* må skrives når vi får inn filmer etc
 fun wantToWatchInCommon(user: User, friend: User) : User{
     val commonWatchList: List<ListItem> = emptyList()
