@@ -53,6 +53,11 @@ fun createUserWithEmailAndPassword(
 ) {
     val auth = FirebaseAuth.getInstance()
 
+    if (username.contains(" ")) {
+        onFailure("Username cannot contain spaces between characters")
+        return
+    }
+
     isUsernameUnique(username) { isUnique ->
         if (isUnique) {
 
