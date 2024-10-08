@@ -81,21 +81,38 @@ fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
 }
 
 fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
-    return user.completedShows.filter { userShow ->
+    val commonCompleted: MutableList<ListItem> = mutableListOf()
+
+    user.completedShows.filter { userShow ->
         friend.completedShows.any { friendShow -> userShow.id == friendShow.id }
-    }
+    }.forEach({common ->
+        commonCompleted.add(common)
+    })
+    return commonCompleted
 }
 
 fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
-    return user.wantToWatchShows.filter { userShow ->
+    val commonShows: MutableList<ListItem> = mutableListOf()
+
+    user.wantToWatchShows.filter { userShow ->
         friend.wantToWatchShows.any { friendShow -> userShow.id == friendShow.id }
-    }
+    }.forEach({commonShow ->
+        commonShows.add(commonShow)
+    })
+
+    return commonShows
 }
 
 fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
-    return user.currentlyWatchingShows.filter { userShow ->
+    val commonShows: MutableList<ListItem> = mutableListOf()
+
+    user.currentlyWatchingShows.filter { userShow ->
         friend.currentlyWatchingShows.any { friendShow -> userShow.id == friendShow.id }
-    }
+    }.forEach({commonShow ->
+        commonShows.add(commonShow)
+    })
+
+    return commonShows
 }
 
 
