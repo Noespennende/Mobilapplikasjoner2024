@@ -33,9 +33,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
+import com.movielist.data.Episode
 import com.movielist.data.ListItem
+import com.movielist.data.Movie
 import com.movielist.data.Review
 import com.movielist.data.Show
+import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.White
@@ -52,13 +55,20 @@ fun FrontPage() {
             ListItem(
                 currentEpisode = i,
                 score = Random.nextInt(0, 10),
-                show =  Show(
+                production = TVShow(
+                    imdbID = "123",
                     title = "Silo",
-                    length = 12,
-                    imageID = R.drawable.silo,
-                    imageDescription = "Silo TV Show",
-                    releaseDate = Calendar.getInstance()
-                )
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    episodes = listOf("01", "02", "03", "04", "05", "06",
+                                      "07", "08", "09", "10", "11", "12"),
+                    seasons = listOf("1", "2", "3")
+                ),
             )
         )
     }
@@ -96,7 +106,7 @@ fun FrontPage() {
             Review(
                 score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
                 reviewer = user,
-                show = listItemList[1].show,
+                show = listItemList[1].production,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
                         "to recommend..",
@@ -152,14 +162,22 @@ fun CurrentlyWatchingScroller (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
     ) {
-        items (listOfShows.size) {i ->
+        items(listOfShows.size) { i ->
             CurrentlyWatchingCard(
-                imageId = listOfShows[i].show.imageID,
-                imageDescription = listOfShows[i].show.imageDescription,
-                title = listOfShows[i].show.title,
-                showLenght = listOfShows[i].show.length,
-                episodesWatched = listOfShows[i].currentEpisode)
+                imageId = listOfShows[i].production.posterUrl,
+                imageDescription = listOfShows[i].production.title + " Image description",
+                title = listOfShows[i].production.title,
+                showLenght = when (listOfShows[i].production) {
+                    is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                    is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
+                    is Episode -> (listOfShows[i].production as Episode).lengthMinutes
+                    else -> 0 // En fallback-verdi hvis det ikke er en TvShow eller Movie
+                },
+                episodesWatched = listOfShows[i].currentEpisode
+            )
         }
+
+
     }
 }
 
@@ -342,15 +360,20 @@ fun YourFriendsJustWatched (
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     ShowImage(
-                        imageID = listOfShows[i].show.imageID,
-                        imageDescription = listOfShows[i].show.imageDescription
+                        imageID = listOfShows[i].production.posterUrl,
+                        imageDescription = listOfShows[i].production.title + " Poster"
                     )
                     //Friend Info
                     FriendsWatchedInfo(
                         profileImageID = R.drawable.profilepicture,
                         profileName = "User Userson", //TEMP DELETE THIS
                         episodesWatched = i,
-                        showLenght = listOfShows[i].show.length,
+                        showLenght = when (listOfShows[i].production) {
+                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                            is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
+                            is Episode -> (listOfShows[i].production as Episode).lengthMinutes
+                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow eller Movie
+                        },
                         score = listOfShows[i].score
                     )
                 }

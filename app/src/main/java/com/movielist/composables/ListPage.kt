@@ -35,8 +35,9 @@ import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.ListItem
 import com.movielist.data.ListOptions
+import com.movielist.data.Movie
 import com.movielist.data.Review
-import com.movielist.data.Show
+import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
@@ -65,15 +66,22 @@ fun ListPage ()
 {
     //Temporary code: DELETE THIS CODE
     val listItems = mutableListOf<ListItem>()
-    for (i in 0..12) {
+    for (i in 1..12) {
         listItems.add(
             ListItem(
-                show = Show(
+                production = TVShow(
+                    imdbID = "123",
                     title = "Silo",
-                    length = 12,
-                    imageID = R.drawable.silo,
-                    imageDescription = "Silo TV Show",
-                    releaseDate = Calendar.getInstance()
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    episodes = listOf("01", "02", "03", "04", "05", "06",
+                                    "07", "08", "09", "10", "11", "12"),
+                    seasons = listOf("1", "2", "3")
                 ),
                 currentEpisode = i,
                 score = Random.nextInt(0, 10)
@@ -100,7 +108,7 @@ fun ListPage ()
             Review(
                 score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
                 reviewer = user,
-                show = listItems[1].show,
+                show = listItems[1].production,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
                         "to recommend..",
@@ -463,8 +471,8 @@ fun ListPageListItem (
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ShowImage(
-                imageID = listItem.show.imageID,
-                imageDescription = listItem.show.imageDescription,
+                imageID = listItem.production.posterUrl,
+                imageDescription = listItem.production.title + " Poster",
             )
             //List Item information
             Column(
@@ -476,7 +484,7 @@ fun ListPageListItem (
                 ){
                     //Title
                     Text(
-                        text = listItem.show.title,
+                        text = listItem.production.title,
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
@@ -484,7 +492,7 @@ fun ListPageListItem (
                     )
                     //ReleaseYear
                     Text(
-                        text = "(${listItem.show.releaseDate.get(Calendar.YEAR)})",
+                        text = "(${listItem.production.releaseDate.get(Calendar.YEAR)})",
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
@@ -531,7 +539,8 @@ fun ListPageListItem (
                         Button(
                             onClick = {
                                 //Button onclick function
-                                if (listItem.currentEpisode < listItem.show.length){
+                                if (listItem.production is TVShow && listItem.currentEpisode < listItem.production.episodes.size) {
+                                    // Øk currentEpisode hvis det er flere episoder igjen å se
                                     listItem.currentEpisode++
                                     watchedEpisodesCount = listItem.currentEpisode
                                 }
@@ -571,7 +580,19 @@ fun ListPageListItem (
                     ) {
                         //Episode text
                         Text(
-                            text = "Ep ${watchedEpisodesCount} of ${listItem.show.length}",
+                            text = when (listItem.production) {
+                                is TVShow -> {
+                                    // For TV-serier: vis episodenummer og totalt antall episoder
+                                    "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
+                                }
+                                is Movie -> {
+                                    // For filmer: vis lengden på filmen i minutter
+                                    "${(listItem.production as Movie).lengthMinutes} minutes"
+                                }
+                                else -> {
+                                    // Standard tekst hvis det ikke er en Movie eller TvShow
+                                    "Unknown production type"
+                                }},
                             fontSize = headerSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
@@ -618,7 +639,11 @@ fun ListPageListItem (
                     }
                     ProgressBar(
                         currentNumber = watchedEpisodesCount,
-                        endNumber = listItem.show.length,
+                        endNumber = when (listItem.production) {
+                            is TVShow -> (listItem.production as TVShow).episodes.size // Antall episoder for TV-serie
+                            is Movie -> (listItem.production as Movie).lengthMinutes // Lengde i minutter for film
+                            else -> 0 // Standardverdi hvis det ikke er en TvShow eller Movie
+                        },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
                         backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
                     )

@@ -143,11 +143,11 @@ fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
 }
 
 
-fun writeReview(reviewer: User, score: Int, show:Show, reviewBody: String,
+fun writeReview(reviewer: User, score: Int, production:Production, reviewBody: String,
                 postDate: Calendar, likes: Int ) : User{
     val newReview = Review(
         score = score,
-        show = show,
+        show = production,
         reviewBody = reviewBody,
         postDate = postDate,
         likes = likes,
