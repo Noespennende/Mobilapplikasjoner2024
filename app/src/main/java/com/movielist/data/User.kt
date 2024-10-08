@@ -9,14 +9,14 @@ data class User (
     val id: String = UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val friendList: List<User> = emptyList(),
-    val myReviews: List<Review> = emptyList(),
-    val favoriteCollection: List<ListItem> = emptyList(),
+    val friendList: MutableList<User> = mutableListOf(),
+    val myReviews: MutableList<Review> = mutableListOf(),
+    val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val profileImageID: Int,
-    val completedShows: List<ListItem> = emptyList(),
-    val wantToWatchShows: List<ListItem> = emptyList(),
-    val droppedShows: List<ListItem> = emptyList(),
-    val currentlyWatchingShows: List<ListItem> = emptyList()
+    val completedShows:  MutableList<ListItem> = mutableListOf(),
+    val wantToWatchShows:  MutableList<ListItem> = mutableListOf(),
+    val droppedShows:  MutableList<ListItem> = mutableListOf(),
+    val currentlyWatchingShows:  MutableList<ListItem> = mutableListOf()
 )
 
 

@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -38,12 +39,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
-import com.movielist.data.SearchSortOptions
 import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
@@ -55,7 +56,9 @@ import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topNavBaHeight
@@ -236,7 +239,8 @@ fun BottomNavBar(
     inactiveColor: Color = LightGray,
     sizeMultiplier: Float = 1f
 ){
-    val buttonSize: Dp = (35*sizeMultiplier).dp
+    val buttonSize: Dp = (45*sizeMultiplier).dp
+    val iconSize: Dp = buttonSize-20.dp
 
 
 
@@ -273,7 +277,7 @@ fun BottomNavBar(
             .wrapContentHeight()
             .align(Alignment.BottomCenter)
             .padding(
-                bottom = bottomPhoneIconsOffset,
+                bottom = bottomPhoneIconsOffset-10.dp,
                 start = horizontalPadding-10.dp,
                 end = horizontalPadding-10.dp
             )
@@ -299,17 +303,28 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Home button icon
-                Image(
-                    painter = painterResource(id = R.drawable.home),
-                    contentDescription = "Home",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(homeButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    //Home button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.home),
+                        contentDescription = "Home",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(homeButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+                    //Home button text
+                    Text(
+                        text = "Home",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = homeButtonColor
+                    )
+                }
             }
 
             //List button
@@ -333,16 +348,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //List button icon
-                Image(
-                    painter = painterResource(id = R.drawable.list),
-                    contentDescription = "List",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(listButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //List button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.list),
+                        contentDescription = "List",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(listButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //List button text
+                    Text(
+                        text = "List",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = listButtonColor
+                    )
+                }
 
             }
 
@@ -367,16 +395,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Search button icon
-                Image(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = "Search",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(searchButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Search button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.search),
+                        contentDescription = "Search",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(searchButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //Search button text
+                    Text(
+                        text = "Search",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = searchButtonColor
+                    )
+                }
 
             }
 
@@ -401,16 +442,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Review button icon
-                Image(
-                    painter = painterResource(id = R.drawable.review),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(reviewButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Review button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.review),
+                        contentDescription = "Review",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(reviewButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //Review button text
+                    Text(
+                        text = "Reviews",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = reviewButtonColor
+                    )
+                }
             }
 
             //Profile button
@@ -434,16 +488,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Profile button icon
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(profileButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Profile button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.profile),
+                        contentDescription = "Review",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(profileButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //profile button text
+                    Text(
+                        text = "Profile",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = profileButtonColor
+                    )
+                }
             }
         }
     }

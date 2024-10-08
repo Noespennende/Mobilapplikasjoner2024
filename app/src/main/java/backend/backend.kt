@@ -74,14 +74,14 @@ fun createUserWithEmailAndPassword(
                                         id = user.uid,
                                         userName = username,
                                         email = email,
-                                        friendList = emptyList(),
-                                        myReviews = emptyList(),
-                                        favoriteCollection = emptyList(),
+                                        friendList = mutableListOf(),
+                                        myReviews = mutableListOf(),
+                                        favoriteCollection = mutableListOf(),
                                         profileImageID = 0,
-                                        completedShows = emptyList(),
-                                        wantToWatchShows = emptyList(),
-                                        droppedShows = emptyList(),
-                                        currentlyWatchingShows = emptyList()
+                                        completedShows = mutableListOf(),
+                                        wantToWatchShows = mutableListOf(),
+                                        droppedShows = mutableListOf(),
+                                        currentlyWatchingShows = mutableListOf()
                                     )
                                     addUserToDatabase(newUser)
 

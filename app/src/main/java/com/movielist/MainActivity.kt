@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
             //main content
             //FirebaseTesting()
-            ListPage()
+            ProfilePage()
             //FrontPage()
 
             //menu backgrounds
