@@ -92,6 +92,12 @@ fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
     }
 }
 
+fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
+    return user.currentlyWatchingShows.filter { userShow ->
+        friend.currentlyWatchingShows.any { friendShow -> userShow.id == friendShow.id }
+    }
+}
+
 
 /* må skrives når vi får inn filmer etc
 fun wantToWatchInCommon(user: User, friend: User) : User{
