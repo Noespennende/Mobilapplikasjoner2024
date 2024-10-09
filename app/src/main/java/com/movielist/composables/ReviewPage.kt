@@ -33,10 +33,10 @@ import androidx.compose.ui.unit.dp
 import com.movielist.R
 import com.movielist.data.ListItem
 import com.movielist.data.Review
-import com.movielist.data.Show
 import com.movielist.data.ShowSortOptions
 import com.movielist.data.User
 import com.movielist.data.ReviewOptions
+import com.movielist.data.TVShow
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.LightGray
@@ -77,12 +77,19 @@ fun ReviewPage () {
                 email = "user@email.com",
             ),
             likes = Random.nextInt(0, 200),
-            show = Show(
-                title = "Silo $i",
-                length = i,
+            show = TVShow(
+                imdbID = "123",
+                title = "Silo",
+                description = "TvShow Silo description here",
+                genre = "Action",
                 releaseDate = Calendar.getInstance(),
-                imageID = R.drawable.silo,
-                imageDescription = "Silo show"
+                actors = emptyList(),
+                rating = 4,
+                reviews = ArrayList(),
+                posterUrl = R.drawable.silo,
+                episodes = listOf("01", "02", "03", "04", "05", "06",
+                                 "07", "08", "09", "10", "11", "12"),
+                seasons = listOf("1", "2", "3")
             ),
             postDate = Calendar.getInstance(),
             reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
@@ -452,7 +459,7 @@ fun ReviewSummary (
             .fillMaxWidth()
     ) {
         ShowImage(
-            imageID = review.show.imageID
+            imageID = review.show.posterUrl
         )
         //Review header, score and body
         Column (

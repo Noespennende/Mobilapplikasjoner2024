@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -35,8 +36,9 @@ import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.ListItem
 import com.movielist.data.ListOptions
+import com.movielist.data.Movie
 import com.movielist.data.Review
-import com.movielist.data.Show
+import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
@@ -65,20 +67,42 @@ fun ListPage ()
 {
     //Temporary code: DELETE THIS CODE
     val listItems = mutableListOf<ListItem>()
-    for (i in 0..12) {
+    for (i in 1..12) {
         listItems.add(
             ListItem(
-                show = Show(
+                production = Movie(
+                    imdbID = "123",
                     title = "Silo",
-                    length = 12,
-                    imageID = R.drawable.silo,
-                    imageDescription = "Silo TV Show",
-                    releaseDate = Calendar.getInstance()
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    lengthMinutes = 127,
+                    trailerUrl = "trailerurl.com"
                 ),
-                currentEpisode = i,
+                currentEpisode = 0,
                 score = Random.nextInt(0, 10)
 
             )
+
+            /*
+            * production = TVShow(
+                    imdbID = "123",
+                    title = "Silo",
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    episodes = listOf("01", "02", "03", "04", "05", "06",
+                                    "07", "08", "09", "10", "11", "12"),
+                    seasons = listOf("1", "2", "3")
+                ),*/
         )
     }
 
@@ -100,7 +124,7 @@ fun ListPage ()
             Review(
                 score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
                 reviewer = user,
-                show = listItems[1].show,
+                show = listItems[1].production,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
                         "to recommend..",
@@ -463,8 +487,8 @@ fun ListPageListItem (
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ShowImage(
-                imageID = listItem.show.imageID,
-                imageDescription = listItem.show.imageDescription,
+                imageID = listItem.production.posterUrl,
+                imageDescription = listItem.production.title + " Poster",
             )
             //List Item information
             Column(
@@ -476,7 +500,7 @@ fun ListPageListItem (
                 ){
                     //Title
                     Text(
-                        text = listItem.show.title,
+                        text = listItem.production.title,
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
@@ -484,7 +508,7 @@ fun ListPageListItem (
                     )
                     //ReleaseYear
                     Text(
-                        text = "(${listItem.show.releaseDate.get(Calendar.YEAR)})",
+                        text = "(${listItem.production.releaseDate.get(Calendar.YEAR)})",
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
@@ -502,9 +526,13 @@ fun ListPageListItem (
                         Button(
                             onClick = {
                                 //Button onclick function
-                                if (listItem.currentEpisode > 0){
-                                    listItem.currentEpisode--
-                                    watchedEpisodesCount = listItem.currentEpisode
+                                if (watchedEpisodesCount > 0){
+                                    watchedEpisodesCount--
+                                    listItem.currentEpisode = watchedEpisodesCount
+
+                                    // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                    //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                    //Log.d("MinusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                                 }
                             },
                             shape = RoundedCornerShape(
@@ -527,14 +555,30 @@ fun ListPageListItem (
                             )
                         }
 
-                        // Minus button
+                        // Plus button
                         Button(
                             onClick = {
-                                //Button onclick function
-                                if (listItem.currentEpisode < listItem.show.length){
-                                    listItem.currentEpisode++
-                                    watchedEpisodesCount = listItem.currentEpisode
+
+                                when (val production = listItem.production) {
+                                    is TVShow -> {
+                                        // For TV-serier: Sjekk om det er flere episoder igjen å se
+                                        if (watchedEpisodesCount < production.episodes.size) {
+                                            watchedEpisodesCount++
+                                            listItem.currentEpisode = watchedEpisodesCount
+
+                                        }
+                                    }
+                                    is Movie -> {
+                                        // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
+                                        if (watchedEpisodesCount == 0) {
+                                            watchedEpisodesCount = 1
+                                            listItem.currentEpisode = watchedEpisodesCount
+                                        }
+                                    }
                                 }
+                                // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                //Log.d("PlusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                //Log.d("PlusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                             },
                             shape = RoundedCornerShape(
                                 topStart = 0.dp,
@@ -571,7 +615,18 @@ fun ListPageListItem (
                     ) {
                         //Episode text
                         Text(
-                            text = "Ep ${watchedEpisodesCount} of ${listItem.show.length}",
+                            text = when (listItem.production) {
+                                is TVShow -> {
+                                    // For TV-serier: vis episodenummer og totalt antall episoder
+                                    "Ep $watchedEpisodesCount of ${listItem.production.episodes.size}"
+                                }
+                                is Movie -> {
+                                    // For filmer: vis lengden på filmen i minutter
+                                    "Ep $watchedEpisodesCount of 1"
+                                }
+                                else -> {
+                                    "Ep $watchedEpisodesCount of 1"
+                                }},
                             fontSize = headerSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
@@ -618,7 +673,11 @@ fun ListPageListItem (
                     }
                     ProgressBar(
                         currentNumber = watchedEpisodesCount,
-                        endNumber = listItem.show.length,
+                        endNumber = when (listItem.production) {
+                            is TVShow -> listItem.production.episodes.size // Antall episoder for TV-serie
+                            is Movie -> 1
+                            else -> 0
+                        },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
                         backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
                     )
