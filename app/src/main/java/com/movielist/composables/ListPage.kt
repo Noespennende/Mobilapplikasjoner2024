@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +70,26 @@ fun ListPage ()
     for (i in 1..12) {
         listItems.add(
             ListItem(
-                production = TVShow(
+                production = Movie(
+                    imdbID = "123",
+                    title = "Silo",
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    lengthMinutes = 127,
+                    trailerUrl = "trailerurl.com"
+                ),
+                currentEpisode = 0,
+                score = Random.nextInt(0, 10)
+
+            )
+
+            /*
+            * production = TVShow(
                     imdbID = "123",
                     title = "Silo",
                     description = "TvShow Silo description here",
@@ -82,11 +102,7 @@ fun ListPage ()
                     episodes = listOf("01", "02", "03", "04", "05", "06",
                                     "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
-                ),
-                currentEpisode = i,
-                score = Random.nextInt(0, 10)
-
-            )
+                ),*/
         )
     }
 
@@ -510,9 +526,13 @@ fun ListPageListItem (
                         Button(
                             onClick = {
                                 //Button onclick function
-                                if (listItem.currentEpisode > 0){
-                                    listItem.currentEpisode--
-                                    watchedEpisodesCount = listItem.currentEpisode
+                                if (watchedEpisodesCount > 0){
+                                    watchedEpisodesCount--
+                                    listItem.currentEpisode = watchedEpisodesCount
+
+                                    // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                    //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                    //Log.d("MinusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                                 }
                             },
                             shape = RoundedCornerShape(
@@ -535,15 +555,30 @@ fun ListPageListItem (
                             )
                         }
 
-                        // Minus button
+                        // Plus button
                         Button(
                             onClick = {
-                                //Button onclick function
-                                if (listItem.production is TVShow && listItem.currentEpisode < listItem.production.episodes.size) {
-                                    // Øk currentEpisode hvis det er flere episoder igjen å se
-                                    listItem.currentEpisode++
-                                    watchedEpisodesCount = listItem.currentEpisode
+
+                                when (val production = listItem.production) {
+                                    is TVShow -> {
+                                        // For TV-serier: Sjekk om det er flere episoder igjen å se
+                                        if (watchedEpisodesCount < production.episodes.size) {
+                                            watchedEpisodesCount++
+                                            listItem.currentEpisode = watchedEpisodesCount
+
+                                        }
+                                    }
+                                    is Movie -> {
+                                        // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
+                                        if (watchedEpisodesCount == 0) {
+                                            watchedEpisodesCount = 1
+                                            listItem.currentEpisode = watchedEpisodesCount
+                                        }
+                                    }
                                 }
+                                // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                //Log.d("PlusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                //Log.d("PlusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                             },
                             shape = RoundedCornerShape(
                                 topStart = 0.dp,
@@ -583,15 +618,14 @@ fun ListPageListItem (
                             text = when (listItem.production) {
                                 is TVShow -> {
                                     // For TV-serier: vis episodenummer og totalt antall episoder
-                                    "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
+                                    "Ep $watchedEpisodesCount of ${listItem.production.episodes.size}"
                                 }
                                 is Movie -> {
                                     // For filmer: vis lengden på filmen i minutter
-                                    "${(listItem.production as Movie).lengthMinutes} minutes"
+                                    "Ep $watchedEpisodesCount of 1"
                                 }
                                 else -> {
-                                    // Standard tekst hvis det ikke er en Movie eller TvShow
-                                    "Unknown production type"
+                                    "Ep $watchedEpisodesCount of 1"
                                 }},
                             fontSize = headerSize,
                             fontWeight = weightLight,
@@ -640,9 +674,9 @@ fun ListPageListItem (
                     ProgressBar(
                         currentNumber = watchedEpisodesCount,
                         endNumber = when (listItem.production) {
-                            is TVShow -> (listItem.production as TVShow).episodes.size // Antall episoder for TV-serie
-                            is Movie -> (listItem.production as Movie).lengthMinutes // Lengde i minutter for film
-                            else -> 0 // Standardverdi hvis det ikke er en TvShow eller Movie
+                            is TVShow -> listItem.production.episodes.size // Antall episoder for TV-serie
+                            is Movie -> 1
+                            else -> 0
                         },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
                         backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
