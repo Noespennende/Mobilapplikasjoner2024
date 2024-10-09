@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +27,7 @@ import backend.createUserWithEmailAndPassword
 import backend.getSignedInUser
 import backend.getUserInfo
 import backend.logInWithEmailAndPassword
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
@@ -45,9 +47,9 @@ fun FirebaseTesting() {
         verticalArrangement = Arrangement.Center // Sentrer vertikalt
     ) {
 
-        //LogInLogic()
+        LogInLogic()
 
-        CreateUser()
+        //CreateUser()
 
         //GetData()
 
@@ -58,8 +60,18 @@ fun FirebaseTesting() {
 @Composable
 fun LogInLogic() {
 
+    val firebaseAuth = FirebaseAuth.getInstance()
+
     // Variabel for å kontrollere om innlogging er vellykket
     var isLoggedIn by remember { mutableStateOf(false) }
+
+    // Bruker LaunchedEffect for å ikke sjekke/sette login-status flere ganger
+    // ved f.eks rerendring av komponentet
+    // -> Unngår dermed at vi gjør kall til Firebase unødvendig mye
+    LaunchedEffect(Unit) {
+        val firebaseAuth = FirebaseAuth.getInstance()
+        isLoggedIn = firebaseAuth.currentUser != null
+    }
 
         // Vis LogInUser hvis ikke innlogget
         if (!isLoggedIn) {
@@ -68,9 +80,11 @@ fun LogInLogic() {
 
         }
         // Viser LoginSuccessful hvis logget inn
-        if (isLoggedIn) {
-            LoginSuccessful()
-        }
+    if (isLoggedIn) {
+        LoginSuccessful(onLogout = {
+            isLoggedIn = false // Oppdater tilstand for å vise innloggingsskjerm etter utlogging
+        })
+    }
 
 }
 
@@ -130,7 +144,7 @@ fun LogInUser(onLoginSuccess: () -> Unit) {
     }
 }
 @Composable
-fun LoginSuccessful() {
+fun LoginSuccessful(onLogout: () -> Unit) {
 
     val user: FirebaseUser? = getSignedInUser()
 
@@ -160,6 +174,15 @@ fun LoginSuccessful() {
                 fontSize = 25.sp,
                 fontWeight = weightRegular,
             )
+        }
+        Button(
+            onClick = {
+                FirebaseAuth.getInstance().signOut() // Logg ut brukeren
+                onLogout() // Kall callback for å oppdatere UI etter utlogging
+            },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(text = "Log out")
         }
     }
 

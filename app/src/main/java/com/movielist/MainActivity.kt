@@ -21,10 +21,10 @@ class MainActivity : ComponentActivity() {
             Background()
 
             //main content
-            //FirebaseTesting()
+            FirebaseTesting()
             //ProfilePage()
             //FrontPage()
-            ListPage()
+            //ListPage()
 
 
             //menu backgrounds
