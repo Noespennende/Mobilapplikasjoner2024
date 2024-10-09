@@ -124,11 +124,6 @@ fun logInWithEmailAndPassword(email: String, password: String, onSuccess: () -> 
         }
 }
 
-fun getSignedInUser(): FirebaseUser? {
-    val auth = FirebaseAuth.getInstance()
-
-    return auth.currentUser
-}
 
 fun isUsernameUnique(username: String, onResult: (Boolean) -> Unit) {
 

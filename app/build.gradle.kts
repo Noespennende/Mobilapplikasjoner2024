@@ -100,6 +100,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
+    implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
+
     // Import the Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
 
