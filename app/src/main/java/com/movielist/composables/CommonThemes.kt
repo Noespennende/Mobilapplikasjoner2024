@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -43,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
+import coil.compose.rememberImagePainter
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple
@@ -74,8 +76,8 @@ fun Background () {
 @Composable
 fun ProgressBar (
     currentNumber: Int,
-    endNumber: Int,
-    lenght: Dp = 50.dp,
+    endNumber: Int?,
+    length: Dp = 50.dp,
     foregroundColor: Color = Purple,
     backgroundColor: Color = DarkPurple,
     strokeWith: Float = 20f,
@@ -83,7 +85,11 @@ fun ProgressBar (
     animationDelay: Int = 0
 )
 {
-    var percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
+    var percentage = if (endNumber != null && endNumber != 0) {
+        currentNumber.toFloat() / endNumber.toFloat()
+    } else {
+        0f // Set to 0 if endNumber is null or 0 to avoid division by zero
+    }
 
     var animationPlayed by remember {
         mutableStateOf(false)
@@ -451,18 +457,23 @@ fun BottomNavBar(
 
 @Composable
 fun ShowImage (
-    imageID: Int  = R.drawable.noimage,
+    imageID: String? = "R.drawable.noimage", // La til ? etter String
+    imageURL: String? = "Image url", // La til ? etter String
     imageDescription: String = "Image not available",
     sizeMultiplier: Float = 1.0f
 ) {
     Image(
-        painter = painterResource(id = imageID),
+        painter = rememberImagePainter(imageURL), // Gjorde om fra 'painterResource(id = imageID)' da det førte til at popularShowsAndMovies krasjet
         contentDescription = imageDescription,
         contentScale = ContentScale.Crop,
         modifier = Modifier
             .width(showImageWith*sizeMultiplier)
             .height(showImageHeight*sizeMultiplier)
     )
+}
+
+fun painterResource(id: String?): Painter {
+    TODO("Not yet implemented")
 }
 
 @Composable

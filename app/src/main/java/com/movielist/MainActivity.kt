@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
 
             //main content
 
-            FirebaseTesting()
+            //FirebaseTesting()
             //SearchPage()
             //FrontPage()
             com.movielist.composables.FrontPage()

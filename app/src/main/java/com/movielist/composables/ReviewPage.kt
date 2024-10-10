@@ -23,6 +23,7 @@ fun ReviewPage () {
     var reviewsList: List<Review> = mutableListOf()
     val emptyList: List<ListItem> = mutableListOf()
 
+    /*
     // Populate reviewsList
     for (i in 0..10) {
         reviewsList = reviewsList + Review(
@@ -47,6 +48,8 @@ fun ReviewPage () {
             reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
         )
     }
+
+     */
 
     //Temp code delete the code above
 

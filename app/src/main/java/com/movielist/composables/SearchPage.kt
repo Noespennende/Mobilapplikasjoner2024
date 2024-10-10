@@ -15,7 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -36,18 +35,21 @@ fun SearchPage () {
 
     val showList = mutableListOf<Show>()
 
+    /*
     for (i in 0..50) {
         showList.add(
             Show(
                 email = "lagt til for test", //fjern denne etter hvert
                 title = "The lord of the rings: The return of the king",
                 length = 12,
-                imageID = R.drawable.silo,
+                imageID = "RandomID",
                 imageDescription = "Silo TV Show",
                 releaseDate = Calendar.getInstance()
             )
         )
     }
+
+     */
     //TEMP CODE DELETE ABOVE
 
 
@@ -77,12 +79,12 @@ fun SearchPage () {
                     .fillMaxWidth()
             ){
                 ShowImage(
-                    imageID = show.imageID,
-                    imageDescription = show.imageDescription
+                    imageID = "show imageID",
+                    //imageDescription = show.primaryImage?.caption.toString()
                 )
 
                 Text(
-                    text = show.title,
+                    text = show.titleText.text,
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,

@@ -74,7 +74,7 @@ fun ReviewSummary (
             .fillMaxWidth()
     ) {
         ShowImage(
-            imageID = review.show.imageID
+           imageID = review.show.primaryImage?.id.toString()
         )
         //Review header, score and body
         Column (
@@ -100,7 +100,7 @@ fun ReviewSummary (
                     {
                         //Header
                         Text(
-                            text = "${review.show.title} (${review.show.releaseDate.get(Calendar.YEAR)})",
+                            text = review.show.titleText.text, //text = "${review.show.title} (${review.show.releaseDate.get(Calendar.YEAR)})",
                             fontSize = paragraphSize,
                             fontFamily = fontFamily,
                             fontWeight = weightBold,

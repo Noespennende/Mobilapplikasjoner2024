@@ -2,30 +2,76 @@ package com.movielist.data
 
 import java.util.Calendar
 
+/*
 data class Show (
     val title: String,
     val length: Int,
-    val imageID: Int,
+    val imageID: String,
     val releaseDate: Calendar,
     val imageDescription: String,
     val email: String //lagt til for test av annen api
 )
-
-// Data classes nedenunder er tilpasset/lagd for dataen vi får fra APIet
+*/
+// Data classes nedenunder er tilpasset/lagd for dataen vi får fra APIet for filmer
 data class MovieResponse(
-    val page: Int,
+    val page: Int?,
     val next: String?,
-    val entries: Int,
+    val entries: Int?,
     val results: List<Movie>
+)
+
+data class ShowResponse (
+    val page: Int?,
+    val next: String?,
+    val entries: Int?,
+    val results: List<Show>
 )
 
 data class Movie(
     val _id: String,
     val id: String,
     val primaryImage: PrimaryImage?,
+    val titleType: TitleType,
     val titleText: TitleText,
     val originalTitleText: TitleText?,
-    val releaseYear: ReleaseYear?
+    val releaseYear: ReleaseYear?,
+    val showLength: Int?, // Må tilpasses
+    val currentEpisode: Int? // Må tilpasses
+)
+
+data class Show(
+    val _id: String,
+    val id: String,
+    val primaryImage: PrimaryImage?,
+    val titleType: TitleType,
+    val titleText: TitleText,
+    val originalTitleText: TitleText?,
+    val releaseYear: ReleaseYear?,
+    val showLength: Int?, // Må tilpasses
+    val currentEpisode: Int? // Må tilpasses
+)
+
+data class CombinedData(
+    val _id: String,
+    val id: String?,
+    val primaryImage: PrimaryImage?,
+    val titleType: TitleType?,
+    val titleText: TitleText?,
+    val originalTitleText: TitleText?,
+    //val releaseYear: ReleaseYear?,
+    val showLength: Int?, // Må tilpasses
+    val totalEpisodes: Int?,
+    val currentEpisode: Int? // Må tilpasses
+)
+
+data class SeriesDetailsResponse(
+    val results: List<Episode>
+)
+
+data class Episode(
+    val tconst: String,
+    val seasonNumber: Int,
+    val episodeNumber: Int
 )
 
 data class PrimaryImage(
@@ -33,11 +79,16 @@ data class PrimaryImage(
     val width: Int,
     val height: Int,
     val url: String,
-    val caption: Caption?
+    //val caption: Caption
 )
 
 data class Caption(
     val plainText: String
+)
+
+data class TitleType(
+    val isSeries: Boolean,
+    val isEpisode: Boolean
 )
 
 data class TitleText(
