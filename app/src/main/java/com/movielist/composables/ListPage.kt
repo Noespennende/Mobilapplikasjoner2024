@@ -1,6 +1,5 @@
 package com.movielist.composables
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +22,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,13 +34,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.movielist.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import backend.AuthViewModel
+import backend.QueryViewModel
 import com.movielist.data.ListItem
 import com.movielist.data.ListOptions
 import com.movielist.data.Movie
-import com.movielist.data.Review
 import com.movielist.data.TVShow
-import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
@@ -58,14 +59,14 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
-import kotlin.random.Random
 
 
 @Composable
 
-fun ListPage ()
+fun ListPage (authViewModel : AuthViewModel)
 {
     //Temporary code: DELETE THIS CODE
+    /*
     val listItems = mutableListOf<ListItem>()
     for (i in 1..12) {
         listItems.add(
@@ -134,11 +135,37 @@ fun ListPage ()
         )
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
+    */
 
+    /*
+        Bruker QueryViewModel (bør nok renames), for backend-logikken.
+        Da er det ikke komponentens jobb å utføre store logikkblokker,
+        men ViewModel, som dermed kan holde på informasjonen mellom sider osv.
+        QueryViewModel gjør henter f.eks watchedCollection etter forespørsel fra en side,
+        (f.eks ListPage). Hvis bruker så bytter til FrontPage, og watchedCollection skal vises der også,
+        trenger ikke QueryViewModel
+    */
 
-    val loggedInUser by remember {
-        mutableStateOf(true)
+    val loggedInUser by remember { mutableStateOf(true) }
+    authViewModel.checkUserStatus()
+    val user by authViewModel.currentUser.collectAsState()
+
+    val queryViewModel: QueryViewModel = viewModel()
+
+    val watchingCollection by queryViewModel.watchingCollection.collectAsState()
+
+    // Disse to kan brukes for ting - mest relevant er kanskje isLoading
+    val isLoading by queryViewModel.isLoading.collectAsState()
+    val hasError by queryViewModel.hasError.collectAsState()
+
+    // Hvis watchingCollection er tom, gjør et kall for å hente data fra databasen
+    if (watchingCollection.isEmpty()) {
+        LaunchedEffect(Unit) {
+            queryViewModel.fetchUserWatchingCollection(user!!.uid)
+        }
     }
+    
+    val watchingCollectionListItems = queryViewModel.createProductionListItems(watchingCollection)
 
     //Graphics
 
@@ -156,7 +183,7 @@ fun ListPage ()
         item {
             ListPageList(
                 loggedInUsersList = loggedInUser,
-                listItemList = listItems
+                listItemList = watchingCollectionListItems
             )
         }
     }
