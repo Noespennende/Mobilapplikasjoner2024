@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
+import com.movielist.data.Production
 import com.movielist.data.Show
 import com.movielist.data.SearchSortOptions
 import com.movielist.data.ShowSortOptions
@@ -711,7 +712,7 @@ fun LikeButton (
 @Composable
 fun ProductionListSidesroller (
     header: String,
-    listOfShows: List<Show>,
+    listOfShows: List<Production>,
     contentModifier: Modifier = Modifier,
     textModifier: Modifier = Modifier
 ) {
@@ -735,8 +736,8 @@ fun ProductionListSidesroller (
         ){
             items (listOfShows.size) {i ->
                 ShowImage(
-                    imageID = listOfShows[i].imageID,
-                    imageDescription = listOfShows[i].imageDescription
+                    imageID = listOfShows[i].posterUrl,
+                    imageDescription = listOfShows[i].title + " Poster"
                 )
             }
         }

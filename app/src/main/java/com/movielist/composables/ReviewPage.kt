@@ -38,6 +38,7 @@ import com.movielist.data.Show
 import com.movielist.data.ShowSortOptions
 import com.movielist.data.User
 import com.movielist.data.ReviewOptions
+import com.movielist.data.TVShow
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.LightGray

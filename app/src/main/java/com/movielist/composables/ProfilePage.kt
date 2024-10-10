@@ -33,9 +33,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.movielist.R
 import com.movielist.data.ListItem
+import com.movielist.data.Production
 import com.movielist.data.ProfileCategoryOptions
 import com.movielist.data.Review
 import com.movielist.data.Show
+import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.LightGray
@@ -73,7 +75,7 @@ fun ProfilePage (){
 
     val exampleReviews: MutableList<Review> = mutableListOf()
     val exampleShows: MutableList<ListItem> = mutableListOf()
-    val exampleFavShows: MutableList<Show> = mutableListOf()
+    val exampleFavShows: MutableList<Production> = mutableListOf()
 
     for (i in 0 .. 10){
         exampleShows.add(
