@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -33,17 +35,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
-import com.movielist.data.SearchSortOptions
+import com.movielist.data.Show
 import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
@@ -54,12 +60,16 @@ import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
+import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -236,7 +246,8 @@ fun BottomNavBar(
     inactiveColor: Color = LightGray,
     sizeMultiplier: Float = 1f
 ){
-    val buttonSize: Dp = (35*sizeMultiplier).dp
+    val buttonSize: Dp = (45*sizeMultiplier).dp
+    val iconSize: Dp = buttonSize-20.dp
 
 
 
@@ -273,7 +284,7 @@ fun BottomNavBar(
             .wrapContentHeight()
             .align(Alignment.BottomCenter)
             .padding(
-                bottom = bottomPhoneIconsOffset,
+                bottom = bottomPhoneIconsOffset-10.dp,
                 start = horizontalPadding-10.dp,
                 end = horizontalPadding-10.dp
             )
@@ -299,17 +310,28 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Home button icon
-                Image(
-                    painter = painterResource(id = R.drawable.home),
-                    contentDescription = "Home",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(homeButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ){
+                    //Home button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.home),
+                        contentDescription = "Home",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(homeButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+                    //Home button text
+                    Text(
+                        text = "Home",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = homeButtonColor
+                    )
+                }
             }
 
             //List button
@@ -333,16 +355,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //List button icon
-                Image(
-                    painter = painterResource(id = R.drawable.list),
-                    contentDescription = "List",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(listButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //List button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.list),
+                        contentDescription = "List",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(listButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //List button text
+                    Text(
+                        text = "List",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = listButtonColor
+                    )
+                }
 
             }
 
@@ -367,16 +402,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Search button icon
-                Image(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = "Search",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(searchButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Search button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.search),
+                        contentDescription = "Search",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(searchButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //Search button text
+                    Text(
+                        text = "Search",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = searchButtonColor
+                    )
+                }
 
             }
 
@@ -401,16 +449,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Review button icon
-                Image(
-                    painter = painterResource(id = R.drawable.review),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(reviewButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Review button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.review),
+                        contentDescription = "Review",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(reviewButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //Review button text
+                    Text(
+                        text = "Reviews",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = reviewButtonColor
+                    )
+                }
             }
 
             //Profile button
@@ -434,16 +495,29 @@ fun BottomNavBar(
                     .wrapContentWidth()
             )
             {
-                //Profile button icon
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(profileButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    //Profile button icon
+                    Image(
+                        painter = painterResource(id = R.drawable.profile),
+                        contentDescription = "Review",
+                        contentScale = ContentScale.Crop,
+                        colorFilter = ColorFilter.tint(profileButtonColor),
+                        modifier = Modifier
+                            .size(iconSize)
+                    )
+
+                    //profile button text
+                    Text(
+                        text = "Profile",
+                        textAlign = TextAlign.Center,
+                        fontFamily = fontFamily,
+                        fontWeight = weightBold,
+                        fontSize = paragraphSize,
+                        color = profileButtonColor
+                    )
+                }
             }
         }
     }
@@ -464,6 +538,7 @@ fun ShowImage (
         modifier = Modifier
             .width(showImageWith*sizeMultiplier)
             .height(showImageHeight*sizeMultiplier)
+            .clip(RoundedCornerShape(5.dp))
     )
 }
 
@@ -531,7 +606,7 @@ fun ScoreGraphics(
                 painter = painterResource(id = R.drawable.empty_star),
                 contentDescription = "Star",
                 contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(LightGray),
+                colorFilter = ColorFilter.tint(darkWhite),
                 modifier = Modifier
                     .size((11*sizeMultiplier).dp)
             )
@@ -540,7 +615,7 @@ fun ScoreGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 16.sp,
-                color = LightGray
+                color = darkWhite
             )
         }
 
@@ -550,7 +625,7 @@ fun ScoreGraphics(
             fontFamily = fontFamily,
             fontWeight = weightRegular,
             fontSize = 12.sp,
-            color = LightGray
+            color = darkWhite
         )
     }
 }
@@ -628,6 +703,91 @@ fun LikeButton (
 
         }
     }
+}
+
+
+
+@Composable
+fun ProductionListSidesroller (
+    header: String,
+    listOfShows: List<Show>,
+    contentModifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier
+) {
+    Column (
+        modifier = contentModifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        //Header
+        Text(
+            header,
+            fontFamily = fontFamily,
+            fontSize = headerSize,
+            fontWeight = weightBold,
+            color = White,
+            modifier = textModifier
+        )
+        LazyRow (
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        ){
+            items (listOfShows.size) {i ->
+                ShowImage(
+                    imageID = listOfShows[i].imageID,
+                    imageDescription = listOfShows[i].imageDescription
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun RoundProgressBar (
+    percentage: Float = 1f,
+    fontSize: TextUnit = 28.sp,
+    color: Color = Purple,
+    strikeWith: Dp = 8.dp,
+    radius: Dp = 100.dp,
+    animationDuration: Int = 1000,
+    animationDelay: Int = 0,
+    strokeCap: StrokeCap = StrokeCap.Round
+) {
+    var animationPlayed by remember {
+        mutableStateOf(false)
+    }
+    val currentPercentage = animateFloatAsState(
+        targetValue = if(animationPlayed) {percentage} else {0f},
+        animationSpec = tween(
+            durationMillis = animationDuration,
+            delayMillis = animationDelay
+        )
+    )
+
+    LaunchedEffect( key1 = true) {
+        animationPlayed = true
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(radius)
+    ){
+        Canvas(
+            modifier = Modifier
+                .size(radius)
+        ){
+            drawArc(
+                color = color,
+                startAngle = -90f,
+                sweepAngle = 360* currentPercentage.value,
+                useCenter = false,
+                style = Stroke(strikeWith.toPx(), cap = strokeCap)
+            )
+        }
+    }
+
 }
 
 fun GenerateShowSortOptionName (

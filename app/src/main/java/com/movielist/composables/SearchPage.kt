@@ -291,7 +291,7 @@ fun GenerateSearchOptionName (
 {
     if(searchOption== SearchSortOptions.MOVIESANDSHOWS)
     {
-        return "Movies and Shows"
+        return "Movies & Shows"
     }
     else
     {

@@ -18,8 +18,7 @@ class MainActivity : ComponentActivity() {
 
             //main content
             //FirebaseTesting()
-            ListPage()
-            //FrontPage()
+            FrontPage()
 
             //menu backgrounds
             TopMobileIconsBackground()

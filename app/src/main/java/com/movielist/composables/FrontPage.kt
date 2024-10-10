@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -82,9 +83,9 @@ fun FrontPage() {
         id = "testid",
         userName = "User Userson",
         email = "test@email.no",
-        friendList = emptyList(),
-        myReviews = emptyList(),
-        favoriteCollection = emptyList(),
+        friendList = mutableListOf(),
+        myReviews = mutableListOf(),
+        favoriteCollection = mutableListOf(),
         profileImageID = R.drawable.profilepicture,
         completedShows = listItemList,
         wantToWatchShows = listItemList,
@@ -118,7 +119,14 @@ fun FrontPage() {
         }
 
         item {
-            PopularShowsAndMovies(showList)
+            ProductionListSidesroller(
+                header = "Popular shows and movies",
+                listOfShows = showList,
+                textModifier = Modifier
+                    .padding(vertical = 10.dp, horizontal = horizontalPadding),
+                contentModifier = Modifier
+                    .padding(top = verticalPadding)
+            )
         }
 
         item {
@@ -206,7 +214,8 @@ fun CurrentlyWatchingCard (
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp))
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(5.dp)))
 
             //Content under image
             Column(modifier = Modifier
@@ -272,41 +281,6 @@ fun CurrentlyWatchingCard (
             }
 
         }
-    }
-}
-
-@Composable
-fun PopularShowsAndMovies (
-    listOfShows: List<Show>
-) {
-    Column (
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(top = verticalPadding)
-    ) {
-        //Header
-        Text(
-            "Popular shows and movies",
-            fontFamily = fontFamily,
-            fontSize = headerSize,
-            fontWeight = weightBold,
-            color = White,
-            modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = horizontalPadding)
-        )
-        LazyRow (
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
-        ){
-            items (listOfShows.size) {i ->
-                ShowImage(
-                    imageID = listOfShows[i].imageID,
-                    imageDescription = listOfShows[i].imageDescription
-                    )
-            }
-        }
-
     }
 }
 

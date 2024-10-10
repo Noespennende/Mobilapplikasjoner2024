@@ -9,6 +9,6 @@ data class Review (
     val reviewer: User,
     val show: Show,
     val reviewBody: String,
-    val postDate: Calendar,
-    var likes: Int
+    val postDate: Calendar = Calendar.getInstance(),
+    var likes: Int = 0
 )
