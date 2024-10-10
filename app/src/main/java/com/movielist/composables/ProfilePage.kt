@@ -78,31 +78,31 @@ fun ProfilePage (){
     for (i in 0 .. 10){
         exampleShows.add(
             ListItem(
-                show = Show(
+                production = TVShow(
+                    imdbID = "123",
                     title = "Silo",
-                    length = 12,
-                    imageID = R.drawable.silo,
-                    imageDescription = "Silo show",
-                    releaseDate = Calendar.getInstance()
-                )
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    episodes = listOf("01", "02", "03", "04", "05", "06",
+                                     "07", "08", "09", "10", "11", "12"),
+                    seasons = listOf("1", "2", "3")
+                ),
+                currentEpisode = i,
+                score = Random.nextInt(0, 10)
+
             )
         )
         exampleReviews.add(
             Review(
                 score = Random.nextInt(0, 10),
                 reviewer = exampleUser,
-                show = exampleShows[i].show,
+                show = exampleShows[i].production,
                 reviewBody = "This is a review of the show",
-            )
-        )
-
-        exampleFavShows.add(
-            Show(
-                title = "Silo",
-                length = 12,
-                imageID = R.drawable.silo,
-                imageDescription = "Silo show",
-                releaseDate = Calendar.getInstance()
             )
         )
     }
@@ -113,11 +113,6 @@ fun ProfilePage (){
     exampleUser.wantToWatchShows.addAll(exampleShows)
     exampleUser.droppedShows.addAll(exampleShows)
 
-
-
-
-
-
     // TEMP CODE DELETE ABOVE
 
     //function variables:
@@ -127,8 +122,6 @@ fun ProfilePage (){
     val loggedInUser by remember {
         mutableStateOf(true)
     }
-
-
 
     //Graphics
     //Main Content
@@ -245,10 +238,6 @@ fun ProfilePage (){
         user = exampleUser,
         loggedInUser = loggedInUser
     )
-
-
-
-
 }
 
 @Composable

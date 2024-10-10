@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
 import com.movielist.data.Show
+import com.movielist.data.SearchSortOptions
 import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent

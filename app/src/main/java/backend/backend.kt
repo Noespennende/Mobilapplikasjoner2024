@@ -9,40 +9,6 @@ import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.firestore
 import com.movielist.data.User
 
-fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
-
-    val db = Firebase.firestore
-
-    //val docRef: DocumentReference = FirebaseFirestore.getInstance().document("users/testuser")
-    /*
-    *  Kan også bruke denne i stedet for db.collection().document().get()
-    *  Så blir det basically docRef.get().addOnSuccessListener
-    * */
-
-    db.collection("users")
-        .document(userID)
-        .get()
-        .addOnSuccessListener { document ->
-            val documentID = document.id
-            val firstName = document.getString("firstName")
-            val lastName = document.getString("lastName")
-
-            Log.d("FirebaseSuccess", "Document ID: $documentID, First Name: $firstName, Last Name: $lastName")
-
-            val userData = mapOf(
-                "documentID" to documentID,
-                "firstName" to firstName,
-                "lastName" to lastName
-            )
-
-            onSuccess(userData)
-
-        }
-        .addOnFailureListener { exception ->
-            Log.w("FirebaseFailure", "Error getting document", exception)
-        }
-
-}
 
 fun createUserWithEmailAndPassword(
     username: String,
@@ -52,6 +18,11 @@ fun createUserWithEmailAndPassword(
     onFailure: (String) -> Unit
 ) {
     val auth = FirebaseAuth.getInstance()
+
+    if (username.contains(" ")) {
+        onFailure("Username cannot contain spaces between characters")
+        return
+    }
 
     isUsernameUnique(username) { isUnique ->
         if (isUnique) {
@@ -119,11 +90,6 @@ fun logInWithEmailAndPassword(email: String, password: String, onSuccess: () -> 
         }
 }
 
-fun getSignedInUser(): FirebaseUser? {
-    val auth = FirebaseAuth.getInstance()
-
-    return auth.currentUser
-}
 
 fun isUsernameUnique(username: String, onResult: (Boolean) -> Unit) {
 
