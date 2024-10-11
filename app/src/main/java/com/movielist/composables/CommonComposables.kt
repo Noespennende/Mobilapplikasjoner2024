@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -33,16 +35,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.NavbarOptions
+import com.movielist.data.Show
+import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple
@@ -52,12 +60,16 @@ import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
+import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -190,266 +202,6 @@ fun TopMobileIconsBackground (
 }
 
 @Composable
-fun BottomNavbarAndMobileIconsBackground (
-    color: Color = Gray
-) {
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ){
-        Box(
-            modifier = Modifier
-                .background(color)
-                .fillMaxWidth()
-                .height(bottomNavBarHeight)
-                .align(Alignment.BottomCenter)
-        )
-    }
-
-}
-
-@Composable
-fun TopNavbarBackground (
-    color: Color = Gray,
-    sizeMultiplier: Float = 1f
-) {
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ){
-        Box(
-            modifier = Modifier
-                .background(color)
-                .fillMaxWidth()
-                .height((topPhoneIconsBackgroundHeight+ topNavBaHeight)*sizeMultiplier)
-                .align(Alignment.TopCenter)
-        )
-    }
-
-}
-
-@Composable
-fun BottomNavBar(
-    activeColor: Color = Purple,
-    inactiveColor: Color = LightGray,
-    sizeMultiplier: Float = 1f
-){
-    val buttonSize: Dp = (35*sizeMultiplier).dp
-
-
-
-    var homeButtonColor by remember {
-        mutableStateOf(activeColor)
-    }
-    var listButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var searchButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var reviewButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var profileButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var activeButton by remember {
-        mutableStateOf(NavbarOptions.HOME)
-    }
-
-
-    //wrapper
-    Box (
-        modifier = Modifier.fillMaxSize()
-    )
-    {
-        //Navbar content
-        Row (
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .align(Alignment.BottomCenter)
-            .padding(
-                bottom = bottomPhoneIconsOffset,
-                start = horizontalPadding-10.dp,
-                end = horizontalPadding-10.dp
-            )
-        ) {
-            //Home button
-            Button(
-                onClick = {
-                    //Home button onClick logic
-                    if(activeButton != NavbarOptions.HOME){
-                        homeButtonColor = activeColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.HOME
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .height(buttonSize)
-                    .wrapContentWidth()
-            )
-            {
-                //Home button icon
-                Image(
-                    painter = painterResource(id = R.drawable.home),
-                    contentDescription = "Home",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(homeButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-
-            }
-
-            //List button
-            Button(
-                onClick = {
-                    //List button onClick logic
-                    if(activeButton != NavbarOptions.LIST){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = activeColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.LIST
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .height(buttonSize)
-                    .wrapContentWidth()
-            )
-            {
-                //List button icon
-                Image(
-                    painter = painterResource(id = R.drawable.list),
-                    contentDescription = "List",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(listButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-
-            }
-
-            //Search button
-            Button(
-                onClick = {
-                    //Search button onClick logic
-                    if(activeButton != NavbarOptions.SEARCH){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = activeColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.SEARCH
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .height(buttonSize)
-                    .wrapContentWidth()
-            )
-            {
-                //Search button icon
-                Image(
-                    painter = painterResource(id = R.drawable.search),
-                    contentDescription = "Search",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(searchButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-
-            }
-
-            //Review button
-            Button(
-                onClick = {
-                    //Review button onClick logic
-                    if(activeButton != NavbarOptions.REVIEW){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = activeColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.REVIEW
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .height(buttonSize)
-                    .wrapContentWidth()
-            )
-            {
-                //Review button icon
-                Image(
-                    painter = painterResource(id = R.drawable.review),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(reviewButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-            }
-
-            //Profile button
-            Button(
-                onClick = {
-                    //Profile button onClick logic
-                    if(activeButton != NavbarOptions.PROFILE){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = activeColor
-                        activeButton = NavbarOptions.PROFILE
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(Color.Transparent),
-                shape = RoundedCornerShape(20.dp),
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .height(buttonSize)
-                    .wrapContentWidth()
-            )
-            {
-                //Profile button icon
-                Image(
-                    painter = painterResource(id = R.drawable.profile),
-                    contentDescription = "Review",
-                    contentScale = ContentScale.Crop,
-                    colorFilter = ColorFilter.tint(profileButtonColor),
-                    modifier = Modifier
-                        .size(buttonSize)
-                        .align(alignment = Alignment.CenterVertically)
-                )
-            }
-        }
-    }
-
-
-}
-
-@Composable
 fun ShowImage (
     imageID: Int  = R.drawable.noimage,
     imageDescription: String = "Image not available",
@@ -462,6 +214,7 @@ fun ShowImage (
         modifier = Modifier
             .width(showImageWith*sizeMultiplier)
             .height(showImageHeight*sizeMultiplier)
+            .clip(RoundedCornerShape(5.dp))
     )
 }
 
@@ -529,7 +282,7 @@ fun ScoreGraphics(
                 painter = painterResource(id = R.drawable.empty_star),
                 contentDescription = "Star",
                 contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(LightGray),
+                colorFilter = ColorFilter.tint(darkWhite),
                 modifier = Modifier
                     .size((11*sizeMultiplier).dp)
             )
@@ -538,7 +291,7 @@ fun ScoreGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 16.sp,
-                color = LightGray
+                color = darkWhite
             )
         }
 
@@ -548,7 +301,7 @@ fun ScoreGraphics(
             fontFamily = fontFamily,
             fontWeight = weightRegular,
             fontSize = 12.sp,
-            color = LightGray
+            color = darkWhite
         )
     }
 }
@@ -625,5 +378,104 @@ fun LikeButton (
             }
 
         }
+    }
+}
+
+
+
+@Composable
+fun ProductionListSidesroller (
+    header: String,
+    listOfShows: List<Show>,
+    contentModifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier
+) {
+    Column (
+        modifier = contentModifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        //Header
+        Text(
+            header,
+            fontFamily = fontFamily,
+            fontSize = headerSize,
+            fontWeight = weightBold,
+            color = White,
+            modifier = textModifier
+        )
+        LazyRow (
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        ){
+            items (listOfShows.size) {i ->
+                ShowImage(
+                    imageID = listOfShows[i].imageID,
+                    imageDescription = listOfShows[i].imageDescription
+                )
+            }
+        }
+
+    }
+}
+
+@Composable
+fun RoundProgressBar (
+    percentage: Float = 1f,
+    fontSize: TextUnit = 28.sp,
+    color: Color = Purple,
+    strikeWith: Dp = 8.dp,
+    radius: Dp = 100.dp,
+    animationDuration: Int = 1000,
+    animationDelay: Int = 0,
+    strokeCap: StrokeCap = StrokeCap.Round
+) {
+    var animationPlayed by remember {
+        mutableStateOf(false)
+    }
+    val currentPercentage = animateFloatAsState(
+        targetValue = if(animationPlayed) {percentage} else {0f},
+        animationSpec = tween(
+            durationMillis = animationDuration,
+            delayMillis = animationDelay
+        )
+    )
+
+    LaunchedEffect( key1 = true) {
+        animationPlayed = true
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(radius)
+    ){
+        Canvas(
+            modifier = Modifier
+                .size(radius)
+        ){
+            drawArc(
+                color = color,
+                startAngle = -90f,
+                sweepAngle = 360* currentPercentage.value,
+                useCenter = false,
+                style = Stroke(strikeWith.toPx(), cap = strokeCap)
+            )
+        }
+    }
+
+}
+
+fun GenerateShowSortOptionName (
+    showSortOptions: ShowSortOptions
+): String
+{
+    if(showSortOptions== ShowSortOptions.MOVIESANDSHOWS)
+    {
+        return "Movies & Shows"
+    }
+    else
+    {
+        return showSortOptions.toString().lowercase().replaceFirstChar { it.uppercase() }
     }
 }

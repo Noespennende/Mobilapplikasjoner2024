@@ -13,20 +13,13 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this) // Initializes Firebase
         enableEdgeToEdge()
         setContent {
-            //Background color
             Background()
 
-            //main content
-            //FirebaseTesting()
-            ListPage()
-            //FrontPage()
+            Navigation()
 
-            //menu backgrounds
             TopMobileIconsBackground()
-            BottomNavbarAndMobileIconsBackground()
 
-            //Bottom nav bar
-            BottomNavBar()
+
 
         }
     }
