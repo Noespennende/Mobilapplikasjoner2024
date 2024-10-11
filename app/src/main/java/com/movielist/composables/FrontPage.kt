@@ -49,6 +49,7 @@ import kotlin.random.Random
 
 @Composable
 fun FrontPage() {
+
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
     for (i in 0..12) {
@@ -186,7 +187,7 @@ fun CurrentlyWatchingScroller (
                     is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                     is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
                     is Episode -> (listOfShows[i].production as Episode).lengthMinutes
-                    else -> 0 // En fallback-verdi hvis det ikke er en TvShow eller Movie
+                    else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                 },
                 episodesWatched = listOfShows[i].currentEpisode
             )
@@ -201,7 +202,7 @@ fun CurrentlyWatchingCard (
     imageId: Int = R.drawable.noimage,
     imageDescription: String = "Image not available",
     title: String,
-    showLenght: Int,
+    showLenght: Int?,
     episodesWatched: Int,
     modifier: Modifier = Modifier
 
@@ -276,7 +277,7 @@ fun CurrentlyWatchingCard (
                 }
 
                 //Progress bar
-                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLenght)
+                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLenght!!)
 
                 //Mark as watched button
                 Button(
@@ -353,7 +354,7 @@ fun YourFriendsJustWatched (
                             is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                             is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
                             is Episode -> (listOfShows[i].production as Episode).lengthMinutes
-                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow eller Movie
+                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                         },
                         score = listOfShows[i].score
                     )
@@ -371,7 +372,7 @@ fun FriendsWatchedInfo(
     profileImageID: Int,
     profileName: String,
     episodesWatched: Int,
-    showLenght: Int,
+    showLenght: Int?,
     score: Int = 0
 ) {
     Row(
@@ -403,7 +404,7 @@ fun FriendsWatchedInfo(
 //Utility Functions
 fun generateButtonText(
     episodesWatched: Int,
-    showLenght: Int)
+    showLenght: Int?)
 : String
 {
     if (episodesWatched+1 == showLenght) {

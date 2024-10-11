@@ -68,6 +68,7 @@ fun ProfilePage (){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
+        id = "IDfromFirebase",
         userName = "Example User",
         email = "Example@Email.com",
         profileImageID = R.drawable.profilepicture
@@ -879,4 +880,3 @@ fun StatisticsList (
         }
     }
 }
-

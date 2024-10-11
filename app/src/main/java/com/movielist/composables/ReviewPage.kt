@@ -71,13 +71,15 @@ fun ReviewPage () {
         reviewsList.add(Review(
             score = Random.nextInt(0, 10),
             reviewer = User(
+                id = "IDfromFirebase",
                 userName = "User $i",
+                email = "user@email.com",
+                friendList = mutableListOf(),
                 profileImageID = R.drawable.profilepicture,
                 completedShows = emptyList,
                 wantToWatchShows = emptyList,
                 droppedShows = emptyList,
                 currentlyWatchingShows = emptyList,
-                email = "user@email.com",
             ),
             likes = Random.nextInt(0, 200),
             show = TVShow(
@@ -574,8 +576,6 @@ fun ReviewSummary (
             ){
                 LikeButton()
             }
-
-
 
         }
     }
