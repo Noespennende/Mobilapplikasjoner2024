@@ -108,6 +108,14 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0") // Kotlin adapter for Moshi
     implementation("com.google.firebase:firebase-firestore-ktx:24.0.0") // Firebase Firestore
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
+
     implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
     implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
 
