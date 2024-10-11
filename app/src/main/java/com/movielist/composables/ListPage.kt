@@ -37,10 +37,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import backend.AuthViewModel
 import backend.QueryViewModel
+import backend.getUser
+import com.movielist.data.Episode
 import com.movielist.data.ListItem
 import com.movielist.data.ListOptions
 import com.movielist.data.Movie
 import com.movielist.data.TVShow
+import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
@@ -167,6 +170,16 @@ fun ListPage (authViewModel : AuthViewModel)
     
     val watchingCollectionListItems = queryViewModel.createProductionListItems(watchingCollection)
 
+
+    val testUser = remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(user) {
+        user?.let { firebaseUser ->
+            getUser(firebaseUser.uid, onSuccess = { fetchedUser ->
+                testUser.value = fetchedUser
+            })
+        }
+    }
     //Graphics
 
     //List
@@ -186,6 +199,73 @@ fun ListPage (authViewModel : AuthViewModel)
                 listItemList = watchingCollectionListItems
             )
         }
+
+        /** ⬇️⬇️⬇️ PROOF OF CONCEPT ⬇️⬇️⬇️
+         * Delete when testing is over 🗑️
+         * SHOWS THAT THE USER-OBJECT CREATED FROM FIREBASE-DATABASE
+         * IS FULFILLED, WITH LISTITEM-OBJECTS IN THE COLLECTIONS **/
+        item {
+            // Liste over felter i brukerobjektet
+            testUser.value?.let { user ->
+                val userFields = listOf(
+                    "ID" to user.id,
+                    "Username" to user.userName,
+                    "Email" to user.email,
+                    "Gender" to user.gender,
+                    "Location" to user.location,
+                    "Website" to user.website,
+                    "Bio" to user.bio
+                )
+
+                // Iterer over felter i testUser
+                Column {
+                    userFields.forEach { (fieldName, fieldValue) ->
+                        Text(text = "$fieldName: $fieldValue")
+                    }
+                }
+
+                // Viser lister som friendList, myReviews, etc.
+                Text(text = "Friends (${user.friendList.size}):")
+                user.friendList.forEach { friend ->
+                    Text(text = friend.userName)
+                }
+
+                Text(text = "Favorite Collection (${user.favoriteCollection.size}):")
+                user.favoriteCollection.forEach { item ->
+                    Text(text = item.production.title)  // Antatt at ListItem har et 'title'-felt
+                }
+
+                Text(text = "Completed Shows (${user.completedShows.size}):")
+                user.completedShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+
+                Text(text = "Currently Watching Shows (${user.currentlyWatchingShows.size}):")
+                user.currentlyWatchingShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+
+                Text(text = "Want to Watch Shows (${user.wantToWatchShows.size}):")
+                user.wantToWatchShows.forEach { show ->
+                    Text(text = show.production.title)
+                    val year = show.production.releaseDate.get(Calendar.YEAR)
+                    val month = show.production.releaseDate.get(Calendar.MONTH) + 1 // 0=januar->11=desember
+                    val day = show.production.releaseDate.get(Calendar.DAY_OF_MONTH)
+                    val formattedDate = "$day.$month.$year"
+                    Text(text = formattedDate)
+                }
+
+                Text(text = "Dropped Shows (${user.droppedShows.size}):")
+                user.droppedShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+            } ?: run {
+                Text(text = "Loading user data...")
+            }
+
+        }
+        /** ⬆️⬆️⬆️ PROOF OF CONCEPT ⬆️⬆️⬆️
+         * Delete when testing is over 🗑️ **/
     }
 
     TopNavBarListPage()
@@ -602,6 +682,9 @@ fun ListPageListItem (
                                             listItem.currentEpisode = watchedEpisodesCount
                                         }
                                     }
+
+                                    is Episode -> TODO()
+
                                 }
                                 // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
                                 //Log.d("PlusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
@@ -645,7 +728,7 @@ fun ListPageListItem (
                             text = when (listItem.production) {
                                 is TVShow -> {
                                     // For TV-serier: vis episodenummer og totalt antall episoder
-                                    "Ep $watchedEpisodesCount of ${listItem.production.episodes.size}"
+                                    "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
                                 }
                                 is Movie -> {
                                     // For filmer: vis lengden på filmen i minutter
@@ -701,7 +784,7 @@ fun ListPageListItem (
                     ProgressBar(
                         currentNumber = watchedEpisodesCount,
                         endNumber = when (listItem.production) {
-                            is TVShow -> listItem.production.episodes.size // Antall episoder for TV-serie
+                            is TVShow -> (listItem.production as TVShow).episodes.size // Antall episoder for TV-serie
                             is Movie -> 1
                             else -> 0
                         },

@@ -100,6 +100,13 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")  // Legg til denne linjen for Moshi Kotlin Adapter
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.8.0")
+
+    implementation("com.squareup.moshi:moshi-adapters:1.8.0")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0") // Kotlin adapter for Moshi
+    implementation("com.google.firebase:firebase-firestore-ktx:24.0.0") // Firebase Firestore
+
     implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
     implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
 

@@ -7,7 +7,7 @@ import java.util.UUID
 val userList = mutableListOf<User>()
 
 data class User (
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,  //= UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
     val friendList: MutableList<User> = mutableListOf(),
@@ -23,7 +23,6 @@ data class User (
     val website: String = "",
     val bio: String = ""
 )
-
 
 fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
     val targetList = when(listType){
