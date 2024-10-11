@@ -1,12 +1,13 @@
 package com.movielist.data
 
+import androidx.browser.browseractions.BrowserActionsIntent.BrowserActionsItemId
 import java.util.Calendar
 import java.util.UUID
 
 val userList = mutableListOf<User>()
 
 data class User (
-    val id: String = UUID.randomUUID().toString(),
+    val id: String,  //= UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
     val friendList: MutableList<User> = mutableListOf(),
@@ -23,6 +24,32 @@ data class User (
     val bio: String = ""
 )
 
+fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
+    val targetList = when(listType){
+        "completed" -> user.completedShows
+        "wantToWatch" -> user.wantToWatchShows
+        "dropped" -> user.droppedShows
+        "currentlyWatching" -> user.currentlyWatchingShows
+        else -> return false
+    }
+
+    val listItem = targetList.find { it.id == itemId }
+
+    return if (listItem != null) {
+        listItem.score = newScore
+        true
+    } else {
+        false
+    }
+}
+
+fun getUniqueShows (user: User): List<ListItem>{
+    val allShows = user.completedShows + user.wantToWatchShows + user.droppedShows + user.currentlyWatchingShows
+
+    val uniqueShows = allShows.distinctBy { it.id }
+
+    return uniqueShows
+}
 
 fun deleteUser(uuid: String){
     val userToDelete = userList.find{it.id == uuid}
@@ -64,28 +91,66 @@ fun removeFriend(user: User, friend: User) : User{
 
     return user.copy(friendList =  updatedFriendList)
 }
-/* Hvilke filmer skal være common, favorites, completed etc
-fun moviesInCommon(user: User, friend: User) : User {
-    val commonMovies: List<ListItem> = emptyList()
-
-    val userMovies =
-}*/
-/* må skrives når vi får inn filmer etc
-fun wantToWatchInCommon(user: User, friend: User) : User{
-    val commonWatchList: List<ListItem> = emptyList()
-
-    val userWatchList = user.wantToWatchShows.toMutableList()
-    val friendWatchList = friend.wantToWatchShows.toMutableList()
 
 
+
+fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
+    val commonMovies: MutableList<ListItem> = mutableListOf()
+
+    val userMovies = user.favoriteCollection
+    val friendMovies = friend.favoriteCollection
+
+    userMovies.forEach { movie ->
+        friendMovies.forEach { friendMovie ->
+            if (movie.id == friendMovie.id) {
+                commonMovies.add(movie)
+            }
+        }
     }
-}*/
+    return commonMovies 
+}
 
-fun writeReview(reviewer: User, score: Int, show:Show, reviewBody: String,
+fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
+    val commonCompleted: MutableList<ListItem> = mutableListOf()
+
+    user.completedShows.filter { userShow ->
+        friend.completedShows.any { friendShow -> userShow.id == friendShow.id }
+    }.forEach({common ->
+        commonCompleted.add(common)
+    })
+    return commonCompleted
+}
+
+fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
+    val commonShows: MutableList<ListItem> = mutableListOf()
+
+    user.wantToWatchShows.filter { userShow ->
+        friend.wantToWatchShows.any { friendShow -> userShow.id == friendShow.id }
+    }.forEach({commonShow ->
+        commonShows.add(commonShow)
+    })
+
+    return commonShows
+}
+
+fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
+    val commonShows: MutableList<ListItem> = mutableListOf()
+
+    user.currentlyWatchingShows.filter { userShow ->
+        friend.currentlyWatchingShows.any { friendShow -> userShow.id == friendShow.id }
+    }.forEach({commonShow ->
+        commonShows.add(commonShow)
+    })
+
+    return commonShows
+}
+
+
+fun writeReview(reviewer: User, score: Int, production:Production, reviewBody: String,
                 postDate: Calendar, likes: Int ) : User{
     val newReview = Review(
         score = score,
-        show = show,
+        show = production,
         reviewBody = reviewBody,
         postDate = postDate,
         likes = likes,

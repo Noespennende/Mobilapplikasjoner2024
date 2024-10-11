@@ -22,6 +22,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +34,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.movielist.R
+import androidx.lifecycle.viewmodel.compose.viewModel
+import backend.AuthViewModel
+import backend.QueryViewModel
+import backend.getUser
+import com.movielist.data.Episode
 import com.movielist.data.ListItem
 import com.movielist.data.ListOptions
-import com.movielist.data.Review
-import com.movielist.data.Show
+import com.movielist.data.Movie
+import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
@@ -56,29 +62,51 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
-import kotlin.random.Random
 
 
 @Composable
 
-fun ListPage ()
+fun ListPage (authViewModel : AuthViewModel)
 {
     //Temporary code: DELETE THIS CODE
+    /*
     val listItems = mutableListOf<ListItem>()
-    for (i in 0..12) {
+    for (i in 1..12) {
         listItems.add(
             ListItem(
-                show = Show(
+                production = Movie(
+                    imdbID = "123",
                     title = "Silo",
-                    length = 12,
-                    imageID = R.drawable.silo,
-                    imageDescription = "Silo TV Show",
-                    releaseDate = Calendar.getInstance()
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    lengthMinutes = 127,
+                    trailerUrl = "trailerurl.com"
                 ),
-                currentEpisode = i,
+                currentEpisode = 0,
                 score = Random.nextInt(0, 10)
 
             )
+
+            /*
+            * production = TVShow(
+                    imdbID = "123",
+                    title = "Silo",
+                    description = "TvShow Silo description here",
+                    genre = "Action",
+                    releaseDate = Calendar.getInstance(),
+                    actors = emptyList(),
+                    rating = 4,
+                    reviews = ArrayList(),
+                    posterUrl = R.drawable.silo,
+                    episodes = listOf("01", "02", "03", "04", "05", "06",
+                                    "07", "08", "09", "10", "11", "12"),
+                    seasons = listOf("1", "2", "3")
+                ),*/
         )
     }
 
@@ -100,7 +128,7 @@ fun ListPage ()
             Review(
                 score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
                 reviewer = user,
-                show = listItems[1].show,
+                show = listItems[1].production,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
                         "to recommend..",
@@ -110,12 +138,48 @@ fun ListPage ()
         )
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
+    */
 
+    /*
+        Bruker QueryViewModel (bør nok renames), for backend-logikken.
+        Da er det ikke komponentens jobb å utføre store logikkblokker,
+        men ViewModel, som dermed kan holde på informasjonen mellom sider osv.
+        QueryViewModel gjør henter f.eks watchedCollection etter forespørsel fra en side,
+        (f.eks ListPage). Hvis bruker så bytter til FrontPage, og watchedCollection skal vises der også,
+        trenger ikke QueryViewModel
+    */
 
-    val loggedInUser by remember {
-        mutableStateOf(true)
+    val loggedInUser by remember { mutableStateOf(true) }
+    authViewModel.checkUserStatus()
+    val user by authViewModel.currentUser.collectAsState()
+
+    val queryViewModel: QueryViewModel = viewModel()
+
+    val watchingCollection by queryViewModel.watchingCollection.collectAsState()
+
+    // Disse to kan brukes for ting - mest relevant er kanskje isLoading
+    val isLoading by queryViewModel.isLoading.collectAsState()
+    val hasError by queryViewModel.hasError.collectAsState()
+
+    // Hvis watchingCollection er tom, gjør et kall for å hente data fra databasen
+    if (watchingCollection.isEmpty()) {
+        LaunchedEffect(Unit) {
+            queryViewModel.fetchUserWatchingCollection(user!!.uid)
+        }
     }
+    
+    val watchingCollectionListItems = queryViewModel.createProductionListItems(watchingCollection)
 
+
+    val testUser = remember { mutableStateOf<User?>(null) }
+
+    LaunchedEffect(user) {
+        user?.let { firebaseUser ->
+            getUser(firebaseUser.uid, onSuccess = { fetchedUser ->
+                testUser.value = fetchedUser
+            })
+        }
+    }
     //Graphics
 
     //List
@@ -132,9 +196,76 @@ fun ListPage ()
         item {
             ListPageList(
                 loggedInUsersList = loggedInUser,
-                listItemList = listItems
+                listItemList = watchingCollectionListItems
             )
         }
+
+        /** ⬇️⬇️⬇️ PROOF OF CONCEPT ⬇️⬇️⬇️
+         * Delete when testing is over 🗑️
+         * SHOWS THAT THE USER-OBJECT CREATED FROM FIREBASE-DATABASE
+         * IS FULFILLED, WITH LISTITEM-OBJECTS IN THE COLLECTIONS **/
+        item {
+            // Liste over felter i brukerobjektet
+            testUser.value?.let { user ->
+                val userFields = listOf(
+                    "ID" to user.id,
+                    "Username" to user.userName,
+                    "Email" to user.email,
+                    "Gender" to user.gender,
+                    "Location" to user.location,
+                    "Website" to user.website,
+                    "Bio" to user.bio
+                )
+
+                // Iterer over felter i testUser
+                Column {
+                    userFields.forEach { (fieldName, fieldValue) ->
+                        Text(text = "$fieldName: $fieldValue")
+                    }
+                }
+
+                // Viser lister som friendList, myReviews, etc.
+                Text(text = "Friends (${user.friendList.size}):")
+                user.friendList.forEach { friend ->
+                    Text(text = friend.userName)
+                }
+
+                Text(text = "Favorite Collection (${user.favoriteCollection.size}):")
+                user.favoriteCollection.forEach { item ->
+                    Text(text = item.production.title)  // Antatt at ListItem har et 'title'-felt
+                }
+
+                Text(text = "Completed Shows (${user.completedShows.size}):")
+                user.completedShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+
+                Text(text = "Currently Watching Shows (${user.currentlyWatchingShows.size}):")
+                user.currentlyWatchingShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+
+                Text(text = "Want to Watch Shows (${user.wantToWatchShows.size}):")
+                user.wantToWatchShows.forEach { show ->
+                    Text(text = show.production.title)
+                    val year = show.production.releaseDate.get(Calendar.YEAR)
+                    val month = show.production.releaseDate.get(Calendar.MONTH) + 1 // 0=januar->11=desember
+                    val day = show.production.releaseDate.get(Calendar.DAY_OF_MONTH)
+                    val formattedDate = "$day.$month.$year"
+                    Text(text = formattedDate)
+                }
+
+                Text(text = "Dropped Shows (${user.droppedShows.size}):")
+                user.droppedShows.forEach { show ->
+                    Text(text = show.production.title)
+                }
+            } ?: run {
+                Text(text = "Loading user data...")
+            }
+
+        }
+        /** ⬆️⬆️⬆️ PROOF OF CONCEPT ⬆️⬆️⬆️
+         * Delete when testing is over 🗑️ **/
     }
 
     TopNavBarListPage()
@@ -463,8 +594,8 @@ fun ListPageListItem (
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             ShowImage(
-                imageID = listItem.show.imageID,
-                imageDescription = listItem.show.imageDescription,
+                imageID = listItem.production.posterUrl,
+                imageDescription = listItem.production.title + " Poster",
             )
             //List Item information
             Column(
@@ -476,7 +607,7 @@ fun ListPageListItem (
                 ){
                     //Title
                     Text(
-                        text = listItem.show.title,
+                        text = listItem.production.title,
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
@@ -484,7 +615,7 @@ fun ListPageListItem (
                     )
                     //ReleaseYear
                     Text(
-                        text = "(${listItem.show.releaseDate.get(Calendar.YEAR)})",
+                        text = "(${listItem.production.releaseDate.get(Calendar.YEAR)})",
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
@@ -502,9 +633,13 @@ fun ListPageListItem (
                         Button(
                             onClick = {
                                 //Button onclick function
-                                if (listItem.currentEpisode > 0){
-                                    listItem.currentEpisode--
-                                    watchedEpisodesCount = listItem.currentEpisode
+                                if (watchedEpisodesCount > 0){
+                                    watchedEpisodesCount--
+                                    listItem.currentEpisode = watchedEpisodesCount
+
+                                    // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                    //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                    //Log.d("MinusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                                 }
                             },
                             shape = RoundedCornerShape(
@@ -527,14 +662,33 @@ fun ListPageListItem (
                             )
                         }
 
-                        // Minus button
+                        // Plus button
                         Button(
                             onClick = {
-                                //Button onclick function
-                                if (listItem.currentEpisode < listItem.show.length){
-                                    listItem.currentEpisode++
-                                    watchedEpisodesCount = listItem.currentEpisode
+
+                                when (val production = listItem.production) {
+                                    is TVShow -> {
+                                        // For TV-serier: Sjekk om det er flere episoder igjen å se
+                                        if (watchedEpisodesCount < production.episodes.size) {
+                                            watchedEpisodesCount++
+                                            listItem.currentEpisode = watchedEpisodesCount
+
+                                        }
+                                    }
+                                    is Movie -> {
+                                        // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
+                                        if (watchedEpisodesCount == 0) {
+                                            watchedEpisodesCount = 1
+                                            listItem.currentEpisode = watchedEpisodesCount
+                                        }
+                                    }
+
+                                    is Episode -> TODO()
+
                                 }
+                                // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                //Log.d("PlusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                //Log.d("PlusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
                             },
                             shape = RoundedCornerShape(
                                 topStart = 0.dp,
@@ -571,7 +725,18 @@ fun ListPageListItem (
                     ) {
                         //Episode text
                         Text(
-                            text = "Ep ${watchedEpisodesCount} of ${listItem.show.length}",
+                            text = when (listItem.production) {
+                                is TVShow -> {
+                                    // For TV-serier: vis episodenummer og totalt antall episoder
+                                    "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
+                                }
+                                is Movie -> {
+                                    // For filmer: vis lengden på filmen i minutter
+                                    "Ep $watchedEpisodesCount of 1"
+                                }
+                                else -> {
+                                    "Ep $watchedEpisodesCount of 1"
+                                }},
                             fontSize = headerSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
@@ -618,7 +783,11 @@ fun ListPageListItem (
                     }
                     ProgressBar(
                         currentNumber = watchedEpisodesCount,
-                        endNumber = listItem.show.length,
+                        endNumber = when (listItem.production) {
+                            is TVShow -> (listItem.production as TVShow).episodes.size // Antall episoder for TV-serie
+                            is Movie -> 1
+                            else -> 0
+                        },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
                         backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
                     )
