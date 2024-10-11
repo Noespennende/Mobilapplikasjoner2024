@@ -100,6 +100,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
+    implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.okhttp)
+    
+
     implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
     implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
 
