@@ -43,7 +43,7 @@ fun SearchPage () {
                 imdbID = "123",
                 title = "Silo",
                 description = "TvShow Silo description here",
-                genre = "Action",
+                genre = listOf("Action"),
                 releaseDate = Calendar.getInstance(),
                 actors = emptyList(),
                 rating = 4,
