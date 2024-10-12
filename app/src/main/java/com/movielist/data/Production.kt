@@ -7,7 +7,7 @@ sealed class Production {
     abstract val imdbID: String
     abstract val title: String
     abstract val description: String
-    abstract val genre: String
+    abstract val genre: List<String>
     abstract val releaseDate: Calendar
     abstract val actors: List<String>  // Listen skal ikke endres i appen - data kommer fra API
     abstract val rating: Int?
