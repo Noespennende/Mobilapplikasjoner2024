@@ -28,7 +28,7 @@ fun Navigation (){
         composable(
             route = Screen.ListScreen.withArguments()
         ) {
-            ListPage()
+            //ListPage()
         }
         composable(
             route = Screen.SearchScreen.withArguments()

@@ -48,7 +48,7 @@ class QueryViewModel : ViewModel() {
                     imdbID = prod,  // Bruker IMDB-IDs fra collection
                     title = "Silo",  // Dynamisk data kan hentes basert på prod (eventuelt API kall)
                     description = "TvShow Silo description here",
-                    genre = "Action",
+                    genre = listOf("Action"),
                     releaseDate = Calendar.getInstance(),
                     actors = emptyList(),
                     rating = 4,
