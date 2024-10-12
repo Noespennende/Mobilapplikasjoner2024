@@ -8,5 +8,7 @@ data class ListItem (
     var currentEpisode: Int = 0,
     var score: Int = 0,
     val production: Production = Movie(),
-    var lastUpdated: Calendar = Calendar.getInstance()
-)
+    var lastUpdated: Calendar = Calendar.getInstance(),
+) {
+
+}

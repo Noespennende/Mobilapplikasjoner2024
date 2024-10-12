@@ -1,10 +1,6 @@
 package com.movielist.data
 
-import androidx.browser.browseractions.BrowserActionsIntent.BrowserActionsItemId
-import androidx.compose.ui.text.toLowerCase
 import java.util.Calendar
-import java.util.UUID
-import kotlin.math.round
 
 val userList = mutableListOf<User>()
 
@@ -29,7 +25,7 @@ data class User (
 fun movieGenrePercentage(user: User): Map<String, Double> {
     val allFilms = getAllMovies(user)
     val genreCounter = mutableMapOf<String, Int>()
-    var totalGenreCount = 0 // Total count of all genres across movies
+    var totalGenreCount = 0
 
     allFilms.forEach { listItem ->
         val movie = listItem.production as? Movie
@@ -67,15 +63,15 @@ fun showGenrePercentage(user: User): Map<String, Double> {
     var totalGenreCount = 0
 
     allShows.forEach { listItem ->
-        val show = listItem.production as? Movie // Assuming `Production` could be other types of shows too
+        val show = listItem.production as? Movie
         show?.let {
-            // Count each genre in the show
             it.genre.forEach { genre ->
                 genreCounter[genre] = genreCounter.getOrDefault(genre, 0) + 1
-                totalGenreCount++ // Increment the total genre count for each genre in the show
+                totalGenreCount++
             }
         }
     }
+
 
     val sortedGenres = genreCounter.entries.sortedByDescending { it.value }.take(4)
 
@@ -83,17 +79,19 @@ fun showGenrePercentage(user: User): Map<String, Double> {
     val genrePercentage = mutableMapOf<String, Double>()
 
     sortedGenres.forEach { (genre, count) ->
-        genrePercentage[genre] = (count.toDouble() / totalGenreCount) * 100
+        genrePercentage[genre] = (count.toDouble() / totalGenreCount) * 100// Round down to two decimal places
     }
+
 
     val remainingGenresCount = genreCounter.size - sortedGenres.size
 
     if (remainingGenresCount > 0) {
-        genrePercentage["any"] = (remainingGenresCount.toDouble() / totalGenreCount) * 100
+        genrePercentage["any"] = (remainingGenresCount.toDouble() / totalGenreCount) * 100 // Round down to two decimal places
     }
 
     return genrePercentage
 }
+
 
 fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
     val targetList = when(listType){

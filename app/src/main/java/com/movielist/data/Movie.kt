@@ -6,7 +6,7 @@ data class Movie(
     override val imdbID: String = "",
     override val title: String = "",
     override val description: String = "",
-    override val genre: List<String> = emptyList(), //endret fra String
+    override val genre: List<String> = emptyList(),
     override val releaseDate: Calendar = Calendar.getInstance(),
     override val actors: List<String> = emptyList(), // Listen skal ikke endres i appen - data kommer fra API
     override val rating: Int? = null,
