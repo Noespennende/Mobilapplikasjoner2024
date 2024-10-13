@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import backend.AuthViewModel
 import com.movielist.composables.BottomNavBar
 import com.movielist.composables.BottomNavbarAndMobileIconsBackground
 import com.movielist.composables.FrontPage
@@ -13,8 +14,9 @@ import com.movielist.composables.ReviewPage
 import com.movielist.composables.SearchPage
 
 
+
 @Composable
-fun Navigation (){
+fun Navigation (authViewModel: AuthViewModel){
     //Nav controller
     val navController = rememberNavController()
     NavHost(
@@ -28,7 +30,7 @@ fun Navigation (){
         composable(
             route = Screen.ListScreen.withArguments()
         ) {
-            //ListPage()
+            ListPage(authViewModel)
         }
         composable(
             route = Screen.SearchScreen.withArguments()

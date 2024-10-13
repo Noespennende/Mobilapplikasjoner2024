@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
     /*
     Må ha felles instans av authViewModel når vi har navigasjon klar
     Så sendes authViewModel inn i hvert komponent.
-    */ 
+    */
     private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Background()
 
-            Navigation()
+            Navigation(authViewModel)
             //FirebaseTesting()
 
             TopMobileIconsBackground()

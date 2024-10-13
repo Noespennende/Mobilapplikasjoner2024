@@ -1,5 +1,6 @@
 package backend
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.movielist.R
 import com.movielist.data.ListItem
@@ -62,6 +63,7 @@ class QueryViewModel : ViewModel() {
             )
             productionListItemList.add(listItem)
         }
+        Log.d("TEST", productionListItemList.size.toString())
         return productionListItemList
     }
 }
