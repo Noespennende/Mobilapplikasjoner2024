@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -36,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import backend.AuthViewModel
-import backend.QueryViewModel
+import backend.UserViewModel
 import backend.getUser
 import com.movielist.data.Episode
 import com.movielist.data.ListItem
@@ -65,121 +66,33 @@ import java.util.Calendar
 
 
 @Composable
-
-fun ListPage (authViewModel : AuthViewModel)
+fun ListPage (userViewModel: UserViewModel)
 {
-    //Temporary code: DELETE THIS CODE
-    /*
-    val listItems = mutableListOf<ListItem>()
-    for (i in 1..12) {
-        listItems.add(
-            ListItem(
-                production = Movie(
-                    imdbID = "123",
-                    title = "Silo",
-                    description = "TvShow Silo description here",
-                    genre = "Action",
-                    releaseDate = Calendar.getInstance(),
-                    actors = emptyList(),
-                    rating = 4,
-                    reviews = ArrayList(),
-                    posterUrl = R.drawable.silo,
-                    lengthMinutes = 127,
-                    trailerUrl = "trailerurl.com"
-                ),
-                currentEpisode = 0,
-                score = Random.nextInt(0, 10)
+    val loggedInUser = userViewModel.loggedInUser.collectAsState().value
 
-            )
+    val isLoggedInUser by remember { mutableStateOf(true) }
 
-            /*
-            * production = TVShow(
-                    imdbID = "123",
-                    title = "Silo",
-                    description = "TvShow Silo description here",
-                    genre = "Action",
-                    releaseDate = Calendar.getInstance(),
-                    actors = emptyList(),
-                    rating = 4,
-                    reviews = ArrayList(),
-                    posterUrl = R.drawable.silo,
-                    episodes = listOf("01", "02", "03", "04", "05", "06",
-                                    "07", "08", "09", "10", "11", "12"),
-                    seasons = listOf("1", "2", "3")
-                ),*/
-        )
-    }
+    // Innlogget bruker sin favorite-kolleksjon
+    val favoriteCollection: List<ListItem> =
+        loggedInUser?.favoriteCollection?.takeIf { it.isNotEmpty() } ?: emptyList()
 
-    val reviewList = mutableListOf<Review>()
-    val user = User(
-        userName = "User Userson",
-        email = "test@email.no",
-        friendList = mutableListOf(),
-        myReviews = mutableListOf(),
-        favoriteCollection = mutableListOf(),
-        profileImageID = R.drawable.profilepicture,
-        completedShows = listItems,
-        wantToWatchShows = listItems,
-        droppedShows = listItems,
-        currentlyWatchingShows = listItems
-    )
-    for (i in 0..6) {
-        reviewList.add(
-            Review(
-                score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
-                reviewer = user,
-                show = listItems[1].production,
-                reviewBody = "It’s reasonably well-made, and visually compelling," +
-                        "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                        "to recommend..",
-                postDate = Calendar.getInstance(),
-                likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
-            )
-        )
-    }
-    //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
-    */
+    // Innlogget bruker sin currentlyWatching-kolleksjon
+    val completedCollection: List<ListItem> =
+        loggedInUser?.completedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
 
-    /*
-        Bruker QueryViewModel (bør nok renames), for backend-logikken.
-        Da er det ikke komponentens jobb å utføre store logikkblokker,
-        men ViewModel, som dermed kan holde på informasjonen mellom sider osv.
-        QueryViewModel gjør henter f.eks watchedCollection etter forespørsel fra en side,
-        (f.eks ListPage). Hvis bruker så bytter til FrontPage, og watchedCollection skal vises der også,
-        trenger ikke QueryViewModel
-    */
+    // Innlogget bruker sin wantToWatch-kolleksjon
+    val wantToWatchCollection: List<ListItem> =
+        loggedInUser?.wantToWatchShows?.takeIf { it.isNotEmpty() } ?: emptyList()
 
-    val loggedInUser by remember { mutableStateOf(true) }
-    authViewModel.checkUserStatus()
-    val user by authViewModel.currentUser.collectAsState()
+    // Innlogget bruker sin favorite-kolleksjon
+    val droppedCollection: List<ListItem> =
+        loggedInUser?.droppedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
 
-    val queryViewModel: QueryViewModel = viewModel()
-
-    val watchingCollection by queryViewModel.watchingCollection.collectAsState()
-
-    // Disse to kan brukes for ting - mest relevant er kanskje isLoading
-    val isLoading by queryViewModel.isLoading.collectAsState()
-    val hasError by queryViewModel.hasError.collectAsState()
-
-    // Hvis watchingCollection er tom, gjør et kall for å hente data fra databasen
-    if (watchingCollection.isEmpty()) {
-        LaunchedEffect(Unit) {
-            queryViewModel.fetchUserWatchingCollection(user!!.uid)
-        }
-    }
-    
-    val watchingCollectionListItems = queryViewModel.createProductionListItems(watchingCollection)
+    // Innlogget bruker sin currentlyWatching-kolleksjon
+    val currentlyWatchingCollection: List<ListItem> =
+        loggedInUser?.currentlyWatchingShows?.takeIf { it.isNotEmpty() } ?: emptyList()
 
 
-    val testUser = remember { mutableStateOf<User?>(null) }
-
-    LaunchedEffect(user) {
-        user?.let { firebaseUser ->
-            getUser(firebaseUser.uid, onSuccess = { fetchedUser ->
-                testUser.value = fetchedUser
-            })
-        }
-    }
     //Graphics
 
     //List
@@ -195,77 +108,10 @@ fun ListPage (authViewModel : AuthViewModel)
     ) {
         item {
             ListPageList(
-                loggedInUsersList = loggedInUser,
-                listItemList = watchingCollectionListItems
+                loggedInUsersList = isLoggedInUser,
+                listItemList = currentlyWatchingCollection.toList()
             )
         }
-
-        /** ⬇️⬇️⬇️ PROOF OF CONCEPT ⬇️⬇️⬇️
-         * Delete when testing is over 🗑️
-         * SHOWS THAT THE USER-OBJECT CREATED FROM FIREBASE-DATABASE
-         * IS FULFILLED, WITH LISTITEM-OBJECTS IN THE COLLECTIONS **/
-        item {
-            // Liste over felter i brukerobjektet
-            testUser.value?.let { user ->
-                val userFields = listOf(
-                    "ID" to user.id,
-                    "Username" to user.userName,
-                    "Email" to user.email,
-                    "Gender" to user.gender,
-                    "Location" to user.location,
-                    "Website" to user.website,
-                    "Bio" to user.bio
-                )
-
-                // Iterer over felter i testUser
-                Column {
-                    userFields.forEach { (fieldName, fieldValue) ->
-                        Text(text = "$fieldName: $fieldValue")
-                    }
-                }
-
-                // Viser lister som friendList, myReviews, etc.
-                Text(text = "Friends (${user.friendList.size}):")
-                user.friendList.forEach { friend ->
-                    Text(text = friend.userName)
-                }
-
-                Text(text = "Favorite Collection (${user.favoriteCollection.size}):")
-                user.favoriteCollection.forEach { item ->
-                    Text(text = item.production.title)  // Antatt at ListItem har et 'title'-felt
-                }
-
-                Text(text = "Completed Shows (${user.completedShows.size}):")
-                user.completedShows.forEach { show ->
-                    Text(text = show.production.title)
-                }
-
-                Text(text = "Currently Watching Shows (${user.currentlyWatchingShows.size}):")
-                user.currentlyWatchingShows.forEach { show ->
-                    Text(text = show.production.title)
-                }
-
-                Text(text = "Want to Watch Shows (${user.wantToWatchShows.size}):")
-                user.wantToWatchShows.forEach { show ->
-                    Text(text = show.production.title)
-                    val year = show.production.releaseDate.get(Calendar.YEAR)
-                    val month = show.production.releaseDate.get(Calendar.MONTH) + 1 // 0=januar->11=desember
-                    val day = show.production.releaseDate.get(Calendar.DAY_OF_MONTH)
-                    val formattedDate = "$day.$month.$year"
-                    Text(text = formattedDate)
-                }
-
-                Text(text = "Dropped Shows (${user.droppedShows.size}):")
-                user.droppedShows.forEach { show ->
-                    Text(text = show.production.title)
-                }
-            } ?: run {
-                Text(text = "Loading user data...")
-            }
-
-        }
-        /** ⬆️⬆️⬆️ PROOF OF CONCEPT ⬆️⬆️⬆️
-         * Delete when testing is over 🗑️ **/
     }
 
     TopNavBarListPage()

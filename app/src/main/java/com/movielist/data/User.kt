@@ -210,7 +210,7 @@ fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
             }
         }
     }
-    return commonMovies 
+    return commonMovies
 }
 
 fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
