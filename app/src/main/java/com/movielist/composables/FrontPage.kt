@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,11 +41,13 @@ import com.movielist.data.ListItem
 import com.movielist.data.Movie
 import com.movielist.data.Production
 import com.movielist.data.Review
+import com.movielist.data.Show
 import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
+import java.io.Console
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -138,9 +141,21 @@ fun FrontPage() {
         }
 
         item {
+            // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
+            // Funksjonen returnerer en liste med Show objekter.
+
+            // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
+            // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
+            var allShowsList = mutableListOf<Production>()
+
+            // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
+            var top10Shows = allShowsList
+                .sortedByDescending { it.rating }
+                .take(10) // Henter kun de første 10
+
             ProductionListSidesroller(
                 header = "Popular shows and movies",
-                listOfShows = showList,
+                listOfShows = top10Shows,
                 textModifier = Modifier
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),
                 contentModifier = Modifier
@@ -153,9 +168,31 @@ fun FrontPage() {
         }
 
         item {
+            // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
+            // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
+
+            var reviewsList  = mutableListOf<Review>()
+            var reviewsListPastWeek = mutableListOf<Review>()
+            val currentDate = Calendar.getInstance()
+            val pastWeek = currentDate.apply {
+                add(Calendar.DATE, -7)
+            }
+
+            for (review in reviewsList) {
+                if (review.postDate >= pastWeek) {
+                    reviewsListPastWeek.add(review)
+                } else {
+                    print("Review not posted within the past 7 days")
+                }
+            }
+
+            var top10ReviewsListPastWeek = reviewsListPastWeek
+                .sortedByDescending { it.score }
+                .take(10)
+
             //Top reviews this week:
             ReviewsSection(
-                reviewList = reviewList,
+                reviewList = top10ReviewsListPastWeek,
                 header = "Top reviews this week"
             )
         }
@@ -174,8 +211,27 @@ fun FrontPage() {
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>
 ) {
+// Funksjon som returnerer alle filmer og serier som ligger i den LOGGED INN brukeren sin Currently Watching liste.
+// Funksjonen returnerer en liste med ListItem objekter og er sortert i henhold til hvilke som var sist oppdatert
 
-    LazyRow (
+    var allCurrentlyWatchingShows = mutableListOf<ListItem>()
+
+    val testUser = remember {mutableStateOf<User?>(null)} // Usikker på om det er riktig bruker som skal hentes
+
+    // Sjekker om bruker har en currentlyWatchingShows liste
+    testUser.value?.currentlyWatchingShows?.let { shows ->
+        allCurrentlyWatchingShows.addAll(shows)
+    }
+
+    // Holder på oversikten over nyligste klikk
+    var clickTimes by remember {mutableStateOf(mutableMapOf<String, Long>())}
+
+    fun mostRecentButtonClick(show: ListItem) {
+        clickTimes[show.id] = System.currentTimeMillis() // Registerer når currentEpisode på watchedEpisodesCount oppdateres (knapp trykkes)
+
+        allCurrentlyWatchingShows = listOfShows.sortedByDescending {clickTimes[it.id]}.toMutableList()
+    }
+        LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
     ) {
@@ -190,7 +246,9 @@ fun CurrentlyWatchingScroller (
                     is Episode -> (listOfShows[i].production as Episode).lengthMinutes
                     else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                 },
-                episodesWatched = listOfShows[i].currentEpisode
+                episodesWatched = listOfShows[i].currentEpisode,
+                onMarkAsWatched = {mostRecentButtonClick(listOfShows[i])} // Registrerer når "Mark as Watched" er trykket
+
             )
         }
 
@@ -205,8 +263,8 @@ fun CurrentlyWatchingCard (
     title: String,
     showLenght: Int?,
     episodesWatched: Int,
-    modifier: Modifier = Modifier
-
+    modifier: Modifier = Modifier,
+    onMarkAsWatched: () -> Unit
     ) {
 
     var watchedEpisodesCount: Int by remember {
@@ -289,6 +347,9 @@ fun CurrentlyWatchingCard (
                         }
 
                         buttonText = generateButtonText(watchedEpisodesCount, showLenght)
+
+                        onMarkAsWatched()
+
                     },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Purple),
@@ -311,10 +372,39 @@ fun CurrentlyWatchingCard (
     }
 }
 
+
 @Composable
 fun YourFriendsJustWatched (
     listOfShows: List<ListItem>
 ) {
+    // Funksjon som retunerer de 10 siste showene som har blitt oppdatert blant vennene til brukeren som er logget inn.
+    // Funksjonen returnerer en liste med ListItem objekter der hvert list item er hentet fra listen til vennen som list itemet er relevant for.
+
+    // Funker nok ikke 100% når det gjelder nyligste klikk, må tilbake å teste ordentlig
+    var friendsList = mutableListOf<User>()
+
+    var allFriendsCurrentlyWatchingShows = mutableListOf<Pair<ListItem, User>>()
+
+    // Holder på oversikten over nyligste klikk, teste om klikk registreres ordentlig senere
+    var clickTimes by remember { mutableStateOf(mutableMapOf<String, Long>()) }
+
+    // Henter alle shows fra currentlyWatchingShows listen til venner
+    friendsList.forEach { friend ->
+        friend.currentlyWatchingShows?.let { shows ->
+            shows.forEach { show ->
+                allFriendsCurrentlyWatchingShows.add(show to friend)
+            }
+        }
+    }
+
+    // Sorterer showene venner ser på ut ifra nyligste klikk, nyligste klikk øverst
+    val sortedShows = allFriendsCurrentlyWatchingShows
+        .sortedByDescending { (show) ->
+            clickTimes[show.id]
+        }
+        .take(10)
+
+
     //Container collumn
     Column (
         modifier = Modifier
@@ -337,27 +427,27 @@ fun YourFriendsJustWatched (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
         ){
-            items (listOfShows.size) {i ->
+            items (sortedShows.size) {i ->
                 //Info for each show
                 Column (
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     ShowImage(
-                        imageID = listOfShows[i].production.posterUrl,
-                        imageDescription = listOfShows[i].production.title + " Poster"
+                        imageID = sortedShows[i].first.production.posterUrl,
+                        imageDescription = sortedShows[i].first.production.title + " Poster"
                     )
                     //Friend Info
                     FriendsWatchedInfo(
                         profileImageID = R.drawable.profilepicture,
                         profileName = "User Userson", //TEMP DELETE THIS
                         episodesWatched = i,
-                        showLenght = when (listOfShows[i].production) {
-                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
-                            is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
-                            is Episode -> (listOfShows[i].production as Episode).lengthMinutes
+                        showLenght = when (sortedShows[i].first.production) {
+                            is TVShow -> (sortedShows[i].first.production as TVShow).episodes.size // Returnerer antall episoder som Int
+                            is Movie -> (sortedShows[i].first.production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
+                            is Episode -> (sortedShows[i].first.production as Episode).lengthMinutes
                             else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                         },
-                        score = listOfShows[i].score
+                        score = sortedShows[i].first.score
                     )
                 }
 
@@ -374,7 +464,8 @@ fun FriendsWatchedInfo(
     profileName: String,
     episodesWatched: Int,
     showLenght: Int?,
-    score: Int = 0
+    score: Int = 0,
+
 ) {
     Row(
         horizontalArrangement =  Arrangement.spacedBy(3.dp)
