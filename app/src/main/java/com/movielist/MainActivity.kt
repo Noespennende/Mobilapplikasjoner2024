@@ -36,14 +36,15 @@ class MainActivity : ComponentActivity() {
             val firebaseUser by authViewModel.currentUser.collectAsState()
             authViewModel.checkUserStatus()
 
-            LaunchedEffect(firebaseUser) {
-                firebaseUser?.let { userViewModel.fetchLoggedInUser(it.uid) }
+            val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
+
+            LaunchedEffect(testUser) {
+                userViewModel.fetchLoggedInUser(testUser)
             }
 
             Background()
 
             Navigation(userViewModel)
-            //FirebaseTesting()
 
             TopMobileIconsBackground()
 

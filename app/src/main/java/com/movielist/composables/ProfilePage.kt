@@ -76,7 +76,7 @@ fun ProfilePage (){
 
     val exampleReviews: MutableList<Review> = mutableListOf()
     val exampleShows: MutableList<ListItem> = mutableListOf()
-    val exampleFavShows: MutableList<Production> = mutableListOf()
+    val exampleFavShows: MutableList<ListItem> = mutableListOf()
 
     for (i in 0 .. 10){
         exampleShows.add(
@@ -116,6 +116,10 @@ fun ProfilePage (){
     exampleUser.wantToWatchShows.addAll(exampleShows)
     exampleUser.droppedShows.addAll(exampleShows)
 
+    exampleFavShows.addAll(exampleShows)
+
+
+
     // TEMP CODE DELETE ABOVE
 
     //function variables:
@@ -153,9 +157,9 @@ fun ProfilePage (){
 
         //Favorite Series
         item {
-            ProductionListSidesroller(
+            ListItemListSidesroller(
                 header = "Favorite series",
-                listOfShows = exampleFavShows.toList(), //TEMP CODE
+                listOfShows = exampleShows, //TEMP CODE
                 textModifier = Modifier
                     .padding(
                         start = verticalPadding,
@@ -180,9 +184,9 @@ fun ProfilePage (){
 
         //Favorite Movies
         item {
-            ProductionListSidesroller(
+            ListItemListSidesroller(
                 header = "Favorite movies",
-                listOfShows = exampleFavShows.toList(), //TEMP CODE
+                listOfShows = exampleFavShows, //TEMP CODE
                 textModifier = Modifier
                     .padding(
                         start = horizontalPadding,

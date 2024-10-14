@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
+import com.movielist.data.ListItem
 import com.movielist.data.NavbarOptions
 import com.movielist.data.Production
 import com.movielist.data.Show
@@ -422,6 +423,43 @@ fun ProductionListSidesroller (
 
     }
 }
+
+@Composable
+fun ListItemListSidesroller (
+    header: String,
+    listOfShows: List<ListItem>,
+    contentModifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier
+) {
+    Column (
+        modifier = contentModifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+    ) {
+        //Header
+        Text(
+            header,
+            fontFamily = fontFamily,
+            fontSize = headerSize,
+            fontWeight = weightBold,
+            color = White,
+            modifier = textModifier
+        )
+        LazyRow (
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        ){
+            items (listOfShows.size) {i ->
+                ShowImage(
+                    imageID = listOfShows[i].production.posterUrl,
+                    imageDescription = listOfShows[i].production.title + " Poster"
+                )
+            }
+        }
+
+    }
+}
+
 
 @Composable
 fun RoundProgressBar (

@@ -155,7 +155,7 @@ fun FrontPage() {
 
             ProductionListSidesroller(
                 header = "Popular shows and movies",
-                listOfShows = top10Shows,
+                listOfShows = showList,
                 textModifier = Modifier
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),
                 contentModifier = Modifier
@@ -168,6 +168,8 @@ fun FrontPage() {
         }
 
         item {
+
+            //TEMP KODE FLYTT UT
             // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
             // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
 
@@ -178,7 +180,7 @@ fun FrontPage() {
                 add(Calendar.DATE, -7)
             }
 
-            for (review in reviewsList) {
+            for (review in reviewList) {
                 if (review.postDate >= pastWeek) {
                     reviewsListPastWeek.add(review)
                 } else {
@@ -189,6 +191,8 @@ fun FrontPage() {
             var top10ReviewsListPastWeek = reviewsListPastWeek
                 .sortedByDescending { it.score }
                 .take(10)
+
+            //TEMP KODE FLYTT UT
 
             //Top reviews this week:
             ReviewsSection(
@@ -211,6 +215,8 @@ fun FrontPage() {
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>
 ) {
+
+    //TEMP KODE: FLYTT UT
 // Funksjon som returnerer alle filmer og serier som ligger i den LOGGED INN brukeren sin Currently Watching liste.
 // Funksjonen returnerer en liste med ListItem objekter og er sortert i henhold til hvilke som var sist oppdatert
 
@@ -375,35 +381,8 @@ fun CurrentlyWatchingCard (
 
 @Composable
 fun YourFriendsJustWatched (
-    listOfShows: List<ListItem>
+    listOfShows: MutableList<ListItem>
 ) {
-    // Funksjon som retunerer de 10 siste showene som har blitt oppdatert blant vennene til brukeren som er logget inn.
-    // Funksjonen returnerer en liste med ListItem objekter der hvert list item er hentet fra listen til vennen som list itemet er relevant for.
-
-    // Funker nok ikke 100% når det gjelder nyligste klikk, må tilbake å teste ordentlig
-    var friendsList = mutableListOf<User>()
-
-    var allFriendsCurrentlyWatchingShows = mutableListOf<Pair<ListItem, User>>()
-
-    // Holder på oversikten over nyligste klikk, teste om klikk registreres ordentlig senere
-    var clickTimes by remember { mutableStateOf(mutableMapOf<String, Long>()) }
-
-    // Henter alle shows fra currentlyWatchingShows listen til venner
-    friendsList.forEach { friend ->
-        friend.currentlyWatchingShows?.let { shows ->
-            shows.forEach { show ->
-                allFriendsCurrentlyWatchingShows.add(show to friend)
-            }
-        }
-    }
-
-    // Sorterer showene venner ser på ut ifra nyligste klikk, nyligste klikk øverst
-    val sortedShows = allFriendsCurrentlyWatchingShows
-        .sortedByDescending { (show) ->
-            clickTimes[show.id]
-        }
-        .take(10)
-
 
     //Container collumn
     Column (
@@ -427,27 +406,27 @@ fun YourFriendsJustWatched (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
         ){
-            items (sortedShows.size) {i ->
+            items (listOfShows.size) {i ->
                 //Info for each show
                 Column (
                     verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     ShowImage(
-                        imageID = sortedShows[i].first.production.posterUrl,
-                        imageDescription = sortedShows[i].first.production.title + " Poster"
+                        imageID = listOfShows[i].production.posterUrl,
+                        imageDescription = listOfShows[i].production.title + " Poster"
                     )
                     //Friend Info
                     FriendsWatchedInfo(
                         profileImageID = R.drawable.profilepicture,
                         profileName = "User Userson", //TEMP DELETE THIS
                         episodesWatched = i,
-                        showLenght = when (sortedShows[i].first.production) {
-                            is TVShow -> (sortedShows[i].first.production as TVShow).episodes.size // Returnerer antall episoder som Int
-                            is Movie -> (sortedShows[i].first.production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
-                            is Episode -> (sortedShows[i].first.production as Episode).lengthMinutes
+                        showLenght = when (listOfShows[i].production) {
+                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                            is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
+                            is Episode -> (listOfShows[i].production as Episode).lengthMinutes
                             else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                         },
-                        score = sortedShows[i].first.score
+                        score = listOfShows[i].score
                     )
                 }
 
