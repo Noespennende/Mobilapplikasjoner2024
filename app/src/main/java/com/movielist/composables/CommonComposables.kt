@@ -35,24 +35,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
 import com.movielist.data.ListItem
-import com.movielist.data.NavbarOptions
 import com.movielist.data.Production
-import com.movielist.data.Show
-import com.movielist.data.SearchSortOptions
 import com.movielist.data.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
@@ -61,18 +56,13 @@ import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
-import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
-import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
-import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
-import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -392,11 +382,11 @@ fun LikeButton (
 fun ProductionListSidesroller (
     header: String,
     listOfShows: List<Production>,
-    contentModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier
 ) {
     Column (
-        modifier = contentModifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
@@ -411,7 +401,7 @@ fun ProductionListSidesroller (
         )
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
                 ShowImage(
@@ -428,11 +418,11 @@ fun ProductionListSidesroller (
 fun ListItemListSidesroller (
     header: String,
     listOfShows: List<ListItem>,
-    contentModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier
 ) {
     Column (
-        modifier = contentModifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
@@ -447,7 +437,7 @@ fun ListItemListSidesroller (
         )
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
                 ShowImage(

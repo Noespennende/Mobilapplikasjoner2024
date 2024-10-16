@@ -1,6 +1,5 @@
 package com.movielist.composables
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,20 +33,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.data.Episode
 import com.movielist.data.ListItem
 import com.movielist.data.Movie
 import com.movielist.data.Production
 import com.movielist.data.Review
-import com.movielist.data.Show
 import com.movielist.data.TVShow
 import com.movielist.data.User
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
-import java.io.Console
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -158,7 +154,7 @@ fun FrontPage() {
                 listOfShows = showList,
                 textModifier = Modifier
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),
-                contentModifier = Modifier
+                modifier = Modifier
                     .padding(top = verticalPadding)
             )
         }

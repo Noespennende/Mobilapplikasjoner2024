@@ -7,8 +7,8 @@ val horizontalPadding = 25.dp
 val verticalPadding = 20.dp
 
 //Bottom navnbar constraints
-val bottomNavBarHeight = 100.dp
-val bottomPhoneIconsOffset = 55.dp
+val bottomNavBarHeight = 110.dp
+val bottomPhoneIconsOffset = 65.dp
 
 //Top phone icon constraints
 val topPhoneIconsBackgroundHeight = 35.dp
