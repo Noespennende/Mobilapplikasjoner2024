@@ -68,30 +68,33 @@ import java.util.Calendar
 @Composable
 fun ListPage (userViewModel: UserViewModel)
 {
-    val loggedInUser = userViewModel.loggedInUser.collectAsState().value
-
     val isLoggedInUser by remember { mutableStateOf(true) }
 
     // Innlogget bruker sin favorite-kolleksjon
-    val favoriteCollection: List<ListItem> =
-        loggedInUser?.favoriteCollection?.takeIf { it.isNotEmpty() } ?: emptyList()
+    val favoriteCollection: List<ListItem> = userViewModel.getLoggedInUsersFavoriteCollection()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> =
-        loggedInUser?.completedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
+    val completedCollection: List<ListItem> = userViewModel.getLoggedInUsersCompletedCollection()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> =
-        loggedInUser?.wantToWatchShows?.takeIf { it.isNotEmpty() } ?: emptyList()
+    val wantToWatchCollection: List<ListItem> = userViewModel.getLoggedInUsersWantToWatchCollection()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> =
-        loggedInUser?.droppedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
+    val droppedCollection: List<ListItem> = userViewModel.getLoggedInUsersDroppedCollection()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> =
-        loggedInUser?.currentlyWatchingShows?.takeIf { it.isNotEmpty() } ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> = userViewModel.getLoggedInUsersCurrentlyWatchingCollection()
 
+    /*
+        Her kan man da da lage sjekk:
+        om isLoggedInUser == true -> hent loggedInUser lister
+        om isLoggedInUser == false -> hent annen brukers lister
+
+        !! OBS !!
+        Om vi henter en annen brukers lister,
+        må denne brukeren ha blitt satt i userViewModel på et tidspunkt, med userViewModel.setOtherUser().
+
+    * */
 
     //Graphics
 

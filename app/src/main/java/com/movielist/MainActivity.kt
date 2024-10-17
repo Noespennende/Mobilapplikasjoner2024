@@ -8,14 +8,10 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import backend.AuthViewModel
 import backend.UserViewModel
-import backend.getUser
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
-import com.movielist.data.User
 
 class MainActivity : ComponentActivity() {
 
@@ -39,7 +35,7 @@ class MainActivity : ComponentActivity() {
             val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
 
             LaunchedEffect(testUser) {
-                userViewModel.fetchLoggedInUser(testUser)
+                userViewModel.setLoggedInUser(testUser)
             }
 
             Background()
