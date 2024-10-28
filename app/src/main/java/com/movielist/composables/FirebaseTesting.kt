@@ -24,21 +24,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import backend.AuthViewModel
-import backend.createUserWithEmailAndPassword
+import com.movielist.viewmodel.AuthViewModel
+import com.movielist.data.createUserWithEmailAndPassword
 import androidx.lifecycle.viewmodel.compose.viewModel
-import backend.FireBaseAuth
-import backend.getUserInfo
-import backend.logInWithEmailAndPassword
+import com.movielist.data.getUserInfo
+import com.movielist.data.logInWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.weightRegular
-import androidx.activity.viewModels
-
-
-
 
 
 @Preview

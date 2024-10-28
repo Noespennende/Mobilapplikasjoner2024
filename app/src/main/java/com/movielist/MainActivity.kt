@@ -8,14 +8,10 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import backend.AuthViewModel
-import backend.UserViewModel
-import backend.getUser
+import com.movielist.viewmodel.AuthViewModel
+import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
-import com.movielist.data.User
 
 class MainActivity : ComponentActivity() {
 
