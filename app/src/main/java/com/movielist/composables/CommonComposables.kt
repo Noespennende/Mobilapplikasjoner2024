@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.R
-import com.movielist.data.ListItem
-import com.movielist.data.Production
-import com.movielist.data.ShowSortOptions
+import com.movielist.model.ListItem
+import com.movielist.model.Production
+import com.movielist.model.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkGrayTransparent
 import com.movielist.ui.theme.DarkPurple

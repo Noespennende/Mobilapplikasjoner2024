@@ -4,16 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import backend.AuthViewModel
-import backend.UserViewModel
+import com.movielist.viewmodel.UserViewModel
 import com.movielist.composables.BottomNavBar
 import com.movielist.composables.BottomNavbarAndMobileIconsBackground
-import com.movielist.composables.FrontPage
-import com.movielist.composables.ListPage
-import com.movielist.composables.ProfilePage
-import com.movielist.composables.ReviewPage
-import com.movielist.composables.SearchPage
-import com.movielist.data.User
+import com.movielist.screens.FrontPage
+import com.movielist.screens.ListPage
+import com.movielist.screens.ProfilePage
+import com.movielist.screens.ReviewPage
+import com.movielist.screens.SearchPage
 
 
 @Composable

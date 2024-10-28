@@ -1,0 +1,14 @@
+package com.movielist.model
+
+import java.util.Calendar
+import java.util.UUID
+
+data class Review(
+    val reviewId: UUID = UUID.randomUUID(),
+    val score: Int,
+    val reviewer: User,
+    val show: Production,
+    val reviewBody: String,
+    val postDate: Calendar = Calendar.getInstance(),
+    var likes: Int = 0
+)

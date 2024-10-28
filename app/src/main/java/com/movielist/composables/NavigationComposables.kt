@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.data.NavbarOptions
+import com.movielist.model.NavbarOptions
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple

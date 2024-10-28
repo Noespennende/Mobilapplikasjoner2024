@@ -1,5 +1,7 @@
 package com.movielist.data
 
+import com.movielist.model.Episode
+
 // evt calles allMedia
 data class Api(
     val _id: String,

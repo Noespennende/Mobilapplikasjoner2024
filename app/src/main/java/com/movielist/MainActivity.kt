@@ -8,8 +8,8 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import backend.AuthViewModel
-import backend.UserViewModel
+import com.movielist.viewmodel.AuthViewModel
+import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 
