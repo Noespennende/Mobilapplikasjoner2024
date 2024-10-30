@@ -70,7 +70,7 @@ fun LoginPage (){
             }
 
 
-            //Username
+            //Email
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it},
@@ -121,7 +121,7 @@ fun LoginPage (){
                 modifier = Modifier
                     .clickable {
                         //On login click logic
-                        errorText = "Wrong username or password"
+                        errorText = "Wrong email or password"
                     }
                     .fillMaxWidth()
                     .height(50.dp)
