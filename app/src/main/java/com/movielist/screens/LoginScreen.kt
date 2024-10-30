@@ -35,7 +35,7 @@ import com.movielist.ui.theme.weightRegular
 @Composable
 fun LoginPage (){
 
-    var username by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
     var errorText by remember { mutableStateOf("") }
@@ -72,8 +72,8 @@ fun LoginPage (){
 
             //Username
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it},
+                value = email,
+                onValueChange = { email = it},
                 singleLine = true,
                 colors = textFieldColors,
                 textStyle = TextStyle(
@@ -83,7 +83,7 @@ fun LoginPage (){
                     color = White,
                 ),
                 label = {Text(
-                    "Username",
+                    "email",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
