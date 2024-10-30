@@ -2,6 +2,7 @@ package com.movielist.viewmodel
 
 import androidx.lifecycle.ViewModel
 import com.movielist.data.getUser
+import com.movielist.model.ListItem
 import com.movielist.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
