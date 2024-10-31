@@ -2,8 +2,10 @@ package com.movielist.data
 
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 import com.movielist.model.Episode
+import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.TVShow
@@ -119,4 +121,89 @@ fun fetchFirebaseUser(userID: String, onSuccess: (Map<String, Any>?) -> Unit) {
             onSuccess(null) // Returner null ved feil
         }
 }
+
+fun addCurrentlyWatchingShow(
+    userID: String,
+    listItem: ListItem,
+    onSuccess: () -> Unit,
+    onFailure: (String) -> Unit
+) {
+    val db = Firebase.firestore
+
+    // Konverter produksjon til Map
+    val productionMap = when (val production = listItem.production) {
+        is Movie -> mapOf(
+            "type" to production.type,
+            "imdbID" to production.imdbID,
+            "title" to production.title,
+            "description" to production.description,
+            "genre" to production.genre,
+            "releaseDate" to production.releaseDate.time, // Konverter til long
+            "actors" to production.actors,
+            "rating" to production.rating,
+            "reviews" to production.reviews,
+            "posterUrl" to production.posterUrl,
+            "lengthMinutes" to production.lengthMinutes,
+            "trailerUrl" to production.trailerUrl
+        )
+        is Episode -> mapOf(
+            "type" to production.type,
+            "imdbID" to production.imdbID,
+            "title" to production.title,
+            "description" to production.description,
+            "genre" to production.genre,
+            "releaseDate" to production.releaseDate.time, // Konverter til long
+            "actors" to production.actors,
+            "rating" to production.rating,
+            "reviews" to production.reviews,
+            "posterUrl" to production.posterUrl,
+            "lengthMinutes" to production.lengthMinutes,
+            "seasonNr" to production.seasonNr,
+            "episodeNr" to production.episodeNr
+        )
+        is TVShow -> mapOf(
+            "type" to production.type,
+            "imdbID" to production.imdbID,
+            "title" to production.title,
+            "description" to production.description,
+            "genre" to production.genre,
+            "releaseDate" to production.releaseDate.time, // Konverter til long
+            "actors" to production.actors,
+            "rating" to production.rating,
+            "reviews" to production.reviews,
+            "posterUrl" to production.posterUrl,
+            "episodes" to production.episodes,
+            "seasons" to production.seasons
+        )
+        else -> null
+    }
+
+    // Hvis produksjon ikke er gyldig, avslutt funksjonen
+    if (productionMap == null) {
+        onFailure("Invalid production type")
+        return
+    }
+
+    // Konverter ListItem til Map
+    val listItemMap = mapOf(
+        "id" to listItem.id,
+        "currentEpisode" to listItem.currentEpisode,
+        "score" to listItem.score,
+        "production" to productionMap,
+        "lastUpdated" to listItem.lastUpdated.time // Konverter til long
+    )
+
+    // Oppdater dokumentet til brukeren
+    db.collection("users")
+        .document(userID)
+        .update("currentlyWatchingShows", FieldValue.arrayUnion(listItemMap))
+        .addOnSuccessListener {
+            onSuccess() // Kall onSuccess når elementet er lagt til
+        }
+        .addOnFailureListener { exception ->
+            onFailure(exception.message ?: "Unknown error") // Kall onFailure med feilmelding
+        }
+}
+
+
 

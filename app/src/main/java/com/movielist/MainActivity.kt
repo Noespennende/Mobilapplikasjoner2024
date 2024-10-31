@@ -38,8 +38,10 @@ class MainActivity : ComponentActivity() {
             //val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
 
             LaunchedEffect(firebaseUser) {
-                if (firebaseUser != null)
-                controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+                if (firebaseUser != null) {
+                    controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+                }
+
             }
 
             Background()
