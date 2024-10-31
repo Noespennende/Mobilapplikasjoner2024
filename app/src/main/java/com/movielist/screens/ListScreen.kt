@@ -38,6 +38,7 @@ import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.composables.TopNavbarBackground
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
@@ -64,24 +65,24 @@ import java.util.Calendar
 
 
 @Composable
-fun ListPage (userViewModel: UserViewModel)
+fun ListPage (controllerViewModel: ControllerViewModel)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
     // Innlogget bruker sin favorite-kolleksjon
-    val favoriteCollection: List<ListItem> = userViewModel.getLoggedInUsersFavoriteCollection()
+    val favoriteCollection: List<ListItem> = controllerViewModel.getLoggedInUsersFavoriteCollection()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> = userViewModel.getLoggedInUsersCompletedCollection()
+    val completedCollection: List<ListItem> = controllerViewModel.getLoggedInUsersCompletedCollection()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> = userViewModel.getLoggedInUsersWantToWatchCollection()
+    val wantToWatchCollection: List<ListItem> = controllerViewModel.getLoggedInUsersWantToWatchCollection()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> = userViewModel.getLoggedInUsersDroppedCollection()
+    val droppedCollection: List<ListItem> = controllerViewModel.getLoggedInUsersDroppedCollection()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> = userViewModel.getLoggedInUsersCurrentlyWatchingCollection()
+    val currentlyWatchingCollection: List<ListItem> = controllerViewModel.getLoggedInUsersCurrentlyWatchingCollection()
 
     /*
         Her kan man da da lage sjekk:

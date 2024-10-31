@@ -12,35 +12,37 @@ import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
+import com.movielist.controller.ControllerViewModel
 
 class MainActivity : ComponentActivity() {
 
-    /*
-    Må ha felles instans av authViewModel når vi har navigasjon klar
-    Så sendes authViewModel inn i hvert komponent.
-    */
+    // Må initalisere de andre viewModels-ene i MainActivity og sende inn i controllerViewModel
     private val authViewModel: AuthViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
 
+    private lateinit var controllerViewModel: ControllerViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this) // Initializes Firebase
         enableEdgeToEdge()
+
+        controllerViewModel = ControllerViewModel(userViewModel, authViewModel)
+
         setContent {
 
-            val firebaseUser by authViewModel.currentUser.collectAsState()
-            authViewModel.checkUserStatus()
+            val firebaseUser by controllerViewModel.currentUser.collectAsState()
+            controllerViewModel.checkUserStatus()
 
             val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
 
             LaunchedEffect(testUser) {
-                userViewModel.setLoggedInUser(testUser)
+                controllerViewModel.setLoggedInUser(testUser)
             }
 
             Background()
 
-            Navigation(userViewModel)
+            Navigation(controllerViewModel)
 
             TopMobileIconsBackground()
 
