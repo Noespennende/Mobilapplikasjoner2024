@@ -83,24 +83,4 @@ class UserViewModel : ViewModel() {
         return jsonAdapter.fromJson(json)
     }
 
-    fun getLoggedInUsersFavoriteCollection(): List<ListItem> {
-        return loggedInUser.value?.favoriteCollection?.takeIf { it.isNotEmpty() } ?: emptyList()
-    }
-
-    fun getLoggedInUsersCompletedCollection(): List<ListItem> {
-        return loggedInUser.value?.completedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
-    }
-
-    fun getLoggedInUsersWantToWatchCollection(): List<ListItem> {
-        return loggedInUser.value?.wantToWatchShows?.takeIf { it.isNotEmpty() } ?: emptyList()
-    }
-
-    fun getLoggedInUsersDroppedCollection(): List<ListItem> {
-        return loggedInUser.value?.droppedShows?.takeIf { it.isNotEmpty() } ?: emptyList()
-    }
-
-    fun getLoggedInUsersCurrentlyWatchingCollection(): List<ListItem> {
-        return loggedInUser.value?.currentlyWatchingShows?.takeIf { it.isNotEmpty() } ?: emptyList()
-    }
-
 }

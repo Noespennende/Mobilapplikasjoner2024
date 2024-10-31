@@ -22,6 +22,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -69,20 +70,22 @@ fun ListPage (controllerViewModel: ControllerViewModel)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
+    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+
     // Innlogget bruker sin favorite-kolleksjon
-    val favoriteCollection: List<ListItem> = controllerViewModel.getLoggedInUsersFavoriteCollection()
+    val favoriteCollection: List<ListItem> = loggedInUser?.favoriteCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> = controllerViewModel.getLoggedInUsersCompletedCollection()
+    val completedCollection: List<ListItem> = loggedInUser?.completedShows ?: emptyList()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> = controllerViewModel.getLoggedInUsersWantToWatchCollection()
+    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchShows ?: emptyList()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> = controllerViewModel.getLoggedInUsersDroppedCollection()
+    val droppedCollection: List<ListItem> = loggedInUser?.droppedShows ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> = controllerViewModel.getLoggedInUsersCurrentlyWatchingCollection()
+    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingShows ?: emptyList()
 
     /*
         Her kan man da da lage sjekk:

@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val firebaseUser by controllerViewModel.currentUser.collectAsState()
+            val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()
             controllerViewModel.checkUserStatus()
 
             val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"

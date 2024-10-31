@@ -2,9 +2,12 @@ package com.movielist.controller
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import com.movielist.model.ListItem
+import com.movielist.model.User
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
+import kotlinx.coroutines.flow.StateFlow
 
 class ControllerViewModel (
     private val userViewModel: UserViewModel,
@@ -13,8 +16,10 @@ class ControllerViewModel (
 
     /* USER LOGIC */
 
-    val loggedInUser = userViewModel.loggedInUser
-    val currentUser = authViewModel.currentUser
+    val currentFirebaseUser: StateFlow<FirebaseUser?> = authViewModel.currentUser
+
+    val loggedInUser: StateFlow<User?> = userViewModel.loggedInUser
+    val otherUser: StateFlow<User?> = userViewModel.otherUser
 
     fun setLoggedInUser(uid: String) {
         userViewModel.setLoggedInUser(uid)
@@ -27,26 +32,6 @@ class ControllerViewModel (
     fun checkUserStatus() {
         authViewModel.checkUserStatus() // Kall autentiseringstatus
     }
-
-    fun getLoggedInUsersFavoriteCollection(): List<ListItem> {
-        return userViewModel.getLoggedInUsersFavoriteCollection()
-    }
-
-    fun getLoggedInUsersCompletedCollection(): List<ListItem> {
-        return userViewModel.getLoggedInUsersCompletedCollection()
-    }
-
-    fun getLoggedInUsersWantToWatchCollection(): List<ListItem> {
-        return userViewModel.getLoggedInUsersWantToWatchCollection()
-    }
-    fun getLoggedInUsersDroppedCollection(): List<ListItem> {
-        return userViewModel.getLoggedInUsersDroppedCollection()
-    }
-
-    fun getLoggedInUsersCurrentlyWatchingCollection(): List<ListItem> {
-        return userViewModel.getLoggedInUsersCurrentlyWatchingCollection()
-    }
-
 
 }
 
