@@ -29,19 +29,21 @@ class MainActivity : ComponentActivity() {
 
         controllerViewModel = ControllerViewModel(userViewModel, authViewModel)
 
+        controllerViewModel.checkUserStatus()
         setContent {
 
             val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()
-            controllerViewModel.checkUserStatus()
 
-            val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
 
-            LaunchedEffect(testUser) {
-                controllerViewModel.setLoggedInUser(testUser)
+            //val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
+
+            LaunchedEffect(firebaseUser) {
+                if (firebaseUser != null)
+                controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
             }
 
             Background()
-
+            
             Navigation(controllerViewModel)
 
             TopMobileIconsBackground()

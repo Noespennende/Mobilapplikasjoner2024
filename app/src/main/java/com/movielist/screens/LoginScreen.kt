@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.movielist.controller.ControllerViewModel
+import com.movielist.data.logInWithEmailAndPassword
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.Purple
@@ -33,7 +35,7 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
 @Composable
-fun LoginPage (){
+fun LoginPage (controllerViewModel: ControllerViewModel){
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -121,7 +123,13 @@ fun LoginPage (){
                 modifier = Modifier
                     .clickable {
                         //On login click logic
-                        errorText = "Wrong email or password"
+                        //errorText = "Wrong email or password"
+                        logInWithEmailAndPassword(email, password, {
+                            // Hvis innloggingen er vellykket, kaller vi callback
+
+                            controllerViewModel.checkUserStatus()
+                        }, {errorText = it})
+
                     }
                     .fillMaxWidth()
                     .height(50.dp)

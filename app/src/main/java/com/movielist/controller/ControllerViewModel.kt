@@ -1,5 +1,6 @@
 package com.movielist.controller
 
+import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -18,6 +19,7 @@ class ControllerViewModel (
 
     val currentFirebaseUser: StateFlow<FirebaseUser?> = authViewModel.currentUser
 
+    val isLoggedIn: State<Boolean> = authViewModel.isLoggedIn
     val loggedInUser: StateFlow<User?> = userViewModel.loggedInUser
     val otherUser: StateFlow<User?> = userViewModel.otherUser
 
