@@ -35,5 +35,7 @@ class ControllerViewModel (
         authViewModel.checkUserStatus() // Kall autentiseringstatus
     }
 
+
+
 }
 

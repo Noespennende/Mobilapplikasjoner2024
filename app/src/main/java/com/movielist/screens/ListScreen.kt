@@ -114,7 +114,7 @@ fun ListPage (controllerViewModel: ControllerViewModel)
         item {
             ListPageList(
                 loggedInUsersList = isLoggedInUser,
-                listItemList = currentlyWatchingCollection.toList()
+                listItemList = wantToWatchCollection.toList()
             )
         }
     }

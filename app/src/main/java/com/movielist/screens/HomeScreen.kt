@@ -29,10 +29,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
@@ -71,7 +74,7 @@ fun FrontPage() {
                     actors = emptyList(),
                     rating = 4,
                     reviews = ArrayList(),
-                    posterUrl = R.drawable.silo,
+                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
                                       "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
@@ -93,7 +96,7 @@ fun FrontPage() {
                 actors = emptyList(),
                 rating = 4,
                 reviews = ArrayList(),
-                posterUrl = R.drawable.silo,
+                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                 episodes = listOf("01", "02", "03", "04", "05", "06",
                     "07", "08", "09", "10", "11", "12"),
                 seasons = listOf("1", "2", "3")
@@ -247,7 +250,7 @@ fun CurrentlyWatchingScroller (
                 imageId = listOfShows[i].production.posterUrl,
                 imageDescription = listOfShows[i].production.title + " Image description",
                 title = listOfShows[i].production.title,
-                showLenght = when (listOfShows[i].production) {
+                showLength = when (listOfShows[i].production) {
                     is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                     is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
                     is Episode -> (listOfShows[i].production as Episode).lengthMinutes
@@ -264,76 +267,78 @@ fun CurrentlyWatchingScroller (
 }
 
 @Composable
-fun CurrentlyWatchingCard (
-    imageId: Int = R.drawable.noimage,
+fun CurrentlyWatchingCard(
+    imageId: String? = null, // Nullable String for bilde-URL
     imageDescription: String = "Image not available",
     title: String,
-    showLenght: Int?,
+    showLength: Int?,
     episodesWatched: Int,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit
-    ) {
-
+) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
     }
 
     var buttonText by remember {
-        mutableStateOf(generateButtonText(episodesWatched, showLenght))
+        mutableStateOf(generateButtonText(episodesWatched, showLength))
     }
 
-    //Card container
-    Card (
-        modifier = modifier
-            .width(350.dp),
+    // Card container
+    Card(
+        modifier = modifier.width(350.dp),
         shape = RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp),
         colors = CardDefaults.cardColors(containerColor = Gray)
-
-    ){
-        //card content
-        Column(modifier = Modifier
-            .height(265.dp+ topPhoneIconsBackgroundHeight)
-            .padding(
-                start = 20.dp,
-                end = 20.dp,
-                top = (topPhoneIconsBackgroundHeight+10.dp),
-                bottom = 10.dp))
-        {
-            //Main image
-            Image(
-                painter = painterResource(id = imageId),
+    ) {
+        // Card content
+        Column(
+            modifier = Modifier
+                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    bottom = 10.dp
+                )
+        ) {
+            // Main image - Last inn bilde fra URL eller bruk placeholder
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageId)
+                    .placeholder(R.drawable.noimage) // placeholder når bildet lastes
+                    .error(R.drawable.noimage) // vis samme placeholder ved feil
+                    .build(),
                 contentDescription = imageDescription,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .clip(RoundedCornerShape(5.dp)))
+                    .clip(RoundedCornerShape(5.dp))
+            )
 
-            //Content under image
-            Column(modifier = Modifier
-                .fillMaxSize()
-                )
-            {
-                //Title and episodes watched
+            // Content under image
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Title and episodes watched
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
-
                 ) {
-                    //Title
+                    // Title
                     Text(
                         title,
                         style = TextStyle(
                             color = White,
                             fontSize = 18.sp,
                             fontWeight = weightRegular
-                            )
+                        )
                     )
-                    //Episodes watched
-                    Text (
-                        "Ep $watchedEpisodesCount of $showLenght",
+                    // Episodes watched
+                    Text(
+                        "Ep $watchedEpisodesCount of $showLength",
                         style = TextStyle(
                             color = White,
                             fontSize = 18.sp,
@@ -342,21 +347,20 @@ fun CurrentlyWatchingCard (
                     )
                 }
 
-                //Progress bar
-                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLenght!!)
+                // Progress bar
+                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLength!!)
 
-                //Mark as watched button
+                // Mark as watched button
                 Button(
                     onClick = {
-                        //Button onclick function
-                        if ( watchedEpisodesCount < showLenght) {
+                        // Button onclick function
+                        if (watchedEpisodesCount < showLength) {
                             watchedEpisodesCount++
                         }
 
-                        buttonText = generateButtonText(watchedEpisodesCount, showLenght)
+                        buttonText = generateButtonText(watchedEpisodesCount, showLength)
 
                         onMarkAsWatched()
-
                     },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Purple),
@@ -365,7 +369,6 @@ fun CurrentlyWatchingCard (
                         .height(50.dp)
                         .padding(vertical = 5.dp)
                 ) {
-                    //Button text
                     Text(
                         buttonText,
                         fontSize = headerSize,
@@ -374,10 +377,11 @@ fun CurrentlyWatchingCard (
                     )
                 }
             }
-
         }
     }
 }
+
+
 
 
 @Composable
