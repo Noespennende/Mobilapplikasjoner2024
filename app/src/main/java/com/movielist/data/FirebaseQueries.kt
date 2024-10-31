@@ -8,6 +8,7 @@ import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.TVShow
 import com.movielist.model.User
+import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -98,45 +99,24 @@ fun getUsersWatchingCollection(
         }
 }
 
-fun getUser(userID: String, onSuccess: (User) -> Unit) {
-
+fun fetchFirebaseUser(userID: String, onSuccess: (Map<String, Any>?) -> Unit) {
     val db = Firebase.firestore
-
-    val moshi: Moshi = Moshi.Builder()
-        .add(
-            PolymorphicJsonAdapterFactory.of(Production::class.java, "type")
-                .withSubtype(Movie::class.java, "Movie")
-                .withSubtype(TVShow::class.java, "TVShow")
-                .withSubtype(Episode::class.java, "Episode")
-        )
-        .add(FirebaseTimestampAdapter())  // Adapter for Firestore Timestamps
-        .add(UUIDAdapter())  // Adapter for UUID
-        .addLast(KotlinJsonAdapterFactory())  // For Kotlin-klasser
-        .build()
-
-    val jsonAdapter = moshi.adapter(User::class.java)
 
     db.collection("users")
         .document(userID)
         .get()
         .addOnSuccessListener { document ->
             if (document != null) {
-                val userJson = document.data // Map<String, Any> - Firebase dokumentdata
-
-                val json = moshi.adapter(Map::class.java).toJson(userJson)
-                val user = jsonAdapter.fromJson(json)
-
-                if (user != null) {
-                    println("User: $user")
-                    onSuccess(user)
-                } else {
-                    println("Failed to deserialize user.")
-                }
+                val userJson = document.data // Map<String, Any>? - Firebase dokumentdata
+                onSuccess(userJson) // Returner JSON til den som kaller funksjonen
             } else {
                 println("Document not found")
+                onSuccess(null) // Ingen dokument funnet
             }
         }
         .addOnFailureListener { exception ->
             Log.w("FirebaseFailure", "Error getting document", exception)
+            onSuccess(null) // Returner null ved feil
         }
 }
+
