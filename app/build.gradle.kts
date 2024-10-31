@@ -117,6 +117,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.okhttp)
 
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
+    // mulig disse 3 kan fjernes
+    implementation ("com.google.android.gms:play-services-base:18.1.0")
+    implementation ("com.google.android.gms:play-services-auth:20.1.0")
+    implementation ("com.google.android.gms:play-services-maps:18.0.0")
+
     implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
     implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
 

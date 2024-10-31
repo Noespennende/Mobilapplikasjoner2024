@@ -51,6 +51,7 @@ import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
 import java.util.Calendar
 import kotlin.random.Random
+import coil.compose.rememberImagePainter
 
 @Composable
 fun FrontPage() {
@@ -71,7 +72,7 @@ fun FrontPage() {
                     actors = emptyList(),
                     rating = 4,
                     reviews = ArrayList(),
-                    posterUrl = R.drawable.silo,
+                    posterUrl = "R.drawable.silo",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
                                       "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
@@ -93,7 +94,7 @@ fun FrontPage() {
                 actors = emptyList(),
                 rating = 4,
                 reviews = ArrayList(),
-                posterUrl = R.drawable.silo,
+                posterUrl = "R.drawable.silo",
                 episodes = listOf("01", "02", "03", "04", "05", "06",
                     "07", "08", "09", "10", "11", "12"),
                 seasons = listOf("1", "2", "3")
@@ -265,7 +266,7 @@ fun CurrentlyWatchingScroller (
 
 @Composable
 fun CurrentlyWatchingCard (
-    imageId: Int = R.drawable.noimage,
+    imageId: String = "https://image.tmdb.org/t/p/original/vCXkaktMk5iBMSlyFH1R6K48Ndb.jpg",
     imageDescription: String = "Image not available",
     title: String,
     showLenght: Int?,
@@ -301,7 +302,7 @@ fun CurrentlyWatchingCard (
         {
             //Main image
             Image(
-                painter = painterResource(id = imageId),
+                painter = rememberImagePainter(imageId),
                 contentDescription = imageDescription,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

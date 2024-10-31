@@ -49,7 +49,7 @@ fun SearchPage () {
                 actors = emptyList(),
                 rating = 4,
                 reviews = ArrayList(),
-                posterUrl = R.drawable.silo,
+                posterUrl = "R.drawable.silo",
                 episodes = listOf("01", "02", "03", "04", "05", "06",
                     "07", "08", "09", "10", "11", "12"),
                 seasons = listOf("1", "2", "3")

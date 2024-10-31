@@ -1,6 +1,9 @@
 package com.movielist.data
 
 import android.util.Log
+import com.movielist.model.PrimaryImage
+import com.movielist.model.TitleText
+import com.movielist.model.TitleType
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Call
@@ -10,7 +13,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class apiFetch {
-
+/*
     private val BASE_URL ="https://moviesdatabase.p.rapidapi.com/"
     private val API_KEY = "09f23523ebmshad9f7b2ebe7b44bp1ecd5bjsn35bb315b63a3" // api key, må være med! Har med autentisering å gjøre
     private val API_HOST = "moviesdatabase.p.rapidapi.com" // host link, må være med! Har med autentisering å gjøre, lik for alle
@@ -86,9 +89,16 @@ class apiFetch {
                                             width = show.primaryImage?.width ?: 200,
                                             height = show.primaryImage?.height ?: 250
                                         ),
-                                        titleType = TitleType(show.titleType?.isSeries == false, show.titleType?.isEpisode == false),
+                                        titleType = TitleType(
+                                            show.titleType?.isSeries == false,
+                                            show.titleType?.isEpisode == false
+                                        ),
                                         titleText = TitleText(show.titleText?.text ?: "No Title"),
-                                        originalTitleText = show.originalTitleText?.let { TitleText(it.text) },
+                                        originalTitleText = show.originalTitleText?.let {
+                                            TitleText(
+                                                it.text
+                                            )
+                                        },
                                         showLength = totalEpisodes, // Use the totalEpisodes value here
                                         totalEpisodes = totalEpisodes,
                                         currentEpisode = show.currentEpisode
@@ -133,7 +143,10 @@ class apiFetch {
                                         width = movie.primaryImage?.width ?: 200,
                                         height = movie.primaryImage?.height ?: 250
                                     ),
-                                    titleType = TitleType(movie.titleType?.isSeries == false, movie.titleType?.isEpisode == false),
+                                    titleType = TitleType(
+                                        movie.titleType?.isSeries == false,
+                                        movie.titleType?.isEpisode == false
+                                    ),
                                     titleText = TitleText(movie.titleText?.text ?: "No Title"),
                                     originalTitleText = movie.originalTitleText?.let { TitleText(it.text) },
                                     showLength = 0,
@@ -156,6 +169,8 @@ class apiFetch {
             }
         })
     }
+*/
+
 /*
    val combinedMediaList = remember { mutableStateOf<List<CombinedData>>(emptyList()) }
 

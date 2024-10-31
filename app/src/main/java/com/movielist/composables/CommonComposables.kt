@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -65,6 +66,7 @@ import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
+import coil.compose.rememberImagePainter
 
 @Composable
 fun Background () {
@@ -198,12 +200,12 @@ fun TopMobileIconsBackground (
 
 @Composable
 fun ShowImage (
-    imageID: Int  = R.drawable.noimage,
+    imageID: String = "https://image.tmdb.org/t/p/original/vCXkaktMk5iBMSlyFH1R6K48Ndb.jpg",
     imageDescription: String = "Image not available",
     sizeMultiplier: Float = 1.0f
 ) {
     Image(
-        painter = painterResource(id = imageID),
+        painter = rememberImagePainter(imageID),
         contentDescription = imageDescription,
         contentScale = ContentScale.Crop,
         modifier = Modifier

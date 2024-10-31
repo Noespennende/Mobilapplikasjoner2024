@@ -1,6 +1,10 @@
 package com.movielist.data
 
 import com.movielist.model.Episode
+import com.movielist.model.PrimaryImage
+import com.movielist.model.ReleaseYear
+import com.movielist.model.TitleText
+import com.movielist.model.TitleType
 
 // evt calles allMedia
 data class Api(

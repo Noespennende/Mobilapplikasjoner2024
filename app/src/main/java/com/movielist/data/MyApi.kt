@@ -5,7 +5,8 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface MyApi {
-
+//Koden nedenunder flyttet til networking/ApiService
+    /*
     // Hvilket endpoint vi vil hente data fra (det etter BASE_URL/)
     @GET("titles?startYear=2010&list=top_rated_english_250")
     fun getMovies(): Call<MovieResponse>
@@ -18,4 +19,5 @@ interface MyApi {
 
     @GET("titles/series/{seriesId}")
     fun getSeriesDetails(@Path("seriesId") seriesId: String): Call<SeriesDetailsResponse>
+    */
 }

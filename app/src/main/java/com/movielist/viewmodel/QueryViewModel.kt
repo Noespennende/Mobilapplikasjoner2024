@@ -54,7 +54,7 @@ class QueryViewModel : ViewModel() {
                     actors = emptyList(),
                     rating = 4,
                     reviews = ArrayList(),
-                    posterUrl = R.drawable.silo,
+                    posterUrl = "https://image.tmdb.org/t/p/original/vCXkaktMk5iBMSlyFH1R6K48Ndb.jpg",
                     lengthMinutes = 127,
                     trailerUrl = "trailerurl.com"
                 ),

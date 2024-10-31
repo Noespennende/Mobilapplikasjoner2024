@@ -12,7 +12,7 @@ data class Episode(
     override val actors: List<String> = emptyList(), // Listen skal ikke endres i appen - data kommer fra API
     override val rating: Int? = null,
     override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
-    override val posterUrl: Int = R.drawable.noimage,
+    override val posterUrl: String = "",
     override val type: String = "Episode",
 
     val lengthMinutes: Int? = null,
