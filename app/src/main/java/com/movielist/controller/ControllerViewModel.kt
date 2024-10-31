@@ -127,7 +127,7 @@ class ControllerViewModel (
         }
     }
 
-  
+
     fun addProductionToFavoriteCollection(production: Production) {
         val user = loggedInUser.value
         if (user != null) {
@@ -147,6 +147,6 @@ class ControllerViewModel (
 
 
 
-}
+
 
 
