@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -30,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -42,6 +43,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
 import com.movielist.composables.ShowImage
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
@@ -56,7 +58,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun FrontPage() {
+fun FrontPage(controllerViewModel: ControllerViewModel) {
 
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
@@ -134,12 +136,15 @@ fun FrontPage() {
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
-    //Front page graphics
+
+    val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
+
+
+    // Front page graphics
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-        //Front page content
+        // Front page content
         item {
             CurrentlyWatchingScroller(listItemList)
         }
@@ -168,7 +173,10 @@ fun FrontPage() {
         }
 
         item {
-            YourFriendsJustWatched(listItemList)
+
+            YourFriendsJustWatched(friendsWatchedList.toMutableList())
+
+
         }
 
         item {
@@ -411,34 +419,59 @@ fun YourFriendsJustWatched (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
         ){
-            items (listOfShows.size) {i ->
-                //Info for each show
-                Column (
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    ShowImage(
-                        imageID = listOfShows[i].production.posterUrl,
-                        imageDescription = listOfShows[i].production.title + " Poster"
-                    )
-                    //Friend Info
-                    FriendsWatchedInfo(
-                        profileImageID = R.drawable.profilepicture,
-                        profileName = "User Userson", //TEMP DELETE THIS
-                        episodesWatched = i,
-                        showLenght = when (listOfShows[i].production) {
-                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
-                            is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
-                            is Episode -> (listOfShows[i].production as Episode).lengthMinutes
-                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
-                        },
-                        score = listOfShows[i].score
-                    )
+            if (listOfShows.isEmpty()) {
+                items (3) {
+                    Column (
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        LoadingCard()
+                    }
                 }
-
-
+            } else {
+                items (listOfShows.size) {i ->
+                    //Info for each show
+                    Column (
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        ShowImage(
+                            imageID = listOfShows[i].production.posterUrl,
+                            imageDescription = listOfShows[i].production.title + " Poster"
+                        )
+                        //Friend Info
+                        FriendsWatchedInfo(
+                            profileImageID = R.drawable.profilepicture,
+                            profileName = "User Userson", //TEMP DELETE THIS
+                            episodesWatched = listOfShows[i].currentEpisode,
+                            showLenght = when (listOfShows[i].production) {
+                                is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                                is Movie -> 1
+                                is Episode -> 1
+                                else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
+                            },
+                            score = listOfShows[i].score
+                        )
+                    }
+                }
             }
+
         }
 
+    }
+}
+
+@Composable
+fun LoadingCard() {
+    ShowImage()
+    Column (
+        verticalArrangement = Arrangement.spacedBy(3.dp)
+    ){
+        Text(
+            text = "Placeholder",
+            color = White,
+            fontFamily = fontFamily,
+            fontWeight = weightLight,
+            fontSize = 12.sp
+        )
     }
 }
 

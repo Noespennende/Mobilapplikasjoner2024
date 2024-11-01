@@ -45,7 +45,7 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         composable(
             route = Screen.HomeScreen.withArguments()
         ) {
-            FrontPage()
+            FrontPage(controllerViewModel)
         }
         composable(
             route = Screen.ListScreen.withArguments()

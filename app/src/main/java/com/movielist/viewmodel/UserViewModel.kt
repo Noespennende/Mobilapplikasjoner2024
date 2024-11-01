@@ -40,7 +40,7 @@ class UserViewModel : ViewModel() {
         }
     }
 
-    private fun getUser(userID: String, onSuccess: (User?) -> Unit) {
+    public fun getUser(userID: String, onSuccess: (User?) -> Unit) {
         fetchFirebaseUser(userID) { userJson ->
             val user = convertUserJsonToUserObject(userJson)
             if (user != null) {
@@ -51,6 +51,33 @@ class UserViewModel : ViewModel() {
             onSuccess(user);
         }
     }
+
+    fun getUsersFriends(onComplete: (MutableList<User>) -> Unit) {
+        val friendsList: MutableList<User> = mutableListOf()
+
+
+
+        val friendIDList = loggedInUser.value?.friendList ?: return onComplete(friendsList)
+
+
+
+        val totalFriends = friendIDList.size
+        var loadedFriends = 0
+
+        for (friendUID in friendIDList) {
+            getUser(friendUID) { friend ->
+                friend?.let {
+                    friendsList.add(it)
+                    loadedFriends++
+                    if (loadedFriends == totalFriends) {
+                        onComplete(friendsList)
+                    }
+                }
+            }
+        }
+    }
+
+
 
     private fun convertUserJsonToUserObject(userJson: Map<String, Any>?): User? {
         if (userJson == null) return null

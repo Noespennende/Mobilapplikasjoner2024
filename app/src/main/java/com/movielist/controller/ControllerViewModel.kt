@@ -2,6 +2,8 @@ package com.movielist.controller
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
@@ -11,11 +13,12 @@ import com.movielist.model.Movie
 import com.movielist.model.User
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import java.util.Calendar
-import kotlin.math.log
 
-class ControllerViewModel (
+class ControllerViewModel(
     private val userViewModel: UserViewModel,
     private val authViewModel: AuthViewModel
 ) : ViewModel() {
@@ -37,34 +40,37 @@ class ControllerViewModel (
     }
 
     fun checkUserStatus() {
-        authViewModel.checkUserStatus() // Kall autentiseringstatus
+        authViewModel.checkUserStatus() // Call authentication status check
     }
 
-    // Kall denne i MainActivity i LaunchedEffect for å teste
-    // SLETTES SENERE
+    // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
-
         val loggedInUserId = currentFirebaseUser.value?.uid
         if (loggedInUserId != null) {
             val newListItem = ListItem(
-                currentEpisode = 1,
+                currentEpisode = 4,
                 score = 5,
                 production = Movie(
-                    imdbID = "tt1234567",
-                    title = "New Movie",
-                    description = "A great new movie.",
-                    genre = listOf("Action", "Adventure"),
-                    releaseDate = Calendar.getInstance(), // Bruk dagens dato
-                    actors = listOf("Actor 1", "Actor 2"),
-                    rating = 8,
-                    reviews = listOf("Great movie!", "Must watch."),
-                    posterUrl = "http://example.com/movie.jpg",
+                    imdbID = "tt2096673",
+                    title = "Inside Out",
+                    description = "When 11-year-old Riley moves to a new city, her Emotions team up to help her through the transition. Joy, Fear, Anger, Disgust and Sadness work together, but when Joy and Sadness get lost, they must journey through unfamiliar places to get back home",
+                    genre = listOf("Animation", "Family", "Drama", "Comedy"),
+                    releaseDate = Calendar.getInstance().apply {
+                        set(Calendar.YEAR, 2015)
+                        set(Calendar.MONTH, Calendar.JUNE) // Remember that months are 0-indexed
+                        set(Calendar.DAY_OF_MONTH, 17)
+                    },
                     lengthMinutes = 120,
-                    trailerUrl = "http://example.com/trailer.mp4"
+                    actors = listOf(),
+                    rating = 7,
+                    reviews = listOf("reviewid0300", "reviewid0431"),
+                    posterUrl = "https://image.tmdb.org/t/p/w500/2H1TmgdfNtsKlU9jKdeNyYL5y8T.jpg"
                 )
             )
 
-            addCurrentlyWatchingShow(userID = loggedInUserId, listItem = newListItem,
+            addCurrentlyWatchingShow(
+                userID = loggedInUserId,
+                listItem = newListItem,
                 onSuccess = {
                     Log.d("Controller", "Show added to currently watching list successfully.")
                 },
@@ -78,7 +84,53 @@ class ControllerViewModel (
     }
 
 
+    private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())
+    val friendsWatchedList: StateFlow<List<ListItem>> get() = _friendsWatchedList
+
+    private val _friendsJustWatchedLoading = MutableLiveData<Boolean>(true)
+    val friendsJustWatchedLoading: LiveData<Boolean> get() = _friendsJustWatchedLoading
+
+
+
+    init {
+        // Lytt etter endringer i loggedInUser og kall getProductionsFromFriendsWatchedList når den er oppdatert
+        viewModelScope.launch {
+            loggedInUser.collect { user ->
+                if (user != null) {
+                    getProductionsFromFriendsWatchedList()
+                }
+            }
+        }
+    }
+
+
+    private fun getProductionsFromFriendsWatchedList() {
+        _friendsJustWatchedLoading.value = true
+
+        viewModelScope.launch {
+            userViewModel.getUsersFriends { friendsList ->
+                val recentFriendsWatched = mutableListOf<ListItem>()
+
+                if (friendsList.isNotEmpty()) {
+
+                    if(friendsList.size > 2) {
+                        for (friend in friendsList) {
+                            friend.completedShows.lastOrNull()?.let { recentFriendsWatched.add(it) }
+                        }
+                    } else {
+                        for (friend in friendsList) {
+                            friend.completedShows.takeLast(2).forEach { recentFriendsWatched.add(it) }
+                        }
+                    }
+                }
+
+                // Oppdater StateFlow
+                _friendsWatchedList.value = recentFriendsWatched
+                _friendsJustWatchedLoading.value = false
+            }
+        }
+    }
+
 
 
 }
-

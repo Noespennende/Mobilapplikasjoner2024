@@ -196,7 +196,7 @@ fun addCurrentlyWatchingShow(
     // Oppdater dokumentet til brukeren
     db.collection("users")
         .document(userID)
-        .update("currentlyWatchingShows", FieldValue.arrayUnion(listItemMap))
+        .update("completedShows", FieldValue.arrayUnion(listItemMap))
         .addOnSuccessListener {
             onSuccess() // Kall onSuccess når elementet er lagt til
         }

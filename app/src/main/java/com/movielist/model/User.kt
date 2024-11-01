@@ -8,7 +8,7 @@ data class User (
     val id: String,  //= UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val friendList: MutableList<User> = mutableListOf(),
+    val friendList: MutableList<String> = mutableListOf(),
     val myReviews: MutableList<Review> = mutableListOf(),
     val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val profileImageID: Int,
@@ -164,6 +164,7 @@ fun deleteUser(uuid: String){
     }
 }
 
+/*
 fun addFriend(user: User, friend: User): User {
     val updatedFriendList = user.friendList.toMutableList()
 
@@ -194,6 +195,7 @@ fun removeFriend(user: User, friend: User) : User {
 
     return user.copy(friendList =  updatedFriendList)
 }
+ */
 
 
 
