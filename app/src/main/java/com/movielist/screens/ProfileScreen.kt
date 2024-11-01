@@ -113,10 +113,10 @@ fun ProfilePage (){
     }
 
     exampleUser.myReviews.addAll(exampleReviews)
-    exampleUser.currentlyWatchingShows.addAll(exampleShows)
-    exampleUser.completedShows.addAll(exampleShows)
-    exampleUser.wantToWatchShows.addAll(exampleShows)
-    exampleUser.droppedShows.addAll(exampleShows)
+    exampleUser.currentlyWatchingCollection.addAll(exampleShows)
+    exampleUser.completedCollection.addAll(exampleShows)
+    exampleUser.wantToWatchCollection.addAll(exampleShows)
+    exampleUser.droppedCollection.addAll(exampleShows)
 
     exampleFavShows.addAll(exampleShows)
 

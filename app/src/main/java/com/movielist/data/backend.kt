@@ -47,10 +47,10 @@ fun createUserWithEmailAndPassword(
                                         myReviews = mutableListOf(),
                                         favoriteCollection = mutableListOf(),
                                         profileImageID = 0,
-                                        completedShows = mutableListOf(),
-                                        wantToWatchShows = mutableListOf(),
-                                        droppedShows = mutableListOf(),
-                                        currentlyWatchingShows = mutableListOf()
+                                        completedCollection = mutableListOf(),
+                                        wantToWatchCollection = mutableListOf(),
+                                        droppedCollection = mutableListOf(),
+                                        currentlyWatchingCollection = mutableListOf()
                                     )
                                     addUserToDatabase(newUser)
 

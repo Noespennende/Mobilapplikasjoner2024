@@ -1,7 +1,5 @@
 package com.movielist.screens
 
-import android.util.Log
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -117,10 +115,10 @@ fun FrontPage(controllerViewModel: ControllerViewModel) {
         myReviews = mutableListOf(),
         favoriteCollection = mutableListOf(),
         profileImageID = R.drawable.profilepicture,
-        completedShows = listItemList,
-        wantToWatchShows = listItemList,
-        droppedShows = listItemList,
-        currentlyWatchingShows = listItemList
+        completedCollection = listItemList,
+        wantToWatchCollection = listItemList,
+        droppedCollection = listItemList,
+        currentlyWatchingCollection = listItemList
     )
     for (i in 0..6) {
         reviewList.add(
@@ -140,7 +138,7 @@ fun FrontPage(controllerViewModel: ControllerViewModel) {
 
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
-    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingShows ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
 
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
@@ -242,7 +240,7 @@ fun CurrentlyWatchingScroller (
     val testUser = remember {mutableStateOf<User?>(null)} // Usikker på om det er riktig bruker som skal hentes
 
     // Sjekker om bruker har en currentlyWatchingShows liste
-    testUser.value?.currentlyWatchingShows?.let { shows ->
+    testUser.value?.currentlyWatchingCollection?.let { shows ->
         allCurrentlyWatchingShows.addAll(shows)
     }
 

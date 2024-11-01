@@ -1,6 +1,5 @@
 package com.movielist.controller
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
@@ -9,14 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.addCurrentlyWatchingShow
-import com.movielist.data.getUsersWatchingCollection
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.AuthViewModel
-import com.movielist.viewmodel.QueryViewModel
 import com.movielist.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -91,20 +88,20 @@ class ControllerViewModel(
     }
 
     fun getCurrentlyWatchingShows(): MutableList<ListItem>? {
-        return loggedInUser.value?.currentlyWatchingShows
+        return loggedInUser.value?.currentlyWatchingCollection
 
     }
 
     fun getCompletedShows(): MutableList<ListItem>?{
-        return loggedInUser.value?.completedShows
+        return loggedInUser.value?.completedCollection
     }
 
     fun getDroppedShows(): MutableList<ListItem>?{
-        return loggedInUser.value?.droppedShows
+        return loggedInUser.value?.droppedCollection
         }
 
     fun getWantToWatchList(): MutableList<ListItem>?{
-        return loggedInUser.value?.wantToWatchShows
+        return loggedInUser.value?.wantToWatchCollection
     }
 
 
@@ -117,7 +114,7 @@ class ControllerViewModel(
                 production = production,
                 lastUpdated = Calendar.getInstance()
             )
-            user.wantToWatchShows.add(listItem)
+            user.wantToWatchCollection.add(listItem)
         } else {
             println("User is not logged in.")
         }
@@ -133,7 +130,7 @@ class ControllerViewModel(
                 production = production,
                 lastUpdated = Calendar.getInstance()
             )
-            user.completedShows.add(listItem)
+            user.completedCollection.add(listItem)
         } else {
             println("User is not logged in.")
         }
@@ -149,7 +146,7 @@ class ControllerViewModel(
                 production = production,
                 lastUpdated = Calendar.getInstance()
             )
-            user.currentlyWatchingShows.add(listItem)
+            user.currentlyWatchingCollection.add(listItem)
         } else {
             println("User is not logged in.")
         }
@@ -165,7 +162,7 @@ class ControllerViewModel(
                 production = production,
                 lastUpdated = Calendar.getInstance()
             )
-            user.droppedShows.add(listItem)
+            user.droppedCollection.add(listItem)
         } else {
             println("User is not logged in.")
         }
@@ -219,11 +216,11 @@ class ControllerViewModel(
 
                     if(friendsList.size > 2) {
                         for (friend in friendsList) {
-                            friend.completedShows.lastOrNull()?.let { recentFriendsWatched.add(it) }
+                            friend.completedCollection.lastOrNull()?.let { recentFriendsWatched.add(it) }
                         }
                     } else {
                         for (friend in friendsList) {
-                            friend.completedShows.takeLast(2).forEach { recentFriendsWatched.add(it) }
+                            friend.completedCollection.takeLast(2).forEach { recentFriendsWatched.add(it) }
                         }
                     }
                 }

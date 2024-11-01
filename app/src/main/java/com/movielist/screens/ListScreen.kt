@@ -33,7 +33,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.movielist.viewmodel.UserViewModel
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
@@ -76,16 +75,16 @@ fun ListPage (controllerViewModel: ControllerViewModel)
     val favoriteCollection: List<ListItem> = loggedInUser?.favoriteCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> = loggedInUser?.completedShows ?: emptyList()
+    val completedCollection: List<ListItem> = loggedInUser?.completedCollection ?: emptyList()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchShows ?: emptyList()
+    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchCollection ?: emptyList()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> = loggedInUser?.droppedShows ?: emptyList()
+    val droppedCollection: List<ListItem> = loggedInUser?.droppedCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingShows ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
 
     /*
         Her kan man da da lage sjekk:

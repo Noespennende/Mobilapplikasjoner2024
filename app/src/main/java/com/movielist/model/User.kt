@@ -8,18 +8,18 @@ data class User (
     val id: String,  //= UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val friendList: MutableList<String> = mutableListOf(),
-    val myReviews: MutableList<Review> = mutableListOf(),
-    val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val profileImageID: Int,
-    val completedShows:  MutableList<ListItem> = mutableListOf(),
-    val wantToWatchShows:  MutableList<ListItem> = mutableListOf(),
-    val droppedShows:  MutableList<ListItem> = mutableListOf(),
-    val currentlyWatchingShows:  MutableList<ListItem> = mutableListOf(),
     val gender: String = "Prefer not to say",
     val location: String = "It's a secret",
     val website: String = "",
-    val bio: String = ""
+    val bio: String = "",
+    val friendList: MutableList<String> = mutableListOf(),
+    val myReviews: MutableList<Review> = mutableListOf(),
+    val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
+    val completedCollection:  MutableList<ListItem> = mutableListOf(),
+    val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
+    val droppedCollection:  MutableList<ListItem> = mutableListOf(),
+    val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf()
 )
 
 fun movieGenrePercentage(user: User): Map<String, Double> {
@@ -95,10 +95,10 @@ fun showGenrePercentage(user: User): Map<String, Double> {
 
 fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
     val targetList = when(listType){
-        "completed" -> user.completedShows
-        "wantToWatch" -> user.wantToWatchShows
-        "dropped" -> user.droppedShows
-        "currentlyWatching" -> user.currentlyWatchingShows
+        "completed" -> user.completedCollection
+        "wantToWatch" -> user.wantToWatchCollection
+        "dropped" -> user.droppedCollection
+        "currentlyWatching" -> user.currentlyWatchingCollection
         else -> return false
     }
 
@@ -118,7 +118,7 @@ fun isMovie(production: Production): Boolean {
 }
 
 fun getAllMoviesAndShows(user: User): List<ListItem> {
-    val allShows = user.completedShows + user.wantToWatchShows + user.droppedShows + user.currentlyWatchingShows
+    val allShows = user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
     return allShows
 }
 
@@ -145,7 +145,7 @@ fun getAllshows(user: User): List<ListItem> {
 }
 
 fun getUniqueShows (user: User): List<ListItem>{
-    val allShows = user.completedShows + user.wantToWatchShows + user.droppedShows + user.currentlyWatchingShows
+    val allShows = user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
 
     val uniqueShows = allShows.distinctBy { it.id }
 
@@ -218,8 +218,8 @@ fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
 fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
     val commonCompleted: MutableList<ListItem> = mutableListOf()
 
-    user.completedShows.filter { userShow ->
-        friend.completedShows.any { friendShow -> userShow.id == friendShow.id }
+    user.completedCollection.filter { userShow ->
+        friend.completedCollection.any { friendShow -> userShow.id == friendShow.id }
     }.forEach({common ->
         commonCompleted.add(common)
     })
@@ -229,8 +229,8 @@ fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
 fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
     val commonShows: MutableList<ListItem> = mutableListOf()
 
-    user.wantToWatchShows.filter { userShow ->
-        friend.wantToWatchShows.any { friendShow -> userShow.id == friendShow.id }
+    user.wantToWatchCollection.filter { userShow ->
+        friend.wantToWatchCollection.any { friendShow -> userShow.id == friendShow.id }
     }.forEach({commonShow ->
         commonShows.add(commonShow)
     })
@@ -241,8 +241,8 @@ fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
 fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
     val commonShows: MutableList<ListItem> = mutableListOf()
 
-    user.currentlyWatchingShows.filter { userShow ->
-        friend.currentlyWatchingShows.any { friendShow -> userShow.id == friendShow.id }
+    user.currentlyWatchingCollection.filter { userShow ->
+        friend.currentlyWatchingCollection.any { friendShow -> userShow.id == friendShow.id }
     }.forEach({commonShow ->
         commonShows.add(commonShow)
     })
