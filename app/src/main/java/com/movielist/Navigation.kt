@@ -63,7 +63,7 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         composable(
             route = Screen.ProfileScreen.withArguments()
         ) {
-            ProfilePage()
+            ProfilePage(controllerViewModel)
         }
         composable(
             route = Screen.CreateUserScreen.withArguments()
@@ -73,6 +73,8 @@ fun Navigation (controllerViewModel: ControllerViewModel){
     }
 
     //Navbar graphics
-    BottomNavbarAndMobileIconsBackground()
-    BottomNavBar(navController = navController)
+    if (isLoggedIn) {
+        BottomNavbarAndMobileIconsBackground()
+        BottomNavBar(navController = navController)
+    }
 }

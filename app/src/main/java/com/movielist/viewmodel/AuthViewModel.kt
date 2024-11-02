@@ -1,10 +1,16 @@
 package com.movielist.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.userProfileChangeRequest
 import com.movielist.data.FireBaseAuth
+import com.movielist.data.addUserToDatabase
+import com.movielist.data.isUsernameUnique
+import com.movielist.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -48,5 +54,70 @@ class AuthViewModel : ViewModel() {
         _currentUser.value = null
         // Setter _isLoggedIn til false siden brukeren nå er logget ut
         _isLoggedIn.value = false
+    }
+
+    fun createUserWithEmailAndPassword(
+        username: String,
+        email: String,
+        password: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val auth = FirebaseAuth.getInstance()
+
+        if (username.contains(" ")) {
+            onFailure("Username cannot contain spaces between characters")
+            return
+        }
+
+        isUsernameUnique(username) { isUnique ->
+            if (isUnique) {
+
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Brukeren ble opprettet
+                            val user = auth.currentUser
+
+                            val profileUpdates = userProfileChangeRequest {
+                                displayName = username
+                            }
+
+                            user!!.updateProfile(profileUpdates)
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+
+                                        val newUser = User(
+                                            id = user.uid,
+                                            userName = username,
+                                            email = email,
+                                            friendList = mutableListOf(),
+                                            myReviews = mutableListOf(),
+                                            favoriteCollection = mutableListOf(),
+                                            profileImageID = 0,
+                                            completedCollection = mutableListOf(),
+                                            wantToWatchCollection = mutableListOf(),
+                                            droppedCollection = mutableListOf(),
+                                            currentlyWatchingCollection = mutableListOf()
+                                        )
+                                        addUserToDatabase(newUser)
+
+                                        onSuccess("User created with UID: ${user.uid} and username: ${user.displayName}")
+                                        Log.d("FirebaseAuth", "User created with UID: ${user.uid}")
+                                    }
+                                }
+                        } else {
+
+                            // Opprettelse feilet
+                            val exceptionMessage = task.exception?.message ?: "Unknown error"
+                            onFailure(exceptionMessage)
+                            Log.w("FirebaseAuth", "User creation failed", task.exception)
+                        }
+                    }
+            } else {
+                onFailure("Username already exists")
+            }
+        }
+
     }
 }

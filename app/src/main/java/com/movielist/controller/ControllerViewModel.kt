@@ -232,6 +232,17 @@ class ControllerViewModel(
         }
     }
 
+    fun createUserWithEmailAndPassword(
+        username: String,
+        email: String,
+        password: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        authViewModel.createUserWithEmailAndPassword(username, email, password, onSuccess, onFailure)
+    }
+
+
 
 
 }
