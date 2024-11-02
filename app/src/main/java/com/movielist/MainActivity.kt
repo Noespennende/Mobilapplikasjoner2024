@@ -13,6 +13,7 @@ import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
+import com.movielist.screens.CreateUserScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -54,8 +55,6 @@ class MainActivity : ComponentActivity() {
             Navigation(controllerViewModel)
 
             TopMobileIconsBackground()
-
-
 
         }
     }

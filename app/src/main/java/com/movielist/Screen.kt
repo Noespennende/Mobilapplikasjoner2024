@@ -11,6 +11,7 @@ sealed class Screen (
     object ReviewsScreen : Screen("reviews_screen")
     object ProfileScreen : Screen("profile_screen")
     object LoginScreen : Screen("login_screen")
+    object CreateUserScreen : Screen("createUser_screen")
 
     fun withArguments(vararg args: String): String {
         return buildString {

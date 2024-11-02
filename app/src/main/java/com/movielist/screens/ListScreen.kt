@@ -65,7 +65,7 @@ import java.util.Calendar
 
 
 @Composable
-fun ListPage (controllerViewModel: ControllerViewModel)
+fun ListScreen (controllerViewModel: ControllerViewModel)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
