@@ -127,6 +127,11 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
 
+    val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
+
+    val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(loggedInUser)
+
+
     //function variables:
     val user by remember(loggedInUser) {
         mutableStateOf(loggedInUser ?: exampleUser)
@@ -164,7 +169,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
         item {
             ListItemListSidesroller(
                 header = "Favorite series",
-                listOfShows = exampleShows, //TEMP CODE
+                listOfShows = usersFavoriteTVShows,
                 textModifier = Modifier
                     .padding(
                         start = verticalPadding,
@@ -191,7 +196,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
         item {
             ListItemListSidesroller(
                 header = "Favorite movies",
-                listOfShows = exampleFavShows, //TEMP CODE
+                listOfShows = usersFavoriteMovies,
                 textModifier = Modifier
                     .padding(
                         start = horizontalPadding,
