@@ -240,18 +240,38 @@ fun ShowImage(
 
 @Composable
 fun ProfileImage(
-    imageID: Int,
+    imageID: Int?,
     userName: String,
     sizeMultiplier: Float = 1.0f
 ) {
-    Image(
-        painter = painterResource(id = imageID),
-        contentDescription = userName,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size((30*sizeMultiplier).dp)
-            .clip(CircleShape)
-    )
+
+    val placeholderID = R.drawable.profilepicture
+
+    if (imageID != null) {
+        // Last inn bildet fra URL
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageID)
+                .placeholder(placeholderID) // placeholder når bildet lastes
+                .error(placeholderID) // vis samme placeholder ved feil
+                .build(),
+            contentDescription = userName,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size((30*sizeMultiplier).dp)
+                .clip(CircleShape)
+        )
+    } else {
+        // Vis fallback-bildet
+        Image(
+            painter = painterResource(id = placeholderID),
+            contentDescription = userName,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size((30*sizeMultiplier).dp)
+                .clip(CircleShape)
+        )
+    }
 }
 
 @Composable
