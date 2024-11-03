@@ -52,23 +52,24 @@ class ControllerViewModel(
         val loggedInUserId = currentFirebaseUser.value?.uid
         if (loggedInUserId != null) {
             val newListItem = ListItem(
-                currentEpisode = 4,
-                score = 5,
-                production = Movie(
-                    imdbID = "tt2096673",
-                    title = "Inside Out",
-                    description = "When 11-year-old Riley moves to a new city, her Emotions team up to help her through the transition. Joy, Fear, Anger, Disgust and Sadness work together, but when Joy and Sadness get lost, they must journey through unfamiliar places to get back home",
-                    genre = listOf("Animation", "Family", "Drama", "Comedy"),
+                currentEpisode = 5,
+                score = 7,
+                production = TVShow(
+                    imdbID = "tt3205802",
+                    title = "How to Get Away with Murder",
+                    description = "Annalise discovers there’s a surprise witness that threatens her case. Meanwhile, Connor tries to persuade the K3 to go along with a new plan. Elsewhere, a lie between Frank and Bonnie threatens their relationship as Annalise’s killer is finally revealed.",
+                    genre = listOf("Crime", "Drama", "Mystery"),
                     releaseDate = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, 2015)
-                        set(Calendar.MONTH, Calendar.JUNE) // Remember that months are 0-indexed
-                        set(Calendar.DAY_OF_MONTH, 17)
+                        set(Calendar.YEAR, 2014)
+                        set(Calendar.MONTH, Calendar.SEPTEMBER) // Remember that months are 0-indexed
+                        set(Calendar.DAY_OF_MONTH, 25)
                     },
-                    lengthMinutes = 120,
+                    episodes = listOf("101", "102", "103", "104", "201", "202", "203", "204"),
+                    seasons = listOf("01", "02"),
                     actors = listOf(),
                     rating = 7,
                     reviews = listOf("reviewid0300", "reviewid0431"),
-                    posterUrl = "https://image.tmdb.org/t/p/w500/2H1TmgdfNtsKlU9jKdeNyYL5y8T.jpg"
+                    posterUrl = "https://image.tmdb.org/t/p/w500/bJs8Y6T88NcgksxA8UaVl4YX8p8.jpg"
                 )
             )
 
@@ -184,6 +185,42 @@ class ControllerViewModel(
         }
     }
 
+    fun getUsersFavoriteMovies(user: User?): List<ListItem> {
+
+        if (user != null) {
+            val favoriteMovies = mutableListOf<ListItem>()
+
+            for (listItem in user.favoriteCollection) {
+                if (listItem.production is Movie) {
+                    favoriteMovies.add(listItem)
+                }
+            }
+            return favoriteMovies.toList()
+        } else {
+            Log.d("FavoriteMovies", "getUsersFavoriteMovies: User is null")
+        }
+
+        return emptyList()
+    }
+
+    fun getUsersFavoriteTVShows(user: User?): List<ListItem> {
+
+        if (user != null) {
+            val favoriteTVShows = mutableListOf<ListItem>()
+
+            for (listItem in user.favoriteCollection) {
+                if (listItem.production is TVShow) {
+                    favoriteTVShows.add(listItem)
+                }
+            }
+            return favoriteTVShows.toList()
+        } else {
+            Log.d("FavoriteTVShows", "getUsersFavoriteTVShows: User is null")
+        }
+
+        return emptyList()
+    }
+
 
     private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())
     val friendsWatchedList: StateFlow<List<ListItem>> get() = _friendsWatchedList
@@ -231,6 +268,17 @@ class ControllerViewModel(
             }
         }
     }
+
+    fun createUserWithEmailAndPassword(
+        username: String,
+        email: String,
+        password: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        authViewModel.createUserWithEmailAndPassword(username, email, password, onSuccess, onFailure)
+    }
+
 
 
 

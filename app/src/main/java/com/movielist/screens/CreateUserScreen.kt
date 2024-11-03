@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +62,12 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
 
     val handleCreateUserClick: () -> Unit = {
         if (checkForNoInputErrors()){
-            //Håndter opprettelse av bruker her
+            controllerViewModel.createUserWithEmailAndPassword(username, email, password,
+                {
+                    Log.d("CreateUser", "Success")
+                    controllerViewModel.checkUserStatus()
+                },
+                { Log.d("CreateUser", "Failure") })
         }
     }
 
