@@ -14,7 +14,8 @@ data class Movie(
     override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
     override val posterUrl: String? = null,
     override val type: String = "Movie",
+    override val trailerUrl: String = "",
 
     val lengthMinutes: Int? = null,
-    val trailerUrl: String = ""
+
 ) : Production()

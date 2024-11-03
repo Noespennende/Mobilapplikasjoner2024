@@ -12,6 +12,7 @@ import com.movielist.screens.CreateUserScreen
 import com.movielist.screens.FrontPage
 import com.movielist.screens.ListScreen
 import com.movielist.screens.LoginPage
+import com.movielist.screens.ProductionScreen
 import com.movielist.screens.ProfilePage
 import com.movielist.screens.ReviewPage
 import com.movielist.screens.SearchPage
@@ -29,7 +30,14 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
+
+            Screen.ProductionScreen.route
+            /*
             Screen.HomeScreen.route
+            */
+
+
+
         }
 
     NavHost(
@@ -69,6 +77,11 @@ fun Navigation (controllerViewModel: ControllerViewModel){
             route = Screen.CreateUserScreen.withArguments()
         ) {
             CreateUserScreen(controllerViewModel, navController)
+        }
+        composable(
+            route = Screen.ProductionScreen.withArguments()
+        ) {
+            ProductionScreen(controllerViewModel)
         }
     }
 

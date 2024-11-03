@@ -135,4 +135,8 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
 
     implementation(libs.coil.compose)
+
+    //Youtube embed
+    implementation ("com.pierfrancescosoffritti.androidyoutubeplayer:chromecast-sender:0.30")
+
 }

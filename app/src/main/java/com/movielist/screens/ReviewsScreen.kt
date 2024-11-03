@@ -46,6 +46,7 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
+import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
@@ -426,7 +427,6 @@ fun ReviewsSection(
 ) {
 
     //Header text
-
     Text(
         text = header,
         fontSize = headerSize,
@@ -449,13 +449,38 @@ fun ReviewsSection(
             )
     ) {
         LineDevider()
-        //Reviews
-        for (review in reviewList) {
-            ReviewSummary(
-                review = review
-            )
-            LineDevider()
+
+        if (reviewList.isNotEmpty()){
+            //Reviews
+            for (review in reviewList) {
+                ReviewSummary(
+                    review = review
+                )
+                LineDevider()
+            }
+        } else {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ){
+
+                Text(
+                    text = "No reviews yet",
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = LightGray,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(
+                            top = verticalPadding,
+                            start = horizontalPadding)
+                )
+            }
+
         }
+
 
     }
 }

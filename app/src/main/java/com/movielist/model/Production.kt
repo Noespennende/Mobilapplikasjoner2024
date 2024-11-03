@@ -14,5 +14,6 @@ sealed class Production {
     abstract val reviews: List<String> // Så bruker kan se anmeldelsen sin *umiddelbart*
     abstract val posterUrl: String?
     abstract val type: String
+    abstract val trailerUrl: String?
 
 }
