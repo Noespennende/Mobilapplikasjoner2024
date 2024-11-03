@@ -65,7 +65,7 @@ import java.util.Calendar
 
 
 @Composable
-fun ListPage (controllerViewModel: ControllerViewModel)
+fun ListScreen (controllerViewModel: ControllerViewModel)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
@@ -75,16 +75,16 @@ fun ListPage (controllerViewModel: ControllerViewModel)
     val favoriteCollection: List<ListItem> = loggedInUser?.favoriteCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> = loggedInUser?.completedShows ?: emptyList()
+    val completedCollection: List<ListItem> = loggedInUser?.completedCollection ?: emptyList()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchShows ?: emptyList()
+    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchCollection ?: emptyList()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> = loggedInUser?.droppedShows ?: emptyList()
+    val droppedCollection: List<ListItem> = loggedInUser?.droppedCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingShows ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
 
     /*
         Her kan man da da lage sjekk:

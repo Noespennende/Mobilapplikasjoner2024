@@ -12,7 +12,7 @@ data class Movie(
     override val actors: List<String> = emptyList(), // Listen skal ikke endres i appen - data kommer fra API
     override val rating: Int? = null,
     override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
-    override val posterUrl: String = "",
+    override val posterUrl: String? = null,
     override val type: String = "Movie",
 
     val lengthMinutes: Int? = null,

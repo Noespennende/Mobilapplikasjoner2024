@@ -25,19 +25,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.viewmodel.AuthViewModel
-import com.movielist.data.createUserWithEmailAndPassword
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.movielist.data.getUserInfo
 import com.movielist.data.logInWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
+import com.movielist.controller.ControllerViewModel
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.weightRegular
 
 
-@Preview
 @Composable
-fun FirebaseTesting() {
+fun FirebaseTesting(controllerViewModel: ControllerViewModel) {
 
     // Hent AuthViewModel. Den kan være Activity-scoped.
     val authViewModel: AuthViewModel = viewModel()
@@ -54,9 +53,9 @@ fun FirebaseTesting() {
 
         LogInLogic(authViewModel)
 
-        //CreateUser()
+        //CreateUser(controllerViewModel)
 
-        //GetData()
+        //GetData(controllerViewModel)
 
     }
 
@@ -218,13 +217,14 @@ fun LoginSuccessful(onLogout: () -> Unit, authViewModel: AuthViewModel = viewMod
 
 
 @Composable
-fun CreateUser() {
+fun CreateUser(controllerViewModel: ControllerViewModel) {
 
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var successMessage by remember { mutableStateOf<String?>(null) }
+
 
     // UI for input og knapp
     Column(
@@ -263,7 +263,7 @@ fun CreateUser() {
         // Knapp for å opprette bruker
         Button(
             onClick = {
-                createUserWithEmailAndPassword(username, email, password, { successMessage = it }, { errorMessage = it })
+                controllerViewModel.createUserWithEmailAndPassword(username, email, password, { successMessage = it }, { errorMessage = it })
             },
             modifier = Modifier.fillMaxWidth()
         ) {

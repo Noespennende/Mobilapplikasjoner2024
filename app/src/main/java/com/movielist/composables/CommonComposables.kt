@@ -39,13 +39,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.model.ListItem
 import com.movielist.model.Production
@@ -66,7 +68,6 @@ import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
-import coil.compose.rememberImagePainter
 
 @Composable
 fun Background () {
@@ -199,36 +200,78 @@ fun TopMobileIconsBackground (
 
 
 @Composable
-fun ShowImage (
-    imageID: String = "https://image.tmdb.org/t/p/original/vCXkaktMk5iBMSlyFH1R6K48Ndb.jpg",
+fun ShowImage(
+    imageID: String? = null, // Endret til nullable for å håndtere URL-er
+    placeholderID: Int = R.drawable.noimage,
     imageDescription: String = "Image not available",
     sizeMultiplier: Float = 1.0f
 ) {
-    Image(
-        painter = rememberImagePainter(imageID),
-        contentDescription = imageDescription,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .width(showImageWith*sizeMultiplier)
-            .height(showImageHeight*sizeMultiplier)
-            .clip(RoundedCornerShape(5.dp))
-    )
+    //val showImageWidth = 100.dp // Juster dette til ønsket bredde
+    //val showImageHeight = 150.dp // Juster dette til ønsket høyde
+
+    if (imageID != null) {
+        // Last inn bildet fra URL
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageID)
+                .placeholder(placeholderID) // placeholder når bildet lastes
+                .error(placeholderID) // vis samme placeholder ved feil
+                .build(),
+            contentDescription = imageDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .width(showImageWith * sizeMultiplier)
+                .height(showImageHeight * sizeMultiplier)
+                .clip(RoundedCornerShape(5.dp))
+        )
+    } else {
+        // Vis fallback-bildet
+        Image(
+            painter = painterResource(id = placeholderID),
+            contentDescription = imageDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .width(showImageWith * sizeMultiplier)
+                .height(showImageHeight * sizeMultiplier)
+                .clip(RoundedCornerShape(5.dp))
+        )
+    }
 }
 
 @Composable
 fun ProfileImage(
-    imageID: Int,
+    imageID: Int?,
     userName: String,
     sizeMultiplier: Float = 1.0f
 ) {
-    Image(
-        painter = painterResource(id = imageID),
-        contentDescription = userName,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size((30*sizeMultiplier).dp)
-            .clip(CircleShape)
-    )
+
+    val placeholderID = R.drawable.profilepicture
+
+    if (imageID != null) {
+        // Last inn bildet fra URL
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageID)
+                .placeholder(placeholderID) // placeholder når bildet lastes
+                .error(placeholderID) // vis samme placeholder ved feil
+                .build(),
+            contentDescription = userName,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size((30*sizeMultiplier).dp)
+                .clip(CircleShape)
+        )
+    } else {
+        // Vis fallback-bildet
+        Image(
+            painter = painterResource(id = placeholderID),
+            contentDescription = userName,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size((30*sizeMultiplier).dp)
+                .clip(CircleShape)
+        )
+    }
 }
 
 @Composable

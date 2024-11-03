@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +38,7 @@ import com.movielist.composables.ListItemListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RoundProgressBar
 import com.movielist.composables.TopNavbarBackground
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
 import com.movielist.model.TVShow
@@ -66,7 +68,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun ProfilePage (){
+fun ProfilePage (controllerViewModel: ControllerViewModel){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
@@ -92,7 +94,7 @@ fun ProfilePage (){
                     actors = emptyList(),
                     rating = 4,
                     reviews = ArrayList(),
-                    posterUrl = "R.drawable.silo",
+                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
                                      "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
@@ -113,22 +115,28 @@ fun ProfilePage (){
     }
 
     exampleUser.myReviews.addAll(exampleReviews)
-    exampleUser.currentlyWatchingShows.addAll(exampleShows)
-    exampleUser.completedShows.addAll(exampleShows)
-    exampleUser.wantToWatchShows.addAll(exampleShows)
-    exampleUser.droppedShows.addAll(exampleShows)
+    exampleUser.currentlyWatchingCollection.addAll(exampleShows)
+    exampleUser.completedCollection.addAll(exampleShows)
+    exampleUser.wantToWatchCollection.addAll(exampleShows)
+    exampleUser.droppedCollection.addAll(exampleShows)
 
     exampleFavShows.addAll(exampleShows)
 
 
-
     // TEMP CODE DELETE ABOVE
 
+    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+
+    val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
+
+    val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(loggedInUser)
+
+
     //function variables:
-    val user by remember {
-        mutableStateOf(exampleUser)
+    val user by remember(loggedInUser) {
+        mutableStateOf(loggedInUser ?: exampleUser)
     }
-    val loggedInUser by remember {
+    val isLoggedInUser by remember {
         mutableStateOf(true)
     }
 
@@ -152,7 +160,7 @@ fun ProfilePage (){
                     )
             )
             {
-                ProfileInfoSection( user = exampleUser)
+                ProfileInfoSection( user = user)
             }
 
         }
@@ -161,7 +169,7 @@ fun ProfilePage (){
         item {
             ListItemListSidesroller(
                 header = "Favorite series",
-                listOfShows = exampleShows, //TEMP CODE
+                listOfShows = usersFavoriteTVShows,
                 textModifier = Modifier
                     .padding(
                         start = verticalPadding,
@@ -188,7 +196,7 @@ fun ProfilePage (){
         item {
             ListItemListSidesroller(
                 header = "Favorite movies",
-                listOfShows = exampleFavShows, //TEMP CODE
+                listOfShows = usersFavoriteMovies,
                 textModifier = Modifier
                     .padding(
                         start = horizontalPadding,
@@ -244,8 +252,8 @@ fun ProfilePage (){
 
     //Navigation
     TopNavBarProfilePage(
-        user = exampleUser,
-        loggedInUser = loggedInUser
+        user = user,
+        loggedInUser = isLoggedInUser
     )
 }
 

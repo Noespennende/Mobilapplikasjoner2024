@@ -1,6 +1,6 @@
 package com.movielist.screens
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -28,17 +29,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
 import com.movielist.composables.ShowImage
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
@@ -51,10 +56,9 @@ import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
 import java.util.Calendar
 import kotlin.random.Random
-import coil.compose.rememberImagePainter
 
 @Composable
-fun FrontPage() {
+fun FrontPage(controllerViewModel: ControllerViewModel) {
 
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
@@ -72,7 +76,7 @@ fun FrontPage() {
                     actors = emptyList(),
                     rating = 4,
                     reviews = ArrayList(),
-                    posterUrl = "R.drawable.silo",
+                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
                                       "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
@@ -94,7 +98,7 @@ fun FrontPage() {
                 actors = emptyList(),
                 rating = 4,
                 reviews = ArrayList(),
-                posterUrl = "R.drawable.silo",
+                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                 episodes = listOf("01", "02", "03", "04", "05", "06",
                     "07", "08", "09", "10", "11", "12"),
                 seasons = listOf("1", "2", "3")
@@ -111,10 +115,10 @@ fun FrontPage() {
         myReviews = mutableListOf(),
         favoriteCollection = mutableListOf(),
         profileImageID = R.drawable.profilepicture,
-        completedShows = listItemList,
-        wantToWatchShows = listItemList,
-        droppedShows = listItemList,
-        currentlyWatchingShows = listItemList
+        completedCollection = listItemList,
+        wantToWatchCollection = listItemList,
+        droppedCollection = listItemList,
+        currentlyWatchingCollection = listItemList
     )
     for (i in 0..6) {
         reviewList.add(
@@ -132,14 +136,20 @@ fun FrontPage() {
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
-    //Front page graphics
+
+    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
+
+    val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
+
+
+    // Front page graphics
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-        //Front page content
+        // Front page content
         item {
-            CurrentlyWatchingScroller(listItemList)
+            CurrentlyWatchingScroller(currentlyWatchingCollection)
         }
 
         item {
@@ -166,7 +176,10 @@ fun FrontPage() {
         }
 
         item {
-            YourFriendsJustWatched(listItemList)
+
+            YourFriendsJustWatched(friendsWatchedList.toMutableList())
+
+
         }
 
         item {
@@ -227,7 +240,7 @@ fun CurrentlyWatchingScroller (
     val testUser = remember {mutableStateOf<User?>(null)} // Usikker på om det er riktig bruker som skal hentes
 
     // Sjekker om bruker har en currentlyWatchingShows liste
-    testUser.value?.currentlyWatchingShows?.let { shows ->
+    testUser.value?.currentlyWatchingCollection?.let { shows ->
         allCurrentlyWatchingShows.addAll(shows)
     }
 
@@ -243,98 +256,150 @@ fun CurrentlyWatchingScroller (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
     ) {
-        items(listOfShows.size) { i ->
-            CurrentlyWatchingCard(
-                imageId = listOfShows[i].production.posterUrl,
-                imageDescription = listOfShows[i].production.title + " Image description",
-                title = listOfShows[i].production.title,
-                showLenght = when (listOfShows[i].production) {
-                    is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
-                    is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
-                    is Episode -> (listOfShows[i].production as Episode).lengthMinutes
-                    else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
-                },
-                episodesWatched = listOfShows[i].currentEpisode,
-                onMarkAsWatched = {mostRecentButtonClick(listOfShows[i])} // Registrerer når "Mark as Watched" er trykket
+            if (listOfShows.isEmpty()) {
+                items (3) {
 
-            )
-        }
+                        LoadingCurrentlyWatchingCard()
+                }
+            } else {
+                items(listOfShows.size) { i ->
+                    CurrentlyWatchingCard(
+                        imageId = listOfShows[i].production.posterUrl,
+                        imageDescription = listOfShows[i].production.title + " Image description",
+                        title = listOfShows[i].production.title,
+                        showLength = when (listOfShows[i].production) {
+                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                            is Movie -> 1 // Returnerer lengden i minutter som Int
+                            is Episode -> 1
+                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
+                        },
+                        episodesWatched = listOfShows[i].currentEpisode,
+                        onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) } // Registrerer når "Mark as Watched" er trykket
+
+                    )
+                }
+            }
+
 
 
     }
 }
 
 @Composable
-fun CurrentlyWatchingCard (
-    imageId: String = "https://image.tmdb.org/t/p/original/vCXkaktMk5iBMSlyFH1R6K48Ndb.jpg",
+fun LoadingCurrentlyWatchingCard(
+    modifier: Modifier = Modifier,
+) {
+    // Card container
+    Card(
+        modifier = modifier.width(350.dp),
+        shape = RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp),
+        colors = CardDefaults.cardColors(containerColor = Gray)
+    ) {
+        // Card content
+        Column(
+            modifier = Modifier
+                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    bottom = 10.dp
+                )
+        ) {
+            // Main image - Last inn bilde fra URL eller bruk placeholder
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(R.drawable.noimage)
+                    .placeholder(R.drawable.noimage) // placeholder når bildet lastes
+                    .error(R.drawable.noimage) // vis samme placeholder ved feil
+                    .build(),
+                contentDescription = "test",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(Color.DarkGray)
+                    .padding(5.dp)
+            )
+
+        }
+    }
+}
+
+@Composable
+fun CurrentlyWatchingCard(
+    imageId: String? = null, // Nullable String for bilde-URL
     imageDescription: String = "Image not available",
     title: String,
-    showLenght: Int?,
+    showLength: Int?,
     episodesWatched: Int,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit
-    ) {
-
+) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
     }
 
     var buttonText by remember {
-        mutableStateOf(generateButtonText(episodesWatched, showLenght))
+        mutableStateOf(generateButtonText(episodesWatched, showLength))
     }
 
-    //Card container
-    Card (
-        modifier = modifier
-            .width(350.dp),
+    // Card container
+    Card(
+        modifier = modifier.width(350.dp),
         shape = RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp),
         colors = CardDefaults.cardColors(containerColor = Gray)
-
-    ){
-        //card content
-        Column(modifier = Modifier
-            .height(265.dp+ topPhoneIconsBackgroundHeight)
-            .padding(
-                start = 20.dp,
-                end = 20.dp,
-                top = (topPhoneIconsBackgroundHeight+10.dp),
-                bottom = 10.dp))
-        {
-            //Main image
-            Image(
-                painter = rememberImagePainter(imageId),
+    ) {
+        // Card content
+        Column(
+            modifier = Modifier
+                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .padding(
+                    start = 20.dp,
+                    end = 20.dp,
+                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    bottom = 10.dp
+                )
+        ) {
+            // Main image - Last inn bilde fra URL eller bruk placeholder
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(imageId)
+                    .placeholder(R.drawable.noimage) // placeholder når bildet lastes
+                    .error(R.drawable.noimage) // vis samme placeholder ved feil
+                    .build(),
                 contentDescription = imageDescription,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .clip(RoundedCornerShape(5.dp)))
+                    .clip(RoundedCornerShape(5.dp))
+            )
 
-            //Content under image
-            Column(modifier = Modifier
-                .fillMaxSize()
-                )
-            {
-                //Title and episodes watched
+            // Content under image
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Title and episodes watched
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 5.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
-
                 ) {
-                    //Title
+                    // Title
                     Text(
                         title,
                         style = TextStyle(
                             color = White,
                             fontSize = 18.sp,
                             fontWeight = weightRegular
-                            )
+                        )
                     )
-                    //Episodes watched
-                    Text (
-                        "Ep $watchedEpisodesCount of $showLenght",
+                    // Episodes watched
+                    Text(
+                        "Ep $watchedEpisodesCount of $showLength",
                         style = TextStyle(
                             color = White,
                             fontSize = 18.sp,
@@ -343,21 +408,20 @@ fun CurrentlyWatchingCard (
                     )
                 }
 
-                //Progress bar
-                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLenght!!)
+                // Progress bar
+                ProgressBar(currentNumber = watchedEpisodesCount, endNumber = showLength!!)
 
-                //Mark as watched button
+                // Mark as watched button
                 Button(
                     onClick = {
-                        //Button onclick function
-                        if ( watchedEpisodesCount < showLenght) {
+                        // Button onclick function
+                        if (watchedEpisodesCount < showLength) {
                             watchedEpisodesCount++
                         }
 
-                        buttonText = generateButtonText(watchedEpisodesCount, showLenght)
+                        buttonText = generateButtonText(watchedEpisodesCount, showLength)
 
                         onMarkAsWatched()
-
                     },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(Purple),
@@ -366,7 +430,6 @@ fun CurrentlyWatchingCard (
                         .height(50.dp)
                         .padding(vertical = 5.dp)
                 ) {
-                    //Button text
                     Text(
                         buttonText,
                         fontSize = headerSize,
@@ -375,10 +438,11 @@ fun CurrentlyWatchingCard (
                     )
                 }
             }
-
         }
     }
 }
+
+
 
 
 @Composable
@@ -408,34 +472,59 @@ fun YourFriendsJustWatched (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
         ){
-            items (listOfShows.size) {i ->
-                //Info for each show
-                Column (
-                    verticalArrangement = Arrangement.spacedBy(3.dp)
-                ) {
-                    ShowImage(
-                        imageID = listOfShows[i].production.posterUrl,
-                        imageDescription = listOfShows[i].production.title + " Poster"
-                    )
-                    //Friend Info
-                    FriendsWatchedInfo(
-                        profileImageID = R.drawable.profilepicture,
-                        profileName = "User Userson", //TEMP DELETE THIS
-                        episodesWatched = i,
-                        showLenght = when (listOfShows[i].production) {
-                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
-                            is Movie -> (listOfShows[i].production as Movie).lengthMinutes // Returnerer lengden i minutter som Int
-                            is Episode -> (listOfShows[i].production as Episode).lengthMinutes
-                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
-                        },
-                        score = listOfShows[i].score
-                    )
+            if (listOfShows.isEmpty()) {
+                items (3) {
+                    Column (
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        LoadingCard()
+                    }
                 }
-
-
+            } else {
+                items (listOfShows.size) {i ->
+                    //Info for each show
+                    Column (
+                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                    ) {
+                        ShowImage(
+                            imageID = listOfShows[i].production.posterUrl,
+                            imageDescription = listOfShows[i].production.title + " Poster"
+                        )
+                        //Friend Info
+                        FriendsWatchedInfo(
+                            profileImageID = R.drawable.profilepicture,
+                            profileName = "User Userson", //TEMP DELETE THIS
+                            episodesWatched = listOfShows[i].currentEpisode,
+                            showLenght = when (listOfShows[i].production) {
+                                is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                                is Movie -> 1
+                                is Episode -> 1
+                                else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
+                            },
+                            score = listOfShows[i].score
+                        )
+                    }
+                }
             }
+
         }
 
+    }
+}
+
+@Composable
+fun LoadingCard() {
+    ShowImage()
+    Column (
+        verticalArrangement = Arrangement.spacedBy(3.dp)
+    ){
+        Text(
+            text = "Placeholder",
+            color = White,
+            fontFamily = fontFamily,
+            fontWeight = weightLight,
+            fontSize = 12.sp
+        )
     }
 }
 

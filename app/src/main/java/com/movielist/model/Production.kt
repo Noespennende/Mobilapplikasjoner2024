@@ -12,7 +12,7 @@ sealed class Production {
     abstract val actors: List<String>  // Listen skal ikke endres i appen - data kommer fra API
     abstract val rating: Int?
     abstract val reviews: List<String> // Så bruker kan se anmeldelsen sin *umiddelbart*
-    abstract val posterUrl: String
+    abstract val posterUrl: String?
     abstract val type: String
 
 }

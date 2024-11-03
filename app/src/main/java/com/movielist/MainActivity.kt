@@ -13,6 +13,7 @@ import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
+import com.movielist.screens.CreateUserScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
         controllerViewModel = ControllerViewModel(userViewModel, authViewModel)
 
         controllerViewModel.checkUserStatus()
+
         setContent {
 
             val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()
@@ -38,17 +40,21 @@ class MainActivity : ComponentActivity() {
             //val testUser = "LVE5ZfTvycg09HX11rdcIsW0rVf2"
 
             LaunchedEffect(firebaseUser) {
-                if (firebaseUser != null)
-                controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+                if (firebaseUser != null) {
+                    controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+
+                    //controllerViewModel.addToShowTest()
+                }
+
             }
 
+
             Background()
-            
+
+            //FirebaseTesting(controllerViewModel)
             Navigation(controllerViewModel)
 
             TopMobileIconsBackground()
-
-
 
         }
     }

@@ -82,10 +82,10 @@ fun ReviewPage () {
                 email = "user@email.com",
                 friendList = mutableListOf(),
                 profileImageID = R.drawable.profilepicture,
-                completedShows = emptyList,
-                wantToWatchShows = emptyList,
-                droppedShows = emptyList,
-                currentlyWatchingShows = emptyList,
+                completedCollection = emptyList,
+                wantToWatchCollection = emptyList,
+                droppedCollection = emptyList,
+                currentlyWatchingCollection = emptyList,
             ),
             likes = Random.nextInt(0, 200),
             show = TVShow(
@@ -97,7 +97,7 @@ fun ReviewPage () {
                 actors = emptyList(),
                 rating = 4,
                 reviews = ArrayList(),
-                posterUrl = "R.drawable.silo",
+                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                 episodes = listOf("01", "02", "03", "04", "05", "06",
                                  "07", "08", "09", "10", "11", "12"),
                 seasons = listOf("1", "2", "3")

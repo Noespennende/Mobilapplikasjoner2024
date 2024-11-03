@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.controller.ControllerViewModel
-import com.movielist.data.logInWithEmailAndPassword
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.Purple
@@ -38,15 +38,43 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
 @Composable
-fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavController){
+fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: NavController){
 
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf("") }
 
-    var handleCreateUserClick: () -> Unit = {
-        navController.navigate(Screen.CreateUserScreen.withArguments())
+    val checkForNoInputErrors: () -> Boolean = {
+       if(username.length < 3){
+           errorText = "The username must be at least 3 characters long"
+           false
+       } else if (email.length < 3 || !email.contains("@") || !email.contains(".")){
+           errorText= "Please provide a valid email adress."
+           false
+       } else if (password.length < 5) {
+           errorText= "The password must be at least 5 characters long"
+           false
+       } else {
+           true
+       }
     }
+
+    val handleCreateUserClick: () -> Unit = {
+        if (checkForNoInputErrors()){
+            controllerViewModel.createUserWithEmailAndPassword(username, email, password,
+                {
+                    Log.d("CreateUser", "Success")
+                    controllerViewModel.checkUserStatus()
+                },
+                { Log.d("CreateUser", "Failure") })
+        }
+    }
+
+    var handleBackToLoginScreenClick: () -> Unit = {
+        navController.navigate(Screen.LoginScreen.withArguments())
+    }
+
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,12 +99,35 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
+                    textAlign = TextAlign.Center,
                     color = Color.Red,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
             }
 
+            //Username
+            OutlinedTextField(
+                value = username,
+                onValueChange = { username = it},
+                singleLine = true,
+                colors = textFieldColors,
+                textStyle = TextStyle(
+                    fontSize = headerSize,
+                    fontFamily = fontFamily,
+                    fontWeight = weightRegular,
+                    color = White,
+                ),
+                label = {Text(
+                    "Username",
+                    fontSize = headerSize,
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    color = White,
+                )},
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
 
             //Email
             OutlinedTextField(
@@ -124,18 +175,11 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     .fillMaxWidth()
             )
 
-            //Login button
+            //Create user button
             Box(
                 modifier = Modifier
                     .clickable {
-                        //On login click logic
-                        //errorText = "Wrong email or password"
-                        logInWithEmailAndPassword(email, password, {
-                            // Hvis innloggingen er vellykket, kaller vi callback
-
-                            controllerViewModel.checkUserStatus()
-                        }, {errorText = it})
-
+                        handleCreateUserClick()
                     }
                     .fillMaxWidth()
                     .height(50.dp)
@@ -144,7 +188,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                         shape = RoundedCornerShape(5.dp))
             ){
                 Text(
-                    "Login",
+                    "Create account",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
@@ -156,7 +200,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
             }
 
             Text(
-                "Don't have an account? Create one!",
+                "Already have an account? Login instead.",
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
@@ -165,7 +209,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .clickable {
-                        handleCreateUserClick()
+                        handleBackToLoginScreenClick()
                     }
             )
         }
