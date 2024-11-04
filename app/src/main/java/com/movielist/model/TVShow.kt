@@ -14,6 +14,7 @@ data class TVShow(
     override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
     override val posterUrl: String? = null,
     override val type: String = "TVShow",
+    override val trailerUrl: String = "",
 
     val episodes: List<String> = emptyList(), // Listen skal ikke endres i appen - data kommer fra API
     val seasons: List<String> = emptyList()

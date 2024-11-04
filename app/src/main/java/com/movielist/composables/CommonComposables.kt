@@ -1,5 +1,8 @@
 package com.movielist.composables
 
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -46,10 +49,13 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.model.ListItem
+import com.movielist.model.ListOptions
 import com.movielist.model.Production
 import com.movielist.model.ShowSortOptions
 import com.movielist.ui.theme.DarkGray
@@ -66,8 +72,12 @@ import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
 @Composable
 fun Background () {
@@ -543,6 +553,30 @@ fun RoundProgressBar (
 
 }
 
+@Composable
+fun YouTubeVideoEmbed(
+    videoUrl: String,
+    lifeCycleOwner: LifecycleOwner,
+    modifier: Modifier = Modifier
+){
+    AndroidView(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .padding(horizontal = horizontalPadding)
+        ,
+        factory = { context ->
+            YouTubePlayerView(context = context).apply {
+                lifeCycleOwner.lifecycle.addObserver(this)
+                addYouTubePlayerListener(object: AbstractYouTubePlayerListener(){
+                    override fun onReady(youTubePlayer: YouTubePlayer) {
+                        youTubePlayer.loadVideo(videoUrl, 0f)
+                    }
+                })
+            }
+        }
+    )
+}
+
 fun GenerateShowSortOptionName (
     showSortOptions: ShowSortOptions
 ): String
@@ -554,5 +588,25 @@ fun GenerateShowSortOptionName (
     else
     {
         return showSortOptions.toString().lowercase().replaceFirstChar { it.uppercase() }
+    }
+}
+
+fun GenerateListOptionName (
+    listOption: ListOptions?
+): String
+{
+    if(listOption == ListOptions.WANTTOWATCH)
+    {
+        return "Want to watch"
+    }
+    else if (listOption == null) {
+        return "Add to library"
+    }
+    else if (listOption == ListOptions.REMOVEFROMLIST){
+        return "Remove from list"
+    }
+    else
+    {
+        return listOption.toString().lowercase().replaceFirstChar { it.uppercase() }
     }
 }
