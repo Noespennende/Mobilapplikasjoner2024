@@ -23,11 +23,13 @@ class ApiViewModel() : ViewModel() {
     var errorMessage: String = ""
         private set
 
-    fun getMovieData() {
+    fun getAllMedia() {
         _isLoading.value = true
         _isError.value = false
 
-        val client = ApiConfig.getApiService().getMovies()
+        val client = ApiConfig.getApiService().getAllMedia()
+
+        Log.d("ApiViewModel", "Starting API call to fetch media")
 
         client.enqueue(object : Callback<ApiResponse> {
 
@@ -36,7 +38,10 @@ class ApiViewModel() : ViewModel() {
                 //response: Response<ApiResponse>
                 response: Response<ApiResponse>
 
-            ) {
+            )
+            {
+                Log.d("ApiViewModel", "Raw response: $response")
+
                 val responseBody = response.body()
 
                 Log.d("ApiViewModel", "Response received: $responseBody")

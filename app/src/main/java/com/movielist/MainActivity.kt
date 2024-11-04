@@ -14,12 +14,14 @@ import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
 import com.movielist.screens.CreateUserScreen
+import com.movielist.viewmodel.ApiViewModel
 
 class MainActivity : ComponentActivity() {
 
     // Må initalisere de andre viewModels-ene i MainActivity og sende inn i controllerViewModel
     private val authViewModel: AuthViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
+    private val apiViewModel : ApiViewModel by viewModels()
 
     private lateinit var controllerViewModel: ControllerViewModel
 
@@ -28,7 +30,7 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this) // Initializes Firebase
         enableEdgeToEdge()
 
-        controllerViewModel = ControllerViewModel(userViewModel, authViewModel)
+        controllerViewModel = ControllerViewModel(userViewModel, authViewModel, apiViewModel)
 
         controllerViewModel.checkUserStatus()
 
@@ -44,6 +46,8 @@ class MainActivity : ComponentActivity() {
                     controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
 
                     //controllerViewModel.addToShowTest()
+
+                    controllerViewModel.getAllMedia()
                 }
 
             }

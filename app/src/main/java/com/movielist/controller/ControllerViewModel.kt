@@ -13,6 +13,7 @@ import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.TVShow
 import com.movielist.model.User
+import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +25,8 @@ import java.util.Calendar
 
 class ControllerViewModel(
     private val userViewModel: UserViewModel,
-    private val authViewModel: AuthViewModel
+    private val authViewModel: AuthViewModel,
+    private val apiViewModel: ApiViewModel
 ) : ViewModel() {
 
     /* USER LOGIC */
@@ -45,6 +47,11 @@ class ControllerViewModel(
 
     fun checkUserStatus() {
         authViewModel.checkUserStatus() // Kall autentiseringstatus
+    }
+
+    fun getAllMedia() {
+        Log.d("ControllerViewModel", "getAllMedia called")
+        apiViewModel.getAllMedia()
     }
 
     // This function is for testing purposes - DELETE LATER
