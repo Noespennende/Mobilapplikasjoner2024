@@ -342,6 +342,7 @@ fun ListInfo (
     var handleListCategoryChange: (listOption: ListOptions) -> Unit = {
         dropDownExpanded = false
         dropDownButtonText = GenerateListOptionName(it)
+        //Gjør Kontroller kall her:
 
     }
     Row (
