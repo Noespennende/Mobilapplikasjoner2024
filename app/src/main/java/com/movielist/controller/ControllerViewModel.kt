@@ -11,6 +11,7 @@ import com.movielist.data.addCurrentlyWatchingShow
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
+import com.movielist.model.Review
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.AuthViewModel
@@ -110,9 +111,34 @@ class ControllerViewModel(
     }
 
 
+    fun getMostRecentProductionFromFriends(): List<ListItem> {
+        val friendProductionsWatched = mutableListOf<ListItem>()
+
+        loggedInUser.value?.friendList?.forEach { friend ->
+            friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
+            friend.completedCollection.forEach { friendProductionsWatched.add(it) }
+            friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
+            friend.droppedCollection.forEach { friendProductionsWatched.add(it) }
+            friend.currentlyWatchingCollection.forEach { friendProductionsWatched.add(it) }
+
+        }
+
+        return friendProductionsWatched.sortedByDescending { it.lastUpdated }.take(10)
+
+    }
+
     fun getTopTenProductions(production: List<Production>): List<Production>{
         return production.filter { it.rating != null }.sortedByDescending { it.rating }.take(10)
     }
+
+    /*
+    fun getTenReviewsWithMostLikes(production: Production): List<String>{
+        val theTimeNow = Calendar.getInstance()
+        val sevenDaysFromNow = theTimeNow.add(Calendar.DAY_OF_MONTH, 7)
+
+        return production.reviews.filter { it.postDate.after(sevenDaysFromNow) }
+
+    }*/
 
     fun getCommonMoviesInWantToWatchList(): MutableList<ListItem> {
         val commonMoviesInWatchList = mutableListOf<ListItem>()
