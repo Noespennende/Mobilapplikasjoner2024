@@ -2,14 +2,16 @@ package com.movielist
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.movielist.composables.BottomNavBar
 import com.movielist.composables.BottomNavbarAndMobileIconsBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.screens.CreateUserScreen
-import com.movielist.screens.FrontPage
+import com.movielist.screens.HomeScreen
 import com.movielist.screens.ListScreen
 import com.movielist.screens.LoginPage
 import com.movielist.screens.ProductionScreen
@@ -44,7 +46,7 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         composable(
             route = Screen.HomeScreen.withArguments()
         ) {
-            FrontPage(controllerViewModel)
+            HomeScreen(controllerViewModel, navController)
         }
         composable(
             route = Screen.ListScreen.withArguments()
@@ -72,9 +74,16 @@ fun Navigation (controllerViewModel: ControllerViewModel){
             CreateUserScreen(controllerViewModel, navController)
         }
         composable(
-            route = Screen.ProductionScreen.withArguments()
-        ) {
-            ProductionScreen(controllerViewModel)
+            route = Screen.ProductionScreen.withArguments() + "/{productionID}",
+            arguments = listOf(
+                navArgument("productionID") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        ) { entry ->
+            ProductionScreen(controllerViewModel, productionID = entry.arguments?.getString("productionID"))
         }
     }
 

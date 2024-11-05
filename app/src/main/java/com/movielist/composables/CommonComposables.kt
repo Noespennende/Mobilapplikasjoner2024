@@ -1,8 +1,5 @@
 package com.movielist.composables
 
-import android.webkit.WebSettings
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -27,6 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,11 +44,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Popup
 import androidx.lifecycle.LifecycleOwner
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -71,8 +72,8 @@ import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
+import com.movielist.ui.theme.sliderColors
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
-import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
@@ -575,6 +576,66 @@ fun YouTubeVideoEmbed(
             }
         }
     )
+}
+
+@Composable
+fun RatingSlider (
+    score: Int = 0,
+    visible: Boolean ,
+    modifier: Modifier = Modifier,
+    onValueChangeFinished: (Int) -> Unit
+){
+    var scoreInput by remember { mutableIntStateOf(score) }
+
+    if (visible){
+        Popup (
+            onDismissRequest = {
+                onValueChangeFinished(score)
+            },
+            alignment = Alignment.Center,
+
+        ) {
+            //Outer paddding
+            Box (
+                modifier = Modifier
+                    .padding(horizontal = 30.dp)
+            ) {
+                //Background box
+                Box(
+                    modifier = modifier
+                        .background(Gray, shape = RoundedCornerShape(5.dp))
+                        .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 5.dp)
+                ){
+                    //Content
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ){
+                        //Stars
+                        ScoreGraphics(
+                            score = scoreInput,
+                            color = Purple,
+                            loggedInUsersScore = true,
+                            sizeMultiplier = 2f
+                        )
+                        //slider
+                        Slider(
+                            value = scoreInput.toFloat(),
+                            onValueChange = {scoreInput = it.toInt()},
+                            enabled = true,
+                            valueRange = 0f..10f,
+                            colors = sliderColors,
+                            onValueChangeFinished = {
+                                onValueChangeFinished(scoreInput)
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 fun GenerateShowSortOptionName (

@@ -1,6 +1,7 @@
 package com.movielist.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,9 +36,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
+import com.movielist.Screen
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
@@ -58,7 +61,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun FrontPage(controllerViewModel: ControllerViewModel) {
+fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavController) {
 
     //Temporary code: DELETE THIS CODE
     val listItemList = mutableListOf<ListItem>()
@@ -139,8 +142,11 @@ fun FrontPage(controllerViewModel: ControllerViewModel) {
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
-
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
+
+    val handleProductionButtonClick: (showID: String) -> Unit = {
+        navController.navigate(Screen.ProductionScreen.withArguments(it))
+    }
 
 
     // Front page graphics
@@ -177,7 +183,12 @@ fun FrontPage(controllerViewModel: ControllerViewModel) {
 
         item {
 
-            YourFriendsJustWatched(friendsWatchedList.toMutableList())
+            YourFriendsJustWatched(
+                listOfShows = friendsWatchedList.toMutableList(),
+                handleShowButtonClick = {showID ->
+                    handleProductionButtonClick(showID)
+                }
+            )
 
 
         }
@@ -447,8 +458,12 @@ fun CurrentlyWatchingCard(
 
 @Composable
 fun YourFriendsJustWatched (
-    listOfShows: MutableList<ListItem>
+    listOfShows: MutableList<ListItem>,
+    handleShowButtonClick: (String) -> Unit
 ) {
+    val handleShowClick: (showId: String) -> Unit = {
+        handleShowButtonClick(it)
+    }
 
     //Container collumn
     Column (
@@ -484,7 +499,11 @@ fun YourFriendsJustWatched (
                 items (listOfShows.size) {i ->
                     //Info for each show
                     Column (
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
+                        verticalArrangement = Arrangement.spacedBy(3.dp),
+                        modifier = Modifier
+                            .clickable {
+                                handleShowClick(listOfShows[i].id)
+                            }
                     ) {
                         ShowImage(
                             imageID = listOfShows[i].production.posterUrl,
