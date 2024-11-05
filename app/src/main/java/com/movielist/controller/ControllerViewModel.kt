@@ -110,6 +110,28 @@ class ControllerViewModel(
         return loggedInUser.value?.favoriteCollection
     }
 
+    fun getAllReviewsWrittenByLoggedInUser(): List<Review>{
+        return loggedInUser.value?.myReviews ?: emptyList()
+    }
+
+    //funksjon når allUsers er implementert
+
+    /*fun getMostPopularReviewsLastMonth(): List<Review>{
+        val lastMonth = Calendar.getInstance().apply { add(Calendar.MONTH, -1) }
+
+        val allUsers = getAllUsers()
+
+        val reviews = allUsers.map{user -> user.reviews}
+
+        return reviews.filter{review-> review.postDate.after(lastMonth)}.sortedByDescending{review -> review.likes}.take()
+    }
+
+    fun getTopTenReviewsLastMonth(): List<Review>{
+        val AllReviews = getMostPopularReviewsLastMonth()
+
+        return allReviews.take(10)
+    }*/
+
 
     fun genrePercentageMovie(): Map<String, Int>{
         val moviesWatched = (
