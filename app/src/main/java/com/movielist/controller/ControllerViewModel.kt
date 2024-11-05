@@ -111,6 +111,66 @@ class ControllerViewModel(
     }
 
 
+    fun genrePercentageMovie(): Map<String, Int>{
+        val moviesWatched = (
+            (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
+            (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
+            (loggedInUser.value?.completedCollection ?: emptyList()) +
+            (loggedInUser.value?.favoriteCollection ?: emptyList())
+        )
+
+        val mapOfGenres = mutableMapOf<String, Int>()
+        var totalMovies = 0
+
+        for (movie in moviesWatched){
+            if(movie.production.type == "movie"){
+                movie.production.genre.forEach { genre->
+                    mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                }
+                totalMovies++
+            }
+        }
+        return mapOfGenres.mapValues { it
+            val count = it.value
+            if(totalMovies > 0 ){
+                (count*100)/  totalMovies
+            }else{
+                0
+            }
+
+        }
+    }
+
+    fun genrePercentageShows(): Map<String, Int>{
+        val showsWatched = (
+                (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
+                        (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
+                        (loggedInUser.value?.completedCollection ?: emptyList()) +
+                        (loggedInUser.value?.favoriteCollection ?: emptyList())
+                )
+
+        val mapOfGenres = mutableMapOf<String, Int>()
+        var totalShows = 0
+
+        for (show in showsWatched){
+            if(show.production.type != "movie"){
+                show.production.genre.forEach { genre->
+                    mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                }
+                totalShows++
+            }
+        }
+        return mapOfGenres.mapValues { it ->
+            val count = it.value
+            if(totalShows > 0 ){
+                (count*100)/  totalShows
+            }else{
+                0
+            }
+
+        }
+    }
+
     fun getMostRecentProductionFromFriends(): List<ListItem> {
         val friendProductionsWatched = mutableListOf<ListItem>()
 
