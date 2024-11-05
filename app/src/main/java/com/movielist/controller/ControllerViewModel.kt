@@ -121,7 +121,7 @@ class ControllerViewModel(
 
         for (show in loggedInUserCollection) {
             for(otherShow in otherUserCollection)
-                if (show.id == otherShow.id) {
+                if (show.id == otherShow.id && commonMoviesInWatchList.none { it.id == show.id })) {
                 commonMoviesInWatchList.add(show)
             }
         }
@@ -135,15 +135,13 @@ class ControllerViewModel(
         val loggedInUserCollection = getCompletedShows()?.filter { it.production.type == "movie" } ?: emptyList()
         val otherUserCollection = otherUser.value?.completedCollection?.filter { it.production.type == "movie" } ?: emptyList()
 
-
-
         for (show in loggedInUserCollection) {
-            for(otherShow in otherUserCollection)
-            if (show.id == otherShow.id) {
-                commonMoviesInCompletedList.add(show)
+            for (otherShow in otherUserCollection) {
+                if (show.id == otherShow.id && commonMoviesInCompletedList.none { it.id == show.id })) {
+                    commonMoviesInCompletedList.add(show)
+                }
             }
         }
-
         return commonMoviesInCompletedList
     }
 
@@ -156,13 +154,64 @@ class ControllerViewModel(
 
         for (show in loggedInUserCollection){
             for(otherShow in otherUserCollection){
-                if (show.id == otherShow.id){
+                if (show.id == otherShow.id && commonMoviesInFavoritesList.none { it.id == show.id }){
                     commonMoviesInFavoritesList.add(show)
                 }
             }
         }
         return commonMoviesInFavoritesList
     }
+
+    fun getCommonCompletedShowsList() : MutableList<ListItem>{
+        val commonShowsInCompletedList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id && commonShowsInCompletedList.none { it.id == show.id }){
+                    commonShowsInCompletedList.add(show)
+                }
+            }
+        }
+        return commonShowsInCompletedList
+    }
+
+    fun getCommonWantToWatchShowsList() : MutableList<ListItem>{
+        val commonShowsInWantToWatchList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id && commonShowsInWantToWatchList.none { it.id == show.id }){
+
+                    commonShowsInWantToWatchList.add(show)
+                }
+            }
+        }
+        return commonShowsInWantToWatchList
+    }
+
+    fun getCommonFavoriteShowsList() : MutableList<ListItem>{
+        val commonShowsInFavoritesList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id){
+                    commonShowsInFavoritesList.add(show)
+                }
+            }
+        }
+        return commonShowsInFavoritesList
+    }
+
+
 
     fun addProductionToWantToWatchList(production: Production) {
         val user = loggedInUser.value
