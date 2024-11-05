@@ -110,6 +110,9 @@ class ControllerViewModel(
     }
 
 
+    fun getTopTenProductions(production: List<Production>): List<Production>{
+        return production.filter { it.rating != null }.sortedByDescending { it.rating }.take(10)
+    }
 
     fun getCommonMoviesInWantToWatchList(): MutableList<ListItem> {
         val commonMoviesInWatchList = mutableListOf<ListItem>()
