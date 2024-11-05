@@ -1,6 +1,8 @@
 package com.movielist.ui.theme
 
+import android.transition.Slide
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.SliderColors
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.ui.graphics.Color
 
@@ -65,6 +67,17 @@ val textFieldColors = TextFieldColors(
     unfocusedLeadingIconColor = White,
     unfocusedTrailingIconColor = White,
     unfocusedSupportingTextColor = White
+)
 
-
+val sliderColors = SliderColors(
+    activeTrackColor = Purple,
+    activeTickColor = Purple,
+    thumbColor = Purple,
+    disabledActiveTrackColor = LightGray,
+    disabledThumbColor = LightGray,
+    disabledActiveTickColor = LightGray,
+    disabledInactiveTickColor = LightGray,
+    disabledInactiveTrackColor = LightGray,
+    inactiveTrackColor = LightGray,
+    inactiveTickColor = LightGray
 )
