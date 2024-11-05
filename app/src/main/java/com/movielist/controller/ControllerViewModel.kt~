@@ -121,7 +121,7 @@ class ControllerViewModel(
 
         for (show in loggedInUserCollection) {
             for(otherShow in otherUserCollection)
-                if (show.id == otherShow.id && commonMoviesInWatchList.none { it.id == show.id }) {
+                if (show.id == otherShow.id && commonMoviesInWatchList.none { it.id == show.id })) {
                 commonMoviesInWatchList.add(show)
             }
         }
@@ -137,7 +137,7 @@ class ControllerViewModel(
 
         for (show in loggedInUserCollection) {
             for (otherShow in otherUserCollection) {
-                if (show.id == otherShow.id && commonMoviesInCompletedList.none { it.id == show.id }) {
+                if (show.id == otherShow.id && commonMoviesInCompletedList.none { it.id == show.id })) {
                     commonMoviesInCompletedList.add(show)
                 }
             }
