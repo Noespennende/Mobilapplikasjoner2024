@@ -229,11 +229,11 @@ class ControllerViewModel(
         val friendProductionsWatched = mutableListOf<ListItem>()
 
         loggedInUser.value?.friendList?.forEach { friend ->
-            friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
-            friend.completedCollection.forEach { friendProductionsWatched.add(it) }
-            friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
-            friend.droppedCollection.forEach { friendProductionsWatched.add(it) }
-            friend.currentlyWatchingCollection.forEach { friendProductionsWatched.add(it) }
+            //friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
+            //friend.completedCollection.forEach { friendProductionsWatched.add(it) }
+            //friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
+            //friend.droppedCollection.forEach { friendProductionsWatched.add(it) }
+            //friend.currentlyWatchingCollection.forEach { friendProductionsWatched.add(it) }
 
         }
 

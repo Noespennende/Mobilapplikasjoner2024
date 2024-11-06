@@ -46,7 +46,7 @@ import kotlin.random.Random
 fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavController, reviewID: String?){
 
     val reviewID by remember { mutableStateOf(reviewID)} /* <- IDen til reviewen som skal hentes ut av kontroller */
-    val review by remember {mutableStateOf()} /* <- Denne må settes til Review objektet som matcher IDen over */
+    val review by remember { mutableStateOf(null) } /* <- Denne må settes til Review objektet som matcher IDen over */
 
     val HandleLikeClick: () -> Unit = {
         //Kontroller funksjon for like her:
@@ -65,12 +65,14 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
             Text(
                 text = reviewID.toString(),
                 color = White)
-            Review(
-                review = review,
-                handleLikeClick = HandleLikeClick,
-                handleUserClick = HandleUserClick,
-                handleProductionClick = HandleProductionClick
-            )
+            review?.let {
+                Review(
+                    review = it,
+                    handleLikeClick = HandleLikeClick,
+                    handleUserClick = HandleUserClick,
+                    handleProductionClick = HandleProductionClick
+                )
+            }
         }
 
     }

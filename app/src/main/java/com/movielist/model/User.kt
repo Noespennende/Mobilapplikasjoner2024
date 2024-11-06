@@ -13,7 +13,7 @@ data class User (
     val location: String = "It's a secret",
     val website: String = "",
     val bio: String = "",
-    val friendList: MutableList<User> = mutableListOf(),
+    val friendList: MutableList<String> = mutableListOf(),
     val myReviews: MutableList<Review> = mutableListOf(),
     val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val completedCollection:  MutableList<ListItem> = mutableListOf(),
