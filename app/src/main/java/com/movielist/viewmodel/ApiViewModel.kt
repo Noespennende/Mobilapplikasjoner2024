@@ -4,15 +4,31 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.movielist.model.ApiResponse
+import com.movielist.model.ApiAllMediaResponse
+import com.movielist.model.ApiMovieResponse
+import com.movielist.model.ApiShowResponse
+import com.movielist.model.ApiShowSeason
+import com.movielist.model.ApiShowSeasonEpisode
 import com.movielist.networking.ApiConfig
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
 
 class ApiViewModel() : ViewModel() {
-    private val _mediaData = MutableLiveData<ApiResponse?>()
-    val mediaData: LiveData<ApiResponse> get() = _mediaData as LiveData<ApiResponse>
+    private val _mediaData = MutableLiveData<ApiAllMediaResponse?>()
+    val mediaData: LiveData<ApiAllMediaResponse> get() = _mediaData as LiveData<ApiAllMediaResponse>
+
+    private val _movieData = MutableLiveData<ApiMovieResponse?>()
+    val movieData: LiveData<ApiMovieResponse> get() = _movieData as LiveData<ApiMovieResponse>
+
+    private val _showData = MutableLiveData<ApiShowResponse?>()
+    val showData: LiveData<ApiShowResponse> get() = _showData as LiveData<ApiShowResponse>
+
+    private val _showSeasonData = MutableLiveData<ApiShowSeason?>()
+    val showSeasonData: LiveData<ApiShowSeason> get() = _showSeasonData as LiveData<ApiShowSeason>
+
+    private val _showEpisodeData = MutableLiveData<ApiShowSeasonEpisode?>()
+    val showEpisodeData: LiveData<ApiShowSeasonEpisode> get() = _showEpisodeData as LiveData<ApiShowSeasonEpisode>
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
@@ -31,16 +47,14 @@ class ApiViewModel() : ViewModel() {
 
         Log.d("ApiViewModel", "Starting API call to fetch media")
 
-        client.enqueue(object : Callback<ApiResponse> {
+        client.enqueue(object : Callback<ApiAllMediaResponse> {
 
             override fun onResponse(
-                call: Call<ApiResponse>,
-                //response: Response<ApiResponse>
-                response: Response<ApiResponse>
-
+                call: Call<ApiAllMediaResponse>,
+                response: Response<ApiAllMediaResponse>
             )
             {
-                Log.d("ApiViewModel", "Raw response: $response")
+                Log.d("ApiViewModel", "Raw getAllMedia response: $response")
 
                 val responseBody = response.body()
 
@@ -51,19 +65,176 @@ class ApiViewModel() : ViewModel() {
                     onError("Data Processing Error")
                     return
                 }
+
+                // sørger for at bare data med mediaType 'tv' og 'movie' hentes ut
+                val filteredResults = responseBody.results?.filter {
+                    it?.mediaType == "tv" || it?.mediaType == "movie"
+                }
+
+                _mediaData.postValue(responseBody.copy(results = filteredResults))
+
                 _isLoading.value = false
                 _mediaData.postValue(responseBody)
             }
 
-            override fun onFailure(call: Call<ApiResponse>, t: Throwable) {
+            override fun onFailure(call: Call<ApiAllMediaResponse>, t: Throwable) {
                 onError(t.message)
                 t.printStackTrace()
 
-                Log.e("ApiViewModel", "API call failed", t)
+                Log.e("ApiViewModel", "API getAllMedia call failed", t)
 
             }
         })
     }
+
+    fun getMovie(movieId: Int) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().getMovie(movieId)
+
+        client.enqueue(object : Callback<ApiMovieResponse> {
+
+            override fun onResponse(
+                call: Call<ApiMovieResponse?>,
+                response: Response<ApiMovieResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getMovie response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getMovie received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _movieData.postValue(responseBody)
+            }
+
+            override fun onFailure(
+                call: Call<ApiMovieResponse?>,
+                t: Throwable
+            ) {
+                 onError(t.message)
+                    t.printStackTrace()
+
+                    Log.e("ApiViewModel", "API getMovie call failed", t)}
+        })
+    }
+
+    fun getShow(seriesId: Int) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().getShow(seriesId)
+
+        client.enqueue(object : Callback<ApiShowResponse> {
+
+            override fun onResponse(
+                call: Call<ApiShowResponse?>,
+                response: Response<ApiShowResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getShow response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getShow received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _showData.postValue(responseBody)
+            }
+
+            override fun onFailure(
+                call: Call<ApiShowResponse?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getShow call failed", t)}
+        })
+    }
+
+    fun getShowSeason(seriesId: Int, seasonNumber: Int) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().getShowSeason(seriesId, seasonNumber)
+
+        client.enqueue(object : Callback<ApiShowSeason> {
+
+            override fun onResponse(
+                call: Call<ApiShowSeason?>,
+                response: Response<ApiShowSeason?>
+            ) {
+                Log.d("ApiViewModel", "Raw getShowSeason response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getShowSeason received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _showSeasonData.postValue(responseBody)
+            }
+
+            override fun onFailure(
+                call: Call<ApiShowSeason?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getShowSeason call failed", t)}
+        })
+    }
+
+    fun getShowEpisode(seriesId: Int, seasonNumber: Int, episodeNumber: Int) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().getShowEpisode(seriesId, seasonNumber, episodeNumber)
+
+        client.enqueue(object : Callback<ApiShowSeasonEpisode> {
+
+            override fun onResponse(
+                call: Call<ApiShowSeasonEpisode?>,
+                response: Response<ApiShowSeasonEpisode?>
+            ) {
+                Log.d("ApiViewModel", "Raw getShowEpisode response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getShowEpisode received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _showEpisodeData.postValue(responseBody)
+            }
+
+            override fun onFailure(
+                call: Call<ApiShowSeasonEpisode?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getShowEpisode call failed", t)}
+        })
+    }
+
     private fun onError(inputMessage: String?) {
 
         val message = if (inputMessage.isNullOrBlank() or inputMessage.isNullOrEmpty()) "Unknown Error"
@@ -76,4 +247,6 @@ class ApiViewModel() : ViewModel() {
         _isLoading.value = false
     }
 }
+
+
 
