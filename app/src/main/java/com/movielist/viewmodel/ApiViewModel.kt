@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.movielist.model.AllMedia
 import com.movielist.model.ApiAllMediaResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiShowResponse
@@ -15,8 +16,8 @@ import retrofit2.Call
 import retrofit2.Response
 
 class ApiViewModel() : ViewModel() {
-    private val _mediaData = MutableLiveData<ApiAllMediaResponse?>()
-    val mediaData: LiveData<ApiAllMediaResponse> get() = _mediaData as LiveData<ApiAllMediaResponse>
+    private val _mediaData = MutableLiveData<List<AllMedia>>()
+    val mediaData: LiveData<List<AllMedia>> get() = _mediaData as LiveData<List<AllMedia>>
 
     private val _movieData = MutableLiveData<ApiMovieResponse?>()
     val movieData: LiveData<ApiMovieResponse> get() = _movieData as LiveData<ApiMovieResponse>
@@ -60,21 +61,22 @@ class ApiViewModel() : ViewModel() {
 
                 Log.d("ApiViewModel", "Response received: $responseBody")
 
-
                 if (!response.isSuccessful || responseBody == null) {
                     onError("Data Processing Error")
                     return
                 }
 
-                // sørger for at bare data med mediaType 'tv' og 'movie' hentes ut
-                val filteredResults = responseBody.results?.filter {
-                    it?.mediaType == "tv" || it?.mediaType == "movie"
-                }
+                val mediaList = responseBody.results
 
-                _mediaData.postValue(responseBody.copy(results = filteredResults))
+                // sørger for at bare data med mediaType 'tv' og 'movie' hentes ut
+                val filteredResults = mediaList?.filter {
+                    it?.mediaType == "tv" || it?.mediaType == "movie"
+                }?.filterNotNull()
 
                 _isLoading.value = false
-                _mediaData.postValue(responseBody)
+                _mediaData.postValue(filteredResults ?: emptyList())
+                Log.d("ApiViewModel", "please be right: $filteredResults")
+
             }
 
             override fun onFailure(call: Call<ApiAllMediaResponse>, t: Throwable) {
@@ -247,6 +249,5 @@ class ApiViewModel() : ViewModel() {
         _isLoading.value = false
     }
 }
-
 
 
