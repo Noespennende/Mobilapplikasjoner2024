@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +21,8 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +49,6 @@ import com.movielist.model.Review
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
@@ -57,19 +59,32 @@ import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 @Composable
 fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: String?){
 
     //Variables
-    val productionID by remember { if (productionID != null){mutableStateOf(productionID)} else {mutableStateOf("")} } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
+    //val productionID by remember { if (productionID != null){mutableStateOf(productionID)} else {mutableStateOf("")} } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
-    val production by remember { mutableStateOf<Production>() } /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    //val production by controllerViewModel.movieData.collectAsState()
+    //val production by remember { mutableStateOf<Production?>(null) }
     var memberOfUserList by remember { mutableStateOf<ListOptions?>(null) } /* <-ListOption enum som sier hvilken liste filmen/serien ligger i i logged inn users liste. Hvis den ikke ligger i en liste set den til null.*/
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
     var listOfReviews by remember { mutableStateOf(mutableListOf<Review>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
+
+    val productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
+
+    /* Lytter etter endring i movieData fra ControllerViewModel */
+    val production by controllerViewModel.movieData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+
+
+    // Trengs for å laste inn
+    LaunchedEffect(productionID) {
+        if (productionID.isNotEmpty()) {
+            Log.d("Test1", production.toString())  // Før kall
+            controllerViewModel.getMovieById(productionID)
+        }
+    }
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
         userScore = score
@@ -81,6 +96,8 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
         //Kontroller kall her:
     }
 
+
+
     //Graphics:
     LazyColumn(
         contentPadding = PaddingValues(
@@ -90,85 +107,106 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ){
         //Top info
-        item {
-            ImageAndName(
-                production = production,
-            )
-        }
+        if (production == null) {
+            item {
+                Text(text = "test")
+            }
+        } else {
+            item {
+                production?.let { production ->
+                    ImageAndName(
+                        production = production,
+                    )
 
-        item {
-            LineDevider()
-        }
-
-        //User score and list option
-        item {
-            ListInfo(
-                memberOfUserList = memberOfUserList,
-                userScore = userScore,
-                handleScoreChange = { score ->
-                    handleScoreChange(score)
-                },
-                handleUserListChange = {listOption ->
-                    handleUserListCategoryChange(listOption)
+                    Log.d("Tester3", production.title)
                 }
+            }
 
-            )
-        }
+            item {
+                LineDevider()
+            }
 
-        item {
-            LineDevider()
-        }
+            //User score and list option
+            item {
+                ListInfo(
+                    memberOfUserList = memberOfUserList,
+                    userScore = userScore,
+                    handleScoreChange = { score ->
+                        handleScoreChange(score)
+                    },
+                    handleUserListChange = {listOption ->
+                        handleUserListCategoryChange(listOption)
+                    }
 
-
-        //Stat stection
-        item {
-            statsSection(
-                production = production,
-            )
-        }
-
-        item {
-            LineDevider()
-        }
-
-        item{
-            GenreSection(
-                production = production
-            )
-        }
-
-        //Youtube trailer embed
-        item {
-            if (production.trailerUrl != null
-                && production.trailerUrl.lowercase().contains("youtube")
-                ){
-                YouTubeVideoEmbed(
-                    videoUrl = ExtractYoutubeVideoIDFromUrl(production.trailerUrl),
-                    lifeCycleOwner = LocalLifecycleOwner.current
                 )
             }
-        }
 
-        //Project desciption
-        item {
-            productionDescription(
-                description = production.description
-            )
-        }
+            item {
+                LineDevider()
+            }
 
-        //Project desciption
-        item {
-            ActorsSection(
-                production = production
-            )
-        }
 
-        //Project reviews
-        item {
-            ReviewsSection(
-                reviewList = listOfReviews,
-                header = "Reviews for " + production.title
-            )
+            //Stat stection
+            item {
+                production?.let { production ->
+                    statsSection(
+                        production = production,
+                    )
+                }
+            }
+
+            item {
+                LineDevider()
+            }
+
+            item{
+                production?.let { production ->
+                    GenreSection(
+                        production = production
+                    )
+                }
+            }
+
+            production?.let { production ->
+                //Youtube trailer embed
+                item {
+                    val trailerUrl = production.trailerUrl
+                    if (trailerUrl != null && trailerUrl.lowercase().contains("youtube")) {
+                        YouTubeVideoEmbed(
+                            videoUrl = ExtractYoutubeVideoIDFromUrl(trailerUrl),
+                            lifeCycleOwner = LocalLifecycleOwner.current
+                        )
+                    }
+                }
+            }
+
+            //Project desciption
+            item {
+                production?.let { production ->
+                    productionDescription(
+                        description = production.description
+                    )
+                }
+            }
+
+            //Project desciption
+            item {
+                production?.let { production ->
+                    ActorsSection(
+                        production = production
+                    )
+                }
+            }
+
+            //Project reviews
+            item {
+                production?.let { production ->
+                    ReviewsSection(
+                        reviewList = listOfReviews,
+                        header = "Reviews for " + production.title
+                    )
+                }
+            }
         }
 
     }
@@ -182,7 +220,9 @@ fun ImageAndName(
 
     //Variables
 
-    val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(production.releaseDate.time)
+    val formattedDate = "test"
+    //val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(production?.releaseDate?.time
+
     //graphics
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -190,22 +230,26 @@ fun ImageAndName(
             .fillMaxWidth()
     ) {
         //Image
-        ShowImage(
-            imageID = production.posterUrl,
-            imageDescription = production.title,
-        )
+        if (production != null) {
+            ShowImage(
+                imageID = production.posterUrl,
+                imageDescription = production.title,
+            )
+        }
 
         //Title
-        Text(
-            text = production.title,
-            fontFamily = fontFamily,
-            fontSize = headerSize * 1.3,
-            fontWeight = weightBold,
-            textAlign = TextAlign.Center,
-            color = White,
-            modifier = Modifier
-                .padding(top= 10.dp)
-        )
+        if (production != null) {
+            Text(
+                text = production.title,
+                fontFamily = fontFamily,
+                fontSize = headerSize * 1.3,
+                fontWeight = weightBold,
+                textAlign = TextAlign.Center,
+                color = White,
+                modifier = Modifier
+                    .padding(top= 10.dp)
+            )
+        }
         //Date
         Text(
             text = formattedDate,
@@ -221,7 +265,7 @@ fun ImageAndName(
 
 @Composable
 fun statsSection(
-    production: Production?,
+    production: Production,
 ){
 
     var productionAsType = if(production != null && production.type == "Movie") {production as Movie} else {production as TVShow}
@@ -514,14 +558,14 @@ fun GenreSection(
     modifier: Modifier = Modifier,
     boxColor: Color = Gray
 ){
-    if (production.genre.size > 0){
+    if (production!!.genre.size > 0){
         LazyRow (
             contentPadding = PaddingValues(horizontal = horizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = modifier
                 .fillMaxWidth()
         ){
-            items(production.genre) {genre ->
+            items(production.genre) { genre ->
                 Box(
                     modifier = Modifier
                         .background(boxColor, RoundedCornerShape(5.dp))

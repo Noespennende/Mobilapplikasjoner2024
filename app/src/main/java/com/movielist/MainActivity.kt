@@ -48,6 +48,8 @@ class MainActivity : ComponentActivity() {
                     //controllerViewModel.addToShowTest()
 
                     controllerViewModel.getAllMedia()
+
+                    //controllerViewModel.getMovieById()
                 }
 
             }

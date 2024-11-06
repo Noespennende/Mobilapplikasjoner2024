@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -145,6 +146,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
     val handleProductionButtonClick: (showID: String) -> Unit = {
+        Log.d("Test", it)
         navController.navigate(Screen.ProductionScreen.withArguments(it))
     }
 
@@ -502,7 +504,7 @@ fun YourFriendsJustWatched (
                         verticalArrangement = Arrangement.spacedBy(3.dp),
                         modifier = Modifier
                             .clickable {
-                                handleShowClick(listOfShows[i].id)
+                                handleShowClick(listOfShows[i].production.imdbID)
                             }
                     ) {
                         ShowImage(

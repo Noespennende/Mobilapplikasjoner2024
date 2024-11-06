@@ -1,6 +1,7 @@
 package com.movielist.networking
 
 import com.movielist.model.ApiResponse
+import com.movielist.model.MovieResponse
 //import com.movielist.data.SeriesDetailsResponse
 //import com.movielist.data.ShowResponse
 import retrofit2.Call
@@ -15,4 +16,11 @@ interface ApiService {
     @GET("trending/all/week?language=en-US")
     //fun getMovies(@Query("api_key") key: String = ApiConfig.API_KEY): Call<ApiResponse>
     fun getAllMedia(@Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiResponse>
+
+
+    @GET("movie/{movie_id}")
+    fun getMovieById(
+        @Path("movie_id") movieId: String,
+        @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"
+    ): Call<MovieResponse>
 }

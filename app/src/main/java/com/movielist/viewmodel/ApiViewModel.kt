@@ -4,8 +4,12 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.google.protobuf.Api
 import com.movielist.model.ApiResponse
+import com.movielist.model.MovieResponse
 import com.movielist.networking.ApiConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
@@ -22,6 +26,8 @@ class ApiViewModel() : ViewModel() {
 
     var errorMessage: String = ""
         private set
+
+
 
     fun getAllMedia() {
         _isLoading.value = true
@@ -64,6 +70,42 @@ class ApiViewModel() : ViewModel() {
             }
         })
     }
+
+    private val _movieData = MutableStateFlow<MovieResponse?>(null)
+    val movieData: StateFlow<MovieResponse?> get() = _movieData
+
+    fun getMovieById(movieId: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().getMovieById(movieId) // Dette bør returnere Call<MovieResponse>
+
+        client.enqueue(object : Callback<MovieResponse> {
+
+            override fun onResponse(
+                call: Call<MovieResponse>,
+                response: Response<MovieResponse>
+            ) {
+                val responseBody = response.body()
+
+                if (!response.isSuccessful || responseBody == null) {
+                    _isLoading.value = false
+                    _isError.value = true
+                    return
+                }
+                _isLoading.value = false
+                _movieData.value = responseBody // Sett data i StateFlow
+            }
+
+            override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
+                _isLoading.value = false
+                _isError.value = true
+                t.printStackTrace()
+                Log.e("ApiViewModel", "API call failed", t)
+            }
+        })
+    }
+
     private fun onError(inputMessage: String?) {
 
         val message = if (inputMessage.isNullOrBlank() or inputMessage.isNullOrEmpty()) "Unknown Error"
