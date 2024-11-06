@@ -48,6 +48,10 @@ class MainActivity : ComponentActivity() {
                     //controllerViewModel.addToShowTest()
 
                     controllerViewModel.getAllMedia()
+                    controllerViewModel.getMovie(movieId = 933260)
+                    controllerViewModel.getShow(seriesId = 94722)
+                    controllerViewModel.getShowSeason(seriesId = 94722, seasonNumber = 1)
+                    controllerViewModel.getShowEpisode(seriesId = 94722, seasonNumber = 1, episodeNumber = 1)
                 }
 
             }
