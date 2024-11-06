@@ -54,6 +54,26 @@ class ControllerViewModel(
         apiViewModel.getAllMedia()
     }
 
+    fun getMovie(movieId: Int) {
+        Log.d("ControllerViewModel", "getMovie called")
+        apiViewModel.getMovie(movieId)
+    }
+
+    fun getShow(seriesId: Int) {
+        Log.d("ControllerViewModel", "getShow called")
+        apiViewModel.getShow(seriesId)
+    }
+
+    fun getShowSeason(seriesId: Int, seasonNumber: Int) {
+        Log.d("ControllerViewModel", "getShowSeason called")
+        apiViewModel.getShowSeason(seriesId, seasonNumber)
+    }
+
+    fun getShowEpisode(seriesId: Int, seasonNumber: Int, episodeNumber: Int) {
+        Log.d("ControllerViewModel", "getShowEpisode called")
+        apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
+    }
+
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
         val loggedInUserId = currentFirebaseUser.value?.uid
