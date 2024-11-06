@@ -141,6 +141,9 @@ class ControllerViewModel(
         return loggedInUser.value?.myReviews ?: emptyList()
     }
 
+    fun getTopTenReviewsWrittenByLoggedInUser(): List<Review> {
+        return getAllReviewsWrittenByLoggedInUser().sortedByDescending { it.likes }.take(10)
+    }
     //funksjon når allUsers er implementert
 
     /*fun getMostPopularReviewsLastMonth(): List<Review>{
