@@ -66,7 +66,7 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
     //Variables
     val productionID by remember { if (productionID != null){mutableStateOf(productionID)} else {mutableStateOf("")} } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
-    val production by remember { mutableStateOf<Production>() } /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    val production by remember { mutableStateOf<Production>(TVShow()) } /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
     var memberOfUserList by remember { mutableStateOf<ListOptions?>(null) } /* <-ListOption enum som sier hvilken liste filmen/serien ligger i i logged inn users liste. Hvis den ikke ligger i en liste set den til null.*/
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
     var listOfReviews by remember { mutableStateOf(mutableListOf<Review>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
@@ -78,6 +78,10 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
 
     val handleUserListCategoryChange: (userListCategory: ListOptions?) -> Unit = {userListCategory ->
         memberOfUserList = userListCategory
+        //Kontroller kall her:
+    }
+
+    val handleReviewLikeButtonClick: (reivewID: String) -> Unit = {reviewID ->
         //Kontroller kall her:
     }
 
@@ -140,10 +144,10 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
         //Youtube trailer embed
         item {
             if (production.trailerUrl != null
-                && production.trailerUrl.lowercase().contains("youtube")
+                && production.trailerUrl?.lowercase().toString().contains("youtube")
                 ){
                 YouTubeVideoEmbed(
-                    videoUrl = ExtractYoutubeVideoIDFromUrl(production.trailerUrl),
+                    videoUrl = ExtractYoutubeVideoIDFromUrl(production.trailerUrl.toString()),
                     lifeCycleOwner = LocalLifecycleOwner.current
                 )
             }
@@ -167,7 +171,8 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
         item {
             ReviewsSection(
                 reviewList = listOfReviews,
-                header = "Reviews for " + production.title
+                header = "Reviews for " + production.title,
+                handleLikeClick = handleReviewLikeButtonClick
             )
         }
 

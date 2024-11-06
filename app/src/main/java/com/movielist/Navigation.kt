@@ -17,6 +17,7 @@ import com.movielist.screens.LoginPage
 import com.movielist.screens.ProductionScreen
 import com.movielist.screens.ProfilePage
 import com.movielist.screens.ReviewPage
+import com.movielist.screens.ReviewScreen
 import com.movielist.screens.SearchPage
 
 
@@ -32,7 +33,10 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
+            Screen.ReviewScreen.route
+            /*
             Screen.HomeScreen.route
+            */
         }
 
     NavHost(
@@ -83,8 +87,26 @@ fun Navigation (controllerViewModel: ControllerViewModel){
                 }
             )
         ) { entry ->
-            ProductionScreen(controllerViewModel, productionID = entry.arguments?.getString("productionID"))
+            ProductionScreen(
+                controllerViewModel,
+                productionID = entry.arguments?.getString("productionID"))
         }
+        composable(
+            route = Screen.ReviewScreen.withArguments(),
+            arguments = listOf(
+                navArgument("reviewID") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        )
+            { entry ->
+            ReviewScreen(
+                controllerViewModel,
+                navController,
+                reviewID = entry.arguments?.getString("productionID"))
+            }
     }
 
     //Navbar graphics

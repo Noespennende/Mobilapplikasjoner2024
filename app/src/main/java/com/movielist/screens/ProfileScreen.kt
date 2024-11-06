@@ -140,6 +140,10 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
         mutableStateOf(true)
     }
 
+    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {
+        //Kontroller funksjon her
+    }
+
     //Graphics
     //Main Content
     LazyColumn(
@@ -244,7 +248,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
         item {
             ReviewsSection(
                 reviewList = exampleReviews,
-                header = "Reviews"
+                header = "Reviews",
+                handleLikeClick = handleReviewButtonLikeClick
+
             )
         }
 

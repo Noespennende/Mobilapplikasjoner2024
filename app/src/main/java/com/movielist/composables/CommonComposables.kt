@@ -215,7 +215,8 @@ fun ShowImage(
     imageID: String? = null, // Endret til nullable for å håndtere URL-er
     placeholderID: Int = R.drawable.noimage,
     imageDescription: String = "Image not available",
-    sizeMultiplier: Float = 1.0f
+    sizeMultiplier: Float = 1.0f,
+    modifier: Modifier = Modifier
 ) {
     //val showImageWidth = 100.dp // Juster dette til ønsket bredde
     //val showImageHeight = 150.dp // Juster dette til ønsket høyde
@@ -230,7 +231,7 @@ fun ShowImage(
                 .build(),
             contentDescription = imageDescription,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
+            modifier = modifier
                 .width(showImageWith * sizeMultiplier)
                 .height(showImageHeight * sizeMultiplier)
                 .clip(RoundedCornerShape(5.dp))
@@ -359,7 +360,8 @@ fun ScoreGraphics(
 
 @Composable
 fun LikeButton (
-    sizeMultiplier: Float = 1f
+    sizeMultiplier: Float = 1f,
+    handleLikeClick: () -> Unit
 ) {
     var buttonText by remember {
         mutableStateOf("Like")
@@ -377,20 +379,26 @@ fun LikeButton (
         mutableStateOf(R.drawable.heart_hollow)
     }
 
+    val handleLikeButtonClick: () -> Unit = {
+        if (buttonClicked) {
+            buttonColor = LightGray
+            buttonClicked = false
+            buttonText = "Like"
+            heartIcon = R.drawable.heart_hollow
+
+        } else {
+            buttonColor = Purple
+            buttonClicked = true
+            buttonText = "Liked"
+            heartIcon = R.drawable.heart_filled
+        }
+
+        handleLikeClick()
+    }
+
     Button(
         onClick = {
-            if (buttonClicked) {
-                buttonColor = LightGray
-                buttonClicked = false
-                buttonText = "Like"
-                heartIcon = R.drawable.heart_hollow
-
-            } else {
-                buttonColor = Purple
-                buttonClicked = true
-                buttonText = "Liked"
-                heartIcon = R.drawable.heart_filled
-            }
+            handleLikeButtonClick()
         },
         colors = ButtonDefaults.buttonColors(Color.Transparent),
         shape = RoundedCornerShape(5.dp),

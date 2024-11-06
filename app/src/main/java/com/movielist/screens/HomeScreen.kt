@@ -148,6 +148,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         navController.navigate(Screen.ProductionScreen.withArguments(it))
     }
 
+    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
+        //Kontroller funksjon for å håndtere en review like hær
+    }
+
 
     // Front page graphics
     LazyColumn(
@@ -223,7 +227,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             //Top reviews this week:
             ReviewsSection(
                 reviewList = top10ReviewsListPastWeek,
-                header = "Top reviews this week"
+                header = "Top reviews this week",
+                handleLikeClick = handleReviewLikeButtonClick
             )
         }
 

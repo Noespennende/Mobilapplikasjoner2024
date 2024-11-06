@@ -116,6 +116,10 @@ fun ReviewPage () {
     var popularReviewsThisMonthList =  reviewsList
     var popularReviewsAllTimeList = reviewsList
 
+    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
+        //Kontroller håndtering av liking av en review her
+    }
+
     //Graphics:
     LazyColumn (
         modifier = Modifier
@@ -126,7 +130,8 @@ fun ReviewPage () {
         item {
             SummarySection(
                 friendsReviewsList = friendsReviewsList,
-                topThisMonthList = popularReviewsThisMonthList
+                topThisMonthList = popularReviewsThisMonthList,
+                handleReviewLikeClick = handleReviewLikeButtonClick
             )
         }
 
@@ -137,41 +142,60 @@ fun ReviewPage () {
 @Composable
 fun SummarySection (
     friendsReviewsList: MutableList<Review>,
-    topThisMonthList: MutableList<Review>
+    topThisMonthList: MutableList<Review>,
+    handleReviewLikeClick: (reviewID: String) -> Unit
 ){
+    val handleReviewLikeButtonClick: (String) -> Unit = {reviewID ->
+        handleReviewLikeClick(reviewID)
+    }
+
     Column () {
         //Latest reviews from your friends section
         ReviewsSection(
             reviewList = friendsReviewsList,
-            header = "Latest reviews from your friends"
+            header = "Latest reviews from your friends",
+            handleLikeClick = handleReviewLikeButtonClick
         )
         //Popular reviews this month section
         ReviewsSection(
             reviewList = topThisMonthList,
-            header = "Popular reviews this month"
+            header = "Popular reviews this month",
+            handleLikeClick = handleReviewLikeButtonClick
         )
     }
 }
 
 @Composable
 fun TopThisMonthSection (
-    topThisMonthList: MutableList<Review>
+    topThisMonthList: MutableList<Review>,
+    handleReviewLikeClick: (reviewID: String) -> Unit
 ){
+    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {reviewID ->
+        handleReviewLikeClick(reviewID)
+    }
+
     //Popular reviews this month section
     ReviewsSection(
         reviewList = topThisMonthList,
-        header = "Popular reviews this month"
+        header = "Popular reviews this month",
+        handleLikeClick = handleReviewButtonLikeClick
     )
 }
 
 @Composable
 fun TopAllTimeSection (
-    topAllTimeList: MutableList<Review>
+    topAllTimeList: MutableList<Review>,
+    handleReviewLikeClick: (reviewID: String) -> Unit
 ){
+    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = { reviewID ->
+        handleReviewLikeClick(reviewID)
+    }
+
     //Popular reviews this month section
     ReviewsSection(
         reviewList = topAllTimeList,
-        header = "Most popular reviews of all time"
+        header = "Most popular reviews of all time",
+        handleLikeClick = handleReviewButtonLikeClick
     )
 }
 
@@ -423,8 +447,13 @@ fun CategorySelectButton () {
 @Composable
 fun ReviewsSection(
     reviewList: List<Review>,
-    header: String
+    header: String,
+    handleLikeClick: (reviewID: String) -> Unit
 ) {
+
+    val handleLikeButtonClick: (String) -> Unit = {reviewID ->
+        handleLikeClick(reviewID)
+    }
 
     //Header text
     Text(
@@ -454,7 +483,8 @@ fun ReviewsSection(
             //Reviews
             for (review in reviewList) {
                 ReviewSummary(
-                    review = review
+                    review = review,
+                    handleLikeClick = handleLikeButtonClick
                 )
                 LineDevider()
             }
@@ -487,8 +517,13 @@ fun ReviewsSection(
 
 @Composable
 fun ReviewSummary (
-    review: Review
+    review: Review,
+    handleLikeClick: (String) -> Unit
 ) {
+    val handleLikeButtonClick: () -> Unit = {
+        handleLikeClick(review.reviewId.toString())
+    }
+
     //Main container
     Row(
         horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -606,7 +641,9 @@ fun ReviewSummary (
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ){
-                LikeButton()
+                LikeButton(
+                    handleLikeClick = handleLikeButtonClick
+                )
             }
 
         }
