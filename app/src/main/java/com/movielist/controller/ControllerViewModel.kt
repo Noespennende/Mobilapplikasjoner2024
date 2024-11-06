@@ -11,6 +11,7 @@ import com.movielist.data.addCurrentlyWatchingShow
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
+import com.movielist.model.Review
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
@@ -131,6 +132,225 @@ class ControllerViewModel(
     fun getWantToWatchList(): MutableList<ListItem>?{
         return loggedInUser.value?.wantToWatchCollection
     }
+
+    fun getFavoritesList(): MutableList<ListItem>?{
+        return loggedInUser.value?.favoriteCollection
+    }
+
+    fun getAllReviewsWrittenByLoggedInUser(): List<Review>{
+        return loggedInUser.value?.myReviews ?: emptyList()
+    }
+
+    //funksjon når allUsers er implementert
+
+    /*fun getMostPopularReviewsLastMonth(): List<Review>{
+        val lastMonth = Calendar.getInstance().apply { add(Calendar.MONTH, -1) }
+
+        val allUsers = getAllUsers()
+
+        val reviews = allUsers.map{user -> user.reviews}
+
+        return reviews.filter{review-> review.postDate.after(lastMonth)}.sortedByDescending{review -> review.likes}.take()
+    }
+
+    fun getTopTenReviewsLastMonth(): List<Review>{
+        val AllReviews = getMostPopularReviewsLastMonth()
+
+        return allReviews.take(10)
+    }*/
+
+    //fun productionReviewsAscending(production: Production): List<Review>{}
+
+
+    fun genrePercentageMovie(): Map<String, Int>{
+        val moviesWatched = (
+            (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
+            (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
+            (loggedInUser.value?.completedCollection ?: emptyList()) +
+            (loggedInUser.value?.favoriteCollection ?: emptyList())
+        )
+
+        val mapOfGenres = mutableMapOf<String, Int>()
+        var totalMovies = 0
+
+        for (movie in moviesWatched){
+            if(movie.production.type == "movie"){
+                movie.production.genre.forEach { genre->
+                    mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                }
+                totalMovies++
+            }
+        }
+        return mapOfGenres.mapValues { it
+            val count = it.value
+            if(totalMovies > 0 ){
+                (count*100)/  totalMovies
+            }else{
+                0
+            }
+
+        }
+    }
+
+    fun genrePercentageShows(): Map<String, Int>{
+        val showsWatched = (
+                (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
+                        (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
+                        (loggedInUser.value?.completedCollection ?: emptyList()) +
+                        (loggedInUser.value?.favoriteCollection ?: emptyList())
+                )
+
+        val mapOfGenres = mutableMapOf<String, Int>()
+        var totalShows = 0
+
+        for (show in showsWatched){
+            if(show.production.type != "movie"){
+                show.production.genre.forEach { genre->
+                    mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                }
+                totalShows++
+            }
+        }
+        return mapOfGenres.mapValues { it ->
+            val count = it.value
+            if(totalShows > 0 ){
+                (count*100)/  totalShows
+            }else{
+                0
+            }
+
+        }
+    }
+
+    fun getMostRecentProductionFromFriends(): List<ListItem> {
+        val friendProductionsWatched = mutableListOf<ListItem>()
+
+        loggedInUser.value?.friendList?.forEach { friend ->
+            friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
+            friend.completedCollection.forEach { friendProductionsWatched.add(it) }
+            friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
+            friend.droppedCollection.forEach { friendProductionsWatched.add(it) }
+            friend.currentlyWatchingCollection.forEach { friendProductionsWatched.add(it) }
+
+        }
+
+        return friendProductionsWatched.sortedByDescending { it.lastUpdated }.take(10)
+
+    }
+
+    fun getTopTenProductions(production: List<Production>): List<Production>{
+        return production.filter { it.rating != null }.sortedByDescending { it.rating }.take(10)
+    }
+
+    /*
+    fun getTenReviewsWithMostLikes(production: Production): List<String>{
+        val theTimeNow = Calendar.getInstance()
+        val sevenDaysFromNow = theTimeNow.add(Calendar.DAY_OF_MONTH, 7)
+
+        return production.reviews.filter { it.postDate.after(sevenDaysFromNow) }
+
+    }*/
+
+    fun getCommonMoviesInWantToWatchList(): MutableList<ListItem> {
+        val commonMoviesInWatchList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getWantToWatchList()?.filter { it.production.type == "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.wantToWatchCollection?.filter { it.production.type == "movie" } ?: emptyList()
+
+        val otherUserIds = otherUserCollection.map { it.id }.toSet()
+
+        for (show in loggedInUserCollection) {
+            for(otherShow in otherUserCollection)
+                if (show.id == otherShow.id && commonMoviesInWatchList.none { it.id == show.id }) {
+                commonMoviesInWatchList.add(show)
+            }
+        }
+
+        return commonMoviesInWatchList
+    }
+
+    fun getCommonMoviesInCompletedList(): MutableList<ListItem> {
+        val commonMoviesInCompletedList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getCompletedShows()?.filter { it.production.type == "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.completedCollection?.filter { it.production.type == "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection) {
+            for (otherShow in otherUserCollection) {
+                if (show.id == otherShow.id && commonMoviesInCompletedList.none { it.id == show.id }) {
+                    commonMoviesInCompletedList.add(show)
+                }
+            }
+        }
+        return commonMoviesInCompletedList
+    }
+
+
+    fun getCommonFavoritesList(): MutableList<ListItem>{
+        val commonMoviesInFavoritesList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type == "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type == "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id && commonMoviesInFavoritesList.none { it.id == show.id }){
+                    commonMoviesInFavoritesList.add(show)
+                }
+            }
+        }
+        return commonMoviesInFavoritesList
+    }
+
+    fun getCommonCompletedShowsList() : MutableList<ListItem>{
+        val commonShowsInCompletedList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id && commonShowsInCompletedList.none { it.id == show.id }){
+                    commonShowsInCompletedList.add(show)
+                }
+            }
+        }
+        return commonShowsInCompletedList
+    }
+
+    fun getCommonWantToWatchShowsList() : MutableList<ListItem>{
+        val commonShowsInWantToWatchList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id && commonShowsInWantToWatchList.none { it.id == show.id }){
+
+                    commonShowsInWantToWatchList.add(show)
+                }
+            }
+        }
+        return commonShowsInWantToWatchList
+    }
+
+    fun getCommonFavoriteShowsList() : MutableList<ListItem>{
+        val commonShowsInFavoritesList = mutableListOf<ListItem>()
+
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+
+        for (show in loggedInUserCollection){
+            for(otherShow in otherUserCollection){
+                if (show.id == otherShow.id){
+                    commonShowsInFavoritesList.add(show)
+                }
+            }
+        }
+        return commonShowsInFavoritesList
+    }
+
 
 
     fun addProductionToWantToWatchList(production: Production) {
