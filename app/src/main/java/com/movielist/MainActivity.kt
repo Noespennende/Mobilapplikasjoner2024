@@ -52,6 +52,8 @@ class MainActivity : ComponentActivity() {
                     controllerViewModel.getShow(seriesId = 94722)
                     controllerViewModel.getShowSeason(seriesId = 94722, seasonNumber = 1)
                     controllerViewModel.getShowEpisode(seriesId = 94722, seasonNumber = 1, episodeNumber = 1)
+
+                    //controllerViewModel.getMovieById()
                 }
 
             }

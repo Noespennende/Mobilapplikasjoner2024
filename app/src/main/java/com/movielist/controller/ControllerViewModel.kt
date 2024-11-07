@@ -8,9 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.addCurrentlyWatchingShow
+import com.movielist.model.ApiResponse
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.MovieResponse
 import com.movielist.model.Production
+import com.movielist.model.ResultsItem
 import com.movielist.model.Review
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -73,6 +76,56 @@ class ControllerViewModel(
     fun getShowEpisode(seriesId: Int, seasonNumber: Int, episodeNumber: Int) {
         Log.d("ControllerViewModel", "getShowEpisode called")
         apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
+    }
+
+    private val _movieData = MutableStateFlow<Production?>(null)
+    val movieData: StateFlow<Production?> get() = _movieData
+
+    fun getMovieById(id: String) {
+        Log.d("ViewModel", "getMovieById called with id: $id")
+        apiViewModel.getMovieById(id)
+
+        viewModelScope.launch {
+            apiViewModel.movieData.collect { movieResponse ->
+                val production = movieResponse?.let { convertResponseToProduction(it, "movie") }
+                Log.d("ViewModel", "Collected production: $production")
+                _movieData.value = production
+            }
+        }
+    }
+
+
+    private fun convertResponseToProduction(result: MovieResponse, test: String): Production? {
+        return when (test) {
+            "movie" -> Movie(
+                imdbID = result.id.toString(),
+                title = result.title.orEmpty(),
+                description = result.overview.orEmpty(),
+                //genre = result.genreIds.orEmpty(),
+                //releaseDate = result.releaseDate ?: Calendar.getInstance(),
+                //actors = result.actors.orEmpty(),
+                //rating = result.rating,
+                //reviews = result.reviews.orEmpty(),
+                posterUrl = result.posterPath,
+                //trailerUrl = result.trailerUrl.orEmpty(),
+                //lengthMinutes = result.lengthMinutes
+            )
+            "tv" -> TVShow(
+                imdbID = result.id.toString(),
+                title = result.title.orEmpty(),
+                description = result.overview.orEmpty(),
+                //genre = result.genre.orEmpty(),
+                //releaseDate = result.releaseDate ?: Calendar.getInstance(),
+                //actors = result.actors.orEmpty(),
+                //rating = result.rating,
+                //reviews = result.reviews.orEmpty(),
+                posterUrl = result.posterPath,
+                //trailerUrl = result.trailerUrl.orEmpty(),
+                //episodes = result.episodes.orEmpty(),
+                //seasons = result.seasons.orEmpty()
+            )
+            else -> null // Hvis det ikke er en film eller tv-show, returner null
+        }
     }
 
     // This function is for testing purposes - DELETE LATER
@@ -489,6 +542,7 @@ class ControllerViewModel(
                 }
             }
         }
+
     }
 
 
