@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -447,8 +448,10 @@ fun ProductionListSidesroller (
     header: String,
     listOfShows: List<Production>,
     modifier: Modifier = Modifier,
-    textModifier: Modifier = Modifier
+    textModifier: Modifier = Modifier,
+    handleImageClick: (productionID: String) -> Unit = {}
 ) {
+
     Column (
         modifier = modifier
             .fillMaxWidth()
@@ -470,7 +473,11 @@ fun ProductionListSidesroller (
             items (listOfShows.size) {i ->
                 ShowImage(
                     imageID = listOfShows[i].posterUrl,
-                    imageDescription = listOfShows[i].title + " Poster"
+                    imageDescription = listOfShows[i].title + " Poster",
+                    modifier = Modifier
+                        .clickable {
+                            handleImageClick(listOfShows[i].imdbID)
+                        }
                 )
             }
         }
@@ -483,7 +490,8 @@ fun ListItemListSidesroller (
     header: String,
     listOfShows: List<ListItem>,
     modifier: Modifier = Modifier,
-    textModifier: Modifier = Modifier
+    textModifier: Modifier = Modifier,
+    handleImageClick: (productionID: String) -> Unit = {}
 ) {
     Column (
         modifier = modifier
@@ -506,7 +514,11 @@ fun ListItemListSidesroller (
             items (listOfShows.size) {i ->
                 ShowImage(
                     imageID = listOfShows[i].production.posterUrl,
-                    imageDescription = listOfShows[i].production.title + " Poster"
+                    imageDescription = listOfShows[i].production.title + " Poster",
+                    modifier = Modifier
+                        .clickable {
+                            handleImageClick(listOfShows[i].production.imdbID)
+                        }
                 )
             }
         }

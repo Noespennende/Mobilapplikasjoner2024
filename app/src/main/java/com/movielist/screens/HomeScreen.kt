@@ -162,7 +162,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     ) {
         // Front page content
         item {
-            CurrentlyWatchingScroller(currentlyWatchingCollection)
+            CurrentlyWatchingScroller(
+                listOfShows = currentlyWatchingCollection,
+                onImageClick = handleProductionButtonClick)
         }
 
         item {
@@ -181,6 +183,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             ProductionListSidesroller(
                 header = "Popular shows and movies",
                 listOfShows = showList,
+                handleImageClick = handleProductionButtonClick,
                 textModifier = Modifier
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),
                 modifier = Modifier
@@ -229,7 +232,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             ReviewsSection(
                 reviewList = top10ReviewsListPastWeek,
                 header = "Top reviews this week",
-                handleLikeClick = handleReviewLikeButtonClick
+                handleLikeClick = handleReviewLikeButtonClick,
+                handleProductionImageClick = handleProductionButtonClick
             )
         }
 
@@ -245,7 +249,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
 @Composable
 fun CurrentlyWatchingScroller (
-    listOfShows: List<ListItem>
+    listOfShows: List<ListItem>,
+    onImageClick: (productionID: String) -> Unit,
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -262,13 +267,14 @@ fun CurrentlyWatchingScroller (
     }
 
     // Holder på oversikten over nyligste klikk
-    var clickTimes by remember {mutableStateOf(mutableMapOf<String, Long>())}
-
+    val clickTimes by remember {mutableStateOf(mutableMapOf<String, Long>())}
     fun mostRecentButtonClick(show: ListItem) {
         clickTimes[show.id] = System.currentTimeMillis() // Registerer når currentEpisode på watchedEpisodesCount oppdateres (knapp trykkes)
 
         allCurrentlyWatchingShows = listOfShows.sortedByDescending {clickTimes[it.id]}.toMutableList()
     }
+
+    //Graphics
         LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
@@ -282,8 +288,9 @@ fun CurrentlyWatchingScroller (
                 items(listOfShows.size) { i ->
                     CurrentlyWatchingCard(
                         imageId = listOfShows[i].production.posterUrl,
-                        imageDescription = listOfShows[i].production.title + " Image description",
+                        imageDescription = listOfShows[i].production.title,
                         title = listOfShows[i].production.title,
+                        productionID = listOfShows[i].production.imdbID,
                         showLength = when (listOfShows[i].production) {
                             is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                             is Movie -> 1 // Returnerer lengden i minutter som Int
@@ -291,8 +298,8 @@ fun CurrentlyWatchingScroller (
                             else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                         },
                         episodesWatched = listOfShows[i].currentEpisode,
-                        onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) } // Registrerer når "Mark as Watched" er trykket
-
+                        onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
+                        onImageClick = onImageClick
                     )
                 }
             }
@@ -351,8 +358,10 @@ fun CurrentlyWatchingCard(
     title: String,
     showLength: Int?,
     episodesWatched: Int,
+    productionID: String,
     modifier: Modifier = Modifier,
-    onMarkAsWatched: () -> Unit
+    onMarkAsWatched: () -> Unit,
+    onImageClick: (productionID: String) -> Unit,
 ) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
@@ -392,6 +401,9 @@ fun CurrentlyWatchingCard(
                     .fillMaxWidth()
                     .height(150.dp)
                     .clip(RoundedCornerShape(5.dp))
+                    .clickable {
+                        onImageClick(productionID)
+                    }
             )
 
             // Content under image

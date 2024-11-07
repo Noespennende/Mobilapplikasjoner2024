@@ -22,9 +22,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.movielist.R
+import com.movielist.Screen
 import com.movielist.composables.ShowImage
 import com.movielist.composables.TopNavbarBackground
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
@@ -33,7 +36,7 @@ import java.util.Calendar
 
 
 @Composable
-fun SearchPage () {
+fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavController) {
     //TEMP CODE DELETE THIS
 
     val showList = mutableListOf<Production>()
@@ -58,6 +61,10 @@ fun SearchPage () {
     }
     //TEMP CODE DELETE ABOVE
 
+
+    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    }
 
     //Graphics:
     //Search result content
@@ -86,7 +93,11 @@ fun SearchPage () {
             ){
                 ShowImage(
                     imageID = prod.posterUrl,
-                    imageDescription = prod.title + " Poster"
+                    imageDescription = prod.title + " Poster",
+                    modifier = Modifier
+                        .clickable {
+                            handleProductionClick(prod.imdbID)
+                        }
                 )
 
                 Text(
