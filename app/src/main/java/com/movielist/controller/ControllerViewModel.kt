@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.addCurrentlyWatchingShow
+import com.movielist.model.AllMedia
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -37,6 +38,17 @@ class ControllerViewModel(
     val isLoggedIn: State<Boolean> = authViewModel.isLoggedIn
     val loggedInUser: StateFlow<User?> = userViewModel.loggedInUser
     val otherUser: StateFlow<User?> = userViewModel.otherUser
+
+
+    private val _topTenProductions = MutableLiveData<List<AllMedia>>()
+    val topTenProductions: LiveData<List<AllMedia>> get() = _topTenProductions
+
+    init {
+        // Observe the media data from ApiViewModel
+        apiViewModel.mediaData.observeForever { mediaList ->
+            _topTenProductions.value = getTopTenProductions(mediaList)
+        }
+    }
 
     fun setLoggedInUser(uid: String) {
         userViewModel.setLoggedInUser(uid)
@@ -213,8 +225,9 @@ class ControllerViewModel(
             if(show.production.type != "movie"){
                 show.production.genre.forEach { genre->
                     mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                    totalShows++
                 }
-                totalShows++
+
             }
         }
         return mapOfGenres.mapValues { it ->
@@ -244,9 +257,16 @@ class ControllerViewModel(
 
     }
 
-    fun getTopTenProductions(production: List<Production>): List<Production>{
-        return production.filter { it.rating != null }.sortedByDescending { it.rating }.take(10)
+    fun loadAllMedia() {
+        apiViewModel.getAllMedia()
     }
+
+    private fun getTopTenProductions(production: List<AllMedia>): List<AllMedia> {
+        return production.filter { it.voteCount != null }
+            .sortedByDescending { it.voteCount }
+            .take(10)
+    }
+
 
     /*
     fun getTenReviewsWithMostLikes(production: Production): List<String>{
