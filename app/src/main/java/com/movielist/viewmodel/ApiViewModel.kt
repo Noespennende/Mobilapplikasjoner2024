@@ -89,10 +89,11 @@ class ApiViewModel() : ViewModel() {
         })
     }
 
-    fun getMovie(movieId: Int) {
+    fun getMovie(movieId: String) {
         _isLoading.value = true
         _isError.value = false
 
+        Log.d("ApiVIEWMODel", "getMovie Called")
         val client = ApiConfig.getApiService().getMovie(movieId)
 
         client.enqueue(object : Callback<ApiMovieResponse> {
@@ -126,10 +127,11 @@ class ApiViewModel() : ViewModel() {
         })
     }
 
-    fun getShow(seriesId: Int) {
+    fun getShow(seriesId: String) {
         _isLoading.value = true
         _isError.value = false
 
+        Log.d("ApiVIEWMODel", "getShow Called")
         val client = ApiConfig.getApiService().getShow(seriesId)
 
         client.enqueue(object : Callback<ApiShowResponse> {

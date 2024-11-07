@@ -22,12 +22,12 @@ interface ApiService {
 
     @GET("movie/{movie_id}?language=en-US")
     fun getMovie(
-        @Path("movie_id") movieId: Int,
+        @Path("movie_id") movieId: String,
         @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiMovieResponse>
 
     @GET("tv/{series_id}?language=en-USS")
     fun getShow(
-        @Path("series_id") seriesId: Int,
+        @Path("series_id") seriesId: String,
         @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiShowResponse>
 
     @GET("tv/{series_id}/season/{season_number}?language=en-US")

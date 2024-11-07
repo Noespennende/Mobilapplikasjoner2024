@@ -22,8 +22,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,7 +61,7 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
 @Composable
-fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: String?){
+fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: String?, productionType: String?){
 
     //Variables
     //val productionID by remember { if (productionID != null){mutableStateOf(productionID)} else {mutableStateOf("")} } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
@@ -72,19 +72,44 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
     var listOfReviews by remember { mutableStateOf(mutableListOf<Review>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
 
-    val productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
+    var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
-    val production by controllerViewModel.movieData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    val production by controllerViewModel.singleProductionData.observeAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
 
     // Trengs for å laste inn
+
     LaunchedEffect(productionID) {
         if (productionID.isNotEmpty()) {
             Log.d("Test1", production.toString())  // Før kall
-            controllerViewModel.getMovieById(productionID)
+            Log.d("TestType", "Production type is: '$productionType'")  // Logg `productionType`
+
+            controllerViewModel.nullifySingleProductionData()
+
+            when (productionType) {
+                "Movie" -> {
+                    Log.d("Test1111", production.toString())
+                    controllerViewModel.getMovieById(productionID)
+
+                }
+                "TVShow" -> {
+                    Log.d("Test2222", productionType)
+                    controllerViewModel.getTVShowById(productionID)
+                }
+                else -> {
+                    // Hvis productionType ikke er Movie eller TVShow, nullifiser data
+                    // Hvis noe går galt, så ønsker vi ikke å vise siste production objekt,
+                    // men kanskje en error side eller noe slikt?
+                    // Passer på at  if (production == null) trigges i LazyColumn
+                    controllerViewModel.nullifySingleProductionData()
+                }
+            }
+
+            productionID = "";
         }
     }
+
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
         userScore = score
@@ -93,6 +118,11 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
 
     val handleUserListCategoryChange: (userListCategory: ListOptions?) -> Unit = {userListCategory ->
         memberOfUserList = userListCategory
+        //Kontroller kall her:
+    }
+
+    val handleLikeClick: (like: String) -> Unit = { like ->
+        Log.d("Temp", "Temp")
         //Kontroller kall her:
     }
 
@@ -203,7 +233,10 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
                 production?.let { production ->
                     ReviewsSection(
                         reviewList = listOfReviews,
-                        header = "Reviews for " + production.title
+                        header = "Reviews for " + production.title,
+                        handleLikeClick =  { reviewID ->
+                            handleLikeClick(reviewID)
+                        }
                     )
                 }
             }

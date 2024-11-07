@@ -4,16 +4,16 @@ import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.addCurrentlyWatchingShow
-import com.movielist.model.ApiResponse
+import com.movielist.model.ApiMovieResponse
+import com.movielist.model.ApiShowResponse
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
-import com.movielist.model.MovieResponse
 import com.movielist.model.Production
-import com.movielist.model.ResultsItem
 import com.movielist.model.Review
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -58,14 +58,14 @@ class ControllerViewModel(
         apiViewModel.getAllMedia()
     }
 
-    fun getMovie(movieId: Int) {
+    fun getMovie(movieId: String) {
         Log.d("ControllerViewModel", "getMovie called")
         apiViewModel.getMovie(movieId)
     }
 
     fun getShow(seriesId: Int) {
         Log.d("ControllerViewModel", "getShow called")
-        apiViewModel.getShow(seriesId)
+        //apiViewModel.getShow(seriesId)
     }
 
     fun getShowSeason(seriesId: Int, seasonNumber: Int) {
@@ -78,26 +78,57 @@ class ControllerViewModel(
         apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
     }
 
-    private val _movieData = MutableStateFlow<Production?>(null)
-    val movieData: StateFlow<Production?> get() = _movieData
+    private val _singleProductionData = MutableLiveData<Production?>()
+    val singleProductionData: LiveData<Production?> get() = _singleProductionData
+
+    fun nullifySingleProductionData() {
+        _singleProductionData.value = null
+    }
 
     fun getMovieById(id: String) {
         Log.d("ViewModel", "getMovieById called with id: $id")
-        apiViewModel.getMovieById(id)
+        apiViewModel.getMovie(id)
 
-        viewModelScope.launch {
-            apiViewModel.movieData.collect { movieResponse ->
-                val production = movieResponse?.let { convertResponseToProduction(it, "movie") }
-                Log.d("ViewModel", "Collected production: $production")
-                _movieData.value = production
+        // Opprett en lokal observer
+        val oneTimeObserver = object : Observer<ApiMovieResponse?> {
+            override fun onChanged(movieResponse: ApiMovieResponse?) {
+                val production = movieResponse?.let { convertResponseToProduction(it) }
+                Log.d("ViewModel", "Observed production: $production")
+                _singleProductionData.value = production
+
+                // Fjern observeren etter første oppdatering
+                apiViewModel.movieData.removeObserver(this)
             }
         }
+
+        // Legg til den lokale observeren for en enkel oppdatering
+        apiViewModel.movieData.observeForever(oneTimeObserver)
+    }
+
+    fun getTVShowById(id: String) {
+        Log.d("ViewModel", "getTVShowById called with id: $id")
+        apiViewModel.getShow(id)
+
+        // Opprett en lokal observer
+        val oneTimeObserver = object : Observer<ApiShowResponse?> {
+            override fun onChanged(showResponse: ApiShowResponse?) {
+                val production = showResponse?.let { convertResponseToProduction(it) }
+                Log.d("ViewModel", "Observed production: $production")
+                _singleProductionData.value = production
+
+                // Fjern observeren etter første oppdatering
+                apiViewModel.showData.removeObserver(this)
+            }
+        }
+
+        // Legg til den lokale observeren for en enkel oppdatering
+        apiViewModel.showData.observeForever(oneTimeObserver)
     }
 
 
-    private fun convertResponseToProduction(result: MovieResponse, test: String): Production? {
-        return when (test) {
-            "movie" -> Movie(
+    private fun convertResponseToProduction(result: Any): Production? {
+        return when (result) {
+           is ApiMovieResponse -> Movie(
                 imdbID = result.id.toString(),
                 title = result.title.orEmpty(),
                 description = result.overview.orEmpty(),
@@ -110,9 +141,9 @@ class ControllerViewModel(
                 //trailerUrl = result.trailerUrl.orEmpty(),
                 //lengthMinutes = result.lengthMinutes
             )
-            "tv" -> TVShow(
+            is ApiShowResponse -> TVShow(
                 imdbID = result.id.toString(),
-                title = result.title.orEmpty(),
+                title = result.name.toString(),
                 description = result.overview.orEmpty(),
                 //genre = result.genre.orEmpty(),
                 //releaseDate = result.releaseDate ?: Calendar.getInstance(),
@@ -127,6 +158,7 @@ class ControllerViewModel(
             else -> null // Hvis det ikke er en film eller tv-show, returner null
         }
     }
+
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {

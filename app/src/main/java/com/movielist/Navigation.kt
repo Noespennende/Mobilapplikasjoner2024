@@ -33,10 +33,9 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
-            Screen.ReviewScreen.route
-            /*
+            // Screen.ReviewScreen.route
             Screen.HomeScreen.route
-            */
+
         }
 
     NavHost(
@@ -78,9 +77,14 @@ fun Navigation (controllerViewModel: ControllerViewModel){
             CreateUserScreen(controllerViewModel, navController)
         }
         composable(
-            route = Screen.ProductionScreen.withArguments() + "/{productionID}",
+            route = Screen.ProductionScreen.withArguments() + "/{productionID}/{productionType}",
             arguments = listOf(
                 navArgument("productionID") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                },
+                navArgument("productionType") {
                     type = NavType.StringType
                     defaultValue = ""
                     nullable = true
@@ -89,7 +93,8 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         ) { entry ->
             ProductionScreen(
                 controllerViewModel,
-                productionID = entry.arguments?.getString("productionID"))
+                productionID = entry.arguments?.getString("productionID"),
+                productionType = entry.arguments?.getString("productionType"))
         }
         composable(
             route = Screen.ReviewScreen.withArguments(),

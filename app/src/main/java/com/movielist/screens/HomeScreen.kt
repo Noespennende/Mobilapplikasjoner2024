@@ -145,9 +145,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
-    val handleProductionButtonClick: (showID: String) -> Unit = {
-        Log.d("Test", it)
-        navController.navigate(Screen.ProductionScreen.withArguments(it))
+    val handleProductionButtonClick: (showID: String, productionType: String)
+    -> Unit = { showID, productionType ->
+        Log.d("Test", "$showID $productionType")
+        navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType))
     }
 
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
@@ -191,9 +192,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
             YourFriendsJustWatched(
                 listOfShows = friendsWatchedList.toMutableList(),
-                handleShowButtonClick = {showID ->
-                    handleProductionButtonClick(showID)
-                }
+                handleShowButtonClick = handleProductionButtonClick
             )
 
 
@@ -466,10 +465,11 @@ fun CurrentlyWatchingCard(
 @Composable
 fun YourFriendsJustWatched (
     listOfShows: MutableList<ListItem>,
-    handleShowButtonClick: (String) -> Unit
+    handleShowButtonClick: (showID: String, productionType: String) -> Unit
 ) {
-    val handleShowClick: (showId: String) -> Unit = {
-        handleShowButtonClick(it)
+    val handleShowClick: (showID: String, productionType: String)
+    -> Unit = { showID, productionType ->
+        handleShowButtonClick(showID, productionType)
     }
 
     //Container collumn
@@ -509,7 +509,7 @@ fun YourFriendsJustWatched (
                         verticalArrangement = Arrangement.spacedBy(3.dp),
                         modifier = Modifier
                             .clickable {
-                                handleShowClick(listOfShows[i].production.imdbID)
+                                handleShowClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
                             }
                     ) {
                         ShowImage(

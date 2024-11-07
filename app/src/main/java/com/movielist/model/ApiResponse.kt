@@ -290,7 +290,7 @@ data class ApiShowResponse(
 	val homepage: String? = null,
 
 	@field:SerializedName("id")
-	val id: Int? = null,
+	val id: String? = null,
 
 	@field:SerializedName("in_production")
 	val inProduction: Boolean? = null,
