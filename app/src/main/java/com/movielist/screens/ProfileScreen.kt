@@ -32,7 +32,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.movielist.R
+import com.movielist.Screen
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ListItemListSidesroller
 import com.movielist.composables.ProfileImage
@@ -68,7 +70,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun ProfilePage (controllerViewModel: ControllerViewModel){
+fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
@@ -81,6 +83,10 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
     val exampleReviews: MutableList<Review> = mutableListOf()
     val exampleShows: MutableList<ListItem> = mutableListOf()
     val exampleFavShows: MutableList<ListItem> = mutableListOf()
+
+    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    }
 
     for (i in 0 .. 10){
         exampleShows.add(
@@ -174,6 +180,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
             ListItemListSidesroller(
                 header = "Favorite series",
                 listOfShows = usersFavoriteTVShows,
+                handleImageClick = handleProductionClick,
                 textModifier = Modifier
                     .padding(
                         start = verticalPadding,
@@ -201,6 +208,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
             ListItemListSidesroller(
                 header = "Favorite movies",
                 listOfShows = usersFavoriteMovies,
+                handleImageClick = handleProductionClick,
                 textModifier = Modifier
                     .padding(
                         start = horizontalPadding,
@@ -249,7 +257,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel){
             ReviewsSection(
                 reviewList = exampleReviews,
                 header = "Reviews",
-                handleLikeClick = handleReviewButtonLikeClick
+                handleLikeClick = handleReviewButtonLikeClick,
+                handleProductionImageClick = handleProductionClick
 
             )
         }

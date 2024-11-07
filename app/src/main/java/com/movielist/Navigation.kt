@@ -55,22 +55,22 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         composable(
             route = Screen.ListScreen.withArguments()
         ) {
-            ListScreen(controllerViewModel)
+            ListScreen(controllerViewModel, navController)
         }
         composable(
             route = Screen.SearchScreen.withArguments()
         ) {
-            SearchPage()
+            SearchPage(controllerViewModel, navController)
         }
         composable(
             route = Screen.ReviewsScreen.withArguments()
         ) {
-            ReviewPage()
+            ReviewPage(controllerViewModel, navController)
         }
         composable(
             route = Screen.ProfileScreen.withArguments()
         ) {
-            ProfilePage(controllerViewModel)
+            ProfilePage(controllerViewModel, navController)
         }
         composable(
             route = Screen.CreateUserScreen.withArguments()

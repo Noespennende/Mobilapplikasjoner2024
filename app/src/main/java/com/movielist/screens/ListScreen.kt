@@ -33,6 +33,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.movielist.Screen
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
@@ -65,7 +67,7 @@ import java.util.Calendar
 
 
 @Composable
-fun ListScreen (controllerViewModel: ControllerViewModel)
+fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavController)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
@@ -97,8 +99,12 @@ fun ListScreen (controllerViewModel: ControllerViewModel)
 
     * */
 
-    //Graphics
+    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    }
 
+
+    //Graphics
     //List
     LazyColumn(
         contentPadding = PaddingValues(
@@ -113,7 +119,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel)
         item {
             ListPageList(
                 loggedInUsersList = isLoggedInUser,
-                listItemList = currentlyWatchingCollection.toList()
+                listItemList = currentlyWatchingCollection.toList(),
+                handleProductionImageClick = handleProductionClick
             )
         }
     }
@@ -364,7 +371,8 @@ fun ListCategoryOptions (
 @Composable
 fun ListPageList (
     loggedInUsersList: Boolean,
-    listItemList: List<ListItem>
+    listItemList: List<ListItem>,
+    handleProductionImageClick: (productionID: String) -> Unit = {}
 ){
     //Graphics
     Column(
@@ -410,7 +418,8 @@ fun ListPageList (
         for (listItem in listItemList){
             ListPageListItem(
                 listItem = listItem,
-                loggedInUsersList = loggedInUsersList
+                loggedInUsersList = loggedInUsersList,
+                handleProductionImageClick = handleProductionImageClick
             )
         }
     }
@@ -420,7 +429,8 @@ fun ListPageList (
 @Composable
 fun ListPageListItem (
     listItem: ListItem,
-    loggedInUsersList: Boolean
+    loggedInUsersList: Boolean,
+    handleProductionImageClick: (productionID: String) -> Unit = {}
 ){
 
     //Graphics logic
@@ -446,6 +456,10 @@ fun ListPageListItem (
             ShowImage(
                 imageID = listItem.production.posterUrl,
                 imageDescription = listItem.production.title + " Poster",
+                modifier = Modifier
+                    .clickable {
+                        handleProductionImageClick(listItem.production.imdbID)
+                    }
             )
             //List Item information
             Column(

@@ -30,7 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.movielist.R
+import com.movielist.Screen
 import com.movielist.composables.GenerateShowSortOptionName
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
@@ -38,6 +40,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ScoreGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.composables.TopNavbarBackground
+import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
 import com.movielist.model.ReviewOptions
@@ -66,7 +69,7 @@ import kotlin.random.Random
 
 
 @Composable
-fun ReviewPage () {
+fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavController) {
 
     //TEMP CODE DELETE THIS:
     var reviewsList  = mutableListOf<Review>()
@@ -120,6 +123,10 @@ fun ReviewPage () {
         //Kontroller håndtering av liking av en review her
     }
 
+    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    }
+
     //Graphics:
     LazyColumn (
         modifier = Modifier
@@ -131,7 +138,8 @@ fun ReviewPage () {
             SummarySection(
                 friendsReviewsList = friendsReviewsList,
                 topThisMonthList = popularReviewsThisMonthList,
-                handleReviewLikeClick = handleReviewLikeButtonClick
+                handleReviewLikeClick = handleReviewLikeButtonClick,
+                handleProductionImageClick = handleProductionClick
             )
         }
 
@@ -143,7 +151,8 @@ fun ReviewPage () {
 fun SummarySection (
     friendsReviewsList: MutableList<Review>,
     topThisMonthList: MutableList<Review>,
-    handleReviewLikeClick: (reviewID: String) -> Unit
+    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleProductionImageClick: (productionID: String) -> Unit = {}
 ){
     val handleReviewLikeButtonClick: (String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -154,13 +163,15 @@ fun SummarySection (
         ReviewsSection(
             reviewList = friendsReviewsList,
             header = "Latest reviews from your friends",
-            handleLikeClick = handleReviewLikeButtonClick
+            handleLikeClick = handleReviewLikeButtonClick,
+            handleProductionImageClick = handleProductionImageClick
         )
         //Popular reviews this month section
         ReviewsSection(
             reviewList = topThisMonthList,
             header = "Popular reviews this month",
-            handleLikeClick = handleReviewLikeButtonClick
+            handleLikeClick = handleReviewLikeButtonClick,
+            handleProductionImageClick = handleProductionImageClick
         )
     }
 }
@@ -168,7 +179,8 @@ fun SummarySection (
 @Composable
 fun TopThisMonthSection (
     topThisMonthList: MutableList<Review>,
-    handleReviewLikeClick: (reviewID: String) -> Unit
+    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleProductionImageClick: (productionID: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -178,14 +190,16 @@ fun TopThisMonthSection (
     ReviewsSection(
         reviewList = topThisMonthList,
         header = "Popular reviews this month",
-        handleLikeClick = handleReviewButtonLikeClick
+        handleLikeClick = handleReviewButtonLikeClick,
+        handleProductionImageClick = handleProductionImageClick
     )
 }
 
 @Composable
 fun TopAllTimeSection (
     topAllTimeList: MutableList<Review>,
-    handleReviewLikeClick: (reviewID: String) -> Unit
+    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleProductionImageClick: (productionID: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = { reviewID ->
         handleReviewLikeClick(reviewID)
@@ -195,7 +209,8 @@ fun TopAllTimeSection (
     ReviewsSection(
         reviewList = topAllTimeList,
         header = "Most popular reviews of all time",
-        handleLikeClick = handleReviewButtonLikeClick
+        handleLikeClick = handleReviewButtonLikeClick,
+        handleProductionImageClick = handleProductionImageClick
     )
 }
 
@@ -448,7 +463,8 @@ fun CategorySelectButton () {
 fun ReviewsSection(
     reviewList: List<Review>,
     header: String,
-    handleLikeClick: (reviewID: String) -> Unit
+    handleLikeClick: (reviewID: String) -> Unit,
+    handleProductionImageClick: (productionID: String) -> Unit = {}
 ) {
 
     val handleLikeButtonClick: (String) -> Unit = {reviewID ->
@@ -484,7 +500,8 @@ fun ReviewsSection(
             for (review in reviewList) {
                 ReviewSummary(
                     review = review,
-                    handleLikeClick = handleLikeButtonClick
+                    handleLikeClick = handleLikeButtonClick,
+                    handleProductionImageClick = handleProductionImageClick
                 )
                 LineDevider()
             }
@@ -518,7 +535,8 @@ fun ReviewsSection(
 @Composable
 fun ReviewSummary (
     review: Review,
-    handleLikeClick: (String) -> Unit
+    handleLikeClick: (String) -> Unit,
+    handleProductionImageClick: (productionID: String) -> Unit
 ) {
     val handleLikeButtonClick: () -> Unit = {
         handleLikeClick(review.reviewId.toString())
@@ -531,7 +549,11 @@ fun ReviewSummary (
             .fillMaxWidth()
     ) {
         ShowImage(
-            imageID = review.show.posterUrl
+            imageID = review.show.posterUrl,
+            modifier = Modifier
+                .clickable {
+                    handleProductionImageClick(review.show.imdbID)
+                }
         )
         //Review header, score and body
         Column (
