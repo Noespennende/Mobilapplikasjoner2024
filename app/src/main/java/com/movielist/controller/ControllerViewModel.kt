@@ -298,8 +298,9 @@ class ControllerViewModel(
             if(show.production.type != "movie"){
                 show.production.genre.forEach { genre->
                     mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                    totalShows++
                 }
-                totalShows++
+
             }
         }
         return mapOfGenres.mapValues { it ->

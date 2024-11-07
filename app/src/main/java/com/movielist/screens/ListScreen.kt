@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
@@ -65,7 +66,7 @@ import java.util.Calendar
 
 
 @Composable
-fun ListScreen (controllerViewModel: ControllerViewModel)
+fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
