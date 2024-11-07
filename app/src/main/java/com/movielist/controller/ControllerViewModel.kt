@@ -220,31 +220,34 @@ class ControllerViewModel(
 
     fun genrePercentageMovie(): Map<String, Int>{
         val moviesWatched = (
-            (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
-            (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
-            (loggedInUser.value?.completedCollection ?: emptyList()) +
-            (loggedInUser.value?.favoriteCollection ?: emptyList())
-        )
+                (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
+                        (loggedInUser.value?.currentlyWatchingCollection ?: emptyList()) +
+                        (loggedInUser.value?.completedCollection ?: emptyList()) +
+                        (loggedInUser.value?.favoriteCollection ?: emptyList())
+                )
 
         val mapOfGenres = mutableMapOf<String, Int>()
-        var totalMovies = 0
+        var totalGenres = 0
 
         for (movie in moviesWatched){
-            if(movie.production.type == "movie"){
+            if(movie.production.type == "Movie"){
                 movie.production.genre.forEach { genre->
                     mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
+                    totalGenres++
                 }
-                totalMovies++
+
             }
+            
+
         }
-        return mapOfGenres.mapValues { it
-            val count = it.value
-            if(totalMovies > 0 ){
-                (count*100)/  totalMovies
-            }else{
-                0
+        return if (totalGenres > 0) {
+            mapOfGenres.mapValues { entry ->
+                val prosent = (entry.value*100) / totalGenres
+                prosent
             }
 
+        }else{
+            emptyMap()
         }
     }
 
