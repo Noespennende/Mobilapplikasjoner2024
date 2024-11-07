@@ -49,7 +49,6 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
@@ -123,8 +122,9 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
         //Kontroller håndtering av liking av en review her
     }
 
-    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    val handleProductionClick: (productionID: String, productionType: String)
+        -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
     //Graphics:
@@ -152,7 +152,7 @@ fun SummarySection (
     friendsReviewsList: MutableList<Review>,
     topThisMonthList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String) -> Unit = {}
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
     val handleReviewLikeButtonClick: (String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -180,7 +180,7 @@ fun SummarySection (
 fun TopThisMonthSection (
     topThisMonthList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -199,7 +199,7 @@ fun TopThisMonthSection (
 fun TopAllTimeSection (
     topAllTimeList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = { reviewID ->
         handleReviewLikeClick(reviewID)
@@ -464,7 +464,7 @@ fun ReviewsSection(
     reviewList: List<Review>,
     header: String,
     handleLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String) -> Unit = {}
+    handleProductionImageClick: (showID: String, productionType: String) -> Unit
 ) {
 
     val handleLikeButtonClick: (String) -> Unit = {reviewID ->
@@ -536,7 +536,7 @@ fun ReviewsSection(
 fun ReviewSummary (
     review: Review,
     handleLikeClick: (String) -> Unit,
-    handleProductionImageClick: (productionID: String) -> Unit
+    handleProductionImageClick: (showID: String, productionType: String) -> Unit
 ) {
     val handleLikeButtonClick: () -> Unit = {
         handleLikeClick(review.reviewId.toString())
@@ -552,7 +552,7 @@ fun ReviewSummary (
             imageID = review.show.posterUrl,
             modifier = Modifier
                 .clickable {
-                    handleProductionImageClick(review.show.imdbID)
+                    handleProductionImageClick(review.show.imdbID, review.show.type)
                 }
         )
         //Review header, score and body

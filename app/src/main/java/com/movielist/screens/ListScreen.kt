@@ -99,8 +99,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavCont
 
     * */
 
-    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
 
@@ -372,7 +372,7 @@ fun ListCategoryOptions (
 fun ListPageList (
     loggedInUsersList: Boolean,
     listItemList: List<ListItem>,
-    handleProductionImageClick: (productionID: String) -> Unit = {}
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
     //Graphics
     Column(
@@ -430,7 +430,7 @@ fun ListPageList (
 fun ListPageListItem (
     listItem: ListItem,
     loggedInUsersList: Boolean,
-    handleProductionImageClick: (productionID: String) -> Unit = {}
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
 
     //Graphics logic
@@ -458,7 +458,7 @@ fun ListPageListItem (
                 imageDescription = listItem.production.title + " Poster",
                 modifier = Modifier
                     .clickable {
-                        handleProductionImageClick(listItem.production.imdbID)
+                        handleProductionImageClick(listItem.production.imdbID, listItem.production.type)
                     }
             )
             //List Item information

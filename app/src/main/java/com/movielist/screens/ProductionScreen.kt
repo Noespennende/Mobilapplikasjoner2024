@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavController
+import com.movielist.Screen
 import com.movielist.composables.GenerateListOptionName
 import com.movielist.composables.LineDevider
 import com.movielist.composables.RatingSlider
@@ -61,7 +63,7 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
 @Composable
-fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: String?, productionType: String?){
+fun ProductionScreen (navController: NavController, controllerViewModel: ControllerViewModel, productionID: String?, productionType: String?){
 
     //Variables
     //val productionID by remember { if (productionID != null){mutableStateOf(productionID)} else {mutableStateOf("")} } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
@@ -81,6 +83,8 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
     // Trengs for å laste inn
 
     LaunchedEffect(productionID) {
+
+        //controllerViewModel.nullifySingleProductionData()
         if (productionID.isNotEmpty()) {
             Log.d("Test1", production.toString())  // Før kall
             Log.d("TestType", "Production type is: '$productionType'")  // Logg `productionType`
@@ -106,7 +110,7 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
                 }
             }
 
-            productionID = "";
+            //productionID = "";
         }
     }
 
@@ -124,6 +128,11 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
     val handleLikeClick: (like: String) -> Unit = { like ->
         Log.d("Temp", "Temp")
         //Kontroller kall her:
+    }
+
+    val handleProductionClick: (productionID: String, productionType: String)
+    -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
 
@@ -234,6 +243,7 @@ fun ProductionScreen (controllerViewModel: ControllerViewModel, productionID: St
                     ReviewsSection(
                         reviewList = listOfReviews,
                         header = "Reviews for " + production.title,
+                        handleProductionImageClick = handleProductionClick,
                         handleLikeClick =  { reviewID ->
                             handleLikeClick(reviewID)
                         }

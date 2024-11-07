@@ -92,6 +92,7 @@ fun Navigation (controllerViewModel: ControllerViewModel){
             )
         ) { entry ->
             ProductionScreen(
+                navController,
                 controllerViewModel,
                 productionID = entry.arguments?.getString("productionID"),
                 productionType = entry.arguments?.getString("productionType"))

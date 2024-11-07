@@ -84,8 +84,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     val exampleShows: MutableList<ListItem> = mutableListOf()
     val exampleFavShows: MutableList<ListItem> = mutableListOf()
 
-    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    val handleProductionClick: (productionID: String, productionType: String)
+        -> Unit = { productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
     for (i in 0 .. 10){

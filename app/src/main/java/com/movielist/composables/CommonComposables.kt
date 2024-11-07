@@ -45,7 +45,6 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -449,7 +448,7 @@ fun ProductionListSidesroller (
     listOfShows: List<Production>,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    handleImageClick: (productionID: String) -> Unit = {}
+    handleImageClick: (showID: String, productionType: String) -> Unit
 ) {
 
     Column (
@@ -476,7 +475,7 @@ fun ProductionListSidesroller (
                     imageDescription = listOfShows[i].title + " Poster",
                     modifier = Modifier
                         .clickable {
-                            handleImageClick(listOfShows[i].imdbID)
+                            handleImageClick(listOfShows[i].imdbID, listOfShows[i].type)
                         }
                 )
             }
@@ -491,7 +490,7 @@ fun ListItemListSidesroller (
     listOfShows: List<ListItem>,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    handleImageClick: (productionID: String) -> Unit = {}
+    handleImageClick: (productionID: String, productionType: String) -> Unit
 ) {
     Column (
         modifier = modifier
@@ -517,7 +516,7 @@ fun ListItemListSidesroller (
                     imageDescription = listOfShows[i].production.title + " Poster",
                     modifier = Modifier
                         .clickable {
-                            handleImageClick(listOfShows[i].production.imdbID)
+                            handleImageClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
                         }
                 )
             }

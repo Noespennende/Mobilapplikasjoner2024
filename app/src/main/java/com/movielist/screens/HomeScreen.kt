@@ -250,7 +250,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 @Composable
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
-    onImageClick: (productionID: String) -> Unit,
+    onImageClick: (showID: String, productionType: String) -> Unit,
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -291,6 +291,7 @@ fun CurrentlyWatchingScroller (
                         imageDescription = listOfShows[i].production.title,
                         title = listOfShows[i].production.title,
                         productionID = listOfShows[i].production.imdbID,
+                        productionType = listOfShows[i].production.type,
                         showLength = when (listOfShows[i].production) {
                             is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                             is Movie -> 1 // Returnerer lengden i minutter som Int
@@ -359,9 +360,10 @@ fun CurrentlyWatchingCard(
     showLength: Int?,
     episodesWatched: Int,
     productionID: String,
+    productionType: String,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit,
-    onImageClick: (productionID: String) -> Unit,
+    onImageClick: (showID: String, productionType: String) -> Unit,
 ) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
@@ -402,7 +404,7 @@ fun CurrentlyWatchingCard(
                     .height(150.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
-                        onImageClick(productionID)
+                        onImageClick(productionID, productionType)
                     }
             )
 
