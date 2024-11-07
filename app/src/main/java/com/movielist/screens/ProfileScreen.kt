@@ -234,9 +234,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         //Statistics section
         item {
             StatisticsSection(
-                //TEMP CODE
-                showGenreToPercentageMap = mapOf("Action" to 30, "Drama" to 25, "Sci-fi" to 20, "Fantacy" to 15),
-                movieGenreToPercentageMap = mapOf("Musical" to 30, "Drama" to 25, "Sci-fi" to 20, "Fantacy" to 15)
+
+                showGenreToPercentageMap = controllerViewModel.genrePercentageShows(),
+                movieGenreToPercentageMap = controllerViewModel.genrePercentageMovie()
             )
         }
 
