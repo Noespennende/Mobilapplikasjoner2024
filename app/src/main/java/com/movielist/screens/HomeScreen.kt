@@ -175,10 +175,13 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
             var allShowsList = mutableListOf<Production>()
 
+            var apiMovies = controllerViewModel.getAllMedia().toString()
+            println("APIMOVIES " + apiMovies + " END API MOVIES")
+
             // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
             var top10Shows = allShowsList
                 .sortedByDescending { it.rating }
-                .take(10) // Henter kun de første 10
+                .take(10)
 
             ProductionListSidesroller(
                 header = "Popular shows and movies",
@@ -188,6 +191,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),
                 modifier = Modifier
                     .padding(top = verticalPadding)
+
             )
         }
 

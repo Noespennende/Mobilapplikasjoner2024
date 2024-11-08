@@ -33,8 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.movielist.Screen
+import androidx.navigation.NavHostController
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
@@ -67,7 +66,7 @@ import java.util.Calendar
 
 
 @Composable
-fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavController)
+fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController)
 {
     val isLoggedInUser by remember { mutableStateOf(true) }
 
@@ -88,6 +87,15 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavCont
     // Innlogget bruker sin currentlyWatching-kolleksjon
     val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
 
+    var activeCategory by remember { mutableStateOf(ListOptions.WATCHING) }
+
+    val displayedList = when (activeCategory) {
+        ListOptions.WATCHING -> currentlyWatchingCollection
+        ListOptions.COMPLETED -> completedCollection
+        ListOptions.WANTTOWATCH -> wantToWatchCollection
+        ListOptions.DROPPED -> droppedCollection
+        ListOptions.REMOVEFROMLIST -> TODO()
+    }
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -99,12 +107,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavCont
 
     * */
 
-    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
-    }
-
-
     //Graphics
+
     //List
     LazyColumn(
         contentPadding = PaddingValues(
@@ -119,17 +123,32 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavCont
         item {
             ListPageList(
                 loggedInUsersList = isLoggedInUser,
-                listItemList = currentlyWatchingCollection.toList(),
-                handleProductionImageClick = handleProductionClick
+                listItemList = displayedList
+
             )
         }
     }
 
-    TopNavBarListPage()
+    TopNavBarListPage(
+        activeCategory = activeCategory,
+        onCategoryChange = { newCategory -> activeCategory = newCategory },
+        watchedListCount = currentlyWatchingCollection.size,
+        completedListCount = completedCollection.size,
+        wantToWatchListCount = wantToWatchCollection.size,
+        droppedListCount = droppedCollection.size
+    )
 }
 
 @Composable
-fun TopNavBarListPage(){
+fun TopNavBarListPage(
+    activeCategory: ListOptions,
+    onCategoryChange: (ListOptions) -> Unit,
+    watchedListCount: Int,
+    completedListCount: Int,
+    wantToWatchListCount: Int,
+    droppedListCount: Int
+
+){
 
     Box(
         modifier = Modifier.wrapContentSize()
@@ -141,7 +160,14 @@ fun TopNavBarListPage(){
                 .padding(top = topNavBarContentStart)
         ) {
             MovieShowSortingOptions()
-            ListCategoryOptions()
+            ListCategoryOptions(
+                activeCategory = activeCategory,
+                onCategoryChange = onCategoryChange,
+                watchedListCount = watchedListCount,
+                completedListCount = completedListCount,
+                wantToWatchListCount = wantToWatchListCount,
+                droppedListCount = droppedListCount
+            )
         }
     }
 }
@@ -205,30 +231,27 @@ fun MovieShowSortingOptions(
 
 @Composable
 fun ListCategoryOptions (
+    activeCategory: ListOptions,
+    onCategoryChange: (ListOptions) -> Unit,
     activeButtonColor: Color = Purple,
     inactiveButtonColor: Color = LightGray,
-    watchedListCount: Int = 0,
-    completedListCount: Int = 0,
-    wantToWatchListCount: Int = 0,
-    droppedListCount: Int = 0,
+    watchedListCount: Int,
+    completedListCount: Int,
+    wantToWatchListCount: Int,
+    droppedListCount: Int,
+
 ){
 
-    //Button graphics logic
-    var watchingButtonColor by remember {
-        mutableStateOf(activeButtonColor)
-    }
-    var completedButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
-    var wantToWatchButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
-    var droppedButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
+    var watchingButtonColor = if (activeCategory == ListOptions.WATCHING) activeButtonColor else inactiveButtonColor
+    var completedButtonColor = if (activeCategory == ListOptions.COMPLETED) activeButtonColor else inactiveButtonColor
+    var wantToWatchButtonColor = if (activeCategory == ListOptions.WANTTOWATCH) activeButtonColor else inactiveButtonColor
+    var droppedButtonColor = if (activeCategory == ListOptions.DROPPED) activeButtonColor else inactiveButtonColor
+
     var activeButton by remember {
         mutableStateOf(ListOptions.WATCHING)
     }
+
+
 
     //Graphics
     LazyRow(
@@ -240,62 +263,24 @@ fun ListCategoryOptions (
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .clickable {
-                        //OnClickFunction
-                        if (activeButton != ListOptions.WATCHING) {
-
-                            activeButton = ListOptions.WATCHING
-                            watchingButtonColor = activeButtonColor
-                            completedButtonColor = inactiveButtonColor
-                            wantToWatchButtonColor = inactiveButtonColor
-                            droppedButtonColor = inactiveButtonColor
-                        }
-                    }
-                    .background(
-                        color = watchingButtonColor,
-                        shape = RoundedCornerShape(5.dp)
-                    )
+                    .clickable { onCategoryChange(ListOptions.WATCHING) }
+                    .background(color = watchingButtonColor, shape = RoundedCornerShape(5.dp))
                     .width(150.dp)
                     .height(30.dp)
             ) {
-                Text(
-                    "Watching ($watchedListCount)",
-                    fontSize = paragraphSize,
-                    fontWeight = weightBold,
-                    color = DarkGray
-                )
+                Text("Watching ($watchedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = DarkGray)
             }
         }
-
         item {
-            //Completed
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .clickable {
-                        //OnClickFunction
-                        if (activeButton != ListOptions.COMPLETED) {
-
-                            activeButton = ListOptions.COMPLETED
-                            watchingButtonColor = inactiveButtonColor
-                            completedButtonColor = activeButtonColor
-                            wantToWatchButtonColor = inactiveButtonColor
-                            droppedButtonColor = inactiveButtonColor
-                        }
-                    }
-                    .background(
-                        color = completedButtonColor,
-                        shape = RoundedCornerShape(5.dp)
-                    )
+                    .clickable { onCategoryChange(ListOptions.COMPLETED) }
+                    .background(color = completedButtonColor, shape = RoundedCornerShape(5.dp))
                     .width(150.dp)
                     .height(30.dp)
             ) {
-                Text(
-                    "Completed ($completedListCount)",
-                    fontSize = paragraphSize,
-                    fontWeight = weightBold,
-                    color = DarkGray
-                )
+                Text("Completed ($completedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = DarkGray)
             }
         }
 
@@ -304,22 +289,8 @@ fun ListCategoryOptions (
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .clickable {
-                        //OnClickFunction
-                        if (activeButton != ListOptions.WANTTOWATCH) {
-
-                            activeButton = ListOptions.WANTTOWATCH
-                            watchingButtonColor = inactiveButtonColor
-                            completedButtonColor = inactiveButtonColor
-                            wantToWatchButtonColor = activeButtonColor
-                            droppedButtonColor = inactiveButtonColor
-                        }
-
-                    }
-                    .background(
-                        color = wantToWatchButtonColor,
-                        shape = RoundedCornerShape(5.dp)
-                    )
+                    .clickable { onCategoryChange(ListOptions.WANTTOWATCH) }
+                    .background(color = wantToWatchButtonColor, shape = RoundedCornerShape(5.dp))
                     .width(150.dp)
                     .height(30.dp)
             ) {
@@ -337,22 +308,8 @@ fun ListCategoryOptions (
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .clickable {
-                        //OnClickFunction
-                        //OnClickFunction
-                        if (activeButton != ListOptions.DROPPED) {
-
-                            activeButton = ListOptions.DROPPED
-                            watchingButtonColor = inactiveButtonColor
-                            completedButtonColor = inactiveButtonColor
-                            wantToWatchButtonColor = inactiveButtonColor
-                            droppedButtonColor = activeButtonColor
-                        }
-                    }
-                    .background(
-                        color = droppedButtonColor,
-                        shape = RoundedCornerShape(5.dp)
-                    )
+                    .clickable { onCategoryChange(ListOptions.DROPPED) }
+                    .background(color = droppedButtonColor, shape = RoundedCornerShape(5.dp))
                     .width(150.dp)
                     .height(30.dp)
             ) {
@@ -371,8 +328,7 @@ fun ListCategoryOptions (
 @Composable
 fun ListPageList (
     loggedInUsersList: Boolean,
-    listItemList: List<ListItem>,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    listItemList: List<ListItem>
 ){
     //Graphics
     Column(
@@ -418,8 +374,7 @@ fun ListPageList (
         for (listItem in listItemList){
             ListPageListItem(
                 listItem = listItem,
-                loggedInUsersList = loggedInUsersList,
-                handleProductionImageClick = handleProductionImageClick
+                loggedInUsersList = loggedInUsersList
             )
         }
     }
@@ -429,8 +384,7 @@ fun ListPageList (
 @Composable
 fun ListPageListItem (
     listItem: ListItem,
-    loggedInUsersList: Boolean,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    loggedInUsersList: Boolean
 ){
 
     //Graphics logic
@@ -456,10 +410,6 @@ fun ListPageListItem (
             ShowImage(
                 imageID = listItem.production.posterUrl,
                 imageDescription = listItem.production.title + " Poster",
-                modifier = Modifier
-                    .clickable {
-                        handleProductionImageClick(listItem.production.imdbID, listItem.production.type)
-                    }
             )
             //List Item information
             Column(
