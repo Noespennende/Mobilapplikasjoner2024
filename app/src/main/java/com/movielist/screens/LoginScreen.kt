@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
+import com.movielist.composables.LogoWithName
 import com.movielist.controller.ControllerViewModel
 import com.movielist.data.logInWithEmailAndPassword
 import com.movielist.ui.theme.DarkGray
@@ -64,6 +65,8 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                 .fillMaxWidth(.9f)
                 .padding(20.dp)
         ) {
+            LogoWithName()
+
             if (errorText.length > 0){
                 //Error text
                 Text(

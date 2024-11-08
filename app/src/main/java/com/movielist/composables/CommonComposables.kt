@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -75,6 +77,7 @@ import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.sliderColors
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
+import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
@@ -689,4 +692,52 @@ fun GenerateListOptionName (
     {
         return listOption.toString().lowercase().replaceFirstChar { it.uppercase() }
     }
+}
+
+@Composable
+fun LogoWithName (
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = 20.sp
+){
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = modifier
+            .fillMaxWidth()
+    ) {
+        Logo()
+        Row(){
+            Text(
+                text = "Movie",
+                textAlign = TextAlign.Center,
+                fontFamily = fontFamily,
+                fontSize = fontSize,
+                fontWeight = weightLight,
+                color = Purple
+            )
+            Text(
+                text = "List",
+                textAlign = TextAlign.Center,
+                fontFamily = fontFamily,
+                fontSize = fontSize,
+                fontWeight = FontWeight.Black,
+                color = Purple
+            )
+        }
+
+    }
+}
+
+
+@Composable
+fun Logo (
+    modifier: Modifier = Modifier,
+){
+    Image(
+        painter = painterResource(R.drawable.logo_m),
+        contentDescription = "MovieList",
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+    )
 }
