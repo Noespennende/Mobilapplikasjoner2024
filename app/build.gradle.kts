@@ -108,7 +108,6 @@ dependencies {
 
     implementation("com.squareup.moshi:moshi-adapters:1.8.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0") // Kotlin adapter for Moshi
-    implementation("com.google.firebase:firebase-firestore-ktx:24.0.0") // Firebase Firestore
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
@@ -122,14 +121,15 @@ dependencies {
 
     // mulig disse 3 kan fjernes
     implementation ("com.google.android.gms:play-services-base:18.1.0")
-    implementation ("com.google.android.gms:play-services-auth:20.1.0")
-    implementation ("com.google.android.gms:play-services-maps:18.0.0")
+    implementation ("com.google.android.gms:play-services-base:18.5.0")
+    implementation ("com.google.android.gms:play-services-auth:21.2.0")
+    implementation ("com.google.android.gms:play-services-maps:19.0.0")
 
     implementation(("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.0"))
     implementation(("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0"))
 
     // Import the Firebase BoM
-    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
 
     // When using the BoM, don't specify versions in Firebase dependencies
     implementation("com.google.firebase:firebase-analytics")
