@@ -34,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.movielist.Screen
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.ScoreGraphics
@@ -96,6 +97,11 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         ListOptions.DROPPED -> droppedCollection
         ListOptions.REMOVEFROMLIST -> TODO()
     }
+
+    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    }
+
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -123,7 +129,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         item {
             ListPageList(
                 loggedInUsersList = isLoggedInUser,
-                listItemList = displayedList
+                listItemList = displayedList,
+                handleProductionImageClick = handleProductionClick
 
             )
         }
@@ -328,7 +335,8 @@ fun ListCategoryOptions (
 @Composable
 fun ListPageList (
     loggedInUsersList: Boolean,
-    listItemList: List<ListItem>
+    listItemList: List<ListItem>,
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
     //Graphics
     Column(
@@ -374,7 +382,8 @@ fun ListPageList (
         for (listItem in listItemList){
             ListPageListItem(
                 listItem = listItem,
-                loggedInUsersList = loggedInUsersList
+                loggedInUsersList = loggedInUsersList,
+                handleProductionImageClick = handleProductionImageClick
             )
         }
     }
@@ -384,7 +393,8 @@ fun ListPageList (
 @Composable
 fun ListPageListItem (
     listItem: ListItem,
-    loggedInUsersList: Boolean
+    loggedInUsersList: Boolean,
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
 
     //Graphics logic
@@ -410,6 +420,10 @@ fun ListPageListItem (
             ShowImage(
                 imageID = listItem.production.posterUrl,
                 imageDescription = listItem.production.title + " Poster",
+                modifier = Modifier
+                    .clickable {
+                        handleProductionImageClick(listItem.production.imdbID, listItem.production.type)
+                    }
             )
             //List Item information
             Column(
