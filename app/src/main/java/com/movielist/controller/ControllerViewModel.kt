@@ -8,9 +8,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.movielist.data.FirebaseTimestampAdapter
+import com.movielist.data.UUIDAdapter
 import com.movielist.data.addCurrentlyWatchingShow
+import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
+import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
+import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -20,6 +25,10 @@ import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
+import com.squareup.moshi.JsonAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +37,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 
 class ControllerViewModel(
@@ -123,40 +134,65 @@ class ControllerViewModel(
         }
     }
 
-
-    private fun convertResponseToProduction(result: Any): Production? {
+    private fun convertResponseToProduction(result: ApiProductionResponse): Production? {
         return when (result) {
-           is ApiMovieResponse -> Movie(
-                imdbID = result.id.toString(),
-                title = result.title.orEmpty(),
-                description = result.overview.orEmpty(),
-                //genre = result.genreIds.orEmpty(),
-                //releaseDate = result.releaseDate ?: Calendar.getInstance(),
-                //actors = result.actors.orEmpty(),
-                //rating = result.rating,
-                //reviews = result.reviews.orEmpty(),
-                posterUrl = result.posterPath,
-                //trailerUrl = result.trailerUrl.orEmpty(),
-                //lengthMinutes = result.lengthMinutes
-            )
-            is ApiShowResponse -> TVShow(
-                imdbID = result.id.toString(),
-                title = result.name.toString(),
-                description = result.overview.orEmpty(),
-                //genre = result.genre.orEmpty(),
-                //releaseDate = result.releaseDate ?: Calendar.getInstance(),
-                //actors = result.actors.orEmpty(),
-                //rating = result.rating,
-                //reviews = result.reviews.orEmpty(),
-                posterUrl = result.posterPath,
-                //trailerUrl = result.trailerUrl.orEmpty(),
-                //episodes = result.episodes.orEmpty(),
-                //seasons = result.seasons.orEmpty()
-            )
-            else -> null // Hvis det ikke er en film eller tv-show, returner null
+            is ApiMovieResponse -> convertApiMovieResponseToMovie(result)
+            is ApiShowResponse -> convertApiShowResponseToTVShow(result)
+            // Mangler ApiEpisodeResponse her
         }
     }
 
+    private fun convertStringToCalendar(dateString: String?): Calendar? {
+        if (dateString.isNullOrEmpty()) {
+            return null
+        }
+
+        val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) // Tilpass datoformatet ditt
+        return try {
+            val date = format.parse(dateString)
+            val calendar = Calendar.getInstance()
+            if (date != null) {
+                calendar.time = date
+            }
+            calendar
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun convertApiMovieResponseToMovie(result: ApiMovieResponse): Movie {
+        return Movie(
+            imdbID = result.id.toString(),
+            title = result.title.orEmpty(),
+            description = result.overview.orEmpty(),
+            posterUrl = result.posterPath,
+            genre = result.genres?.map { it.name.orEmpty() } ?: emptyList(),
+            releaseDate = convertStringToCalendar(result.releaseDate) ?: Calendar.getInstance(),
+            // actors = // Trenger nytt API Kall -> /3/movie/{movie_id}/credits
+            rating = result.voteAverage?.toInt(), // Forandres vel til interne ratings
+            // reviews = Kommer når Firebase implementasjon er klart
+            // trailerUrl = Trenger nytt API Kall -> /3/movie/{movie_id}/videos
+            lengthMinutes = result.runtime
+        )
+    }
+
+    private fun convertApiShowResponseToTVShow(result: ApiShowResponse): TVShow {
+        return TVShow(
+            imdbID = result.id.toString(),
+            title = result.name.orEmpty(),
+            description = result.overview.orEmpty(),
+            posterUrl = result.posterPath,
+            genre = result.genres?.map { it?.name.orEmpty() } ?: emptyList(),
+            releaseDate = convertStringToCalendar(result.firstAirDate) ?: Calendar.getInstance(),
+            // actors =  // Trenger nytt API Kall -> /3/tv/{series_id}/aggregate_credits
+            // rating =
+            // reviews = Kommer når Firebase implementasjon er klart
+            // trailerUrl = Trenger nytt API Kall -> /3/movie/{movie_id}/videos
+            //episodes = // Må gjøres om til "numberOfEpisodes", eller vi må gjøre Episode-kall
+            seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
+            // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
+        )
+    }
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
@@ -616,8 +652,5 @@ class ControllerViewModel(
     ) {
         authViewModel.createUserWithEmailAndPassword(username, email, password, onSuccess, onFailure)
     }
-
-
-
 
 }

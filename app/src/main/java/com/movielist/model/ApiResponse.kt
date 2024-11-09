@@ -2,6 +2,10 @@ package com.movielist.model
 
 import com.google.gson.annotations.SerializedName
 
+sealed class ApiProductionResponse
+
+
+
 data class ApiAllMediaResponse(
 
 	@field:SerializedName("page")
@@ -230,7 +234,7 @@ data class ApiMovieResponse(
 
 	@field:SerializedName("vote_count")
 	val voteCount: Int? = null
-)
+) : ApiProductionResponse()
 
 data class ProductionCompany(
 	@field:SerializedName("id")
@@ -336,7 +340,7 @@ data class ApiShowResponse(
 
 	@field:SerializedName("seasons")
 	val seasons: List<Season?>? = null
-)
+) : ApiProductionResponse()
 
 
 data class ShowEpisode(
