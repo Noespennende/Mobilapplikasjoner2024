@@ -20,9 +20,13 @@ import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -78,8 +82,8 @@ class ControllerViewModel(
         apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
     }
 
-    private val _singleProductionData = MutableLiveData<Production?>()
-    val singleProductionData: LiveData<Production?> get() = _singleProductionData
+    private val _singleProductionData = MutableStateFlow<Production?>(null)
+    val singleProductionData: MutableStateFlow<Production?> get() = _singleProductionData
 
     fun nullifySingleProductionData() {
         _singleProductionData.value = null
@@ -89,40 +93,34 @@ class ControllerViewModel(
         Log.d("ViewModel", "getMovieById called with id: $id")
         apiViewModel.getMovie(id)
 
-        // Opprett en lokal observer
-        val oneTimeObserver = object : Observer<ApiMovieResponse?> {
-            override fun onChanged(movieResponse: ApiMovieResponse?) {
-                val production = movieResponse?.let { convertResponseToProduction(it) }
-                Log.d("ViewModel", "Observed production: $production")
-                _singleProductionData.value = production
-
-                // Fjern observeren etter første oppdatering
-                apiViewModel.movieData.removeObserver(this)
+        viewModelScope.launch {
+            try {
+                apiViewModel.movieData.collect { movieResponse ->
+                    val production = movieResponse?.let { convertResponseToProduction(it) }
+                    Log.d("Controller", "Observed production: $production")
+                    _singleProductionData.update { production }
+                }
+            } catch(e: Exception) {
+                Log.e("Controller", "Error collecting TV show data", e)
             }
         }
-
-        // Legg til den lokale observeren for en enkel oppdatering
-        apiViewModel.movieData.observeForever(oneTimeObserver)
     }
 
     fun getTVShowById(id: String) {
-        Log.d("ViewModel", "getTVShowById called with id: $id")
+        Log.d("Controller", "getTVShowById called with id: $id")
         apiViewModel.getShow(id)
 
-        // Opprett en lokal observer
-        val oneTimeObserver = object : Observer<ApiShowResponse?> {
-            override fun onChanged(showResponse: ApiShowResponse?) {
-                val production = showResponse?.let { convertResponseToProduction(it) }
-                Log.d("ViewModel", "Observed production: $production")
-                _singleProductionData.value = production
-
-                // Fjern observeren etter første oppdatering
-                apiViewModel.showData.removeObserver(this)
+        viewModelScope.launch {
+            try {
+                apiViewModel.showData.collect { showResponse ->
+                    val production = showResponse?.let { convertResponseToProduction(it) }
+                    Log.d("Controller", "Observed production: $production")
+                    _singleProductionData.update { production }
+                }
+            } catch (e: Exception) {
+                Log.e("Controller", "Error collecting TV show data", e)
             }
         }
-
-        // Legg til den lokale observeren for en enkel oppdatering
-        apiViewModel.showData.observeForever(oneTimeObserver)
     }
 
 

@@ -22,6 +22,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -77,7 +78,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
-    val production by controllerViewModel.singleProductionData.observeAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
 
     // Trengs for å laste inn

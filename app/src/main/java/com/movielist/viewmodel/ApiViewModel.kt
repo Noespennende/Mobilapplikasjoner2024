@@ -11,6 +11,8 @@ import com.movielist.model.ApiShowResponse
 import com.movielist.model.ApiShowSeason
 import com.movielist.model.ApiShowSeasonEpisode
 import com.movielist.networking.ApiConfig
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
@@ -19,11 +21,11 @@ class ApiViewModel() : ViewModel() {
     private val _mediaData = MutableLiveData<List<AllMedia>>()
     val mediaData: LiveData<List<AllMedia>> get() = _mediaData as LiveData<List<AllMedia>>
 
-    private val _movieData = MutableLiveData<ApiMovieResponse?>()
-    val movieData: LiveData<ApiMovieResponse> get() = _movieData as LiveData<ApiMovieResponse>
+    private val _movieData = MutableStateFlow<ApiMovieResponse?>(null)
+    val movieData: StateFlow<ApiMovieResponse?> get() = _movieData
 
-    private val _showData = MutableLiveData<ApiShowResponse?>()
-    val showData: LiveData<ApiShowResponse> get() = _showData as LiveData<ApiShowResponse>
+    private val _showData = MutableStateFlow<ApiShowResponse?>(null)
+    val showData: StateFlow<ApiShowResponse?> get() = _showData
 
     private val _showSeasonData = MutableLiveData<ApiShowSeason?>()
     val showSeasonData: LiveData<ApiShowSeason> get() = _showSeasonData as LiveData<ApiShowSeason>
@@ -113,7 +115,7 @@ class ApiViewModel() : ViewModel() {
                     return
                 }
                 _isLoading.value = false
-                _movieData.postValue(responseBody)
+                _movieData.value = responseBody
             }
 
             override fun onFailure(
@@ -151,7 +153,7 @@ class ApiViewModel() : ViewModel() {
                     return
                 }
                 _isLoading.value = false
-                _showData.postValue(responseBody)
+                _showData.value = responseBody
             }
 
             override fun onFailure(
