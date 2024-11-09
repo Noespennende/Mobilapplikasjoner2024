@@ -23,7 +23,7 @@ import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Review
@@ -36,7 +36,6 @@ import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
-import kotlin.random.Random
 
 @Composable
 fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavController, reviewID: String?){
@@ -126,7 +125,7 @@ fun Review (
                                 color = White
                             )
                             //Score
-                            ScoreGraphics(
+                            RatingsGraphics(
                                 review.score
                             )
                         }

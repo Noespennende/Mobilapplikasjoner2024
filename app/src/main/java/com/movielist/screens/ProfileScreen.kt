@@ -295,8 +295,7 @@ fun TopNavBarProfilePage(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ){
         UsernameHeadline(
-            user = user,
-            loggedInUser = loggedInUser
+            user = user
         )
 
         ProfileCategoryOptions()
@@ -307,8 +306,7 @@ fun TopNavBarProfilePage(
 
 @Composable
 fun UsernameHeadline (
-    user: User,
-    loggedInUser: Boolean
+    user: User
 ){
     Row(
         horizontalArrangement = Arrangement.Center,

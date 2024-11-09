@@ -11,13 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,18 +24,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.composables.GenerateShowSortOptionName
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ShowImage
+import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
@@ -48,7 +43,6 @@ import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
@@ -61,7 +55,6 @@ import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
-import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
 import kotlin.random.Random
@@ -135,6 +128,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
     val handleSortChange: (sortOption: ShowSortOptions) -> Unit = {sortOption ->
         activeSortOption = sortOption
+        //Kontrollerfunksjon for å håndtere sortering her
     }
 
     val handleTabChange: (tab: ReviewsScreenTabs) -> Unit = {tab ->
@@ -287,7 +281,9 @@ fun TopNavBarReviewPage(
             modifier = Modifier
                 .padding(top = topNavBarContentStart)
         ) {
-            SortSelectButton(handleSortChange = handleSortChange)
+            ProductionSortSelectButton(
+                handleSortChange = handleSortChange
+            )
             ReviewTabOptions(handleTabChange = handleTabChange)
         }
 
@@ -420,109 +416,6 @@ fun ReviewTabOptions (
         }
     }
 
-}
-
-
-@Composable
-fun SortSelectButton (
-    handleSortChange: (activeCategory: ShowSortOptions) -> Unit
-) {
-    //Category button
-
-    var dropDownExpanded by remember {
-        mutableStateOf(false)
-    }
-    var dropDownButtonText by remember{
-        mutableStateOf("Movies & Shows")
-    }
-    val sortOptions = listOf(
-        ShowSortOptions.MOVIESANDSHOWS, ShowSortOptions.MOVIES, ShowSortOptions.SHOWS
-    )
-
-
-    //Wrapper
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        //CategorySelectButton
-        Box(
-            modifier = Modifier
-                .wrapContentHeight()
-                .width(200.dp)
-                .align(Alignment.Center)
-                .clickable {
-                    //dropdown menu button logic
-                    dropDownExpanded = true
-                }
-        ){
-            //BUTTON TEXT
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .align(Alignment.Center)
-
-            )
-
-            {
-                Text(
-                    text = "$dropDownButtonText",
-                    fontSize = headerSize,
-                    fontWeight = weightBold,
-                    fontFamily = fontFamily,
-                    color = Purple,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "V",
-                    fontSize = paragraphSize,
-                    fontWeight = weightLight,
-                    fontFamily = fontFamily,
-                    color = Purple,
-                )
-
-            }
-
-            //MENU
-            DropdownMenu(
-                expanded = dropDownExpanded,
-                onDismissRequest = {dropDownExpanded = false},
-                offset = DpOffset(x = 50.dp, y= 0.dp),
-                modifier = Modifier
-                    .background(color = DarkPurple)
-                    .width(100.dp)
-            ) {
-                sortOptions.forEach{
-                        option -> DropdownMenuItem(
-                    text = {
-                        Box(modifier = Modifier
-                            .fillMaxWidth()
-                        ){
-                            //MENU ITEM TEXT
-                            Text(
-                                text = GenerateShowSortOptionName(option),
-                                fontSize = headerSize,
-                                fontWeight = weightBold,
-                                fontFamily = fontFamily,
-                                color = White,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .align(Alignment.Center)
-                            )
-                        }
-                    },
-                    onClick = {
-                        //On click logic for dropdown menu
-                        dropDownExpanded = false
-                        dropDownButtonText = GenerateShowSortOptionName(option)
-                        handleSortChange(option)
-                    })
-                }
-            }
-
-        }
-   }
 }
 
 @Composable
@@ -661,7 +554,7 @@ fun ReviewSummary (
                             color = White
                         )
                         //Score
-                        ScoreGraphics(
+                        RatingsGraphics(
                             review.score
                         )
                     }

@@ -62,8 +62,8 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     //TEMP CODE DELETE ABOVE
 
 
-    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
+    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
     //Graphics:
@@ -96,7 +96,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
                     imageDescription = prod.title + " Poster",
                     modifier = Modifier
                         .clickable {
-                            handleProductionClick(prod.imdbID)
+                            handleProductionClick(prod.imdbID, prod.type)
                         }
                 )
 

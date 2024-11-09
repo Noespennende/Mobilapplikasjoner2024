@@ -45,7 +45,7 @@ import com.movielist.Screen
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
-import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
@@ -610,7 +610,7 @@ fun FriendsWatchedInfo(
                 fontWeight = weightLight,
                 fontSize = 12.sp
             )
-            ScoreGraphics(
+            RatingsGraphics(
                 score = score
             )
         }

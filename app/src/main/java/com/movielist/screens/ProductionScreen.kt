@@ -40,7 +40,7 @@ import com.movielist.Screen
 import com.movielist.composables.GenerateListOptionName
 import com.movielist.composables.LineDevider
 import com.movielist.composables.RatingSlider
-import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.composables.YouTubeVideoEmbed
 import com.movielist.controller.ControllerViewModel
@@ -370,7 +370,7 @@ fun statsSection(
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 5.dp)
             )
-            ScoreGraphics(
+            RatingsGraphics(
                 score = formattedScore,
                 sizeMultiplier = 1.5f
             )
@@ -480,7 +480,7 @@ fun ListInfo (
 
             RatingSlider(
                 visible = ratingsSliderIsVisible,
-                score = userScoreFormatted,
+                rating = userScoreFormatted,
                 onValueChangeFinished = { score ->
                     handleScoreSliderChange(score)
                 }
@@ -505,7 +505,7 @@ fun ListInfo (
                 )
 
 
-                ScoreGraphics(
+                RatingsGraphics(
                     score = userScoreFormatted,
                     sizeMultiplier = 1.5f,
                     loggedInUsersScore = true,

@@ -321,7 +321,7 @@ fun BottomNavBar(
                         profileButtonColor = activeColor
                         activeButton = NavbarOptions.PROFILE
 
-                        navController.navigate(Screen.ProfileScreen.route)
+                        navController.navigate(Screen.ProfileScreen.withArguments(loggedInUser?.id.toString()))
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
