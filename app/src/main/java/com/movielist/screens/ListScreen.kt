@@ -67,8 +67,9 @@ import java.util.Calendar
 
 
 @Composable
-fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController)
+fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController, userID: String?)
 {
+    val listOwnderID by remember {mutableStateOf<String?>(userID)} /*<- ID til brukeren som eier listen*/
     val isLoggedInUser by remember { mutableStateOf(true) }
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()

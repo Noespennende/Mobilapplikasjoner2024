@@ -79,7 +79,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     /* Lytter etter endring i movieData fra ControllerViewModel */
     val production by controllerViewModel.singleProductionData.observeAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
-
     // Trengs for å laste inn
 
     LaunchedEffect(productionID) {
@@ -135,6 +134,13 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
+    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(productionID))
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
+    }
 
 
     //Graphics:
@@ -246,7 +252,9 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                         handleProductionImageClick = handleProductionClick,
                         handleLikeClick =  { reviewID ->
                             handleLikeClick(reviewID)
-                        }
+                        },
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
                     )
                 }
             }

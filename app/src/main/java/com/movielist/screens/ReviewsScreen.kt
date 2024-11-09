@@ -43,7 +43,7 @@ import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
-import com.movielist.model.ReviewOptions
+import com.movielist.model.ReviewsScreenTabs
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -68,7 +68,7 @@ import kotlin.random.Random
 
 
 @Composable
-fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavController) {
+fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavController) {
 
     //TEMP CODE DELETE THIS:
     var reviewsList  = mutableListOf<Review>()
@@ -118,6 +118,9 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
     var popularReviewsThisMonthList =  reviewsList
     var popularReviewsAllTimeList = reviewsList
 
+    var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current sort option*/
+    var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
+
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
         //Kontroller håndtering av liking av en review her
     }
@@ -125,6 +128,21 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
     val handleProductionClick: (productionID: String, productionType: String)
         -> Unit = {productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    }
+    val handleProfilePictureClick: (userID: String) -> Unit =  {userID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(userID))
+    }
+
+    val handleSortChange: (sortOption: ShowSortOptions) -> Unit = {sortOption ->
+        activeSortOption = sortOption
+    }
+
+    val handleTabChange: (tab: ReviewsScreenTabs) -> Unit = {tab ->
+        activeTab = tab
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
     //Graphics:
@@ -135,16 +153,40 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
     )
     {
         item {
-            SummarySection(
-                friendsReviewsList = friendsReviewsList,
-                topThisMonthList = popularReviewsThisMonthList,
-                handleReviewLikeClick = handleReviewLikeButtonClick,
-                handleProductionImageClick = handleProductionClick
-            )
+            if(activeTab == ReviewsScreenTabs.SUMMARY){
+                SummarySection(
+                    friendsReviewsList = friendsReviewsList,
+                    topThisMonthList = popularReviewsThisMonthList,
+                    handleReviewLikeClick = handleReviewLikeButtonClick,
+                    handleProductionImageClick = handleProductionClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
+                )
+            } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
+                TopThisMonthSection(
+                    topThisMonthList = popularReviewsThisMonthList,
+                    handleReviewLikeClick = handleReviewLikeButtonClick,
+                    handleProductionImageClick = handleProductionClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
+                )
+            } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
+                TopAllTimeSection (
+                    topAllTimeList = popularReviewsAllTimeList,
+                    handleReviewLikeClick = handleReviewLikeButtonClick,
+                    handleProductionImageClick = handleProductionClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
+                )
+            }
+
         }
 
     }
-    TopNavBarReviewPage()
+    TopNavBarReviewPage(
+        handleSortChange = handleSortChange,
+        handleTabChange = handleTabChange
+    )
 }
 
 @Composable
@@ -152,7 +194,9 @@ fun SummarySection (
     friendsReviewsList: MutableList<Review>,
     topThisMonthList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProfilePictureClick: (userID: String) -> Unit,
+    handleReviewClick: (reviewID: String) -> Unit
 ){
     val handleReviewLikeButtonClick: (String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -164,14 +208,18 @@ fun SummarySection (
             reviewList = friendsReviewsList,
             header = "Latest reviews from your friends",
             handleLikeClick = handleReviewLikeButtonClick,
-            handleProductionImageClick = handleProductionImageClick
+            handleProductionImageClick = handleProductionImageClick,
+            handleProfilePictureClick = handleProfilePictureClick,
+            handleReviewClick = handleReviewClick
         )
         //Popular reviews this month section
         ReviewsSection(
             reviewList = topThisMonthList,
             header = "Popular reviews this month",
             handleLikeClick = handleReviewLikeButtonClick,
-            handleProductionImageClick = handleProductionImageClick
+            handleProductionImageClick = handleProductionImageClick,
+            handleProfilePictureClick = handleProfilePictureClick,
+            handleReviewClick = handleReviewClick
         )
     }
 }
@@ -180,7 +228,9 @@ fun SummarySection (
 fun TopThisMonthSection (
     topThisMonthList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProfilePictureClick: (userID: String) -> Unit,
+    handleReviewClick: (reviewID: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {reviewID ->
         handleReviewLikeClick(reviewID)
@@ -191,7 +241,9 @@ fun TopThisMonthSection (
         reviewList = topThisMonthList,
         header = "Popular reviews this month",
         handleLikeClick = handleReviewButtonLikeClick,
-        handleProductionImageClick = handleProductionImageClick
+        handleProductionImageClick = handleProductionImageClick,
+        handleProfilePictureClick = handleProfilePictureClick,
+        handleReviewClick = handleReviewClick
     )
 }
 
@@ -199,7 +251,9 @@ fun TopThisMonthSection (
 fun TopAllTimeSection (
     topAllTimeList: MutableList<Review>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProfilePictureClick: (userID: String) -> Unit,
+    handleReviewClick: (reviewID: String) -> Unit
 ){
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = { reviewID ->
         handleReviewLikeClick(reviewID)
@@ -210,12 +264,17 @@ fun TopAllTimeSection (
         reviewList = topAllTimeList,
         header = "Most popular reviews of all time",
         handleLikeClick = handleReviewButtonLikeClick,
-        handleProductionImageClick = handleProductionImageClick
+        handleProductionImageClick = handleProductionImageClick,
+        handleProfilePictureClick = handleProfilePictureClick,
+        handleReviewClick = handleReviewClick
     )
 }
 
 @Composable
-fun TopNavBarReviewPage(){
+fun TopNavBarReviewPage(
+    handleSortChange: (activeCategory: ShowSortOptions) -> Unit,
+    handleTabChange: (reviewsScreenTabs: ReviewsScreenTabs) -> Unit
+){
 
     //Wrapper
     Box(
@@ -228,8 +287,8 @@ fun TopNavBarReviewPage(){
             modifier = Modifier
                 .padding(top = topNavBarContentStart)
         ) {
-            CategorySelectButton()
-            ReviewCategoryOptions()
+            SortSelectButton(handleSortChange = handleSortChange)
+            ReviewTabOptions(handleTabChange = handleTabChange)
         }
 
 
@@ -238,9 +297,10 @@ fun TopNavBarReviewPage(){
 
 
 @Composable
-fun ReviewCategoryOptions (
+fun ReviewTabOptions (
     activeButtonColor: Color = Purple,
     inactiveButtonColor: Color = LightGray,
+    handleTabChange: (reviewsScreenTabs: ReviewsScreenTabs) -> Unit
 ){
 
     //Button graphics logic
@@ -254,7 +314,7 @@ fun ReviewCategoryOptions (
         mutableStateOf(inactiveButtonColor)
     }
     var activeButton by remember {
-        mutableStateOf(ReviewOptions.SUMMARY)
+        mutableStateOf(ReviewsScreenTabs.SUMMARY)
     }
 
     //Graphics
@@ -269,12 +329,13 @@ fun ReviewCategoryOptions (
                 modifier = Modifier
                     .clickable {
                         //OnClickFunction
-                        if (activeButton != ReviewOptions.SUMMARY) {
+                        if (activeButton != ReviewsScreenTabs.SUMMARY) {
 
-                            activeButton = ReviewOptions.SUMMARY
+                            activeButton = ReviewsScreenTabs.SUMMARY
                             summaryButtonColor = activeButtonColor
                             topThisMonthButtonColor = inactiveButtonColor
                             topAllTimeButtonColor = inactiveButtonColor
+                            handleTabChange(ReviewsScreenTabs.SUMMARY)
                         }
                     }
                     .background(
@@ -300,12 +361,13 @@ fun ReviewCategoryOptions (
                 modifier = Modifier
                     .clickable {
                         //OnClickFunction
-                        if (activeButton != ReviewOptions.TOPTHISMONTH) {
+                        if (activeButton != ReviewsScreenTabs.TOPTHISMONTH) {
 
-                            activeButton = ReviewOptions.TOPTHISMONTH
+                            activeButton = ReviewsScreenTabs.TOPTHISMONTH
                             summaryButtonColor = inactiveButtonColor
                             topThisMonthButtonColor = activeButtonColor
                             topAllTimeButtonColor = inactiveButtonColor
+                            handleTabChange(ReviewsScreenTabs.TOPTHISMONTH)
                         }
                     }
                     .background(
@@ -331,12 +393,13 @@ fun ReviewCategoryOptions (
                 modifier = Modifier
                     .clickable {
                         //OnClickFunction
-                        if (activeButton != ReviewOptions.TOPALLTIME) {
+                        if (activeButton != ReviewsScreenTabs.TOPALLTIME) {
 
-                            activeButton = ReviewOptions.TOPALLTIME
+                            activeButton = ReviewsScreenTabs.TOPALLTIME
                             summaryButtonColor = inactiveButtonColor
                             topThisMonthButtonColor = inactiveButtonColor
                             topAllTimeButtonColor = activeButtonColor
+                            handleTabChange(ReviewsScreenTabs.TOPALLTIME)
                         }
 
                     }
@@ -361,7 +424,9 @@ fun ReviewCategoryOptions (
 
 
 @Composable
-fun CategorySelectButton () {
+fun SortSelectButton (
+    handleSortChange: (activeCategory: ShowSortOptions) -> Unit
+) {
     //Category button
 
     var dropDownExpanded by remember {
@@ -451,6 +516,7 @@ fun CategorySelectButton () {
                         //On click logic for dropdown menu
                         dropDownExpanded = false
                         dropDownButtonText = GenerateShowSortOptionName(option)
+                        handleSortChange(option)
                     })
                 }
             }
@@ -464,7 +530,9 @@ fun ReviewsSection(
     reviewList: List<Review>,
     header: String,
     handleLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit
+    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleProfilePictureClick: (userID: String) -> Unit,
+    handleReviewClick: (reviewID: String) -> Unit
 ) {
 
     val handleLikeButtonClick: (String) -> Unit = {reviewID ->
@@ -501,7 +569,9 @@ fun ReviewsSection(
                 ReviewSummary(
                     review = review,
                     handleLikeClick = handleLikeButtonClick,
-                    handleProductionImageClick = handleProductionImageClick
+                    handleProductionImageClick = handleProductionImageClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
                 )
                 LineDevider()
             }
@@ -536,7 +606,9 @@ fun ReviewsSection(
 fun ReviewSummary (
     review: Review,
     handleLikeClick: (String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit
+    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleProfilePictureClick: (userID: String) -> Unit,
+    handleReviewClick: (reviewID: String) -> Unit
 ) {
     val handleLikeButtonClick: () -> Unit = {
         handleLikeClick(review.reviewId.toString())
@@ -562,6 +634,9 @@ fun ReviewSummary (
                 .padding(
                     start = 5.dp
                 )
+                .clickable {
+                    handleReviewClick(review.reviewId.toString())
+                }
         ) {
             Row (
             ){
@@ -593,7 +668,11 @@ fun ReviewSummary (
 
                     //Userinfo and review date
                     Row (
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier
+                            .clickable {
+                                handleProfilePictureClick(review.reviewer.id)
+                            }
                     ){
                         //Username and review date
                         Column (
@@ -634,16 +713,30 @@ fun ReviewSummary (
                     .padding(top = 10.dp)
             )
             {
-                Text(
-                    text = review.reviewBody,
-                    fontSize = paragraphSize,
-                    fontFamily = fontFamily,
-                    fontWeight = weightRegular,
-                    color = darkWhite,
+                Column(
                     modifier = Modifier
                         .fillMaxWidth(.8f)
-                        .height(60.dp)
-                )
+                ) {
+                    Text(
+                        text = TruncateReviewSummaryText(review.reviewBody),
+                        fontSize = paragraphSize,
+                        fontFamily = fontFamily,
+                        fontWeight = weightRegular,
+                        color = darkWhite,
+                    )
+                    if (ReviewBodyIsTruncated(review.reviewBody)){
+                        Text(
+                            text = "(Click to read more)",
+                            fontSize = paragraphSize,
+                            fontFamily = fontFamily,
+                            fontWeight = weightRegular,
+                            color = Purple,
+                            modifier = Modifier
+                                .fillMaxWidth(.8f)
+                        )
+                    }
+                }
+
 
                 Text(
                     text = "${review.likes} likes",
@@ -670,4 +763,25 @@ fun ReviewSummary (
 
         }
     }
+}
+
+fun TruncateReviewSummaryText (reviewBody: String): String {
+    val words = reviewBody.split(" ")
+    var truncatedReviewBody = ""
+
+    if (words.size > 15) {
+        truncatedReviewBody = words.take(20).joinToString(" ") + "..."
+    } else {
+        truncatedReviewBody = reviewBody
+    }
+
+    return truncatedReviewBody
+}
+
+fun ReviewBodyIsTruncated (reviewBody: String): Boolean {
+    val words = reviewBody.split(" ")
+    if (words.size > 15) {
+        return true
+    }
+    return false
 }

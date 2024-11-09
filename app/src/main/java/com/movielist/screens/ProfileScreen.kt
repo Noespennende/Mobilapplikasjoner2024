@@ -70,7 +70,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController){
+fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController, userID: String?){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
@@ -132,6 +132,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     // TEMP CODE DELETE ABOVE
 
+    val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
+
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
@@ -149,6 +151,14 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {
         //Kontroller funksjon her
+    }
+
+    val handleProfilePictureClick: (profileID: String) -> Unit = { profileID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = { reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
     //Graphics
@@ -259,7 +269,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 reviewList = exampleReviews,
                 header = "Reviews",
                 handleLikeClick = handleReviewButtonLikeClick,
-                handleProductionImageClick = handleProductionClick
+                handleProductionImageClick = handleProductionClick,
+                handleProfilePictureClick = handleProfilePictureClick,
+                handleReviewClick = handleReviewClick
 
             )
         }
@@ -316,7 +328,7 @@ fun UsernameHeadline (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = if(loggedInUser){Purple} else {LightGray},
+            color = White,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
         )

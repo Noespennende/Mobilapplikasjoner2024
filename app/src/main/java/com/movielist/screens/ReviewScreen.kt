@@ -19,7 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
@@ -27,10 +26,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ScoreGraphics
 import com.movielist.composables.ShowImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.ListItem
 import com.movielist.model.Review
-import com.movielist.model.TVShow
-import com.movielist.model.User
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
@@ -58,13 +54,11 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
         navController.navigate((Screen.ProductionScreen.withArguments(showID)))
     }
 
+
     LazyColumn (
         contentPadding = PaddingValues(horizontal = horizontalPadding, vertical = topNavBarContentStart+ 10.dp)
     ){
         item {
-            Text(
-                text = reviewID.toString(),
-                color = White)
             review?.let {
                 Review(
                     review = it,

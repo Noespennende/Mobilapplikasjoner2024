@@ -132,13 +132,14 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 show = listItemList[1].production,
                 reviewBody = "It’s reasonably well-made, and visually compelling," +
                         "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                        "to recommend..",
+                        "It's an easy show to recomend for anyone who loves a good mystery.",
                 postDate = Calendar.getInstance(),
                 likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
             )
         )
     }
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
+
 
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
@@ -153,6 +154,14 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
         //Kontroller funksjon for å håndtere en review like hær
+    }
+
+    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
 
@@ -237,7 +246,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 reviewList = top10ReviewsListPastWeek,
                 header = "Top reviews this week",
                 handleLikeClick = handleReviewLikeButtonClick,
-                handleProductionImageClick = handleProductionButtonClick
+                handleProductionImageClick = handleProductionButtonClick,
+                handleProfilePictureClick = handleProfilePictureClick,
+                handleReviewClick = handleReviewClick
             )
         }
 
