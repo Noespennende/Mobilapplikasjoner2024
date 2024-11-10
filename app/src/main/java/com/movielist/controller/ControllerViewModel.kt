@@ -20,6 +20,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.Review
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
@@ -40,6 +41,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.random.Random
 
 
 class ControllerViewModel(
@@ -134,7 +136,7 @@ class ControllerViewModel(
         }
     }
 
-    private fun convertResponseToProduction(result: ApiProductionResponse): Production? {
+    private fun convertResponseToProduction(result: ApiProductionResponse): Production {
         return when (result) {
             is ApiMovieResponse -> convertApiMovieResponseToMovie(result)
             is ApiShowResponse -> convertApiShowResponseToTVShow(result)
@@ -191,6 +193,58 @@ class ControllerViewModel(
             //episodes = // Må gjøres om til "numberOfEpisodes", eller vi må gjøre Episode-kall
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
             // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
+        )
+    }
+
+    private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
+    val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
+
+
+    fun getReview() {
+        // Logikk her som henter fra Firebase
+
+        val reviewTemp = Review(
+            score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
+            reviewerID = "userIDhere",
+            productionID = "154423",
+            reviewBody = "It’s reasonably well-made, and visually compelling," +
+                    "but it’s ultimately too derivative, and obvious in its thematic execution," +
+                    "to recommend..",
+            postDate = Calendar.getInstance(),
+            likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
+        )
+
+
+
+
+        val reviewerTemp = User(
+            id = "test",
+            email = "test@email.no",
+            userName = "tempUser",
+        )
+
+        val productionTemp = Movie()
+
+        val reviewDTO = createReviewDTO(reviewTemp, reviewerTemp, productionTemp)
+
+        _singleReviewDTOData.update { reviewDTO }
+    }
+
+    private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {
+        return ReviewDTO(
+            reviewID = review.reviewID,
+            score = review.score,
+            productionID = review.productionID,
+            reviewerID = review.reviewerID,
+            reviewBody = review.reviewBody,
+            postDate = review.postDate,
+            likes = review.likes,
+            reviewerUserName = reviewer.userName,
+            reviewerProfileImage = reviewer.profileImageID,
+            productionPosterUrl = production.posterUrl,
+            productionTitle = production.title,
+            productionReleaseDate = production.releaseDate,
+            productionType = production.type
         )
     }
 
@@ -256,13 +310,18 @@ class ControllerViewModel(
         return loggedInUser.value?.favoriteCollection
     }
 
+    /* // Nå er myReviews en liste med Review-IDer. Logikken må ta hensyn til å returnere ReviewDTO objekter, og ikke rene Review objekter
     fun getAllReviewsWrittenByLoggedInUser(): List<Review>{
         return loggedInUser.value?.myReviews ?: emptyList()
     }
+    */
 
+    /* // Nå er myReviews en liste med Review-IDer. Logikken må ta hensyn til å returnere ReviewDTO objekter, og ikke rene Review objekter
     fun getTopTenReviewsWrittenByLoggedInUser(): List<Review> {
         return getAllReviewsWrittenByLoggedInUser().sortedByDescending { it.likes }.take(10)
     }
+    */
+
     //funksjon når allUsers er implementert
 
     /*fun getMostPopularReviewsLastMonth(): List<Review>{

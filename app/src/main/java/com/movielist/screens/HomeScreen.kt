@@ -53,6 +53,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.Review
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.Gray
@@ -110,7 +111,60 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         )
     }
 
-    val reviewList = mutableListOf<Review>()
+    val reviewList = mutableListOf<ReviewDTO>()
+
+    val reviewUser = User(
+        id = "IDfromFirebase",
+        userName = "UserN",
+        email = "user@email.com",
+        friendList = mutableListOf(),
+    )
+
+    val reviewProduction = TVShow(
+        imdbID = "123",
+        title = "Silo",
+        description = "TvShow Silo description here",
+        genre = listOf("Action"),
+        releaseDate = Calendar.getInstance(),
+        actors = emptyList(),
+        rating = 4,
+        reviews = ArrayList(),
+        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
+        episodes = listOf("01", "02", "03", "04", "05", "06",
+            "07", "08", "09", "10", "11", "12"),
+        seasons = listOf("1", "2", "3")
+    )
+
+    val reviewReview = Review(
+        score = Random.nextInt(0, 10),
+        reviewerID = reviewUser.id,
+        likes = Random.nextInt(0, 200),
+        productionID = reviewProduction.imdbID,
+        postDate = Calendar.getInstance(),
+        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
+    )
+
+    // Populate reviewsList
+    for (i in 0..10) {
+        reviewList.add(
+            ReviewDTO(
+                reviewID = reviewUser.id,
+                score = reviewReview.score,
+                productionID = reviewReview.productionID,
+                reviewerID = reviewReview.reviewerID,
+                reviewBody = reviewReview.reviewBody,
+                postDate = reviewReview.postDate,
+                likes = reviewReview.likes,
+                reviewerUserName = reviewUser.userName,
+                reviewerProfileImage = reviewUser.profileImageID,
+                productionPosterUrl = reviewProduction.posterUrl,
+                productionTitle = reviewProduction.title,
+                productionReleaseDate = reviewProduction.releaseDate,
+                productionType = reviewProduction.type
+            )
+
+        )
+    }
     val user = User(
         id = "testid",
         userName = "User Userson",
@@ -118,26 +172,12 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         friendList = mutableListOf(),
         myReviews = mutableListOf(),
         favoriteCollection = mutableListOf(),
-        profileImageID = R.drawable.profilepicture,
         completedCollection = listItemList,
         wantToWatchCollection = listItemList,
         droppedCollection = listItemList,
         currentlyWatchingCollection = listItemList
     )
-    for (i in 0..6) {
-        reviewList.add(
-            Review(
-                score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
-                reviewer = user,
-                show = listItemList[1].production,
-                reviewBody = "It’s reasonably well-made, and visually compelling," +
-                        "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                        "to recommend..",
-                postDate = Calendar.getInstance(),
-                likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
-            )
-        )
-    }
+
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
 
@@ -211,8 +251,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
             // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
 
-            var reviewsList  = mutableListOf<Review>()
-            var reviewsListPastWeek = mutableListOf<Review>()
+            var reviewsList  = mutableListOf<ReviewDTO>()
+            var reviewsListPastWeek = mutableListOf<ReviewDTO>()
             val currentDate = Calendar.getInstance()
             val pastWeek = currentDate.apply {
                 add(Calendar.DATE, -7)
@@ -536,7 +576,7 @@ fun YourFriendsJustWatched (
                         )
                         //Friend Info
                         FriendsWatchedInfo(
-                            profileImageID = R.drawable.profilepicture,
+                            profileImageID = null, // Gir "standard" profilbilde
                             profileName = "User Userson", //TEMP DELETE THIS
                             episodesWatched = listOfShows[i].currentEpisode,
                             showLenght = when (listOfShows[i].production) {
@@ -574,7 +614,7 @@ fun LoadingCard() {
 
 @Composable
 fun FriendsWatchedInfo(
-    profileImageID: Int,
+    profileImageID: String?,
     profileName: String,
     episodesWatched: Int,
     showLenght: Int?,

@@ -49,6 +49,7 @@ import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.Review
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
@@ -73,7 +74,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     //val production by remember { mutableStateOf<Production?>(null) }
     var memberOfUserList by remember { mutableStateOf<ListOptions?>(null) } /* <-ListOption enum som sier hvilken liste filmen/serien ligger i i logged inn users liste. Hvis den ikke ligger i en liste set den til null.*/
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
-    var listOfReviews by remember { mutableStateOf(mutableListOf<Review>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
+    var listOfReviews by remember { mutableStateOf(mutableListOf<ReviewDTO>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
 
     var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 

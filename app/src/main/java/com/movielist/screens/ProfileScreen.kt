@@ -43,6 +43,7 @@ import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
@@ -77,10 +78,44 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         id = "IDfromFirebase",
         userName = "Example User",
         email = "Example@Email.com",
-        profileImageID = R.drawable.profilepicture
     )
 
-    val exampleReviews: MutableList<Review> = mutableListOf()
+    val reviewList = mutableListOf<ReviewDTO>()
+
+    val reviewUser = User(
+        id = "IDfromFirebase",
+        userName = "UserN",
+        email = "user@email.com",
+        friendList = mutableListOf(),
+    )
+
+    val reviewProduction = TVShow(
+        imdbID = "123",
+        title = "Silo",
+        description = "TvShow Silo description here",
+        genre = listOf("Action"),
+        releaseDate = Calendar.getInstance(),
+        actors = emptyList(),
+        rating = 4,
+        reviews = ArrayList(),
+        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
+        episodes = listOf("01", "02", "03", "04", "05", "06",
+            "07", "08", "09", "10", "11", "12"),
+        seasons = listOf("1", "2", "3")
+    )
+
+    val reviewReview = Review(
+        score = Random.nextInt(0, 10),
+        reviewerID = reviewUser.id,
+        likes = Random.nextInt(0, 200),
+        productionID = reviewProduction.imdbID,
+        postDate = Calendar.getInstance(),
+        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
+    )
+
+
+
+    val exampleReviews: MutableList<ReviewDTO> = mutableListOf()
     val exampleShows: MutableList<ListItem> = mutableListOf()
     val exampleFavShows: MutableList<ListItem> = mutableListOf()
 
@@ -112,16 +147,25 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
             )
         )
         exampleReviews.add(
-            Review(
-                score = Random.nextInt(0, 10),
-                reviewer = exampleUser,
-                show = exampleShows[i].production,
-                reviewBody = "This is a review of the show",
+            ReviewDTO(
+                reviewID = reviewUser.id,
+                score = reviewReview.score,
+                productionID = reviewReview.productionID,
+                reviewerID = reviewReview.reviewerID,
+                reviewBody = reviewReview.reviewBody,
+                postDate = reviewReview.postDate,
+                likes = reviewReview.likes,
+                reviewerUserName = reviewUser.userName,
+                reviewerProfileImage = reviewUser.profileImageID,
+                productionPosterUrl = reviewProduction.posterUrl,
+                productionTitle = reviewProduction.title,
+                productionReleaseDate = reviewProduction.releaseDate,
+                productionType = reviewProduction.type
             )
         )
     }
 
-    exampleUser.myReviews.addAll(exampleReviews)
+    exampleUser.myReviews.addAll(exampleReviews.map { it.reviewID })
     exampleUser.currentlyWatchingCollection.addAll(exampleShows)
     exampleUser.completedCollection.addAll(exampleShows)
     exampleUser.wantToWatchCollection.addAll(exampleShows)

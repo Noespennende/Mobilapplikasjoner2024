@@ -1,20 +1,21 @@
 package com.movielist.model
 
 import java.util.Calendar
+import java.util.UUID
 
 val userList = mutableListOf<User>()
 
 data class User (
-    val id: String,  //= UUID.randomUUID().toString(),
+    val id: String = UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val profileImageID: Int,
+    val profileImageID: String? = null,
     val gender: String = "Prefer not to say",
     val location: String = "It's a secret",
     val website: String = "",
     val bio: String = "",
     val friendList: MutableList<String> = mutableListOf(),
-    val myReviews: MutableList<Review> = mutableListOf(),
+    val myReviews: MutableList<String> = mutableListOf(), // Review-IDer
     val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val completedCollection:  MutableList<ListItem> = mutableListOf(),
     val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
@@ -251,15 +252,16 @@ fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
 }
 
 
-fun writeReview(reviewer: User, score: Int, production: Production, reviewBody: String,
+/* // Nå er myReviews en liste med Review-IDer. Logikken må ta hensyn til å returnere ReviewDTO objekter, og ikke rene Review objekter
+fun writeReview(reviewer: User, score: Int, productionID: String, reviewBody: String,
                 postDate: Calendar, likes: Int ) : User {
     val newReview = Review(
         score = score,
-        show = production,
+        productionID = productionID,
         reviewBody = reviewBody,
         postDate = postDate,
         likes = likes,
-        reviewer = reviewer
+        reviewerID = reviewer.id
     )
 
     val updatedReviewList = reviewer.myReviews.toMutableList()
@@ -268,4 +270,4 @@ fun writeReview(reviewer: User, score: Int, production: Production, reviewBody: 
 
     return reviewer.copy(myReviews = updatedReviewList)
 }
-
+*/

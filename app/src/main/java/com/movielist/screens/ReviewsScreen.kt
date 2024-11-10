@@ -20,6 +20,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
+import com.movielist.model.ReviewDTO
 import com.movielist.model.ReviewOptions
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
@@ -71,43 +73,58 @@ import kotlin.random.Random
 fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavController) {
 
     //TEMP CODE DELETE THIS:
-    var reviewsList  = mutableListOf<Review>()
-    val emptyList = mutableListOf<ListItem>()
+    var reviewsList  = mutableListOf<ReviewDTO>()
+
+    val reviewUser = User(
+        id = "IDfromFirebase",
+        userName = "UserN",
+        email = "user@email.com",
+        friendList = mutableListOf(),
+    )
+
+    val reviewProduction = TVShow(
+        imdbID = "123",
+        title = "Silo",
+        description = "TvShow Silo description here",
+        genre = listOf("Action"),
+        releaseDate = Calendar.getInstance(),
+        actors = emptyList(),
+        rating = 4,
+        reviews = ArrayList(),
+        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
+        episodes = listOf("01", "02", "03", "04", "05", "06",
+            "07", "08", "09", "10", "11", "12"),
+        seasons = listOf("1", "2", "3")
+    )
+
+    val reviewReview = Review(
+        score = Random.nextInt(0, 10),
+        reviewerID = reviewUser.id,
+        likes = Random.nextInt(0, 200),
+        productionID = reviewProduction.imdbID,
+        postDate = Calendar.getInstance(),
+        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
+    )
 
     // Populate reviewsList
     for (i in 0..10) {
         reviewsList.add(
-            Review(
-            score = Random.nextInt(0, 10),
-            reviewer = User(
-                id = "IDfromFirebase",
-                userName = "User $i",
-                email = "user@email.com",
-                friendList = mutableListOf(),
-                profileImageID = R.drawable.profilepicture,
-                completedCollection = emptyList,
-                wantToWatchCollection = emptyList,
-                droppedCollection = emptyList,
-                currentlyWatchingCollection = emptyList,
-            ),
-            likes = Random.nextInt(0, 200),
-            show = TVShow(
-                imdbID = "123",
-                title = "Silo",
-                description = "TvShow Silo description here",
-                genre = listOf("Action"),
-                releaseDate = Calendar.getInstance(),
-                actors = emptyList(),
-                rating = 4,
-                reviews = ArrayList(),
-                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                episodes = listOf("01", "02", "03", "04", "05", "06",
-                                 "07", "08", "09", "10", "11", "12"),
-                seasons = listOf("1", "2", "3")
-            ),
-            postDate = Calendar.getInstance(),
-            reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-        )
+            ReviewDTO(
+                reviewID = reviewUser.id,
+                score = reviewReview.score,
+                productionID = reviewReview.productionID,
+                reviewerID = reviewReview.reviewerID,
+                reviewBody = reviewReview.reviewBody,
+                postDate = reviewReview.postDate,
+                likes = reviewReview.likes,
+                reviewerUserName = reviewUser.userName,
+                reviewerProfileImage = reviewUser.profileImageID,
+                productionPosterUrl = reviewProduction.posterUrl,
+                productionTitle = reviewProduction.title,
+                productionReleaseDate = reviewProduction.releaseDate,
+                productionType = reviewProduction.type
+            )
+
         )
     }
 
@@ -117,6 +134,12 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
     var friendsReviewsList = reviewsList
     var popularReviewsThisMonthList =  reviewsList
     var popularReviewsAllTimeList = reviewsList
+
+    val productionType by remember { mutableStateOf("Movie") }
+    val productionID by remember { mutableStateOf("") }
+
+    val review by controllerViewModel.singleReviewDTOData.collectAsState()
+    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
         //Kontroller håndtering av liking av en review her
@@ -149,8 +172,8 @@ fun ReviewPage (controllerViewModel: ControllerViewModel, navController: NavCont
 
 @Composable
 fun SummarySection (
-    friendsReviewsList: MutableList<Review>,
-    topThisMonthList: MutableList<Review>,
+    friendsReviewsList: MutableList<ReviewDTO>,
+    topThisMonthList: MutableList<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
@@ -178,7 +201,7 @@ fun SummarySection (
 
 @Composable
 fun TopThisMonthSection (
-    topThisMonthList: MutableList<Review>,
+    topThisMonthList: MutableList<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
@@ -197,7 +220,7 @@ fun TopThisMonthSection (
 
 @Composable
 fun TopAllTimeSection (
-    topAllTimeList: MutableList<Review>,
+    topAllTimeList: MutableList<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit
 ){
@@ -461,7 +484,7 @@ fun CategorySelectButton () {
 
 @Composable
 fun ReviewsSection(
-    reviewList: List<Review>,
+    reviewList: List<ReviewDTO>,
     header: String,
     handleLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (showID: String, productionType: String) -> Unit
@@ -534,12 +557,12 @@ fun ReviewsSection(
 
 @Composable
 fun ReviewSummary (
-    review: Review,
+    review: ReviewDTO,
     handleLikeClick: (String) -> Unit,
     handleProductionImageClick: (showID: String, productionType: String) -> Unit
 ) {
     val handleLikeButtonClick: () -> Unit = {
-        handleLikeClick(review.reviewId.toString())
+        handleLikeClick(review.reviewID.toString())
     }
 
     //Main container
@@ -549,10 +572,10 @@ fun ReviewSummary (
             .fillMaxWidth()
     ) {
         ShowImage(
-            imageID = review.show.posterUrl,
+            imageID = review.productionPosterUrl,
             modifier = Modifier
                 .clickable {
-                    handleProductionImageClick(review.show.imdbID, review.show.type)
+                    handleProductionImageClick(review.productionID, review.productionType)
                 }
         )
         //Review header, score and body
@@ -579,7 +602,7 @@ fun ReviewSummary (
                     {
                         //Header
                         Text(
-                            text = "${review.show.title} (${review.show.releaseDate.get(Calendar.YEAR)})",
+                            text = "${review.productionTitle} (${review.productionReleaseDate.get(Calendar.YEAR)})",
                             fontSize = paragraphSize,
                             fontFamily = fontFamily,
                             fontWeight = weightBold,
@@ -602,7 +625,7 @@ fun ReviewSummary (
                         ){
                             //Username
                             Text(
-                                text = review.reviewer.userName,
+                                text = review.reviewerUserName,
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightBold,
@@ -619,8 +642,8 @@ fun ReviewSummary (
                         }
                         //profile picture
                         ProfileImage(
-                            imageID = review.reviewer.profileImageID,
-                            userName = review.reviewer.userName
+                            imageID = review.reviewerProfileImage,
+                            userName = review.reviewerUserName
                         )
                     }
 

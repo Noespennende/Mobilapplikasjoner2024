@@ -94,7 +94,6 @@ class AuthViewModel : ViewModel() {
                                             friendList = mutableListOf(),
                                             myReviews = mutableListOf(),
                                             favoriteCollection = mutableListOf(),
-                                            profileImageID = 0,
                                             completedCollection = mutableListOf(),
                                             wantToWatchCollection = mutableListOf(),
                                             droppedCollection = mutableListOf(),

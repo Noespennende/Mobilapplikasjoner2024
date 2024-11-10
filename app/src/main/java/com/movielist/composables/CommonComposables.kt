@@ -255,7 +255,7 @@ fun ShowImage(
 
 @Composable
 fun ProfileImage(
-    imageID: Int?,
+    imageID: String?,
     userName: String,
     sizeMultiplier: Float = 1.0f
 ) {
