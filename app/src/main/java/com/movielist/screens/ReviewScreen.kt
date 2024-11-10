@@ -24,7 +24,7 @@ import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Review
 import com.movielist.ui.theme.White
@@ -87,7 +87,7 @@ fun Review (
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            ShowImage(
+            ProductionImage(
                 imageID = review.show.posterUrl,
                 modifier = Modifier
                     .clickable {

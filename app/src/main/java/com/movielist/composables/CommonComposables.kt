@@ -204,6 +204,42 @@ fun LineDevider (
 }
 
 @Composable
+fun LineDeviderVertical (
+    color: Color = Gray,
+    strokeWith: Float = 5f,
+    modifier: Modifier = Modifier
+)
+{
+
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .padding(start = 10.dp, end = 10.dp)
+    ){
+        Canvas(
+            modifier = Modifier
+                .fillMaxHeight()
+        )  {
+            //Line parameters
+            val lineStart = 0.dp.toPx()
+            val lineEnd = size.height
+            val lineX = size.width/2
+            //line
+            drawLine(
+                color = color,
+                start = Offset(x = lineX, y= lineStart),
+                end = Offset(x= lineX , y= lineEnd),
+                strokeWidth = strokeWith,
+                StrokeCap.Round,
+            )
+        }
+
+    }
+
+}
+
+@Composable
 fun TopMobileIconsBackground (
     color: Color = DarkGrayTransparent,
 ) {
@@ -218,7 +254,7 @@ fun TopMobileIconsBackground (
 
 
 @Composable
-fun ShowImage(
+fun ProductionImage(
     imageID: String? = null, // Endret til nullable for å håndtere URL-er
     placeholderID: Int = R.drawable.noimage,
     imageDescription: String = "Image not available",
@@ -261,7 +297,8 @@ fun ShowImage(
 fun ProfileImage(
     imageID: Int?,
     userName: String,
-    sizeMultiplier: Float = 1.0f
+    sizeMultiplier: Float = 1.0f,
+    handleProfileImageClick: () -> Unit = {}
 ) {
 
     val placeholderID = R.drawable.profilepicture
@@ -279,6 +316,9 @@ fun ProfileImage(
             modifier = Modifier
                 .size((30*sizeMultiplier).dp)
                 .clip(CircleShape)
+                .clickable {
+                    handleProfileImageClick()
+                }
         )
     } else {
         // Vis fallback-bildet
@@ -342,6 +382,7 @@ fun RatingsGraphics(
                 contentDescription = "Star",
                 contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.tint(darkWhite),
+                alignment = Alignment.Center,
                 modifier = Modifier
                     .size((11*sizeMultiplier).dp)
             )
@@ -350,7 +391,8 @@ fun RatingsGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 16.sp,
-                color = darkWhite
+                color = darkWhite,
+                textAlign = TextAlign.Center
             )
         }
 
@@ -359,7 +401,7 @@ fun RatingsGraphics(
             text = "No score",
             fontFamily = fontFamily,
             fontWeight = weightRegular,
-            fontSize = 12.sp,
+            fontSize = 16.sp,
             color = darkWhite
         )
     }
@@ -558,7 +600,7 @@ fun ProductionListSidesroller (
             contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
-                ShowImage(
+                ProductionImage(
                     imageID = listOfShows[i].posterUrl,
                     imageDescription = listOfShows[i].title + " Poster",
                     modifier = Modifier
@@ -599,7 +641,7 @@ fun ListItemListSidesroller (
             contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
-                ShowImage(
+                ProductionImage(
                     imageID = listOfShows[i].production.posterUrl,
                     imageDescription = listOfShows[i].production.title + " Poster",
                     modifier = Modifier

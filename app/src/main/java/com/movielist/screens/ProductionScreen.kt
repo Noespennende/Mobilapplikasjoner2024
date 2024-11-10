@@ -41,7 +41,7 @@ import com.movielist.composables.GenerateListOptionName
 import com.movielist.composables.LineDevider
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.ProductionImage
 import com.movielist.composables.YouTubeVideoEmbed
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListOptions
@@ -282,7 +282,7 @@ fun ImageAndName(
     ) {
         //Image
         if (production != null) {
-            ShowImage(
+            ProductionImage(
                 imageID = production.posterUrl,
                 imageDescription = production.title,
             )
