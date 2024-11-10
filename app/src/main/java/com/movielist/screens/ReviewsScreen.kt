@@ -609,7 +609,7 @@ fun ReviewSummary (
                             color = White
                         )
                         //Score
-                        ScoreGraphics(
+                        RatingsGraphics(
                             review.score
                         )
                     }

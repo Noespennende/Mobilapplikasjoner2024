@@ -136,7 +136,7 @@ fun ProgressBar (
                 .fillMaxHeight(0.5f)
         )  {
             //drawing the progress bar
-            val lineStart = 4.dp.toPx()
+            val lineStart = 0.dp.toPx()
             val lineEnd = size.width * curPercentage.value
             val lineY = size.height/2
             //background line
@@ -346,7 +346,8 @@ fun ScoreGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 16.sp,
-                color = darkWhite
+                color = darkWhite,
+                textAlign = TextAlign.Center
             )
         }
 
@@ -355,7 +356,7 @@ fun ScoreGraphics(
             text = "No score",
             fontFamily = fontFamily,
             fontWeight = weightRegular,
-            fontSize = 12.sp,
+            fontSize = 16.sp,
             color = darkWhite
         )
     }
