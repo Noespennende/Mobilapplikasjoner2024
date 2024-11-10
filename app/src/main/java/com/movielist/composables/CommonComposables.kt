@@ -136,7 +136,11 @@ fun ProgressBar (
                 .fillMaxHeight(0.5f)
         )  {
             //drawing the progress bar
+<<<<<<< HEAD
             val lineStart = 4.dp.toPx()
+=======
+            val lineStart = 0.dp.toPx()
+>>>>>>> parent of d838c6d (Comparison screen frontend done.)
             val lineEnd = size.width * curPercentage.value
             val lineY = size.height/2
             //background line
@@ -346,7 +350,12 @@ fun ScoreGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 16.sp,
+<<<<<<< HEAD
                 color = darkWhite
+=======
+                color = darkWhite,
+                textAlign = TextAlign.Center
+>>>>>>> parent of d838c6d (Comparison screen frontend done.)
             )
         }
 
@@ -355,7 +364,11 @@ fun ScoreGraphics(
             text = "No score",
             fontFamily = fontFamily,
             fontWeight = weightRegular,
+<<<<<<< HEAD
             fontSize = 12.sp,
+=======
+            fontSize = 16.sp,
+>>>>>>> parent of d838c6d (Comparison screen frontend done.)
             color = darkWhite
         )
     }

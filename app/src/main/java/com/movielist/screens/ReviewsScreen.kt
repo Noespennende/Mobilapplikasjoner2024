@@ -609,7 +609,11 @@ fun ReviewSummary (
                             color = White
                         )
                         //Score
+<<<<<<< HEAD
                         ScoreGraphics(
+=======
+                        RatingsGraphics(
+>>>>>>> parent of d838c6d (Comparison screen frontend done.)
                             review.score
                         )
                     }

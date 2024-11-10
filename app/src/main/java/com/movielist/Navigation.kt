@@ -33,8 +33,16 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
+<<<<<<< HEAD
             //Screen.LoginScreen.route
             Screen.HomeScreen.route
+=======
+            Screen.ComparisonScreen.withArguments("testID")
+            /*
+            Screen.HomeScreen.route
+            */
+
+>>>>>>> parent of d838c6d (Comparison screen frontend done.)
 
         }
 
