@@ -45,9 +45,8 @@ import com.movielist.Screen
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
-import com.movielist.composables.RatingSlider
-import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ProductionImage
+import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.ShowImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
@@ -178,8 +177,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         droppedCollection = listItemList,
         currentlyWatchingCollection = listItemList
     )
-    //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
+    //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
@@ -196,18 +195,6 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         //Kontroller funksjon for å håndtere en review like hær
     }
 
-    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
-        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
-    }
-
-    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
-        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
-    }
-
-    val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
-        //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
-    }
-
 
     // Front page graphics
     LazyColumn(
@@ -217,9 +204,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         item {
             CurrentlyWatchingScroller(
                 listOfShows = currentlyWatchingCollection,
-                onImageClick = handleProductionButtonClick,
-                handleRatingChange = handleUserRatingChange
-            )
+                onImageClick = handleProductionButtonClick)
         }
 
         item {
@@ -292,9 +277,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 reviewList = top10ReviewsListPastWeek,
                 header = "Top reviews this week",
                 handleLikeClick = handleReviewLikeButtonClick,
-                handleProductionImageClick = handleProductionButtonClick,
-                handleProfilePictureClick = handleProfilePictureClick,
-                handleReviewClick = handleReviewClick
+                handleProductionImageClick = handleProductionButtonClick
             )
         }
 
@@ -312,7 +295,6 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
     onImageClick: (showID: String, productionType: String) -> Unit,
-    handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -362,10 +344,7 @@ fun CurrentlyWatchingScroller (
                         },
                         episodesWatched = listOfShows[i].currentEpisode,
                         onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
-                        onImageClick = onImageClick,
-                        userRating = listOfShows[i].score,
-                        listItemID = listOfShows[i].id,
-                        handleRatingChange = handleRatingChange
+                        onImageClick = onImageClick
                     )
                 }
             }
@@ -426,12 +405,9 @@ fun CurrentlyWatchingCard(
     episodesWatched: Int,
     productionID: String,
     productionType: String,
-    userRating: Int,
-    listItemID: String,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit,
     onImageClick: (showID: String, productionType: String) -> Unit,
-    handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
@@ -439,17 +415,6 @@ fun CurrentlyWatchingCard(
 
     var buttonText by remember {
         mutableStateOf(generateButtonText(episodesWatched, showLength))
-    }
-
-    var ratingAdded by remember { mutableStateOf(false) }
-
-    var ratingSliderVisible by remember { mutableStateOf(false) }
-
-    val handleRatingChange: (rating: Int) -> Unit = {rating ->
-        ratingSliderVisible = false
-        ratingAdded = true
-        buttonText = "Rating updated!"
-        handleRatingChange(rating, listItemID)
     }
 
     // Card container
@@ -527,13 +492,9 @@ fun CurrentlyWatchingCard(
                         // Button onclick function
                         if (watchedEpisodesCount < showLength) {
                             watchedEpisodesCount++
-                        } else {
-                            ratingSliderVisible = true
                         }
 
-                        if (!ratingAdded){
-                            buttonText = generateButtonText(watchedEpisodesCount, showLength)
-                        }
+                        buttonText = generateButtonText(watchedEpisodesCount, showLength)
 
                         onMarkAsWatched()
                     },
@@ -554,12 +515,6 @@ fun CurrentlyWatchingCard(
             }
         }
     }
-
-    RatingSlider(
-        rating = userRating,
-        visible = ratingSliderVisible,
-        onValueChangeFinished = handleRatingChange
-    )
 }
 
 
@@ -615,7 +570,7 @@ fun YourFriendsJustWatched (
                                 handleShowClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
                             }
                     ) {
-                        ProductionImage(
+                        ShowImage(
                             imageID = listOfShows[i].production.posterUrl,
                             imageDescription = listOfShows[i].production.title + " Poster"
                         )
@@ -643,7 +598,7 @@ fun YourFriendsJustWatched (
 
 @Composable
 fun LoadingCard() {
-    ProductionImage()
+    ShowImage()
     Column (
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ){
@@ -684,7 +639,7 @@ fun FriendsWatchedInfo(
                 fontWeight = weightLight,
                 fontSize = 12.sp
             )
-            RatingsGraphics(
+            ScoreGraphics(
                 score = score
             )
         }

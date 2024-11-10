@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.controller.ControllerViewModel
 import com.movielist.model.NavbarOptions
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightGray
@@ -56,19 +54,17 @@ import com.movielist.ui.theme.weightBold
 
 @Composable
 fun BottomNavBar(
-    controllerViewModel: ControllerViewModel,
     activeColor: Color = Purple,
     inactiveColor: Color = LightGray,
     sizeMultiplier: Float = 1f,
-    navController: NavController,
-    buttonsActive: Boolean = true,
+    navController: NavController
 ){
     //Graphics variables
     val buttonSize: Dp = (45*sizeMultiplier).dp
     val iconSize: Dp = buttonSize-20.dp
 
     var homeButtonColor by remember {
-        mutableStateOf(if (buttonsActive){activeColor} else {inactiveColor})
+        mutableStateOf(activeColor)
     }
     var listButtonColor by remember {
         mutableStateOf(inactiveColor)
@@ -82,22 +78,10 @@ fun BottomNavBar(
     var profileButtonColor by remember {
         mutableStateOf(inactiveColor)
     }
-
     var activeButton by remember {
         mutableStateOf(NavbarOptions.HOME)
     }
 
-    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
-
-
-    if(!buttonsActive){
-        activeButton = NavbarOptions.NONE
-        homeButtonColor = inactiveColor
-        listButtonColor = inactiveColor
-        searchButtonColor = inactiveColor
-        reviewButtonColor = inactiveColor
-        profileButtonColor = inactiveColor
-    }
 
     //wrapper
     Box (
@@ -128,6 +112,7 @@ fun BottomNavBar(
                         reviewButtonColor = inactiveColor
                         profileButtonColor = inactiveColor
                         activeButton = NavbarOptions.HOME
+
                         navController.navigate(Screen.HomeScreen.route)
                     }
                 },
@@ -175,7 +160,7 @@ fun BottomNavBar(
                         profileButtonColor = inactiveColor
                         activeButton = NavbarOptions.LIST
 
-                        navController.navigate(Screen.ListScreen.withArguments(loggedInUser?.id.toString()))
+                        navController.navigate(Screen.ListScreen.route)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -321,7 +306,7 @@ fun BottomNavBar(
                         profileButtonColor = activeColor
                         activeButton = NavbarOptions.PROFILE
 
-                        navController.navigate(Screen.ProfileScreen.withArguments(loggedInUser?.id.toString()))
+                        navController.navigate(Screen.ProfileScreen.route)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -401,7 +386,5 @@ fun TopNavbarBackground (
     }
 
 }
-
-
 
 
