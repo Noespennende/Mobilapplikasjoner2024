@@ -555,7 +555,7 @@ fun ReviewSummary (
                         )
                         //Score
                         RatingsGraphics(
-                            review.score
+                            review.score,
                         )
                     }
 

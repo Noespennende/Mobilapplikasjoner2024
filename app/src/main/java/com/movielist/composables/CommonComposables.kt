@@ -101,15 +101,15 @@ fun Background () {
 fun ProgressBar (
     currentNumber: Int,
     endNumber: Int,
-    lenght: Dp = 50.dp,
     foregroundColor: Color = Purple,
     backgroundColor: Color = DarkPurple,
     strokeWith: Float = 20f,
     animationDuration: Int = 1000,
-    animationDelay: Int = 0
+    animationDelay: Int = 0,
+    flip: Boolean = false
 )
 {
-    var percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
+    val percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
 
     var animationPlayed by remember {
         mutableStateOf(false)
@@ -127,6 +127,7 @@ fun ProgressBar (
 
     //Progress bar graphics
     //ProgressBarContainer
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -140,25 +141,52 @@ fun ProgressBar (
                 .fillMaxHeight(0.5f)
         )  {
             //drawing the progress bar
-            val lineStart = 0.dp.toPx()
-            val lineEnd = size.width * curPercentage.value
-            val lineY = size.height/2
-            //background line
-            drawLine(
-                color = backgroundColor,
-                start = Offset(x = lineStart, y= lineY),
-                end = Offset(x= size.width , y= lineY),
-                strokeWidth = strokeWith,
-                StrokeCap.Round,
-            )
-            //foreground line
-            drawLine(
-                color = foregroundColor,
-                start = Offset(x = lineStart, y= lineY),
-                end = Offset(x= lineEnd , y= lineY),
-                strokeWidth = strokeWith,
-                StrokeCap.Round,
-            )
+            var lineY = size.height/2
+
+            if (flip){
+                val lineStart = Offset(x = size.width, y = lineY)
+                val backgroundLineEnd = Offset(x = 0f, y = lineY)
+                val foregroundLineEnd = Offset(x = size.width * (1 - curPercentage.value), y = lineY)
+
+
+                //background line
+                drawLine(
+                    color = backgroundColor,
+                    start = lineStart,
+                    end = backgroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+                //foreground line
+                drawLine(
+                    color = foregroundColor,
+                    start = lineStart,
+                    end = foregroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+            } else {
+                val lineStart = Offset(x = 0f, y = lineY)
+                val backgroundLineEnd = Offset(x = size.width, y = lineY)
+                val foregroundLineEnd = Offset(x = size.width * curPercentage.value, y = lineY)
+                //background line
+                drawLine(
+                    color = backgroundColor,
+                    start = lineStart,
+                    end = backgroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+                //foreground line
+                drawLine(
+                    color = foregroundColor,
+                    start = lineStart,
+                    end = foregroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+            }
+
         }
 
     }
@@ -338,7 +366,8 @@ fun RatingsGraphics(
     score: Int,
     sizeMultiplier: Float = 1.0f,
     color: Color = White,
-    loggedInUsersScore: Boolean = false
+    loggedInUsersScore: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     //Generate stars if score is greater than 0
     if (score > 0){
@@ -346,6 +375,7 @@ fun RatingsGraphics(
         if (scoreNumber > 10) { scoreNumber = 10}
         //Graphics
         Row (
+            modifier = modifier
         ) {
             //Generate full stars
             for (i in 1..score) {
@@ -375,7 +405,8 @@ fun RatingsGraphics(
         }
     } else if (loggedInUsersScore) {
         Row (
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = modifier
         ) {
             Image(
                 painter = painterResource(id = R.drawable.empty_star),
@@ -390,7 +421,7 @@ fun RatingsGraphics(
                 text = "Unrated",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                fontSize = 16.sp,
+                fontSize = 11.sp* sizeMultiplier,
                 color = darkWhite,
                 textAlign = TextAlign.Center
             )
@@ -398,10 +429,10 @@ fun RatingsGraphics(
 
     } else {
         Text(
-            text = "No score",
+            text = "No rating",
             fontFamily = fontFamily,
             fontWeight = weightRegular,
-            fontSize = 16.sp,
+            fontSize = 11.sp * sizeMultiplier,
             color = darkWhite
         )
     }

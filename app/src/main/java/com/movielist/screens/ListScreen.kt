@@ -621,7 +621,7 @@ fun ListPageListItem (
                             else -> 0
                         },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
-                        backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
+                        backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray},
                     )
                 }
             }
