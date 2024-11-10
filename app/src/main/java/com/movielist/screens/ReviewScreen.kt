@@ -26,8 +26,8 @@ import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ProductionImage
+import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.ShowImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.Review
@@ -169,26 +169,8 @@ fun Review(
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(5.dp),
                             )
-                            //Score
-                            RatingsGraphics(
-                                review.score
-                            )
-                        }
-
-                        //Userinfo and review date
-                        Row (
-                            horizontalArrangement = Arrangement.spacedBy(10.dp),
-                            modifier = Modifier
-                                .clickable {
-                                    handleUserClick(review.reviewer.id)
-                                }
-                        ){
-                            //Username and review date
-                            Column (
-                                verticalArrangement = Arrangement.spacedBy(3.dp),
-                                horizontalAlignment = Alignment.End
-                            ){
-                                //Username
+                            {
+                                //Header
                                 Text(
                                     text = "${reviewDTO.productionTitle} (${
                                         reviewDTO.productionReleaseDate.get(
