@@ -9,7 +9,6 @@ data class ListItem (
     var score: Int = 0,
     val production: Production = Movie(),
     var lastUpdated: Calendar = Calendar.getInstance(),
-    var loggedInUsersFavorite: Boolean = false
 ) {
 
 }

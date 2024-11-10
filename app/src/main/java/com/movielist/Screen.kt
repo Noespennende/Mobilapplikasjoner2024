@@ -13,7 +13,6 @@ sealed class Screen (
     object CreateUserScreen : Screen("createUser_screen")
     object ProductionScreen : Screen("production_screen")
     object ReviewScreen : Screen("review_screen")
-    object ComparisonScreen: Screen("comparison_screen")
 
 
     fun withArguments(vararg args: String): String {

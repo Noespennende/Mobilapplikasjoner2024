@@ -41,8 +41,8 @@ import com.movielist.Screen
 import com.movielist.composables.GenerateListOptionName
 import com.movielist.composables.LineDevider
 import com.movielist.composables.RatingSlider
-import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ProductionImage
+import com.movielist.composables.ScoreGraphics
+import com.movielist.composables.ShowImage
 import com.movielist.composables.YouTubeVideoEmbed
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListOptions
@@ -80,6 +80,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+
 
     // Trengs for å laste inn
 
@@ -136,13 +137,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
-    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
-        navController.navigate(Screen.ProfileScreen.withArguments(productionID))
-    }
-
-    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
-        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
-    }
 
 
     //Graphics:
@@ -254,9 +248,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                         handleProductionImageClick = handleProductionClick,
                         handleLikeClick =  { reviewID ->
                             handleLikeClick(reviewID)
-                        },
-                        handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
+                        }
                     )
                 }
             }
@@ -284,7 +276,7 @@ fun ImageAndName(
     ) {
         //Image
         if (production != null) {
-            ProductionImage(
+            ShowImage(
                 imageID = production.posterUrl,
                 imageDescription = production.title,
             )
@@ -372,7 +364,7 @@ fun statsSection(
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 5.dp)
             )
-            RatingsGraphics(
+            ScoreGraphics(
                 score = formattedScore,
                 sizeMultiplier = 1.5f
             )
@@ -482,7 +474,7 @@ fun ListInfo (
 
             RatingSlider(
                 visible = ratingsSliderIsVisible,
-                rating = userScoreFormatted,
+                score = userScoreFormatted,
                 onValueChangeFinished = { score ->
                     handleScoreSliderChange(score)
                 }
@@ -507,7 +499,7 @@ fun ListInfo (
                 )
 
 
-                RatingsGraphics(
+                ScoreGraphics(
                     score = userScoreFormatted,
                     sizeMultiplier = 1.5f,
                     loggedInUsersScore = true,
