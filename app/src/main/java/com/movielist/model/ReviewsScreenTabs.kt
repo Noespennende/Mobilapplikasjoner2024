@@ -1,5 +1,5 @@
 package com.movielist.model
 
-enum class ReviewOptions {
+enum class ReviewsScreenTabs {
     SUMMARY, TOPTHISMONTH, TOPALLTIME
 }
