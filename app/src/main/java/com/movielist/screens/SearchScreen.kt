@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.composables.ShowImage
+import com.movielist.composables.ProductionImage
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
@@ -91,7 +91,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
                     }
                     .fillMaxWidth()
             ){
-                ShowImage(
+                ProductionImage(
                     imageID = prod.posterUrl,
                     imageDescription = prod.title + " Poster",
                     modifier = Modifier
