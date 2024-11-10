@@ -15,6 +15,7 @@ import com.movielist.composables.BottomNavBar
 import com.movielist.composables.BottomNavbarAndMobileIconsBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.NavbarOptions
+import com.movielist.screens.ComparisonScreen
 import com.movielist.screens.CreateUserScreen
 import com.movielist.screens.HomeScreen
 import com.movielist.screens.ListScreen
@@ -39,13 +40,9 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
-<<<<<<< HEAD
             //Screen.LoginScreen.route
             Screen.HomeScreen.route
 
-=======
-            Screen.HomeScreen.route
->>>>>>> parent of c01b3e5 (Comparison screen in progress)
         }
 
     NavHost(
@@ -167,6 +164,24 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 controllerViewModel,
                 navController,
                 reviewID = entry.arguments?.getString("reviewID")
+            )
+            aNavButtonIsActive = false
+        }
+        composable(
+            route = Screen.ComparisonScreen.withArguments() + "/{userToCompareToID:}",
+            arguments = listOf(
+                navArgument("userToCompareToID:") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        )
+        { entry ->
+            ComparisonScreen(
+                controllerViewModel,
+                navController,
+                userToCompareToID = entry.arguments?.getString("userToCompareToID:")
             )
             aNavButtonIsActive = false
         }

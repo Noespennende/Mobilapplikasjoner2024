@@ -27,7 +27,7 @@ import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.Review
@@ -140,7 +140,6 @@ fun Review(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-<<<<<<< HEAD
             if (reviewDTO != null) {
                 ShowImage(
                     imageID = reviewDTO.productionPosterUrl,
@@ -157,26 +156,6 @@ fun Review(
                             start = 5.dp
                         )
                 ) {
-=======
-            ShowImage(
-                imageID = review.show.posterUrl,
-                modifier = Modifier
-                    .clickable {
-                        handleProductionClick(review.show.imdbID)
-                    }
-            )
-            //Review header, score and body
-            Column (
-                verticalArrangement = Arrangement.spacedBy(0.dp),
-                modifier = Modifier
-                    .padding(
-                        start = 5.dp
-                    )
-            ) {
-                Row (
-                ){
-                    //Review Header and user section
->>>>>>> parent of c01b3e5 (Comparison screen in progress)
                     Row(
                     ) {
                         //Review Header and user section
