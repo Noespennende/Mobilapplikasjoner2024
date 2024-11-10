@@ -71,7 +71,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController, userID: String?){
+fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
@@ -176,8 +176,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     // TEMP CODE DELETE ABOVE
 
-    val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
-
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
@@ -195,14 +193,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {
         //Kontroller funksjon her
-    }
-
-    val handleProfilePictureClick: (profileID: String) -> Unit = { profileID ->
-        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
-    }
-
-    val handleReviewClick: (reviewID: String) -> Unit = { reviewID ->
-        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
     //Graphics
@@ -313,9 +303,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 reviewList = exampleReviews,
                 header = "Reviews",
                 handleLikeClick = handleReviewButtonLikeClick,
-                handleProductionImageClick = handleProductionClick,
-                handleProfilePictureClick = handleProfilePictureClick,
-                handleReviewClick = handleReviewClick
+                handleProductionImageClick = handleProductionClick
 
             )
         }
@@ -339,7 +327,8 @@ fun TopNavBarProfilePage(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ){
         UsernameHeadline(
-            user = user
+            user = user,
+            loggedInUser = loggedInUser
         )
 
         ProfileCategoryOptions()
@@ -350,7 +339,8 @@ fun TopNavBarProfilePage(
 
 @Composable
 fun UsernameHeadline (
-    user: User
+    user: User,
+    loggedInUser: Boolean
 ){
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -370,7 +360,7 @@ fun UsernameHeadline (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = White,
+            color = if(loggedInUser){Purple} else {LightGray},
             modifier = Modifier
                 .padding(horizontal = 10.dp)
         )

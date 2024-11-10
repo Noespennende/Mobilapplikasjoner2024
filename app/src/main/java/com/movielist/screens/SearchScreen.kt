@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.composables.ProductionImage
+import com.movielist.composables.ShowImage
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
@@ -62,8 +62,8 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     //TEMP CODE DELETE ABOVE
 
 
-    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    val handleProductionClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID))
     }
 
     //Graphics:
@@ -91,12 +91,12 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
                     }
                     .fillMaxWidth()
             ){
-                ProductionImage(
+                ShowImage(
                     imageID = prod.posterUrl,
                     imageDescription = prod.title + " Poster",
                     modifier = Modifier
                         .clickable {
-                            handleProductionClick(prod.imdbID, prod.type)
+                            handleProductionClick(prod.imdbID)
                         }
                 )
 
