@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -36,7 +38,7 @@ import com.movielist.composables.FavoriteButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.ProductionImage
+import com.movielist.composables.ShowImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.TopNavbarBackground
@@ -119,10 +121,6 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         //Kontroller kall her
     }
 
-    val handleCompareUserListsClick: () -> Unit = {
-        navController.navigate(Screen.ComparisonScreen.withArguments(listOwnderID.toString()))
-    }
-
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -153,8 +151,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
                 listItemList = displayedList,
                 handleProductionImageClick = handleProductionClick,
                 handleListItemRatingChange = handleListItemRatingsChange,
-                handleListItemFavoriteClick = handleListItemFavoriteClick,
-                handleCompareUserClick = handleCompareUserListsClick
+                handleListItemFavoriteClick = handleListItemFavoriteClick
+
             )
         }
     }
@@ -309,8 +307,7 @@ fun ListPageList (
     listItemList: List<ListItem>,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
-    handleListItemFavoriteClick: (favorite: Boolean) -> Unit,
-    handleCompareUserClick: () -> Unit
+    handleListItemFavoriteClick: (favorite: Boolean) -> Unit
 ){
     //Graphics
     Column(
@@ -332,7 +329,7 @@ fun ListPageList (
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .clickable {
-                            handleCompareUserClick()
+                            //OnClickFunction
                         }
                         .background(
                             color = LightGray,
@@ -409,7 +406,7 @@ fun ListPageListItem (
         Row (
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ProductionImage(
+            ShowImage(
                 imageID = listItem.production.posterUrl,
                 imageDescription = listItem.production.title + " Poster",
                 modifier = Modifier
