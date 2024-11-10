@@ -33,11 +33,8 @@ fun Navigation (controllerViewModel: ControllerViewModel){
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
-            Screen.ComparisonScreen.withArguments("testID")
-            /*
+            //Screen.LoginScreen.route
             Screen.HomeScreen.route
-            */
-
 
         }
 
