@@ -56,48 +56,35 @@ import com.movielist.ui.theme.weightBold
 
 @Composable
 fun BottomNavBar(
-    controllerViewModel: ControllerViewModel,
     activeColor: Color = Purple,
     inactiveColor: Color = LightGray,
     sizeMultiplier: Float = 1f,
-    navController: NavController,
-    buttonsActive: Boolean = true,
+    activeNavButton: NavbarOptions,
+    handleNavButtonClick: (NavbarOptions) -> Unit
 ){
     //Graphics variables
     val buttonSize: Dp = (45*sizeMultiplier).dp
     val iconSize: Dp = buttonSize-20.dp
 
-    var homeButtonColor by remember {
-        mutableStateOf(if (buttonsActive){activeColor} else {inactiveColor})
-    }
-    var listButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var searchButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var reviewButtonColor by remember {
-        mutableStateOf(inactiveColor)
-    }
-    var profileButtonColor by remember {
-        mutableStateOf(inactiveColor)
+
+    var homeButtonColor= inactiveColor
+    var listButtonColor = inactiveColor
+    var searchButtonColor = inactiveColor
+    var reviewButtonColor = inactiveColor
+    var profileButtonColor = inactiveColor
+
+    if (activeNavButton == NavbarOptions.HOME){
+        homeButtonColor = activeColor
+    } else if (activeNavButton == NavbarOptions.LIST){
+        listButtonColor = activeColor
+    } else if (activeNavButton == NavbarOptions.PROFILE){
+        profileButtonColor = activeColor
+    } else if (activeNavButton == NavbarOptions.REVIEW){
+        reviewButtonColor = activeColor
+    } else if (activeNavButton == NavbarOptions.SEARCH) {
+        searchButtonColor = activeColor
     }
 
-    var activeButton by remember {
-        mutableStateOf(NavbarOptions.HOME)
-    }
-
-    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
-
-
-    if(!buttonsActive){
-        activeButton = NavbarOptions.NONE
-        homeButtonColor = inactiveColor
-        listButtonColor = inactiveColor
-        searchButtonColor = inactiveColor
-        reviewButtonColor = inactiveColor
-        profileButtonColor = inactiveColor
-    }
 
     //wrapper
     Box (
@@ -121,14 +108,8 @@ fun BottomNavBar(
             Button(
                 onClick = {
                     //Home button onClick logic
-                    if(activeButton != NavbarOptions.HOME){
-                        homeButtonColor = activeColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.HOME
-                        navController.navigate(Screen.HomeScreen.route)
+                    if(activeNavButton != NavbarOptions.HOME){
+                        handleNavButtonClick(NavbarOptions.HOME)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -167,15 +148,8 @@ fun BottomNavBar(
             Button(
                 onClick = {
                     //List button onClick logic
-                    if(activeButton != NavbarOptions.LIST){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = activeColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.LIST
-
-                        navController.navigate(Screen.ListScreen.withArguments(loggedInUser?.id.toString()))
+                    if(activeNavButton != NavbarOptions.LIST){
+                        handleNavButtonClick(NavbarOptions.LIST)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -216,15 +190,8 @@ fun BottomNavBar(
             Button(
                 onClick = {
                     //Search button onClick logic
-                    if(activeButton != NavbarOptions.SEARCH){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = activeColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.SEARCH
-
-                        navController.navigate(Screen.SearchScreen.route)
+                    if(activeNavButton != NavbarOptions.SEARCH){
+                        handleNavButtonClick(NavbarOptions.SEARCH)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -265,15 +232,8 @@ fun BottomNavBar(
             Button(
                 onClick = {
                     //Review button onClick logic
-                    if(activeButton != NavbarOptions.REVIEW){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = activeColor
-                        profileButtonColor = inactiveColor
-                        activeButton = NavbarOptions.REVIEW
-
-                        navController.navigate(Screen.ReviewsScreen.route)
+                    if(activeNavButton != NavbarOptions.REVIEW){
+                        handleNavButtonClick(NavbarOptions.REVIEW)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),
@@ -313,15 +273,8 @@ fun BottomNavBar(
             Button(
                 onClick = {
                     //Profile button onClick logic
-                    if(activeButton != NavbarOptions.PROFILE){
-                        homeButtonColor = inactiveColor
-                        listButtonColor = inactiveColor
-                        searchButtonColor = inactiveColor
-                        reviewButtonColor = inactiveColor
-                        profileButtonColor = activeColor
-                        activeButton = NavbarOptions.PROFILE
-
-                        navController.navigate(Screen.ProfileScreen.withArguments(loggedInUser?.id.toString()))
+                    if(activeNavButton != NavbarOptions.PROFILE){
+                        handleNavButtonClick(NavbarOptions.PROFILE)
                     }
                 },
                 colors = ButtonDefaults.buttonColors(Color.Transparent),

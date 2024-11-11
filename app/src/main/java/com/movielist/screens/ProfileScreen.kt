@@ -184,6 +184,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(loggedInUser)
 
+    var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
     //function variables:
     val user by remember(loggedInUser) {
@@ -205,6 +206,17 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
+    val handleSummaryClick: () -> Unit = {
+        activeTab = com.movielist.model.ProfileCategoryOptions.SUMMARY
+    }
+    val handleLibraryClick: () -> Unit = {
+        activeTab = com.movielist.model.ProfileCategoryOptions.LIBRARY
+        navController.navigate(Screen.ListScreen.withArguments(profileOwnerID.toString()))
+    }
+    val handleReviewsClick: () -> Unit = {
+        activeTab = com.movielist.model.ProfileCategoryOptions.REVIEWS
+    }
+
     //Graphics
     //Main Content
     LazyColumn(
@@ -215,124 +227,133 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         verticalArrangement = Arrangement.spacedBy(15.dp)
     )
     {
-        //Biosection
-        item{
-            //Wrapper for horisontal padding
-            Box(
-                modifier = Modifier
-                    .padding(
-                        horizontal = horizontalPadding
-                    )
-            )
-            {
-                ProfileInfoSection( user = user)
+        if(activeTab == com.movielist.model.ProfileCategoryOptions.SUMMARY){
+            //Biosection
+            item{
+                //Wrapper for horisontal padding
+                Box(
+                    modifier = Modifier
+                        .padding(
+                            horizontal = horizontalPadding
+                        )
+                )
+                {
+                    ProfileInfoSection( user = user)
+                }
+
             }
 
-        }
+            //Favorite Series
+            item {
+                ListItemListSidesroller(
+                    header = "Favorite series",
+                    listOfShows = usersFavoriteTVShows,
+                    handleImageClick = handleProductionClick,
+                    textModifier = Modifier
+                        .padding(
+                            start = verticalPadding,
+                            bottom = 15.dp
+                        )
 
-        //Favorite Series
-        item {
-            ListItemListSidesroller(
-                header = "Favorite series",
-                listOfShows = usersFavoriteTVShows,
-                handleImageClick = handleProductionClick,
-                textModifier = Modifier
-                    .padding(
-                        start = verticalPadding,
-                        bottom = 15.dp
-                    )
-
-            )
-        }
-
-        //Line devider
-        item {
-            //Wrapper for the line devider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-            ){
-                LineDevider()
+                )
             }
 
-        }
+            //Line devider
+            item {
+                //Wrapper for the line devider
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding)
+                ){
+                    LineDevider()
+                }
 
-        //Favorite Movies
-        item {
-            ListItemListSidesroller(
-                header = "Favorite movies",
-                listOfShows = usersFavoriteMovies,
-                handleImageClick = handleProductionClick,
-                textModifier = Modifier
-                    .padding(
-                        start = horizontalPadding,
-                        bottom = 15.dp
-                    )
-            )
-        }
-
-        //Line devider
-        item {
-            //Wrapper for the line devider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-            ){
-                LineDevider()
             }
 
-        }
-
-        //Statistics section
-        item {
-            StatisticsSection(
-
-                showGenreToPercentageMap = controllerViewModel.genrePercentageShows(),
-                movieGenreToPercentageMap = controllerViewModel.genrePercentageMovie()
-            )
-        }
-
-        //Line devider
-        item {
-            //Wrapper for the line devider
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = horizontalPadding)
-            ){
-                LineDevider()
+            //Favorite Movies
+            item {
+                ListItemListSidesroller(
+                    header = "Favorite movies",
+                    listOfShows = usersFavoriteMovies,
+                    handleImageClick = handleProductionClick,
+                    textModifier = Modifier
+                        .padding(
+                            start = horizontalPadding,
+                            bottom = 15.dp
+                        )
+                )
             }
 
+            //Line devider
+            item {
+                //Wrapper for the line devider
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding)
+                ){
+                    LineDevider()
+                }
+
+            }
+
+            //Statistics section
+            item {
+                StatisticsSection(
+
+                    showGenreToPercentageMap = controllerViewModel.genrePercentageShows(),
+                    movieGenreToPercentageMap = controllerViewModel.genrePercentageMovie()
+                )
+            }
+
+            //Line devider
+            item {
+                //Wrapper for the line devider
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = horizontalPadding)
+                ){
+                    LineDevider()
+                }
+
+            }
+
+            //Review section
+            item {
+                ReviewsSection(
+                    reviewList = exampleReviews,
+                    header = "Reviews",
+                    handleLikeClick = handleReviewButtonLikeClick,
+                    handleProductionImageClick = handleProductionClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
+
+                )
+            }
         }
 
-        //Review section
-        item {
-            ReviewsSection(
-                reviewList = exampleReviews,
-                header = "Reviews",
-                handleLikeClick = handleReviewButtonLikeClick,
-                handleProductionImageClick = handleProductionClick,
-                handleProfilePictureClick = handleProfilePictureClick,
-                handleReviewClick = handleReviewClick
-
-            )
-        }
 
     }
 
     //Navigation
     TopNavBarProfilePage(
         user = user,
-        loggedInUser = isLoggedInUser
+        loggedInUser = isLoggedInUser,
+        handleSummaryClick = handleSummaryClick,
+        handleLibraryClick = handleLibraryClick,
+        handleReviewsClick = handleReviewsClick
     )
 }
 
 @Composable
 fun TopNavBarProfilePage(
     user: User,
-    loggedInUser: Boolean
+    loggedInUser: Boolean,
+    handleSummaryClick: () -> Unit,
+    handleLibraryClick: () -> Unit,
+    handleReviewsClick: () -> Unit
 ) {
     TopNavbarBackground()
     Column(
@@ -342,7 +363,11 @@ fun TopNavBarProfilePage(
             user = user
         )
 
-        ProfileCategoryOptions()
+        ProfileCategoryOptions(
+            handleSummaryClick = handleSummaryClick,
+            handleLibraryClick = handleLibraryClick,
+            handleReviewsClick = handleReviewsClick
+        )
 
     }
 
@@ -381,6 +406,9 @@ fun UsernameHeadline (
 fun ProfileCategoryOptions(
     activeButtonColor: Color = Purple,
     inactiveButtonColor: Color = LightGray,
+    handleSummaryClick: () -> Unit,
+    handleLibraryClick: () -> Unit,
+    handleReviewsClick: () -> Unit
 ){
 
     //Button graphics logic
@@ -411,11 +439,11 @@ fun ProfileCategoryOptions(
                     .clickable {
                         //OnClickFunction
                         if (activeButton != com.movielist.model.ProfileCategoryOptions.SUMMARY) {
-
                             activeButton = com.movielist.model.ProfileCategoryOptions.SUMMARY
                             summaryButtonColor = activeButtonColor
                             libaryButtonColor = inactiveButtonColor
                             reviewsButtonColor = inactiveButtonColor
+                            handleSummaryClick()
                         }
                     }
                     .background(
@@ -447,6 +475,8 @@ fun ProfileCategoryOptions(
                             summaryButtonColor = inactiveButtonColor
                             libaryButtonColor = activeButtonColor
                             reviewsButtonColor = inactiveButtonColor
+
+                            handleLibraryClick()
                         }
                     }
                     .background(
@@ -478,6 +508,7 @@ fun ProfileCategoryOptions(
                             summaryButtonColor = inactiveButtonColor
                             libaryButtonColor = inactiveButtonColor
                             reviewsButtonColor = activeButtonColor
+                            handleReviewsClick()
                         }
 
                     }

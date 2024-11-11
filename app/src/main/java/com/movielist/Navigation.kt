@@ -35,6 +35,22 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
     val isLoggedIn by controllerViewModel.isLoggedIn
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     var aNavButtonIsActive by remember { mutableStateOf<Boolean>(true) }
+    var activeNavButton by remember { mutableStateOf(NavbarOptions.HOME) }
+
+    val handleNavButtonClick: (navOption: NavbarOptions) -> Unit = {navOption ->
+        activeNavButton = navOption
+        if(navOption == NavbarOptions.HOME){
+            navController.navigate(Screen.HomeScreen.route)
+        } else if (navOption == NavbarOptions.LIST){
+            navController.navigate(Screen.ListScreen.withArguments(loggedInUser?.id.toString()))
+        } else if (navOption == NavbarOptions.REVIEW){
+            navController.navigate(Screen.ReviewsScreen.route)
+        } else if (navOption == NavbarOptions.PROFILE){
+            navController.navigate(Screen.ProfileScreen.withArguments(loggedInUser?.id.toString()))
+        }else if (navOption == NavbarOptions.SEARCH){
+            navController.navigate(Screen.SearchScreen.route)
+        }
+    }
 
     val startScreen =
         if (!isLoggedIn) {
@@ -55,6 +71,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             LoginPage(controllerViewModel, navController)
             aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
 
         }
         composable(
@@ -62,6 +79,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             HomeScreen(controllerViewModel, navController)
             aNavButtonIsActive = true
+            activeNavButton = NavbarOptions.HOME
         }
         composable(
             route = Screen.ListScreen.withArguments() + "/{userID}",
@@ -81,8 +99,10 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             if(entry.arguments?.getString("userID") == loggedInUser?.id.toString())
             {
                 aNavButtonIsActive = true
+                activeNavButton = NavbarOptions.LIST
             } else {
                 aNavButtonIsActive = false
+                activeNavButton = NavbarOptions.NONE
             }
 
         }
@@ -91,12 +111,14 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             SearchPage(controllerViewModel, navController)
             aNavButtonIsActive = true
+            activeNavButton = NavbarOptions.SEARCH
         }
         composable(
             route = Screen.ReviewsScreen.withArguments()
         ) {
             ReviewsScreen(controllerViewModel, navController)
             aNavButtonIsActive = true
+            activeNavButton = NavbarOptions.REVIEW
         }
         composable(
             route = Screen.ProfileScreen.withArguments() + "/{userID}",
@@ -116,8 +138,10 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             if(entry.arguments?.getString("userID") == loggedInUser?.id.toString())
             {
                 aNavButtonIsActive = true
+                activeNavButton = NavbarOptions.PROFILE
             } else {
                 aNavButtonIsActive = false
+                activeNavButton = NavbarOptions.NONE
             }
 
         }
@@ -126,6 +150,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             CreateUserScreen(controllerViewModel, navController)
             aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
         }
         composable(
             route = Screen.ProductionScreen.withArguments() + "/{productionID}/{productionType}",
@@ -149,6 +174,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 productionType = entry.arguments?.getString("productionType")
             )
             aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
         }
         composable(
             route = Screen.ReviewScreen.withArguments() + "/{reviewID}",
@@ -167,6 +193,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 reviewID = entry.arguments?.getString("reviewID")
             )
             aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
         }
         composable(
             route = Screen.ComparisonScreen.withArguments() + "/{userToCompareToID:}",
@@ -185,6 +212,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 userToCompareToID = entry.arguments?.getString("userToCompareToID:")
             )
             aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
         }
     }
 
@@ -192,8 +220,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
     if (isLoggedIn) {
         BottomNavbarAndMobileIconsBackground()
         BottomNavBar(
-            navController = navController,
-            buttonsActive = aNavButtonIsActive,
-            controllerViewModel = controllerViewModel)
+            activeNavButton = activeNavButton,
+            handleNavButtonClick = handleNavButtonClick)
     }
 }
