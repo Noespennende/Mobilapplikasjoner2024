@@ -108,10 +108,6 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
         )
     ) {
         item {
-            Text(
-                text = reviewID.toString(),
-                color = White
-            )
             reviewDTO?.let {
                 Review(
                     reviewDTO = reviewDTO,
@@ -135,12 +131,13 @@ fun Review(
 ) {
     //Main container
     Column {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(5.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            if (reviewDTO != null) {
+        if (reviewDTO != null) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+
                 ProductionImage(
                     imageID = reviewDTO.productionPosterUrl,
                     modifier = Modifier
@@ -249,7 +246,6 @@ fun Review(
                             color = darkWhite,
                             modifier = Modifier
                                 .fillMaxWidth(.8f)
-                                .height(60.dp)
                         )
 
                         Text(
@@ -262,7 +258,9 @@ fun Review(
 
                     }
 
+
                 }
+
             }
 
             LineDevider()
