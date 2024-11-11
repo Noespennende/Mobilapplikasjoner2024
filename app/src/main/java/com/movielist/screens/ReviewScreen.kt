@@ -26,8 +26,8 @@ import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.ScoreGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.RatingsGraphics
+import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.Review
@@ -141,7 +141,7 @@ fun Review(
                 .fillMaxWidth()
         ) {
             if (reviewDTO != null) {
-                ShowImage(
+                ProductionImage(
                     imageID = reviewDTO.productionPosterUrl,
                     modifier = Modifier
                         .clickable {
@@ -149,6 +149,7 @@ fun Review(
                         }
                 )
 
+                //Review header, score and body
                 Column(
                     verticalArrangement = Arrangement.spacedBy(0.dp),
                     modifier = Modifier
@@ -183,7 +184,7 @@ fun Review(
                                     color = White
                                 )
                                 //Score
-                                ScoreGraphics(
+                                RatingsGraphics(
                                     reviewDTO.score
                                 )
                             }
@@ -261,23 +262,21 @@ fun Review(
 
                     }
 
+                }
             }
-            //Review header, score and body
 
+            LineDevider()
+
+            //LIKE BUTTON
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                LikeButton(
+                    handleLikeClick = handleLikeClick
+                )
             }
+            LineDevider()
         }
-
-        LineDevider()
-
-        //LIKE BUTTON
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center
-        ) {
-            LikeButton(
-                handleLikeClick = handleLikeClick
-            )
-        }
-        LineDevider()
     }
-}
+    }
