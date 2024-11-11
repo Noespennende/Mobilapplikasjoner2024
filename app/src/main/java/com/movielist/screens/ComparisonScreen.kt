@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +34,7 @@ import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
+import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
@@ -51,13 +52,13 @@ import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
-import kotlin.reflect.typeOf
 
 @Composable
 fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: NavController, userToCompareToID: String?) {
@@ -106,12 +107,14 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         userName = "Comparison user",
         email = "email@email.com",
         id = "tempID",
+        profileImageID = R.drawable.profilepicture.toString()
     )
 
     var loggedInUserTemp = User(
         userName = "LoggedIn User",
         email = "email@email.com",
         id = "tempID",
+        profileImageID = R.drawable.profilepicture.toString()
     )
 
 
@@ -122,7 +125,6 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
     val comparisonUser by remember { mutableStateOf<User>(comparisonUserTemp) } /* <- Brukeren som matcher IDen til comparisonUserID*/
     var sharedShowsAndMovies =  sharedShowsAndMoviesTemp /* <- Map<ListItem, ListItem> med list items av alle filmer/serier som er å både logged inn user og comparison user sin liste.
     Keys tilhører logged in user og values tilhører comparison user. Pass på at Keyen og valuen er den samme produksjonen for begge brukerene. Hvis Key = Silo skal Value = Silo (bare for den andre brukeren også.)*/
-
     var uniqueToLoggedInUser: MutableList<ListItem> = uniqueToLoggedInUserTemp /*<- Liste med list items av alle shows/movies som er unike til LoggedInUser*/
     var uniqueToComparisonUser: MutableList<ListItem> = uniqueToComparisonUserTemp /*<- Liste med list items av alle shows/movies som er unike til ComparisonUser */
     var currentSortingOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) }
@@ -132,9 +134,18 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         //Kontroller funksjon for å håndtere sorterings endring
     }
 
+    val handleListItemRatingChange: (listItemID: String, newRating: Int) -> Unit  ={listItemID, newRating ->
+        //Kontroller funksjon for å oppdatere rating her
+    }
+
     val handleProfileImageClick: (userID: String) -> Unit = {userID ->
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
+
+    val handleProductionImageClick: (productionID: String) -> Unit = {productionID ->
+        navController.navigate(Screen.ComparisonScreen.withArguments(productionID))
+    }
+
 
     //Graphics
     LazyColumn(
@@ -149,6 +160,8 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         modifier = Modifier
             .fillMaxSize()
     ) {
+
+        //Shared Shows and movies
         item {
             ComparisonScreenHeader(GenerateHeaderText(currentSortingOption))
         }
@@ -156,11 +169,60 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         item {
             LineDevider()
         }
-
-        item {
+        items(sharedShowsAndMovies.entries.toList()) { entry ->
             ComparisonCard(
-                listItemForLoggedInUser = sharedShowsAndMovies.keys.first(),
-                listItemForComparisonUser = sharedShowsAndMovies.values.first()
+                listItemForLoggedInUser = entry.key,
+                listItemForComparisonUser = entry.value,
+                handleProductionImageClick = handleProductionImageClick,
+                handleListItemRatingsChange = handleListItemRatingChange,
+                modifier = Modifier
+                    .padding(bottom = 15.dp)
+            )
+
+        }
+
+
+        //Unique to logged in user
+        item {
+            ComparisonScreenHeader(
+                headerText = "Unique to you",
+                modifier = Modifier
+                    .padding(top = 30.dp)
+            )
+        }
+        item {
+            LineDevider()
+        }
+        items (uniqueToLoggedInUser) { entry ->
+            ComparisonCard(
+                listItemForLoggedInUser = entry,
+                listItemForComparisonUser = ListItem(),
+                handleProductionImageClick = handleProductionImageClick,
+                handleListItemRatingsChange = handleListItemRatingChange,
+                modifier = Modifier
+                    .padding(bottom = 15.dp)
+            )
+        }
+
+        //Unique to comparison user
+        item {
+            ComparisonScreenHeader(
+                headerText = "Unique to " + comparisonUser.userName,
+                modifier = Modifier
+                    .padding(top = 30.dp)
+            )
+        }
+        item {
+            LineDevider()
+        }
+        items (uniqueToComparisonUser) { entry ->
+            ComparisonCard(
+                listItemForLoggedInUser = ListItem(),
+                listItemForComparisonUser = entry,
+                handleProductionImageClick = handleProductionImageClick,
+                handleListItemRatingsChange = handleListItemRatingChange,
+                modifier = Modifier
+                    .padding(bottom = 15.dp)
             )
         }
     }
@@ -201,7 +263,7 @@ fun TopNavBarComparisonScreen(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-               //LoggedInUserCard
+                //LoggedInUserCard
                 Row (
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -267,7 +329,7 @@ fun ComparisonScreenHeader (
         fontSize = headerSize,
         color = color,
         textAlign = TextAlign.Center,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
     )
 }
@@ -276,9 +338,40 @@ fun ComparisonScreenHeader (
 fun ComparisonCard (
     listItemForLoggedInUser: ListItem,
     listItemForComparisonUser: ListItem,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    handleProductionImageClick: (productionID: String) -> Unit,
+    handleListItemRatingsChange: (listItemID: String, rating: Int) -> Unit
 ){
+
     var productionLenght: Int = 1
+    var productionImage = listItemForLoggedInUser.production.posterUrl
+    var productionTitle = listItemForLoggedInUser.production.title
+    var productionYear = listItemForLoggedInUser.production.releaseDate.get(Calendar.YEAR)
+
+    if(productionImage == null){
+        productionImage = listItemForComparisonUser.production.posterUrl
+        productionTitle = listItemForComparisonUser.production.title
+        productionYear = listItemForComparisonUser.production.releaseDate.get(Calendar.YEAR)
+
+    }
+
+
+    if(listItemForLoggedInUser.production is TVShow){
+        productionLenght = listItemForLoggedInUser.production.episodes.size
+    } else if (listItemForComparisonUser.production is TVShow){
+        productionLenght = listItemForComparisonUser.production.episodes.size
+    }
+
+
+    var loggedInUserRating by remember { mutableStateOf(listItemForLoggedInUser.score) }
+
+    var ratingsSliderVisible by remember { mutableStateOf(false) }
+
+    val handleRatingsChange: (newRating: Int) -> Unit = {newRating ->
+        ratingsSliderVisible = false
+        loggedInUserRating = newRating
+        handleListItemRatingsChange(listItemForLoggedInUser.id, newRating)
+    }
 
     if(listItemForComparisonUser.production is TVShow){
         productionLenght = listItemForComparisonUser.production.episodes.size
@@ -298,17 +391,17 @@ fun ComparisonCard (
                 .padding(bottom = 10.dp)
         ){
             Text(
-                text = listItemForLoggedInUser.production.title,
+                text = productionTitle,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = headerSize,
                 color = White,
                 textAlign = TextAlign.Center,
-                modifier = modifier
+                modifier = Modifier
                     .padding(end = 5.dp)
             )
             Text(
-                text = "(" + listItemForLoggedInUser.production.releaseDate.get(Calendar.YEAR) + ")",
+                text = "(" + productionYear + ")",
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
                 fontSize = headerSize,
@@ -331,35 +424,40 @@ fun ComparisonCard (
                     .height(90.dp)
             ) {
                 RatingsGraphics(
-                    score = listItemForLoggedInUser.score,
+                    score = loggedInUserRating,
+                    sizeMultiplier = 1.3f,
                     color = Purple,
                     loggedInUsersScore = true,
+                    modifier = Modifier.clickable {
+                        ratingsSliderVisible = true
+                    }
                 )
 
                 Text(
                     text = "Ep " + listItemForLoggedInUser.currentEpisode + " of " + productionLenght,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    fontSize = headerSize,
+                    fontSize = paragraphSize,
                     color = darkWhite,
                     textAlign = TextAlign.End,
                     modifier = Modifier
-                        .padding(top = 6.dp, bottom = 6.dp)
+                        .padding(top = 6.dp, bottom = 6.dp )
                 )
                 ProgressBar(
                     currentNumber = listItemForComparisonUser.currentEpisode,
                     endNumber = productionLenght,
+                    flip = true
                 )
             }
 
             //Production Image
             ProductionImage(
-                imageID = listItemForLoggedInUser.production.posterUrl,
+                imageID = productionImage,
                 imageDescription = listItemForLoggedInUser.production.title,
                 sizeMultiplier = .7f,
                 modifier = Modifier
                     .clickable {
-
+                        handleProductionImageClick(listItemForLoggedInUser.production.imdbID)
                     }
             )
 
@@ -373,6 +471,7 @@ fun ComparisonCard (
             ) {
                 RatingsGraphics(
                     score = listItemForLoggedInUser.score,
+                    sizeMultiplier = 1.3f,
                     color = Gray,
                     loggedInUsersScore = false,
                 )
@@ -381,7 +480,7 @@ fun ComparisonCard (
                     text = "Ep " + listItemForLoggedInUser.currentEpisode + " of " + productionLenght,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    fontSize = headerSize,
+                    fontSize = paragraphSize,
                     color = darkWhite,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -396,6 +495,11 @@ fun ComparisonCard (
             }
         }
     }
+    RatingSlider(
+        rating = loggedInUserRating,
+        visible = ratingsSliderVisible,
+        onValueChangeFinished = handleRatingsChange
+    )
 }
 
 
