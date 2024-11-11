@@ -71,7 +71,7 @@ import java.util.Calendar
 import kotlin.random.Random
 
 @Composable
-fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController){
+fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavController, userID: String?){
 
     // TEMP CODE DELETE BELOW
     val exampleUser: User = User(
@@ -120,7 +120,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     val exampleFavShows: MutableList<ListItem> = mutableListOf()
 
     val handleProductionClick: (productionID: String, productionType: String)
-        -> Unit = { productionID, productionType ->
+    -> Unit = { productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
@@ -138,7 +138,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     reviews = ArrayList(),
                     posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
-                                     "07", "08", "09", "10", "11", "12"),
+                        "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
                 ),
                 currentEpisode = i,
@@ -176,6 +176,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     // TEMP CODE DELETE ABOVE
 
+    val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
+
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
@@ -193,6 +195,14 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {
         //Kontroller funksjon her
+    }
+
+    val handleProfilePictureClick: (profileID: String) -> Unit = { profileID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = { reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
     //Graphics
@@ -303,7 +313,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 reviewList = exampleReviews,
                 header = "Reviews",
                 handleLikeClick = handleReviewButtonLikeClick,
-                handleProductionImageClick = handleProductionClick
+                handleProductionImageClick = handleProductionClick,
+                handleProfilePictureClick = handleProfilePictureClick,
+                handleReviewClick = handleReviewClick
 
             )
         }
@@ -327,8 +339,7 @@ fun TopNavBarProfilePage(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ){
         UsernameHeadline(
-            user = user,
-            loggedInUser = loggedInUser
+            user = user
         )
 
         ProfileCategoryOptions()
@@ -339,8 +350,7 @@ fun TopNavBarProfilePage(
 
 @Composable
 fun UsernameHeadline (
-    user: User,
-    loggedInUser: Boolean
+    user: User
 ){
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -360,7 +370,7 @@ fun UsernameHeadline (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = if(loggedInUser){Purple} else {LightGray},
+            color = White,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
         )
@@ -373,120 +383,120 @@ fun ProfileCategoryOptions(
     inactiveButtonColor: Color = LightGray,
 ){
 
-        //Button graphics logic
-        var summaryButtonColor by remember {
-            mutableStateOf(activeButtonColor)
-        }
-        var libaryButtonColor by remember {
-            mutableStateOf(inactiveButtonColor)
-        }
-        var reviewsButtonColor by remember {
-            mutableStateOf(inactiveButtonColor)
-        }
+    //Button graphics logic
+    var summaryButtonColor by remember {
+        mutableStateOf(activeButtonColor)
+    }
+    var libaryButtonColor by remember {
+        mutableStateOf(inactiveButtonColor)
+    }
+    var reviewsButtonColor by remember {
+        mutableStateOf(inactiveButtonColor)
+    }
 
-        var activeButton by remember {
-            mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY)
-        }
+    var activeButton by remember {
+        mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY)
+    }
 
-        //Graphics
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = horizontalPadding)
-        ){
-            item {
-                //Summary
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clickable {
-                            //OnClickFunction
-                            if (activeButton != com.movielist.model.ProfileCategoryOptions.SUMMARY) {
+    //Graphics
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = horizontalPadding)
+    ){
+        item {
+            //Summary
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clickable {
+                        //OnClickFunction
+                        if (activeButton != com.movielist.model.ProfileCategoryOptions.SUMMARY) {
 
-                                activeButton = com.movielist.model.ProfileCategoryOptions.SUMMARY
-                                summaryButtonColor = activeButtonColor
-                                libaryButtonColor = inactiveButtonColor
-                                reviewsButtonColor = inactiveButtonColor
-                            }
+                            activeButton = com.movielist.model.ProfileCategoryOptions.SUMMARY
+                            summaryButtonColor = activeButtonColor
+                            libaryButtonColor = inactiveButtonColor
+                            reviewsButtonColor = inactiveButtonColor
                         }
-                        .background(
-                            color = summaryButtonColor,
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                        .width(150.dp)
-                        .height(30.dp)
-                ) {
-                    Text(
-                        "Summary",
-                        fontSize = paragraphSize,
-                        fontWeight = weightBold,
-                        color = DarkGray
+                    }
+                    .background(
+                        color = summaryButtonColor,
+                        shape = RoundedCornerShape(5.dp)
                     )
-                }
-            }
-
-            item {
-                //Completed
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clickable {
-                            //OnClickFunction
-                            if (activeButton != com.movielist.model.ProfileCategoryOptions.LIBRARY) {
-
-                                activeButton = com.movielist.model.ProfileCategoryOptions.LIBRARY
-                                summaryButtonColor = inactiveButtonColor
-                                libaryButtonColor = activeButtonColor
-                                reviewsButtonColor = inactiveButtonColor
-                            }
-                        }
-                        .background(
-                            color = libaryButtonColor,
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                        .width(150.dp)
-                        .height(30.dp)
-                ) {
-                    Text(
-                        "Library",
-                        fontSize = paragraphSize,
-                        fontWeight = weightBold,
-                        color = DarkGray
-                    )
-                }
-            }
-
-            item {
-                //Want to watch
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clickable {
-                            //OnClickFunction
-                            if (activeButton != com.movielist.model.ProfileCategoryOptions.REVIEWS) {
-
-                                activeButton = com.movielist.model.ProfileCategoryOptions.REVIEWS
-                                summaryButtonColor = inactiveButtonColor
-                                libaryButtonColor = inactiveButtonColor
-                                reviewsButtonColor = activeButtonColor
-                            }
-
-                        }
-                        .background(
-                            color = reviewsButtonColor,
-                            shape = RoundedCornerShape(5.dp)
-                        )
-                        .width(150.dp)
-                        .height(30.dp)
-                ) {
-                    Text(
-                        "Reviews",
-                        fontSize = paragraphSize,
-                        fontWeight = weightBold,
-                        color = DarkGray
-                    )
-                }
+                    .width(150.dp)
+                    .height(30.dp)
+            ) {
+                Text(
+                    "Summary",
+                    fontSize = paragraphSize,
+                    fontWeight = weightBold,
+                    color = DarkGray
+                )
             }
         }
+
+        item {
+            //Completed
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clickable {
+                        //OnClickFunction
+                        if (activeButton != com.movielist.model.ProfileCategoryOptions.LIBRARY) {
+
+                            activeButton = com.movielist.model.ProfileCategoryOptions.LIBRARY
+                            summaryButtonColor = inactiveButtonColor
+                            libaryButtonColor = activeButtonColor
+                            reviewsButtonColor = inactiveButtonColor
+                        }
+                    }
+                    .background(
+                        color = libaryButtonColor,
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .width(150.dp)
+                    .height(30.dp)
+            ) {
+                Text(
+                    "Library",
+                    fontSize = paragraphSize,
+                    fontWeight = weightBold,
+                    color = DarkGray
+                )
+            }
+        }
+
+        item {
+            //Want to watch
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .clickable {
+                        //OnClickFunction
+                        if (activeButton != com.movielist.model.ProfileCategoryOptions.REVIEWS) {
+
+                            activeButton = com.movielist.model.ProfileCategoryOptions.REVIEWS
+                            summaryButtonColor = inactiveButtonColor
+                            libaryButtonColor = inactiveButtonColor
+                            reviewsButtonColor = activeButtonColor
+                        }
+
+                    }
+                    .background(
+                        color = reviewsButtonColor,
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .width(150.dp)
+                    .height(30.dp)
+            ) {
+                Text(
+                    "Reviews",
+                    fontSize = paragraphSize,
+                    fontWeight = weightBold,
+                    color = DarkGray
+                )
+            }
+        }
+    }
 }
 
 @Composable
@@ -860,14 +870,14 @@ fun StatisticsPieChart (
             println(restPercentage)
 
             if (index <= 3) {
-            RoundProgressBar(
-                strokeCap = StrokeCap.Butt,
-                strikeWith = pieChartStrokeWith,
-                radius = pieChartRadius,
-                percentage = restPercentage,
-                color = colorList[index]
-            )
-        }
+                RoundProgressBar(
+                    strokeCap = StrokeCap.Butt,
+                    strikeWith = pieChartStrokeWith,
+                    radius = pieChartRadius,
+                    percentage = restPercentage,
+                    color = colorList[index]
+                )
+            }
             if (index >= 3) {
                 break
             }

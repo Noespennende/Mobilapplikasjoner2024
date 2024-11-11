@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +50,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,6 +75,7 @@ import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.sliderColors
@@ -97,15 +101,15 @@ fun Background () {
 fun ProgressBar (
     currentNumber: Int,
     endNumber: Int,
-    lenght: Dp = 50.dp,
     foregroundColor: Color = Purple,
     backgroundColor: Color = DarkPurple,
     strokeWith: Float = 20f,
     animationDuration: Int = 1000,
-    animationDelay: Int = 0
+    animationDelay: Int = 0,
+    flip: Boolean = false
 )
 {
-    var percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
+    val percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
 
     var animationPlayed by remember {
         mutableStateOf(false)
@@ -123,6 +127,7 @@ fun ProgressBar (
 
     //Progress bar graphics
     //ProgressBarContainer
+
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -136,25 +141,52 @@ fun ProgressBar (
                 .fillMaxHeight(0.5f)
         )  {
             //drawing the progress bar
-            val lineStart = 0.dp.toPx()
-            val lineEnd = size.width * curPercentage.value
-            val lineY = size.height/2
-            //background line
-            drawLine(
-                color = backgroundColor,
-                start = Offset(x = lineStart, y= lineY),
-                end = Offset(x= size.width , y= lineY),
-                strokeWidth = strokeWith,
-                StrokeCap.Round,
-            )
-            //foreground line
-            drawLine(
-                color = foregroundColor,
-                start = Offset(x = lineStart, y= lineY),
-                end = Offset(x= lineEnd , y= lineY),
-                strokeWidth = strokeWith,
-                StrokeCap.Round,
-            )
+            var lineY = size.height/2
+
+            if (flip){
+                val lineStart = Offset(x = size.width, y = lineY)
+                val backgroundLineEnd = Offset(x = 0f, y = lineY)
+                val foregroundLineEnd = Offset(x = size.width * (1 - curPercentage.value), y = lineY)
+
+
+                //background line
+                drawLine(
+                    color = backgroundColor,
+                    start = lineStart,
+                    end = backgroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+                //foreground line
+                drawLine(
+                    color = foregroundColor,
+                    start = lineStart,
+                    end = foregroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+            } else {
+                val lineStart = Offset(x = 0f, y = lineY)
+                val backgroundLineEnd = Offset(x = size.width, y = lineY)
+                val foregroundLineEnd = Offset(x = size.width * curPercentage.value, y = lineY)
+                //background line
+                drawLine(
+                    color = backgroundColor,
+                    start = lineStart,
+                    end = backgroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+                //foreground line
+                drawLine(
+                    color = foregroundColor,
+                    start = lineStart,
+                    end = foregroundLineEnd,
+                    strokeWidth = strokeWith,
+                    StrokeCap.Round,
+                )
+            }
+
         }
 
     }
@@ -200,6 +232,42 @@ fun LineDevider (
 }
 
 @Composable
+fun LineDeviderVertical (
+    color: Color = Gray,
+    strokeWith: Float = 5f,
+    modifier: Modifier = Modifier
+)
+{
+
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            .padding(start = 10.dp, end = 10.dp)
+    ){
+        Canvas(
+            modifier = Modifier
+                .fillMaxHeight()
+        )  {
+            //Line parameters
+            val lineStart = 0.dp.toPx()
+            val lineEnd = size.height
+            val lineX = size.width/2
+            //line
+            drawLine(
+                color = color,
+                start = Offset(x = lineX, y= lineStart),
+                end = Offset(x= lineX , y= lineEnd),
+                strokeWidth = strokeWith,
+                StrokeCap.Round,
+            )
+        }
+
+    }
+
+}
+
+@Composable
 fun TopMobileIconsBackground (
     color: Color = DarkGrayTransparent,
 ) {
@@ -214,7 +282,7 @@ fun TopMobileIconsBackground (
 
 
 @Composable
-fun ShowImage(
+fun ProductionImage(
     imageID: String? = null, // Endret til nullable for å håndtere URL-er
     placeholderID: Int = R.drawable.noimage,
     imageDescription: String = "Image not available",
@@ -257,7 +325,8 @@ fun ShowImage(
 fun ProfileImage(
     imageID: String?,
     userName: String,
-    sizeMultiplier: Float = 1.0f
+    sizeMultiplier: Float = 1.0f,
+    handleProfileImageClick: () -> Unit = {}
 ) {
 
     val placeholderID = R.drawable.profilepicture
@@ -275,6 +344,9 @@ fun ProfileImage(
             modifier = Modifier
                 .size((30*sizeMultiplier).dp)
                 .clip(CircleShape)
+                .clickable {
+                    handleProfileImageClick()
+                }
         )
     } else {
         // Vis fallback-bildet
@@ -290,11 +362,12 @@ fun ProfileImage(
 }
 
 @Composable
-fun ScoreGraphics(
+fun RatingsGraphics(
     score: Int,
     sizeMultiplier: Float = 1.0f,
     color: Color = White,
-    loggedInUsersScore: Boolean = false
+    loggedInUsersScore: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     //Generate stars if score is greater than 0
     if (score > 0){
@@ -302,6 +375,7 @@ fun ScoreGraphics(
         if (scoreNumber > 10) { scoreNumber = 10}
         //Graphics
         Row (
+            modifier = modifier
         ) {
             //Generate full stars
             for (i in 1..score) {
@@ -331,13 +405,15 @@ fun ScoreGraphics(
         }
     } else if (loggedInUsersScore) {
         Row (
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            modifier = modifier
         ) {
             Image(
                 painter = painterResource(id = R.drawable.empty_star),
                 contentDescription = "Star",
                 contentScale = ContentScale.Crop,
                 colorFilter = ColorFilter.tint(darkWhite),
+                alignment = Alignment.Center,
                 modifier = Modifier
                     .size((11*sizeMultiplier).dp)
             )
@@ -345,7 +421,7 @@ fun ScoreGraphics(
                 text = "Unrated",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                fontSize = 16.sp,
+                fontSize = 11.sp* sizeMultiplier,
                 color = darkWhite,
                 textAlign = TextAlign.Center
             )
@@ -353,10 +429,10 @@ fun ScoreGraphics(
 
     } else {
         Text(
-            text = "No score",
+            text = "No rating",
             fontFamily = fontFamily,
             fontWeight = weightRegular,
-            fontSize = 16.sp,
+            fontSize = 11.sp * sizeMultiplier,
             color = darkWhite
         )
     }
@@ -365,6 +441,7 @@ fun ScoreGraphics(
 @Composable
 fun LikeButton (
     sizeMultiplier: Float = 1f,
+    liked: Boolean = false,
     handleLikeClick: () -> Unit
 ) {
     var buttonText by remember {
@@ -376,7 +453,7 @@ fun LikeButton (
     }
 
     var buttonClicked by remember {
-        mutableStateOf(false)
+        mutableStateOf(liked)
     }
 
     var heartIcon by remember {
@@ -444,7 +521,87 @@ fun LikeButton (
     }
 }
 
+@Composable
+fun FavoriteButton (
+    sizeMultiplier: Float = 1f,
+    favorited: Boolean = false,
+    handleFavoriteClick: () -> Unit
+) {
+    var buttonText by remember {
+        mutableStateOf("Add to favorites")
+    }
 
+    var buttonColor by remember {
+        mutableStateOf(LightGray)
+    }
+
+    var buttonClicked by remember {
+        mutableStateOf(favorited)
+    }
+
+    var heartIcon by remember {
+        mutableStateOf(R.drawable.heart_hollow)
+    }
+
+    val handleFavoriteButtonClick: () -> Unit = {
+        if (buttonClicked) {
+            buttonColor = LightGray
+            buttonClicked = false
+            buttonText = "Add to favorites"
+            heartIcon = R.drawable.heart_hollow
+
+        } else {
+            buttonColor = Purple
+            buttonClicked = true
+            buttonText = "Favorite"
+            heartIcon = R.drawable.heart_filled
+        }
+        handleFavoriteClick()
+    }
+
+    Button(
+        onClick = {
+            handleFavoriteButtonClick()
+        },
+        colors = ButtonDefaults.buttonColors(Color.Transparent),
+        shape = RoundedCornerShape(5.dp),
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier
+            .height((20*sizeMultiplier).dp)
+            .wrapContentWidth()
+    )
+    {
+        Row(
+        ) {
+            //Button content
+            Row (
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            )
+            {
+                Image(
+                    painter = painterResource(id = heartIcon),
+                    contentDescription = "heart icon",
+                    contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(buttonColor),
+                    modifier = Modifier
+                        .size((15*sizeMultiplier).dp)
+                        .align(alignment = Alignment.CenterVertically)
+                )
+
+                Text(
+                    text = buttonText,
+                    fontSize = (15*sizeMultiplier).sp,
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    color = buttonColor,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                )
+            }
+
+        }
+    }
+}
 
 @Composable
 fun ProductionListSidesroller (
@@ -474,7 +631,7 @@ fun ProductionListSidesroller (
             contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
-                ShowImage(
+                ProductionImage(
                     imageID = listOfShows[i].posterUrl,
                     imageDescription = listOfShows[i].title + " Poster",
                     modifier = Modifier
@@ -515,7 +672,7 @@ fun ListItemListSidesroller (
             contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
             items (listOfShows.size) {i ->
-                ShowImage(
+                ProductionImage(
                     imageID = listOfShows[i].production.posterUrl,
                     imageDescription = listOfShows[i].production.title + " Poster",
                     modifier = Modifier
@@ -603,21 +760,21 @@ fun YouTubeVideoEmbed(
 
 @Composable
 fun RatingSlider (
-    score: Int = 0,
-    visible: Boolean ,
+    rating: Int = 0,
+    visible: Boolean,
     modifier: Modifier = Modifier,
     onValueChangeFinished: (Int) -> Unit
 ){
-    var scoreInput by remember { mutableIntStateOf(score) }
+    var scoreInput by remember { mutableIntStateOf(rating) }
 
     if (visible){
         Popup (
             onDismissRequest = {
-                onValueChangeFinished(score)
+                onValueChangeFinished(rating)
             },
             alignment = Alignment.Center,
 
-        ) {
+            ) {
             //Outer paddding
             Box (
                 modifier = Modifier
@@ -636,7 +793,7 @@ fun RatingSlider (
                             .fillMaxWidth()
                     ){
                         //Stars
-                        ScoreGraphics(
+                        RatingsGraphics(
                             score = scoreInput,
                             color = Purple,
                             loggedInUsersScore = true,
@@ -741,4 +898,106 @@ fun Logo (
         modifier = modifier
             .clip(RoundedCornerShape(5.dp))
     )
+}
+
+@Composable
+fun ProductionSortSelectButton (
+    handleSortChange: (activeCategory: ShowSortOptions) -> Unit
+) {
+    //Category button
+
+    var dropDownExpanded by remember {
+        mutableStateOf(false)
+    }
+    var dropDownButtonText by remember{
+        mutableStateOf("Movies & Shows")
+    }
+    val sortOptions = listOf(
+        ShowSortOptions.MOVIESANDSHOWS, ShowSortOptions.MOVIES, ShowSortOptions.SHOWS
+    )
+
+
+    //Wrapper
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        //CategorySelectButton
+        Box(
+            modifier = Modifier
+                .wrapContentHeight()
+                .width(200.dp)
+                .align(Alignment.Center)
+                .clickable {
+                    //dropdown menu button logic
+                    dropDownExpanded = true
+                }
+        ){
+            //BUTTON TEXT
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .align(Alignment.Center)
+
+            )
+
+            {
+                Text(
+                    text = "$dropDownButtonText",
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = Purple,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = "V",
+                    fontSize = paragraphSize,
+                    fontWeight = weightLight,
+                    fontFamily = fontFamily,
+                    color = Purple,
+                )
+
+            }
+
+            //MENU
+            DropdownMenu(
+                expanded = dropDownExpanded,
+                onDismissRequest = {dropDownExpanded = false},
+                offset = DpOffset(x = 50.dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = DarkPurple)
+                    .width(100.dp)
+            ) {
+                sortOptions.forEach{
+                        option -> DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = GenerateShowSortOptionName(option),
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = White,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        dropDownExpanded = false
+                        dropDownButtonText = GenerateShowSortOptionName(option)
+                        handleSortChange(option)
+                    })
+                }
+            }
+
+        }
+    }
 }
