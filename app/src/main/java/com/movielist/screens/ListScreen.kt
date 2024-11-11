@@ -14,12 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,16 +32,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.movielist.Screen
+import com.movielist.composables.FavoriteButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ProgressBar
-import com.movielist.composables.ScoreGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.RatingsGraphics
+import com.movielist.composables.ProductionImage
+import com.movielist.composables.ProductionSortSelectButton
+import com.movielist.composables.RatingSlider
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
+import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
@@ -67,8 +68,9 @@ import java.util.Calendar
 
 
 @Composable
-fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController)
+fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHostController, userID: String?)
 {
+    val listOwnderID by remember {mutableStateOf<String?>(userID)} /*<- ID til brukeren som eier listen*/
     val isLoggedInUser by remember { mutableStateOf(true) }
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
@@ -90,6 +92,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     var activeCategory by remember { mutableStateOf(ListOptions.WATCHING) }
 
+    var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current production sorting: Movies and shows, movies, shows*/
+
     val displayedList = when (activeCategory) {
         ListOptions.WATCHING -> currentlyWatchingCollection
         ListOptions.COMPLETED -> completedCollection
@@ -100,6 +104,23 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    }
+
+    val handleSortingChange: (sortOption: ShowSortOptions) -> Unit = {sortOption ->
+        activeSortOption = sortOption
+        //Kontroller funksjon for å håndtere sorting
+    }
+
+    val handleListItemRatingsChange: (score: Int, showID: String) -> Unit = { score, showID ->
+        //Kontroller kall her:
+    }
+
+    val handleListItemFavoriteClick: (favorited: Boolean) -> Unit = {favorited ->
+        //Kontroller kall her
+    }
+
+    val handleCompareUserListsClick: () -> Unit = {
+        navController.navigate(Screen.ComparisonScreen.withArguments(listOwnderID.toString()))
     }
 
     /*
@@ -130,8 +151,10 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
             ListPageList(
                 loggedInUsersList = isLoggedInUser,
                 listItemList = displayedList,
-                handleProductionImageClick = handleProductionClick
-
+                handleProductionImageClick = handleProductionClick,
+                handleListItemRatingChange = handleListItemRatingsChange,
+                handleListItemFavoriteClick = handleListItemFavoriteClick,
+                handleCompareUserClick = handleCompareUserListsClick
             )
         }
     }
@@ -142,7 +165,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         watchedListCount = currentlyWatchingCollection.size,
         completedListCount = completedCollection.size,
         wantToWatchListCount = wantToWatchCollection.size,
-        droppedListCount = droppedCollection.size
+        droppedListCount = droppedCollection.size,
+        handleSortChange = handleSortingChange
     )
 }
 
@@ -150,6 +174,7 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 fun TopNavBarListPage(
     activeCategory: ListOptions,
     onCategoryChange: (ListOptions) -> Unit,
+    handleSortChange: (ShowSortOptions) -> Unit,
     watchedListCount: Int,
     completedListCount: Int,
     wantToWatchListCount: Int,
@@ -166,7 +191,9 @@ fun TopNavBarListPage(
             modifier = Modifier
                 .padding(top = topNavBarContentStart)
         ) {
-            MovieShowSortingOptions()
+            ProductionSortSelectButton(
+                handleSortChange = handleSortChange
+            )
             ListCategoryOptions(
                 activeCategory = activeCategory,
                 onCategoryChange = onCategoryChange,
@@ -179,62 +206,6 @@ fun TopNavBarListPage(
     }
 }
 
-@Composable
-fun MovieShowSortingOptions(
-    sizeMultiplier: Float = 1f
-) {
-
-    var buttonText by remember {
-        mutableStateOf("Movies & Shows")
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
-        Button(
-            onClick = {
-            },
-            colors = ButtonDefaults.buttonColors(Color.Transparent),
-            shape = RoundedCornerShape(5.dp),
-            contentPadding = PaddingValues(0.dp),
-            modifier = Modifier
-                .height((20 * sizeMultiplier).dp)
-                .wrapContentWidth()
-        )
-        {
-            Row(
-            ) {
-                //Button content
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                )
-                {
-                    Text(
-                        text = buttonText,
-                        fontSize = (16 * sizeMultiplier).sp,
-                        fontFamily = fontFamily,
-                        fontWeight = weightBold,
-                        color = Purple,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                    )
-                    Text(
-                        text = "v",
-                        fontSize = (16 * sizeMultiplier).sp,
-                        fontFamily = fontFamily,
-                        fontWeight = weightLight,
-                        color = Purple,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                    )
-                }
-
-            }
-        }
-    }
-}
 
 @Composable
 fun ListCategoryOptions (
@@ -247,7 +218,7 @@ fun ListCategoryOptions (
     wantToWatchListCount: Int,
     droppedListCount: Int,
 
-){
+    ){
 
     var watchingButtonColor = if (activeCategory == ListOptions.WATCHING) activeButtonColor else inactiveButtonColor
     var completedButtonColor = if (activeCategory == ListOptions.COMPLETED) activeButtonColor else inactiveButtonColor
@@ -336,7 +307,10 @@ fun ListCategoryOptions (
 fun ListPageList (
     loggedInUsersList: Boolean,
     listItemList: List<ListItem>,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
+    handleListItemFavoriteClick: (favorite: Boolean) -> Unit,
+    handleCompareUserClick: () -> Unit
 ){
     //Graphics
     Column(
@@ -358,7 +332,7 @@ fun ListPageList (
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .clickable {
-                            //OnClickFunction
+                            handleCompareUserClick()
                         }
                         .background(
                             color = LightGray,
@@ -383,7 +357,9 @@ fun ListPageList (
             ListPageListItem(
                 listItem = listItem,
                 loggedInUsersList = loggedInUsersList,
-                handleProductionImageClick = handleProductionImageClick
+                handleProductionImageClick = handleProductionImageClick,
+                handleListItemRatingChange = handleListItemRatingChange,
+                handleFavoriteClick = handleListItemFavoriteClick
             )
         }
     }
@@ -394,7 +370,9 @@ fun ListPageList (
 fun ListPageListItem (
     listItem: ListItem,
     loggedInUsersList: Boolean,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
+    handleFavoriteClick: (favorite: Boolean) -> Unit
 ){
 
     //Graphics logic
@@ -402,10 +380,24 @@ fun ListPageListItem (
         mutableIntStateOf(listItem.currentEpisode)
     }
 
-    var showScore: Int by remember {
+    var listItemRating: Int by remember {
         mutableIntStateOf(listItem.score)
     }
 
+    var listItemFavorite by remember { mutableStateOf(listItem.loggedInUsersFavorite) }
+
+    var ratingsSliderIsVisible by remember { mutableStateOf(false) }
+
+    var handleFavoriteClick: () -> Unit = {
+        listItemFavorite = !listItemFavorite
+        handleFavoriteClick(listItemFavorite)
+    }
+
+    val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
+        handleListItemRatingChange(rating, listItem.id)
+        listItemRating = rating
+        ratingsSliderIsVisible = false
+    }
     //Graphics
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -417,7 +409,7 @@ fun ListPageListItem (
         Row (
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ShowImage(
+            ProductionImage(
                 imageID = listItem.production.posterUrl,
                 imageDescription = listItem.production.title + " Poster",
                 modifier = Modifier
@@ -453,33 +445,41 @@ fun ListPageListItem (
 
                 //Pluss and minus buttons
                 if (loggedInUsersList) {
-                    //Buttons
+                    // Favorite button
+                    FavoriteButton(
+                        favorited = listItemFavorite,
+                        handleFavoriteClick = handleFavoriteClick
+                    )
+                    //+ and - buttons
                     Row (
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         // Minus button
-                        Button(
-                            onClick = {
-                                //Button onclick function
-                                if (watchedEpisodesCount > 0){
-                                    watchedEpisodesCount--
-                                    listItem.currentEpisode = watchedEpisodesCount
-
-                                    // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
-                                    //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
-                                    //Log.d("MinusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
-                                }
-                            },
-                            shape = RoundedCornerShape(
-                                topStart = 10.dp,
-                                bottomStart = 10.dp,
-                                topEnd = 0.dp,
-                                bottomEnd = 0.dp
-                            ),
-                            colors = ButtonDefaults.buttonColors(Gray),
+                        Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .height(40.dp)
+                                .height(30.dp)
                                 .fillMaxWidth(.5f)
+                                .background(
+                                    color = Gray,
+                                    shape = RoundedCornerShape(
+                                        topStart = 10.dp,
+                                        bottomStart = 10.dp,
+                                        topEnd = 0.dp,
+                                        bottomEnd = 0.dp
+                                    )
+                                )
+                                .clickable {
+                                    //Button onclick function
+                                    if (watchedEpisodesCount > 0){
+                                        watchedEpisodesCount--
+                                        listItem.currentEpisode = watchedEpisodesCount
+
+                                        // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
+                                        //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
+                                        //Log.d("MinusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
+                                    }
+                                }
                         ) {
                             //Button text
                             Text(
@@ -490,45 +490,45 @@ fun ListPageListItem (
                             )
                         }
 
+
                         // Plus button
-                        Button(
-                            onClick = {
-
-                                when (val production = listItem.production) {
-                                    is TVShow -> {
-                                        // For TV-serier: Sjekk om det er flere episoder igjen å se
-                                        if (watchedEpisodesCount < production.episodes.size) {
-                                            watchedEpisodesCount++
-                                            listItem.currentEpisode = watchedEpisodesCount
-
-                                        }
-                                    }
-                                    is Movie -> {
-                                        // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
-                                        if (watchedEpisodesCount == 0) {
-                                            watchedEpisodesCount = 1
-                                            listItem.currentEpisode = watchedEpisodesCount
-                                        }
-                                    }
-
-                                    is Episode -> TODO()
-
-                                }
-                                // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
-                                //Log.d("PlusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
-                                //Log.d("PlusBtn_VariableTest", "watchedEpisodesCount: $watchedEpisodesCount")
-                            },
-                            shape = RoundedCornerShape(
-                                topStart = 0.dp,
-                                bottomStart = 0.dp,
-                                topEnd = 10.dp,
-                                bottomEnd = 10.dp
-                            ),
-                            colors = ButtonDefaults.buttonColors(Gray),
+                        Box(
+                            contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .height(40.dp)
+                                .height(30.dp)
                                 .fillMaxWidth(1f)
-                        ) {
+                                .background(
+                                    color = Gray,
+                                    shape = RoundedCornerShape(
+                                        topStart = 0.dp,
+                                        bottomStart = 0.dp,
+                                        topEnd = 10.dp,
+                                        bottomEnd = 10.dp
+                                    )
+                                )
+                                .clickable {
+                                    when (val production = listItem.production) {
+                                        is TVShow -> {
+                                            // For TV-serier: Sjekk om det er flere episoder igjen å se
+                                            if (watchedEpisodesCount < production.episodes.size) {
+                                                watchedEpisodesCount++
+                                                listItem.currentEpisode = watchedEpisodesCount
+
+                                            }
+                                        }
+
+                                        is Movie -> {
+                                            // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
+                                            if (watchedEpisodesCount == 0) {
+                                                watchedEpisodesCount = 1
+                                                listItem.currentEpisode = watchedEpisodesCount
+                                            }
+                                        }
+
+                                        is Episode -> TODO()
+                                    }
+                                }
+                        ){
                             //Button text
                             Text(
                                 text = "+",
@@ -578,20 +578,24 @@ fun ListPageListItem (
                                     .width(90.dp)
                                     .wrapContentHeight()
                                     .clickable {
-                                        //button logic
-                                        ///TEMP ADD LOGIC HERE
+                                        ratingsSliderIsVisible = true
                                     }
                             )
                             {
+                                RatingSlider(
+                                    onValueChangeFinished = handleListItemScoreChange,
+                                    visible = ratingsSliderIsVisible,
+                                    rating = listItemRating
+                                )
                                 //Wrapper to align content to the right
                                 Row(
                                     horizontalArrangement = Arrangement.End,
                                     modifier = Modifier.fillMaxWidth()
                                 ){
-                                    //Score stars
-                                    ScoreGraphics(
+                                    //Ratings stars
+                                    RatingsGraphics(
                                         color = Purple,
-                                        score = showScore,
+                                        score = listItemRating,
                                         sizeMultiplier = 1.5f,
                                         loggedInUsersScore = loggedInUsersList
                                     )
@@ -599,10 +603,10 @@ fun ListPageListItem (
 
                             }
                         } else {
-                            //Score stars
-                            ScoreGraphics(
+                            //Ratings stars
+                            RatingsGraphics(
                                 color =  White,
-                                score = showScore,
+                                score = listItemRating,
                                 sizeMultiplier = 1.5f
                             )
                         }
@@ -617,7 +621,7 @@ fun ListPageListItem (
                             else -> 0
                         },
                         foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
-                        backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray}
+                        backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray},
                     )
                 }
             }

@@ -106,14 +106,12 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         userName = "Comparison user",
         email = "email@email.com",
         id = "tempID",
-        profileImageID = R.drawable.profilepicture
     )
 
     var loggedInUserTemp = User(
         userName = "LoggedIn User",
         email = "email@email.com",
         id = "tempID",
-        profileImageID = R.drawable.profilepicture
     )
 
 

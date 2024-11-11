@@ -45,8 +45,9 @@ import com.movielist.Screen
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
-import com.movielist.composables.ScoreGraphics
-import com.movielist.composables.ShowImage
+import com.movielist.composables.RatingSlider
+import com.movielist.composables.RatingsGraphics
+import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
@@ -83,7 +84,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     reviews = ArrayList(),
                     posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
                     episodes = listOf("01", "02", "03", "04", "05", "06",
-                                      "07", "08", "09", "10", "11", "12"),
+                        "07", "08", "09", "10", "11", "12"),
                     seasons = listOf("1", "2", "3")
                 ),
             )
@@ -181,6 +182,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
 
+
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
@@ -195,6 +197,18 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         //Kontroller funksjon for å håndtere en review like hær
     }
 
+    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
+    }
+
+    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
+        navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
+    }
+
+    val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
+        //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
+    }
+
 
     // Front page graphics
     LazyColumn(
@@ -204,7 +218,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         item {
             CurrentlyWatchingScroller(
                 listOfShows = currentlyWatchingCollection,
-                onImageClick = handleProductionButtonClick)
+                onImageClick = handleProductionButtonClick,
+                handleRatingChange = handleUserRatingChange
+            )
         }
 
         item {
@@ -277,7 +293,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 reviewList = top10ReviewsListPastWeek,
                 header = "Top reviews this week",
                 handleLikeClick = handleReviewLikeButtonClick,
-                handleProductionImageClick = handleProductionButtonClick
+                handleProductionImageClick = handleProductionButtonClick,
+                handleProfilePictureClick = handleProfilePictureClick,
+                handleReviewClick = handleReviewClick
             )
         }
 
@@ -295,6 +313,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
     onImageClick: (showID: String, productionType: String) -> Unit,
+    handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -319,35 +338,38 @@ fun CurrentlyWatchingScroller (
     }
 
     //Graphics
-        LazyRow (
+    LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
     ) {
-            if (listOfShows.isEmpty()) {
-                items (3) {
+        if (listOfShows.isEmpty()) {
+            items (3) {
 
-                        LoadingCurrentlyWatchingCard()
-                }
-            } else {
-                items(listOfShows.size) { i ->
-                    CurrentlyWatchingCard(
-                        imageId = listOfShows[i].production.posterUrl,
-                        imageDescription = listOfShows[i].production.title,
-                        title = listOfShows[i].production.title,
-                        productionID = listOfShows[i].production.imdbID,
-                        productionType = listOfShows[i].production.type,
-                        showLength = when (listOfShows[i].production) {
-                            is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
-                            is Movie -> 1 // Returnerer lengden i minutter som Int
-                            is Episode -> 1
-                            else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
-                        },
-                        episodesWatched = listOfShows[i].currentEpisode,
-                        onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
-                        onImageClick = onImageClick
-                    )
-                }
+                LoadingCurrentlyWatchingCard()
             }
+        } else {
+            items(listOfShows.size) { i ->
+                CurrentlyWatchingCard(
+                    imageId = listOfShows[i].production.posterUrl,
+                    imageDescription = listOfShows[i].production.title,
+                    title = listOfShows[i].production.title,
+                    productionID = listOfShows[i].production.imdbID,
+                    productionType = listOfShows[i].production.type,
+                    showLength = when (listOfShows[i].production) {
+                        is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
+                        is Movie -> 1 // Returnerer lengden i minutter som Int
+                        is Episode -> 1
+                        else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
+                    },
+                    episodesWatched = listOfShows[i].currentEpisode,
+                    onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
+                    onImageClick = onImageClick,
+                    userRating = listOfShows[i].score,
+                    listItemID = listOfShows[i].id,
+                    handleRatingChange = handleRatingChange
+                )
+            }
+        }
 
 
 
@@ -405,9 +427,12 @@ fun CurrentlyWatchingCard(
     episodesWatched: Int,
     productionID: String,
     productionType: String,
+    userRating: Int,
+    listItemID: String,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit,
     onImageClick: (showID: String, productionType: String) -> Unit,
+    handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(episodesWatched)
@@ -415,6 +440,17 @@ fun CurrentlyWatchingCard(
 
     var buttonText by remember {
         mutableStateOf(generateButtonText(episodesWatched, showLength))
+    }
+
+    var ratingAdded by remember { mutableStateOf(false) }
+
+    var ratingSliderVisible by remember { mutableStateOf(false) }
+
+    val handleRatingChange: (rating: Int) -> Unit = {rating ->
+        ratingSliderVisible = false
+        ratingAdded = true
+        buttonText = "Rating updated!"
+        handleRatingChange(rating, listItemID)
     }
 
     // Card container
@@ -492,9 +528,13 @@ fun CurrentlyWatchingCard(
                         // Button onclick function
                         if (watchedEpisodesCount < showLength) {
                             watchedEpisodesCount++
+                        } else {
+                            ratingSliderVisible = true
                         }
 
-                        buttonText = generateButtonText(watchedEpisodesCount, showLength)
+                        if (!ratingAdded){
+                            buttonText = generateButtonText(watchedEpisodesCount, showLength)
+                        }
 
                         onMarkAsWatched()
                     },
@@ -515,6 +555,12 @@ fun CurrentlyWatchingCard(
             }
         }
     }
+
+    RatingSlider(
+        rating = userRating,
+        visible = ratingSliderVisible,
+        onValueChangeFinished = handleRatingChange
+    )
 }
 
 
@@ -570,7 +616,7 @@ fun YourFriendsJustWatched (
                                 handleShowClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
                             }
                     ) {
-                        ShowImage(
+                        ProductionImage(
                             imageID = listOfShows[i].production.posterUrl,
                             imageDescription = listOfShows[i].production.title + " Poster"
                         )
@@ -598,7 +644,7 @@ fun YourFriendsJustWatched (
 
 @Composable
 fun LoadingCard() {
-    ShowImage()
+    ProductionImage()
     Column (
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ){
@@ -620,7 +666,7 @@ fun FriendsWatchedInfo(
     showLenght: Int?,
     score: Int = 0,
 
-) {
+    ) {
     Row(
         horizontalArrangement =  Arrangement.spacedBy(3.dp)
     ) {
@@ -639,7 +685,7 @@ fun FriendsWatchedInfo(
                 fontWeight = weightLight,
                 fontSize = 12.sp
             )
-            ScoreGraphics(
+            RatingsGraphics(
                 score = score
             )
         }
@@ -651,7 +697,7 @@ fun FriendsWatchedInfo(
 fun generateButtonText(
     episodesWatched: Int,
     showLenght: Int?)
-: String
+        : String
 {
     if (episodesWatched+1 == showLenght) {
         return "Mark as completed"
