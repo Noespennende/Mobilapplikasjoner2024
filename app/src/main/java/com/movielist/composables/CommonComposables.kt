@@ -690,7 +690,8 @@ fun ListItemListSidesroller (
 @Composable
 fun RoundProgressBar (
     percentage: Float = 1f,
-    fontSize: TextUnit = 28.sp,
+    startAngle: Float = -90f,
+    sweepAngle: Float = 360f,
     color: Color = Purple,
     strikeWith: Dp = 8.dp,
     radius: Dp = 100.dp,
@@ -724,8 +725,8 @@ fun RoundProgressBar (
         ){
             drawArc(
                 color = color,
-                startAngle = -90f,
-                sweepAngle = 360* currentPercentage.value,
+                startAngle = startAngle,
+                sweepAngle = sweepAngle* currentPercentage.value,
                 useCenter = false,
                 style = Stroke(strikeWith.toPx(), cap = strokeCap)
             )
