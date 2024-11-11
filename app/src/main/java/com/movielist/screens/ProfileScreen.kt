@@ -359,7 +359,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     //Navigation
     TopNavBarProfilePage(
         user = user,
-        loggedInUser = isLoggedInUser,
         handleSummaryClick = handleSummaryClick,
         handleLibraryClick = handleLibraryClick,
         handleReviewsClick = handleReviewsClick
@@ -369,7 +368,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 @Composable
 fun TopNavBarProfilePage(
     user: User,
-    loggedInUser: Boolean,
     handleSummaryClick: () -> Unit,
     handleLibraryClick: () -> Unit,
     handleReviewsClick: () -> Unit
@@ -999,7 +997,7 @@ fun StatisticsList (
                     textAlign = TextAlign.End,
                 )
                 index++
-                if (index >= 3) break
+                if (index >= 4) break
             }
             index = 0
             Text(
@@ -1027,7 +1025,7 @@ fun StatisticsList (
                     textAlign = TextAlign.Start,
                 )
                 index++
-                if (index >= 3) break
+                if (index >= 4) break
             }
 
             index = 0
@@ -1057,7 +1055,7 @@ fun StatisticsList (
                     backgroundColor = Gray,
                 )
                 index++
-                if (index >= 3) break
+                if (index >= 4) break
             }
             index = 0
 
