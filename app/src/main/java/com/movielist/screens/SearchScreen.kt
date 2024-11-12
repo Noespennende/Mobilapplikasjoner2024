@@ -26,11 +26,14 @@ import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.ProductionImage
+import com.movielist.composables.ProfileImage
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
+import com.movielist.model.User
+import com.movielist.model.userList
 import com.movielist.ui.theme.*
 import java.util.Calendar
 
@@ -39,10 +42,11 @@ import java.util.Calendar
 fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavController) {
     //TEMP CODE DELETE THIS
 
-    val showList = mutableListOf<Production>()
+    val tempShowList = mutableListOf<Production>()
+    val tempUserList = mutableListOf<User>()
 
     for (i in 0..50) {
-        showList.add(
+        tempShowList.add(
             TVShow(
                 imdbID = "123",
                 title = "Silo",
@@ -58,13 +62,40 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
                 seasons = listOf("1", "2", "3")
             ),
         )
+
+        tempUserList.add(
+            User(
+                email = "lol@email.com",
+                userName = "Jane User",
+                profileImageID = R.drawable.profilepicture.toString()
+            )
+        )
     }
     //TEMP CODE DELETE ABOVE
 
+    val productionList: MutableList<Production> = tempShowList /*<-- Liste som inneholder søkeresultatene for Movies og TVSerier*/
+    val userList: MutableList<User> = tempUserList /* <-- Liste som inneholder søkeresultatene for brukere */
+
+    var activeSortOption by remember { mutableStateOf(SearchSortOptions.MOVIESANDSHOWS) }
+
+    val handleSearchQuerry: (sortingOption: SearchSortOptions, searchQuerry:String) -> Unit = {sortingOption, searchQuerry ->
+        activeSortOption = sortingOption
+        //Kontroller logikk for å håndtere søk her
+    }
+
+    val handleSortOptionsChange: (sortingOption: SearchSortOptions) -> Unit = {sortingOption ->
+        activeSortOption = sortingOption
+        //kontroller logikk for å håndtere sortering her
+    }
+
+    val handleUserClick: (userID: String) -> Unit = {userID ->
+        navController.navigate(Screen.ProfileScreen.withArguments(userID))
+    }
 
     val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
+
 
     //Graphics:
     //Search result content
@@ -81,58 +112,56 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
         modifier = Modifier
             .fillMaxSize()
     ) {
-        items(showList) { prod ->
-            //Individual show search result items
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .clickable {
-                        //Button logic when clicking search result items
-                    }
-                    .fillMaxWidth()
-            ){
-                ProductionImage(
-                    imageID = prod.posterUrl,
-                    imageDescription = prod.title + " Poster",
-                    modifier = Modifier
-                        .clickable {
-                            handleProductionClick(prod.imdbID, prod.type)
-                        }
-                )
+        if (activeSortOption == SearchSortOptions.MOVIESANDSHOWS ||
+            activeSortOption == SearchSortOptions.SHOW ||
+            activeSortOption == SearchSortOptions.SHOW ||
+            activeSortOption == SearchSortOptions.GENRE){
 
-                Text(
-                    text = prod.title,
-                    fontSize = headerSize,
-                    fontWeight = weightBold,
-                    fontFamily = fontFamily,
-                    color = White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(top = 5.dp)
-                        .align(Alignment.CenterHorizontally)
+            items(productionList) { prod ->
+                //Individual show search result items
+                ProductionCardSearchPage(
+                    production = prod,
+                    handleProductionClick = handleProductionClick
                 )
             }
-
+        } else if (activeSortOption == SearchSortOptions.USER)
+        {
+            items(userList) { user ->
+                //Individual show search result items
+                UserCardSearchPage(
+                    user = user,
+                    handleUserClick = handleUserClick
+                )
+            }
         }
+
     }
 
-    TopNavBarSearchPage()
+    TopNavBarSearchPage(
+        handleSearchQuerry = handleSearchQuerry,
+        handleSortOptionsChange = handleSortOptionsChange,
+        activeSortOption = activeSortOption
+    )
 
 
 }
 
 @Composable
-fun TopNavBarSearchPage (){
+fun TopNavBarSearchPage (
+    handleSearchQuerry: (sortingOption: SearchSortOptions, searchQuerry: String) -> Unit,
+    handleSortOptionsChange: (sortOption: SearchSortOptions) -> Unit,
+    activeSortOption: SearchSortOptions
+){
 
-    //Nesessary variables
     var searchQuery by remember { mutableStateOf("") }
     var dropDownExpanded by remember { mutableStateOf(false) }
     val sortOptions = listOf(
         SearchSortOptions.MOVIESANDSHOWS, SearchSortOptions.MOVIE, SearchSortOptions.SHOW,
         SearchSortOptions.GENRE, SearchSortOptions.USER
     )
+
     var dropDownButtonText by remember {
-        mutableStateOf(GenerateSearchOptionName(sortOptions[0]))
+        mutableStateOf(GenerateSearchOptionName(activeSortOption))
     }
 
 
@@ -198,6 +227,7 @@ fun TopNavBarSearchPage (){
                             ))
                         .clickable {
                             //SEARCH BUTTON LOGIC
+                            handleSearchQuerry(activeSortOption, searchQuery)
 
                         }
                 ){
@@ -295,6 +325,7 @@ fun TopNavBarSearchPage (){
                                 //On click logic for dropdown menu
                                 dropDownExpanded = false
                                 dropDownButtonText = GenerateSearchOptionName(option)
+                                handleSortOptionsChange(option)
                             })
                         }
                     }
@@ -305,6 +336,75 @@ fun TopNavBarSearchPage (){
     }
 }
 
+@Composable
+fun ProductionCardSearchPage(
+    production: Production,
+    handleProductionClick: (productionID: String, productionType: String) -> Unit
+){
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clickable {
+                //Button logic when clicking search result items
+            }
+            .fillMaxWidth()
+    ){
+        ProductionImage(
+            imageID = production.posterUrl,
+            imageDescription = production.title + " Poster",
+            modifier = Modifier
+                .clickable {
+                    handleProductionClick(production.imdbID, production.type)
+                }
+        )
+
+        Text(
+            text = production.title ,
+            fontSize = headerSize,
+            fontWeight = weightBold,
+            fontFamily = fontFamily,
+            color = White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(top = 5.dp)
+                .align(Alignment.CenterHorizontally)
+                .width(150.dp)
+        )
+    }
+}
+
+@Composable
+fun UserCardSearchPage(
+    user: User,
+    handleUserClick: (userID: String) -> Unit
+){
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .clickable {
+                handleUserClick(user.id)
+            }
+    ) {
+        ProfileImage(
+            imageID = user.profileImageID,
+            userName = user.userName,
+            sizeMultiplier = 1.5f
+
+        )
+        Text(
+            text = user.userName,
+            fontFamily = fontFamily,
+            fontWeight = weightBold,
+            fontSize = headerSize,
+            color = White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .width(150.dp)
+        )
+
+    }
+}
 
 fun GenerateSearchOptionName (
     searchOption: SearchSortOptions,

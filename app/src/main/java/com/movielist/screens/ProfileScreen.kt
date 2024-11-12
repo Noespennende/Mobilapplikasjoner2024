@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -33,7 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.isPopupLayout
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
@@ -42,6 +40,7 @@ import com.movielist.composables.ListItemListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RoundProgressBar
+import com.movielist.composables.SettingsButton
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
@@ -52,7 +51,6 @@ import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightBlack
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
@@ -74,7 +72,6 @@ import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import com.movielist.ui.theme.yellow
 import java.util.Calendar
-import java.util.SortedMap
 import kotlin.random.Random
 
 @Composable
@@ -185,19 +182,23 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
 
-    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+    val profileOwner by controllerViewModel.loggedInUser.collectAsState()
+
+    val profileBelongsToLoggedInUser = true /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
     var profileOwnersReviews = exampleReviews /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
 
-    val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(loggedInUser)
+    val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(profileOwner)
 
-    val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(loggedInUser)
+    val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(profileOwner)
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
+    var settingsVisible by remember { mutableStateOf(false) }
+
     //function variables:
-    val user by remember(loggedInUser) {
-        mutableStateOf(loggedInUser ?: exampleUser)
+    val user by remember(profileOwner) {
+        mutableStateOf(profileOwner ?: exampleUser)
     }
     val isLoggedInUser by remember {
         mutableStateOf(true)
@@ -226,6 +227,10 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         activeTab = com.movielist.model.ProfileCategoryOptions.REVIEWS
     }
 
+    val handleSettingsButtonClick: () -> Unit = {
+        settingsVisible = true
+    }
+
     //Graphics
     //Main Content
     LazyColumn(
@@ -247,7 +252,11 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                         )
                 )
                 {
-                    ProfileInfoSection( user = user)
+                    ProfileInfoSection(
+                        user = user,
+                        loggedInUsersProfile = profileBelongsToLoggedInUser,
+                        handleSettingsButtonClick = handleSettingsButtonClick
+                    )
                 }
 
             }
@@ -549,13 +558,26 @@ fun ProfileCategoryOptions(
 
 @Composable
 fun ProfileInfoSection (
-    user: User
+    user: User,
+    loggedInUsersProfile: Boolean,
+    handleSettingsButtonClick: () -> Unit
 ){
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
             .fillMaxWidth()
     ){
+        if (loggedInUsersProfile){
+            SettingsButton(
+                handleSettingsButtonClick = handleSettingsButtonClick,
+                filled = true,
+                sizeMultiplier = 1.3f,
+                backgroundColor = LightGray,
+                modifier = Modifier
+                    .align(Alignment.End)
+            )
+        }
+
         //Bio Section
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -695,7 +717,7 @@ fun LeftProfileSection(
 
 @Composable
 fun BioSection (
-    userBio: String
+    userBio: String,
 ){
     var bio = userBio
 
@@ -771,7 +793,7 @@ fun SummarySection (
                 color = White
             )
             Text(
-                text = "Films",
+                text = "Shows",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
@@ -792,7 +814,7 @@ fun SummarySection (
                 color = White
             )
             Text(
-                text = "Films",
+                text = "Following",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
@@ -813,7 +835,7 @@ fun SummarySection (
                 color = White
             )
             Text(
-                text = "Films",
+                text = "Followers",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,

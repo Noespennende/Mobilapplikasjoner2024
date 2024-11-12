@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -1001,4 +1002,35 @@ fun ProductionSortSelectButton (
 
         }
     }
+}
+
+
+@Composable
+fun SettingsButton(
+    modifier: Modifier = Modifier,
+    sizeMultiplier: Float = 1f,
+    iconColor: Color = White,
+    backgroundColor: Color = DarkPurple,
+    filled: Boolean = false,
+    handleSettingsButtonClick: () -> Unit
+) {
+
+    Image(
+        painter = if(filled){painterResource(R.drawable.cog_filled)}else{painterResource(R.drawable.cog)},
+        contentDescription = "Settings and user info",
+        contentScale = ContentScale.Crop,
+        colorFilter = ColorFilter.tint(iconColor),
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(100)
+            )
+            .padding(5.dp)
+            .height(15.dp * sizeMultiplier)
+            .width(15.dp * sizeMultiplier)
+            .clickable {
+                handleSettingsButtonClick()
+            }
+    )
 }
