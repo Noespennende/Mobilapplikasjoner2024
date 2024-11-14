@@ -84,39 +84,8 @@ class UserViewModel : ViewModel() {
     }
 
 
-    fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
-        val userID = loggedInUser.value?.id
-        val user = loggedInUser.value
+    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String?, targetCollection: String) {
 
-        if (userID.isNullOrEmpty() || user == null) {
-            Log.e("UserViewModel", "UserID or user data is null.")
-            return
-        }
-
-        // Finn riktig listItem i de forskjellige samlingene
-        val listItem = user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
-            ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
-            ?: user.droppedCollection.find { it.production.imdbID == productionID }
-            ?: user.completedCollection.find { it.production.imdbID == productionID }
-
-        if (listItem == null) {
-            Log.e("UserViewModel", "List item with productionID: $productionID not found in any collection.")
-            return
-        }
-
-        // Sjekk hvilken samling listItem tilhører (kilden)
-        val sourceCollection = when {
-            user.currentlyWatchingCollection.contains(listItem) -> "currentlyWatchingCollection"
-            user.wantToWatchCollection.contains(listItem) -> "wantToWatchCollection"
-            user.droppedCollection.contains(listItem) -> "droppedCollection"
-            user.completedCollection.contains(listItem) -> "completedCollection"
-            else -> null
-        }
-
-        if (sourceCollection == null || sourceCollection == targetCollection) {
-            Log.e("UserViewModel", "Invalid source or target collection.")
-            return
-        }
 
         // Konverter listItem til map for lagring i Firestore
         val listItemMap = listItem.toMap()
@@ -127,21 +96,25 @@ class UserViewModel : ViewModel() {
             onSuccess = {
                 Log.d("FirestoreAdd", "Successfully added to $targetCollection for user $userID")
 
-                firestoreRepository.removeFromCollection(
-                    userID, listItem, sourceCollection,
-                    onSuccess = {
-                        Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
-                        updateUserCollections(listItem, sourceCollection, targetCollection)
-                    },
-                    onFailure = {
-                        Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")
-                        updateUserCollections(listItem, sourceCollection, targetCollection)
-                    },
-                    onNotFound = {
-                        Log.e("FirestoreRemove", "Item not found in $sourceCollection")
-                        updateUserCollections(listItem, sourceCollection, targetCollection)
-                    }
-                )
+                if (sourceCollection != null) {
+                    firestoreRepository.removeFromCollection(
+                        userID, listItem, sourceCollection,
+                        onSuccess = {
+                            Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
+                            updateUserCollections(listItem, sourceCollection, targetCollection)
+                        },
+                        onFailure = {
+                            Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")
+                            updateUserCollections(listItem, sourceCollection, targetCollection)
+                        },
+                        onNotFound = {
+                            Log.e("FirestoreRemove", "Item not found in $sourceCollection")
+                            updateUserCollections(listItem, sourceCollection, targetCollection)
+                        }
+                    )
+                } else {
+                    updateUserCollections(listItem, sourceCollection, targetCollection)
+                }
             },
             onFailure = { e ->
                 Log.e("FirestoreAdd", "Failed to add to $targetCollection for user $userID", e)
@@ -149,7 +122,7 @@ class UserViewModel : ViewModel() {
         )
     }
 
-    private fun updateUserCollections(listItem: ListItem, sourceCollection: String, targetCollection: String) {
+    private fun updateUserCollections(listItem: ListItem, sourceCollection: String?, targetCollection: String) {
         val user = loggedInUser.value
 
         // Fjern fra sourceCollection og legg til i targetCollection

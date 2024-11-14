@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -523,6 +524,7 @@ fun ListPageListItem (
                                                 watchedEpisodesCount = 1
                                                 listItem.currentEpisode = watchedEpisodesCount
                                             }
+
                                         }
 
                                         is Episode -> TODO()
@@ -559,8 +561,13 @@ fun ListPageListItem (
                                     "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
                                 }
                                 is Movie -> {
+                                    Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
+                                    Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
+
+
                                     // For filmer: vis lengden på filmen i minutter
                                     "Ep $watchedEpisodesCount of 1"
+
                                 }
                                 else -> {
                                     "Ep $watchedEpisodesCount of 1"
