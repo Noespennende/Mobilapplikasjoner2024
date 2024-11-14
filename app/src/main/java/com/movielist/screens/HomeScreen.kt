@@ -92,7 +92,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     }
 
     val showList = mutableListOf<Production>()
-
+/*
     for (i in 0..12) {
         showList.add(
             TVShow(
@@ -110,7 +110,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 seasons = listOf("1", "2", "3")
             )
         )
-    }
+    }*/
 
     val reviewList = mutableListOf<ReviewDTO>()
 
@@ -229,19 +229,23 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
             // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
             // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
-            var allShowsList = mutableListOf<Production>()
 
+            //denne må stå her for å gjøre kallet til getAllMedia
             var apiMovies = controllerViewModel.getAllMedia().toString()
-            println("APIMOVIES " + apiMovies + " END API MOVIES")
+
+            var test = controllerViewModel.filteredMediaData.value
+
+            println("APIMOVIES 2: " + controllerViewModel.filteredMediaData.value)
+            test?.forEach { item-> showList.add(item)}
 
             // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
-            var top10Shows = allShowsList
+            var top10Shows = showList
                 .sortedByDescending { it.rating }
                 .take(10)
 
             ProductionListSidesroller(
                 header = "Popular shows and movies",
-                listOfShows = showList,
+                listOfShows = top10Shows,
                 handleImageClick = handleProductionButtonClick,
                 textModifier = Modifier
                     .padding(vertical = 10.dp, horizontal = horizontalPadding),

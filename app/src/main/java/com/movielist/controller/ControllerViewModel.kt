@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.UUIDAdapter
 import com.movielist.data.addCurrentlyWatchingShow
+import com.movielist.model.AllMedia
 import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
@@ -62,6 +63,65 @@ class ControllerViewModel(
         userViewModel.setLoggedInUser(uid)
     }
 
+    private val _filteredMediaData = MutableLiveData<List<Production>>()
+    val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
+
+    init {
+
+        apiViewModel.mediaData.observeForever { mediaList ->
+
+            val convertedResults = mediaList.map { media ->
+                if (media.mediaType.equals("movie", ignoreCase = true)) {
+                    convertToMovie(media)
+                } else {
+                    convertToTVShow(media)
+                }
+            }
+
+            _filteredMediaData.postValue(convertedResults)
+        }
+    }
+
+    private fun convertToMovie(media: AllMedia): Movie{
+        return(Movie(
+            imdbID = media.id.toString(),
+            title = media.title.toString(),
+            description = media.overview.toString(),
+            genre = media.genres?.map { it.name.orEmpty() } ?: emptyList(),
+            releaseDate = convertStringToCalendar(media.releaseDate) ?: Calendar.getInstance(),
+            rating = media.voteAverage?.toInt(),
+            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.backdropPath,
+
+        ))
+    }
+
+    private fun convertToTVShow(media: AllMedia): TVShow{
+        return(TVShow(
+            imdbID = media.id.toString(),
+            title = media.name.orEmpty(),
+            description = media.overview.orEmpty(),
+            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.posterPath,
+            genre = media.genres?.map { it?.name.orEmpty() } ?: emptyList(),
+            releaseDate = convertStringToCalendar(media.firstAirDate) ?: Calendar.getInstance(),
+
+        )
+        )
+    }
+
+
+
+    init {
+
+        apiViewModel.mediaData.observeForever { mediaList ->
+            Log.d("ControllerViewModel", "Updated media data: $mediaList")
+        }
+    }
+
+    val test = apiViewModel.mediaData.value.toString()
+
+    init {
+        Log.d("ControllerViewModel", "Value of test: $test")
+    }
     fun setOtherUser(uid: String) {
         userViewModel.setOtherUser(uid)
     }
