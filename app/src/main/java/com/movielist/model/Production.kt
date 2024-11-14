@@ -2,18 +2,21 @@ package com.movielist.model
 
 import java.util.Calendar
 
-sealed class Production {
+sealed class Production(
+    open val imdbID: String = "",
+    open val title: String = "",
+    open val description: String = "",
+    open val genre: List<String> = emptyList(),
+    open val releaseDate: Calendar = Calendar.getInstance(),
+    open val actors: List<String> = emptyList(),
+    open val rating: Int? = null,
+    open val reviews: List<String> = emptyList(),
+    open val posterUrl: String? = null,
+    open val trailerUrl: String? = null,
 
-    abstract val imdbID: String
-    abstract val title: String
-    abstract val description: String
-    abstract val genre: List<String>
-    abstract val releaseDate: Calendar
-    abstract val actors: List<String>  // Listen skal ikke endres i appen - data kommer fra API
-    abstract val rating: Int?
-    abstract val reviews: List<String> // Så bruker kan se anmeldelsen sin *umiddelbart*
-    abstract val posterUrl: String?
+) {
+
     abstract val type: String
-    abstract val trailerUrl: String?
 
+    abstract fun toMap(): Map<String, Any>
 }

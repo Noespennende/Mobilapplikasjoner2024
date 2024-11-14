@@ -13,10 +13,35 @@ data class Episode(
     override val rating: Int? = null,
     override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
     override val posterUrl: String? = null,
-    override val type: String = "Episode",
-    override val trailerUrl: String? = "",
+    override val trailerUrl: String,
 
     val lengthMinutes: Int? = null,
     val seasonNr: Int = 0,
     val episodeNr: Int = 0,
-) : Production()
+) : Production() {
+
+    // Type skal ikke kunne forandres i konstruktør
+    override val type: String = "Episode"
+
+
+    override fun toMap(): Map<String, Any> {
+        val map = mutableMapOf<String, Any>()
+
+        // Legg til felt kun hvis de ikke er null
+        imdbID.let { map["imdbID"] = it }
+        title.let { map["title"] = it }
+        description.let { map["description"] = it }
+        genre.let { map["genre"] = it }
+        releaseDate.let { map["releaseDate"] = it.timeInMillis }
+        actors.let { map["actors"] = it }
+        rating?.let { map["rating"] = it }
+        reviews.let { map["reviews"] = it }
+        posterUrl?.let { map["posterUrl"] = it }
+        type.let { map["type"] = it }
+        lengthMinutes?.let { map["lengthMinutes"] = it }
+        seasonNr.let { map["seasonNr"] = it }
+        episodeNr.let { map["episodeNr"] = it }
+
+        return map
+    }
+}
