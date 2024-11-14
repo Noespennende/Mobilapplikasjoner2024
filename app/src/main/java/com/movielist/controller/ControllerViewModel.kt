@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.UUIDAdapter
-import com.movielist.data.addCurrentlyWatchingShow
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
@@ -334,6 +333,7 @@ class ControllerViewModel(
                 )
             )
 
+            /*
             addCurrentlyWatchingShow(
                 userID = loggedInUserId,
                 listItem = newListItem,
@@ -344,6 +344,7 @@ class ControllerViewModel(
                     Log.e("Controller", "Failed to add show: $errorMessage")
                 }
             )
+             */
         } else {
             Log.w("Controller", "User is not logged in.")
         }
@@ -760,6 +761,18 @@ class ControllerViewModel(
                 _friendsJustWatchedLoading.value = false
             }
         }
+    }
+
+    fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
+        userViewModel.addOrMoveToUsersCollection(productionID, targetCollection)
+    }
+
+    fun isInCurrentlyWatching(productionID: String) : Boolean {
+
+        val user = loggedInUser.value
+        val listItem = user?.currentlyWatchingCollection?.find { it.production.imdbID == productionID }
+
+        return listItem != null
     }
 
     fun createUserWithEmailAndPassword(
