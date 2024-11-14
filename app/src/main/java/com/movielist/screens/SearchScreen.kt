@@ -113,7 +113,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
             .fillMaxSize()
     ) {
         if (activeSortOption == SearchSortOptions.MOVIESANDSHOWS ||
-            activeSortOption == SearchSortOptions.SHOW ||
+            activeSortOption == SearchSortOptions.MOVIE ||
             activeSortOption == SearchSortOptions.SHOW ||
             activeSortOption == SearchSortOptions.GENRE){
 

@@ -126,7 +126,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         //Kontroller kall her:
     }
 
-    val handleLikeClick: (like: String) -> Unit = { like ->
+    val handleLikeClick: (reviewID: String) -> Unit = { reviewID ->
         Log.d("Temp", "Temp")
         //Kontroller kall her:
     }
