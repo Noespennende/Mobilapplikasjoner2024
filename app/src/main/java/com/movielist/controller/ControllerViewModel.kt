@@ -4,18 +4,12 @@ import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.movielist.data.FirebaseTimestampAdapter
-import com.movielist.data.UUIDAdapter
-import com.movielist.data.addCurrentlyWatchingShow
-import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -26,16 +20,9 @@ import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -274,7 +261,7 @@ class ControllerViewModel(
                 )
             )
 
-            addCurrentlyWatchingShow(
+            /*userViewModel.addCurrentlyWatchingShow(
                 userID = loggedInUserId,
                 listItem = newListItem,
                 onSuccess = {
@@ -283,7 +270,7 @@ class ControllerViewModel(
                 onFailure = { errorMessage ->
                     Log.e("Controller", "Failed to add show: $errorMessage")
                 }
-            )
+            )*/
         } else {
             Log.w("Controller", "User is not logged in.")
         }
@@ -700,6 +687,18 @@ class ControllerViewModel(
                 _friendsJustWatchedLoading.value = false
             }
         }
+    }
+
+    fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
+        userViewModel.addOrMoveToUsersCollection(productionID, targetCollection)
+    }
+
+    fun isInCurrentlyWatching(productionID: String) : Boolean {
+
+        val user = loggedInUser.value
+        val listItem = user?.currentlyWatchingCollection?.find { it.production.imdbID == productionID }
+
+        return listItem != null
     }
 
     fun createUserWithEmailAndPassword(

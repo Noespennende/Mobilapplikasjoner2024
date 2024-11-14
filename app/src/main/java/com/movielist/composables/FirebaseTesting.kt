@@ -26,17 +26,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.movielist.viewmodel.AuthViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.movielist.data.getUserInfo
 import com.movielist.data.logInWithEmailAndPassword
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.controller.ControllerViewModel
+import com.movielist.data.FirestoreRepository
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.weightRegular
 
+val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
 
 @Composable
 fun FirebaseTesting(controllerViewModel: ControllerViewModel) {
+
+
 
     // Hent AuthViewModel. Den kan være Activity-scoped.
     val authViewModel: AuthViewModel = viewModel()
@@ -303,7 +307,7 @@ fun GetData() {
     val userid = "qwVPkcZhvKooSRfDHpIV" // <-- Eksempel brukerid
 
     // Henter bruker-info fra "backend" som henter fra databasen
-    getUserInfo(userid) { data ->
+    firestoreRepository.getUserInfo(userid) { data ->
         userData = data
     }
 

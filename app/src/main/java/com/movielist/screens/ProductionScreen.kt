@@ -124,6 +124,15 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     val handleUserListCategoryChange: (userListCategory: ListOptions?) -> Unit = {userListCategory ->
         memberOfUserList = userListCategory
         //Kontroller kall her:
+
+        when (userListCategory) {
+            ListOptions.WATCHING -> controllerViewModel.addOrMoveToUsersCollection(productionID, "currentlyWatchingCollection")
+            ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "completedCollection")
+            ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(productionID, "wantToWatchCollection")
+            ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "droppedCollection")
+            ListOptions.REMOVEFROMLIST -> {}
+            null -> {}
+        }
     }
 
     val handleLikeClick: (reviewID: String) -> Unit = { reviewID ->

@@ -1,8 +1,9 @@
 package com.movielist.viewmodel
 
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.R
-import com.movielist.data.getUsersWatchingCollection
+import com.movielist.data.FirestoreRepository
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,6 +12,9 @@ import java.util.Calendar
 import kotlin.random.Random
 
 class QueryViewModel : ViewModel() {
+
+    private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
+
     private val _watchingCollection = MutableStateFlow<List<String>>(emptyList())
     val watchingCollection: StateFlow<List<String>> = _watchingCollection
 
@@ -26,7 +30,7 @@ class QueryViewModel : ViewModel() {
         _isLoading.value = true
         _hasError.value = false
 
-        getUsersWatchingCollection(
+        firestoreRepository.getUsersWatchingCollection(
             userID,
             onSuccess = { collection ->
                 _watchingCollection.value = collection
