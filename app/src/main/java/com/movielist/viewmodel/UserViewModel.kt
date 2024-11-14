@@ -122,7 +122,33 @@ class UserViewModel : ViewModel() {
         )
     }
 
-    private fun updateUserCollections(listItem: ListItem, sourceCollection: String?, targetCollection: String) {
+    fun removeProductionFromCollections(userID: String, listItem: ListItem, sourceCollection: String?) {
+
+
+        // Konverter listItem til map for lagring i Firestore
+        val listItemMap = listItem.toMap()
+
+        // Legg til i targetCollection og fjern fra sourceCollection
+        if (sourceCollection != null) {
+            firestoreRepository.removeFromCollection(
+                userID, listItem, sourceCollection,
+                onSuccess = {
+                    Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
+                    updateUserCollections(listItem, sourceCollection)
+                },
+                onFailure = {
+                    Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")
+                    updateUserCollections(listItem, sourceCollection)
+                },
+                onNotFound = {
+                    Log.e("FirestoreRemove", "Item not found in $sourceCollection")
+                    updateUserCollections(listItem, sourceCollection)
+                }
+            )
+        }
+    }
+
+    private fun updateUserCollections(listItem: ListItem, sourceCollection: String? = null, targetCollection: String? = null) {
         val user = loggedInUser.value
 
         // Fjern fra sourceCollection og legg til i targetCollection

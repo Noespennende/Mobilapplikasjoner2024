@@ -130,7 +130,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "completedCollection")
             ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(productionID, "wantToWatchCollection")
             ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "droppedCollection")
-            ListOptions.REMOVEFROMLIST -> {}
+            ListOptions.REMOVEFROMLIST -> controllerViewModel.removeProductionFromCollections(productionID)
             null -> {}
         }
     }

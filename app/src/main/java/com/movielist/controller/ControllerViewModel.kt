@@ -807,6 +807,40 @@ class ControllerViewModel(
         }
     }
 
+    fun removeProductionFromCollections(productionID: String) {
+
+        val userID = loggedInUser.value?.id
+        val user = loggedInUser.value
+
+        if (userID.isNullOrEmpty() || user == null) {
+            Log.e("UserViewModel", "UserID or user data is null.")
+            return
+        }
+
+        // Finn riktig listItem i de forskjellige samlingene
+        var listItem = user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
+            ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
+            ?: user.droppedCollection.find { it.production.imdbID == productionID }
+            ?: user.completedCollection.find { it.production.imdbID == productionID }
+
+        // Sjekk hvilken samling listItem tilhører (kilden)
+        val sourceCollection = when {
+            user.currentlyWatchingCollection.contains(listItem) -> "currentlyWatchingCollection"
+            user.wantToWatchCollection.contains(listItem) -> "wantToWatchCollection"
+            user.droppedCollection.contains(listItem) -> "droppedCollection"
+            user.completedCollection.contains(listItem) -> "completedCollection"
+            else -> null
+        }
+
+        if (sourceCollection == null) {
+            Log.e("UserViewModel", "Invalid source collection.")
+        }
+
+        if (listItem != null) {
+            userViewModel.removeProductionFromCollections(userID, listItem, sourceCollection)
+        }
+    }
+
     fun isInCurrentlyWatching(productionID: String) : Boolean {
 
         val user = loggedInUser.value
