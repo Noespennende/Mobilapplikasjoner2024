@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -399,6 +400,14 @@ fun ListPageListItem (
         listItemRating = rating
         ratingsSliderIsVisible = false
     }
+
+    // Passer på at watchedEpisodeCount oppdaterer seg for produksjonen
+    // (Fikser bug hvor filmer f.eks har 5 som Ep of 1 (Ep 5 of 1),
+    // selv om currentEpisode er 0 eller 1
+    LaunchedEffect(listItem.currentEpisode) {
+        watchedEpisodesCount = listItem.currentEpisode
+    }
+
     //Graphics
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
