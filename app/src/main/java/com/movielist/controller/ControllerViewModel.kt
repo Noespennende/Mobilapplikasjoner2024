@@ -4,18 +4,16 @@ import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
+import com.movielist.composables.firestoreRepository
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.UUIDAdapter
 import com.movielist.model.AllMedia
-import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -28,14 +26,12 @@ import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -256,57 +252,7 @@ class ControllerViewModel(
         )
     }
 
-    private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
-    val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
 
-
-    fun getReview() {
-        // Logikk her som henter fra Firebase
-
-        val reviewTemp = Review(
-            score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
-            reviewerID = "userIDhere",
-            productionID = "154423",
-            reviewBody = "It’s reasonably well-made, and visually compelling," +
-                    "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                    "to recommend..",
-            postDate = Calendar.getInstance(),
-            likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
-        )
-
-
-
-
-        val reviewerTemp = User(
-            id = "test",
-            email = "test@email.no",
-            userName = "tempUser",
-        )
-
-        val productionTemp = Movie()
-
-        val reviewDTO = createReviewDTO(reviewTemp, reviewerTemp, productionTemp)
-
-        _singleReviewDTOData.update { reviewDTO }
-    }
-
-    private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {
-        return ReviewDTO(
-            reviewID = review.reviewID,
-            score = review.score,
-            productionID = review.productionID,
-            reviewerID = review.reviewerID,
-            reviewBody = review.reviewBody,
-            postDate = review.postDate,
-            likes = review.likes,
-            reviewerUserName = reviewer.userName,
-            reviewerProfileImage = reviewer.profileImageID,
-            productionPosterUrl = production.posterUrl,
-            productionTitle = production.title,
-            productionReleaseDate = production.releaseDate,
-            productionType = production.type
-        )
-    }
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
@@ -741,12 +687,14 @@ class ControllerViewModel(
         _friendsJustWatchedLoading.value = true
 
         viewModelScope.launch {
-            userViewModel.getUsersFriends { friendsList ->
+            try {
+                // Bruk den suspenderende funksjonen for å hente vennene
+                val friendsList = userViewModel.getUsersFriends()
+
                 val recentFriendsWatched = mutableListOf<ListItem>()
 
                 if (friendsList.isNotEmpty()) {
-
-                    if(friendsList.size > 2) {
+                    if (friendsList.size > 2) {
                         for (friend in friendsList) {
                             friend.completedCollection.lastOrNull()?.let { recentFriendsWatched.add(it) }
                         }
@@ -759,6 +707,10 @@ class ControllerViewModel(
 
                 // Oppdater StateFlow
                 _friendsWatchedList.value = recentFriendsWatched
+            } catch (e: Exception) {
+                // Håndter eventuelle feil her
+                Log.e("UserViewModel", "Failed to fetch user's friends", e)
+            } finally {
                 _friendsJustWatchedLoading.value = false
             }
         }
@@ -847,6 +799,127 @@ class ControllerViewModel(
         val listItem = user?.currentlyWatchingCollection?.find { it.production.imdbID == productionID }
 
         return listItem != null
+    }
+
+    private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
+    val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
+
+    fun getReview() {
+        // Logikk her som henter fra Firebase
+
+        val reviewTemp = Review(
+            score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
+            reviewerID = "userIDhere",
+            productionID = "154423",
+            reviewBody = "It’s reasonably well-made, and visually compelling," +
+                    "but it’s ultimately too derivative, and obvious in its thematic execution," +
+                    "to recommend..",
+            postDate = Calendar.getInstance(),
+            likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
+        )
+
+        val reviewerTemp = User(
+            id = "test",
+            email = "test@email.no",
+            userName = "tempUser",
+        )
+
+        val productionTemp = Movie()
+
+        val reviewDTO = createReviewDTO(reviewTemp, reviewerTemp, productionTemp)
+
+        _singleReviewDTOData.update { reviewDTO }
+    }
+
+    private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {
+        return ReviewDTO(
+            reviewID = review.reviewID,
+            score = review.score,
+            productionID = review.productionID,
+            reviewerID = review.reviewerID,
+            reviewBody = review.reviewBody,
+            postDate = review.postDate,
+            likes = review.likes,
+            reviewerUserName = reviewer.userName,
+            reviewerProfileImage = reviewer.profileImageID,
+            productionPosterUrl = production.posterUrl,
+            productionTitle = production.title,
+            productionReleaseDate = production.releaseDate,
+            productionType = production.type
+        )
+    }
+
+    private val _reviewDTOs = MutableStateFlow<List<ReviewDTO>>(emptyList())
+    val reviewDTOs: StateFlow<List<ReviewDTO>> get() = _reviewDTOs
+
+    fun nullifyReviewDTOs() {
+        _reviewDTOs.value = emptyList()
+    }
+
+    fun getReviewByProduction(productionID: String, productionType: String) {
+        // Start som en suspenderende funksjon innenfor en coroutine
+        viewModelScope.launch {
+            try {
+                // Hent anmeldelser fra Firestore
+                val reviewsRaw = firestoreRepository.getReviewByProduction(productionID, productionType)
+
+                val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
+
+                val production = singleProductionData.value
+                if (production == null) {
+                    Log.d("GetReviews", "Production data is null, aborting.")
+                    _reviewDTOs.value = emptyList()
+                    return@launch
+                }
+
+                // Lager map for enklere oversikt over reviewerID mot User-objekt
+                val reviewers = reviewsObjects.map { review ->
+                    async {
+                        review.reviewerID to (userViewModel.getUser(review.reviewerID)
+                            ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous"))
+                    }
+                }.awaitAll().toMap() // Konverter til en Map for enkel matching
+
+                // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
+                val reviewDTOs = reviewsObjects.mapNotNull { review ->
+                    val reviewer = reviewers[review.reviewerID]
+                    reviewer?.let { createReviewDTO(review, it, production) }
+                }
+
+                _reviewDTOs.value = reviewDTOs
+                Log.d("GetReviews", "Updated StateFlow with ${reviewDTOs.size} reviews")
+            } catch (exception: Exception) {
+
+                Log.d("GetReviews", "Failed to fetch reviews: $exception")
+                _reviewDTOs.value = emptyList()
+            }
+        }
+    }
+
+
+    private fun convertReviewJsonToReviewObject(reviewJson: Map<String, Any>?): Review? {
+        if (reviewJson == null) return null
+
+        val moshi = Moshi.Builder()
+            .add(FirebaseTimestampAdapter()) // Adapter for Firestore Timestamps
+            .add(UUIDAdapter())              // Adapter for UUID
+            .addLast(KotlinJsonAdapterFactory()) // For Kotlin-klasser
+            .build()
+
+        // Konverter Map til JSON-streng
+        val jsonAdapter = moshi.adapter(Review::class.java)
+        val json = mapToJson(reviewJson, moshi)
+
+        // Deserialiser JSON-streng til Review-objekt
+        return jsonToReview(json, jsonAdapter)
+    }
+
+    private fun mapToJson(map: Map<String, Any>, moshi: Moshi): String {
+        return moshi.adapter(Map::class.java).toJson(map)
+    }
+
+    private fun jsonToReview(json: String, jsonAdapter: JsonAdapter<Review>): Review? {
+        return jsonAdapter.fromJson(json)
     }
 
     fun createUserWithEmailAndPassword(

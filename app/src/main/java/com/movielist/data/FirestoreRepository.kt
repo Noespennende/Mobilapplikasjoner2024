@@ -8,7 +8,9 @@ import com.google.firebase.firestore.firestore
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.Review
 import com.movielist.model.TVShow
+import kotlinx.coroutines.tasks.await
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
@@ -98,25 +100,23 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             }
     }
 
-    fun fetchFirebaseUser(userID: String, onSuccess: (Map<String, Any>?) -> Unit) {
+    suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
         val db = Firebase.firestore
 
-        db.collection("users")
-            .document(userID)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    val userJson = document.data // Map<String, Any>? - Firebase dokumentdata
-                    onSuccess(userJson) // Returner JSON til den som kaller funksjonen
-                } else {
-                    println("Document not found")
-                    onSuccess(null) // Ingen dokument funnet
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.w("FirebaseFailure", "Error getting document", exception)
-                onSuccess(null) // Returner null ved feil
-            }
+        return try {
+            // Bruk await direkte på Firebase Firestore get()-kallet
+            val document = db.collection("users")
+                .document(userID)
+                .get()
+                .await() // Suspenderende kall på get()
+
+            // Returner dokumentdata hvis dokumentet finnes
+            document.data
+        } catch (exception: Exception) {
+            // Håndter eventuelle feil og returner null
+            Log.w("FirebaseFailure", "Error getting document", exception)
+            null
+        }
     }
 
     fun addToCollection(
@@ -377,5 +377,36 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
     }
 
 
+    suspend fun getReviewByProduction(
+        productionID: String,
+        productionType: String
+    ): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+
+        val collection = when (productionType) {
+            "Movie" -> "movieReviews"
+            "TVShow" -> "tvShowReviews"
+            else -> null
+        }
+
+        if (collection == null) {
+            throw IllegalArgumentException("Invalid production type: $productionType")
+        }
+
+        return try {
+            // Hent alle reviews fra sub-kolleksjonen basert på productionID
+            val reviews = db.collection("reviews")
+                .document(collection)
+                .collection(productionID)
+                .get()
+                .await() // Bruker await for å vente på resultatet før vi går videre
+
+            // Samle alle reviews i en liste og returnere som en vanlig liste
+            reviews.documents.mapNotNull { it.data }
+        } catch (exception: Exception) {
+            // Kaster en feil hvis det skjer en unntak
+            throw exception
+        }
+    }
 
 }

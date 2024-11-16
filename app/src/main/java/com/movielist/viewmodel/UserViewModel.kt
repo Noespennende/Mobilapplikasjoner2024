@@ -2,6 +2,7 @@ package com.movielist.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.UUIDAdapter
@@ -19,6 +20,10 @@ import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 // ViewModel for å håndtere bruker-logikk
 class UserViewModel : ViewModel() {
@@ -34,53 +39,55 @@ class UserViewModel : ViewModel() {
 
     // Funksjon for å sette User-objekt for innloggede bruker
     fun setLoggedInUser(uid: String) {
-        getUser(uid) { fetchedUser ->
+        viewModelScope.launch {
+            val fetchedUser = getUser(uid) // Kall den suspenderende funksjonen uten callback
             _loggedInUser.value = fetchedUser
         }
     }
 
     // Funksjon for å sette *ANDRE* brukere - for å vise deres profiler, lister osv.
     fun setOtherUser(uid: String) {
-        getUser(uid) { fetchedUser ->
+        viewModelScope.launch {
+            val fetchedUser = getUser(uid) // Kall den suspenderende funksjonen uten callback
             _otherUser.value = fetchedUser
         }
     }
 
-    private fun getUser(userID: String, onSuccess: (User?) -> Unit) {
-        firestoreRepository.fetchFirebaseUser(userID) { userJson ->
-            val user = convertUserJsonToUserObject(userJson)
-            if (user != null) {
-                println("User: $user")
-            } else {
-                println("Failed to deserialize user.")
-            }
-            onSuccess(user);
+    suspend fun getUser(userID: String): User? {
+
+        val userJson = firestoreRepository.fetchFirebaseUser(userID)
+
+        return if (userJson != null) {
+
+            convertUserJsonToUserObject(userJson)
+        } else {
+
+            Log.w("GetUser", "User not found or failed to fetch user data.")
+            null
         }
     }
 
-    fun getUsersFriends(onComplete: (MutableList<User>) -> Unit) {
+
+    suspend fun getUsersFriends(): MutableList<User> {
         val friendsList: MutableList<User> = mutableListOf()
 
-
-
-        val friendIDList = loggedInUser.value?.friendList ?: return onComplete(friendsList)
-
-
+        val friendIDList = loggedInUser.value?.friendList ?: return friendsList
 
         val totalFriends = friendIDList.size
         var loadedFriends = 0
 
         for (friendUID in friendIDList) {
-            getUser(friendUID) { friend ->
-                friend?.let {
-                    friendsList.add(it)
-                    loadedFriends++
-                    if (loadedFriends == totalFriends) {
-                        onComplete(friendsList)
-                    }
-                }
+            val friend = getUser(friendUID) // Er en suspend funksjon, som vi venter på før vi går videre
+            friend?.let {
+                friendsList.add(it)
+            }
+            loadedFriends++
+            if (loadedFriends == totalFriends) {
+                break
             }
         }
+
+        return friendsList
     }
 
 

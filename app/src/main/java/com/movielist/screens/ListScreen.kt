@@ -570,8 +570,8 @@ fun ListPageListItem (
                                     "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
                                 }
                                 is Movie -> {
-                                    Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
-                                    Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
+                                    //Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
+                                    //Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
 
 
                                     // For filmer: vis lengden på filmen i minutter

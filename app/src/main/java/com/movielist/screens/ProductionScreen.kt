@@ -74,8 +74,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     //val production by remember { mutableStateOf<Production?>(null) }
     var memberOfUserList by remember { mutableStateOf<ListOptions?>(null) } /* <-ListOption enum som sier hvilken liste filmen/serien ligger i i logged inn users liste. Hvis den ikke ligger i en liste set den til null.*/
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
-    var listOfReviews by remember { mutableStateOf(mutableListOf<ReviewDTO>()) } /* <-Liste med Review objekter med alle reviews av filmen/serien*/
 
+    val listOfReviews by controllerViewModel.reviewDTOs.collectAsState(emptyList()) /* <-Liste med Review objekter med alle reviews av filmen/serien*/
     var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
@@ -85,21 +85,23 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
     LaunchedEffect(productionID) {
 
-        //controllerViewModel.nullifySingleProductionData()
-        if (productionID.isNotEmpty()) {
-            Log.d("Test1", production.toString())  // Før kall
-            Log.d("TestType", "Production type is: '$productionType'")  // Logg `productionType`
+        controllerViewModel.nullifyReviewDTOs()
 
+        if (productionType != null) {
+            controllerViewModel.getReviewByProduction(productionID, productionType)
+        }
+
+        // Håndter produksjonsdata basert på productionType
+        if (productionID.isNotEmpty()) {
+
+            // Nullifiser produksjonsdata før henting
             controllerViewModel.nullifySingleProductionData()
 
             when (productionType) {
                 "Movie" -> {
-                    Log.d("Test1111", production.toString())
                     controllerViewModel.getMovieById(productionID)
-
                 }
                 "TVShow" -> {
-                    Log.d("Test2222", productionType)
                     controllerViewModel.getTVShowById(productionID)
                 }
                 else -> {
@@ -108,12 +110,19 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                     // men kanskje en error side eller noe slikt?
                     // Passer på at  if (production == null) trigges i LazyColumn
                     controllerViewModel.nullifySingleProductionData()
+
                 }
             }
 
-            //productionID = "";
+            Log.d("GetReviews", "listOfReviews has now ${listOfReviews?.size} reviews")
         }
     }
+
+    LaunchedEffect(listOfReviews) {
+        // Når listOfReviews endres, kan du logge eller oppdatere UI med de nye anmeldelsene
+        Log.d("GetReviews", "Reviews updated with ${listOfReviews?.size} reviews")
+    }
+
 
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
@@ -173,8 +182,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                     ImageAndName(
                         production = production,
                     )
-
-                    Log.d("Tester3", production.title)
                 }
             }
 
