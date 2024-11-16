@@ -1,21 +1,15 @@
 package com.movielist.controller
-
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.movielist.data.FirebaseTimestampAdapter
-import com.movielist.data.UUIDAdapter
 import com.movielist.model.AllMedia
-import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -26,16 +20,8 @@ import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -65,6 +51,10 @@ class ControllerViewModel(
     private val _filteredMediaData = MutableLiveData<List<Production>>()
     val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
 
+    private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
+    val searchResults: StateFlow<List<Production>> get() = _searchResult
+
+
     init {
 
         apiViewModel.mediaData.observeForever { mediaList ->
@@ -78,6 +68,33 @@ class ControllerViewModel(
             }
 
             _filteredMediaData.postValue(convertedResults)
+        }
+    }
+
+
+
+
+    fun searchMultibleMedia(query: String) {
+        apiViewModel.searchMulti(query)
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+
+                    val convertedSearchResults = searchResultsList.map { media ->
+                        if (media.mediaType.equals("movie", ignoreCase = true)) {
+                            convertToMovie(media)
+                        } else {
+                            convertToTVShow(media)
+                        }
+                    }
+
+                    _searchResult.value = convertedSearchResults
+                    Log.d("ControllerViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("ControllerViewModel", "Error collecting search results", e)
+            }
         }
     }
 
