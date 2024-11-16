@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -398,6 +400,14 @@ fun ListPageListItem (
         listItemRating = rating
         ratingsSliderIsVisible = false
     }
+
+    // Passer på at watchedEpisodeCount oppdaterer seg for produksjonen
+    // (Fikser bug hvor filmer f.eks har 5 som Ep of 1 (Ep 5 of 1),
+    // selv om currentEpisode er 0 eller 1
+    LaunchedEffect(listItem.currentEpisode) {
+        watchedEpisodesCount = listItem.currentEpisode
+    }
+
     //Graphics
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
@@ -523,6 +533,7 @@ fun ListPageListItem (
                                                 watchedEpisodesCount = 1
                                                 listItem.currentEpisode = watchedEpisodesCount
                                             }
+
                                         }
 
                                         is Episode -> TODO()
@@ -559,8 +570,13 @@ fun ListPageListItem (
                                     "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
                                 }
                                 is Movie -> {
+                                    Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
+                                    Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
+
+
                                     // For filmer: vis lengden på filmen i minutter
                                     "Ep $watchedEpisodesCount of 1"
+
                                 }
                                 else -> {
                                     "Ep $watchedEpisodesCount of 1"

@@ -243,7 +243,7 @@ class ControllerViewModel(
             imdbID = result.id.toString(),
             title = result.title.orEmpty(),
             description = result.overview.orEmpty(),
-            posterUrl = result.posterPath,
+            posterUrl = "https://image.tmdb.org/t/p/w500" + result.posterPath,
             genre = result.genres?.map { it.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(result.releaseDate) ?: Calendar.getInstance(),
             // actors = // Trenger nytt API Kall -> /3/movie/{movie_id}/credits
@@ -259,14 +259,15 @@ class ControllerViewModel(
             imdbID = result.id.toString(),
             title = result.name.orEmpty(),
             description = result.overview.orEmpty(),
-            posterUrl = result.posterPath,
+            posterUrl = "https://image.tmdb.org/t/p/w500" + result.posterPath,
             genre = result.genres?.map { it?.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(result.firstAirDate) ?: Calendar.getInstance(),
             // actors =  // Trenger nytt API Kall -> /3/tv/{series_id}/aggregate_credits
-            // rating =
+            rating = 0,
             // reviews = Kommer når Firebase implementasjon er klart
             // trailerUrl = Trenger nytt API Kall -> /3/movie/{movie_id}/videos
-            //episodes = // Må gjøres om til "numberOfEpisodes", eller vi må gjøre Episode-kall
+            episodes = listOf(result.numberOfEpisodes.toString()),
+            // Må gjøres om til "numberOfEpisodes" og ikke liste, eller vi må gjøre Episode-kall for å få alle
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
             // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
         )
@@ -781,7 +782,80 @@ class ControllerViewModel(
     }
 
     fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
-        userViewModel.addOrMoveToUsersCollection(productionID, targetCollection)
+
+        val userID = loggedInUser.value?.id
+        val user = loggedInUser.value
+
+        if (userID.isNullOrEmpty() || user == null) {
+            Log.e("UserViewModel", "UserID or user data is null.")
+            return
+        }
+
+        // Finn riktig listItem i de forskjellige samlingene
+        var listItem = user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
+            ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
+            ?: user.droppedCollection.find { it.production.imdbID == productionID }
+            ?: user.completedCollection.find { it.production.imdbID == productionID }
+
+        // Sjekk hvilken samling listItem tilhører (kilden)
+        val sourceCollection = when {
+            user.currentlyWatchingCollection.contains(listItem) -> "currentlyWatchingCollection"
+            user.wantToWatchCollection.contains(listItem) -> "wantToWatchCollection"
+            user.droppedCollection.contains(listItem) -> "droppedCollection"
+            user.completedCollection.contains(listItem) -> "completedCollection"
+            else -> null
+        }
+
+        if (listItem == null) {
+
+            val productionData = singleProductionData.value
+            if (productionData != null) {
+                listItem = ListItem(production = productionData)
+            }
+            Log.e("UserViewModel", "List item with productionID: $productionID not found in any collection.")
+        }
+
+        if (sourceCollection == null || sourceCollection == targetCollection) {
+            Log.e("UserViewModel", "Invalid source or target collection.")
+        }
+
+        if (listItem != null) {
+            userViewModel.addOrMoveToUsersCollection(userID, listItem, sourceCollection, targetCollection)
+        }
+    }
+
+    fun removeProductionFromCollections(productionID: String) {
+
+        val userID = loggedInUser.value?.id
+        val user = loggedInUser.value
+
+        if (userID.isNullOrEmpty() || user == null) {
+            Log.e("UserViewModel", "UserID or user data is null.")
+            return
+        }
+
+        // Finn riktig listItem i de forskjellige samlingene
+        var listItem = user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
+            ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
+            ?: user.droppedCollection.find { it.production.imdbID == productionID }
+            ?: user.completedCollection.find { it.production.imdbID == productionID }
+
+        // Sjekk hvilken samling listItem tilhører (kilden)
+        val sourceCollection = when {
+            user.currentlyWatchingCollection.contains(listItem) -> "currentlyWatchingCollection"
+            user.wantToWatchCollection.contains(listItem) -> "wantToWatchCollection"
+            user.droppedCollection.contains(listItem) -> "droppedCollection"
+            user.completedCollection.contains(listItem) -> "completedCollection"
+            else -> null
+        }
+
+        if (sourceCollection == null) {
+            Log.e("UserViewModel", "Invalid source collection.")
+        }
+
+        if (listItem != null) {
+            userViewModel.removeProductionFromCollections(userID, listItem, sourceCollection)
+        }
     }
 
     fun isInCurrentlyWatching(productionID: String) : Boolean {
