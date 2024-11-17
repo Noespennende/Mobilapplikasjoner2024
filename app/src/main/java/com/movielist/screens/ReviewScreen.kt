@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -16,8 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,10 +26,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Production
-import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
-import com.movielist.model.User
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
@@ -74,13 +68,13 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
             when (production?.type) {
                 "Movie" -> {
                     Log.d("ReviewTesterScreen: Movie", reviewDTO?.reviewerID.toString())
-                    production?.let { controllerViewModel.getMovieById(it.imdbID) }
+                    production?.let { controllerViewModel.setMovieById(it.imdbID) }
 
                 }
 
                 "TVShow" -> {
                     Log.d("ReviewTesterScreen: TVShow", production!!.type)
-                    production?.let { controllerViewModel.getTVShowById(it.imdbID) }
+                    production?.let { controllerViewModel.setTVShowById(it.imdbID) }
                 }
 
                 else -> {

@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,8 +47,6 @@ import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.Production
-import com.movielist.model.Review
-import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
@@ -99,10 +96,10 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
             when (productionType) {
                 "Movie" -> {
-                    controllerViewModel.getMovieById(productionID)
+                    controllerViewModel.setMovieById(productionID)
                 }
                 "TVShow" -> {
-                    controllerViewModel.getTVShowById(productionID)
+                    controllerViewModel.setTVShowById(productionID)
                 }
                 else -> {
                     // Hvis productionType ikke er Movie eller TVShow, nullifiser data

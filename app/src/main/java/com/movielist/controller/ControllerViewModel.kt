@@ -157,8 +157,8 @@ class ControllerViewModel(
         _singleProductionData.value = null
     }
 
-    fun getMovieById(id: String) {
-        Log.d("ViewModel", "getMovieById called with id: $id")
+    fun setMovieById(id: String) {
+        Log.d("ViewModel", "setMovieById called with id: $id")
         apiViewModel.getMovie(id)
 
         viewModelScope.launch {
@@ -174,7 +174,7 @@ class ControllerViewModel(
         }
     }
 
-    fun getTVShowById(id: String) {
+    fun setTVShowById(id: String) {
         Log.d("Controller", "getTVShowById called with id: $id")
         apiViewModel.getShow(id)
 
