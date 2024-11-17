@@ -33,7 +33,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
-
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
@@ -68,6 +67,10 @@ class ControllerViewModel(
     private val _filteredMediaData = MutableLiveData<List<Production>>()
     val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
 
+    private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
+    val searchResults: StateFlow<List<Production>> get() = _searchResult
+
+
     init {
 
         apiViewModel.mediaData.observeForever { mediaList ->
@@ -81,6 +84,33 @@ class ControllerViewModel(
             }
 
             _filteredMediaData.postValue(convertedResults)
+        }
+    }
+
+
+
+
+    fun searchMultibleMedia(query: String) {
+        apiViewModel.searchMulti(query)
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+
+                    val convertedSearchResults = searchResultsList.map { media ->
+                        if (media.mediaType.equals("movie", ignoreCase = true)) {
+                            convertToMovie(media)
+                        } else {
+                            convertToTVShow(media)
+                        }
+                    }
+
+                    _searchResult.value = convertedSearchResults
+                    Log.d("ControllerViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("ControllerViewModel", "Error collecting search results", e)
+            }
         }
     }
 

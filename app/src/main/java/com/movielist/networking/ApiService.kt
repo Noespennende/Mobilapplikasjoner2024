@@ -43,4 +43,10 @@ interface ApiService {
         @Path("episode_number") episodeNumber: Int,
         @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiShowSeasonEpisode>
 
+    @GET("search/multi?language=en-US")
+    fun searchMulti(
+        @Query("query") query: String,
+        @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"
+    ): Call<ApiAllMediaResponse>
+
 }
