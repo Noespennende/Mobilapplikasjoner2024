@@ -8,7 +8,6 @@ import com.google.firebase.firestore.firestore
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
-import com.movielist.model.Review
 import com.movielist.model.TVShow
 import kotlinx.coroutines.tasks.await
 
@@ -449,4 +448,40 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             throw exception
         }
     }
+
+    suspend fun getReviewsByUser(collectionID: String, productionID: String, reviewerID: String): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+
+        // Resultatvariabel som holder alle reviews
+        val reviewsList = mutableListOf<Map<String, Any>>()
+
+        try {
+            // Hent anmeldelsene basert på reviewerID
+            val result = db.collection("reviews") // Hovedsamlingen
+                .document(collectionID) // Dokument for produksjonstype
+                .collection(productionID) // Samlingen for spesifik produksjonsID
+                .whereEqualTo("reviewerID", reviewerID) // Filtrere for reviewerID som samsvarer med reviewerID
+                .get() // Hent alle dokumentene som matcher
+                .await() // Bruker await() for å vente på resultatet
+
+            if (!result.isEmpty) {
+                // Hvis result er ikke tomt, legg til dataene til reviewsList
+                for (document in result) {
+                    // Legg til dokumentdata som et Map (dokumentet som er hentet fra Firestore)
+                    reviewsList.add(document.data)
+                }
+                // Logge for debugging
+                Log.d("Firestore-Reviews", "Funnet ${reviewsList.size} reviews.")
+            } else {
+                Log.d("Firestore-Reviews", "Ingen reviews funnet for reviewerID: $reviewerID.")
+            }
+        } catch (e: Exception) {
+            // Håndter feil
+            Log.d("Firestore-Reviews", "Feil ved henting av reviews: $e")
+        }
+
+        // Returner listen med dokumenter som Map<String, Any>
+        return reviewsList
+    }
+
 }

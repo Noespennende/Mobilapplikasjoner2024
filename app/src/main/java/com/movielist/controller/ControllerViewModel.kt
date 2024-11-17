@@ -27,17 +27,19 @@ import com.movielist.viewmodel.UserViewModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.random.Random
 
 
 class ControllerViewModel(
@@ -869,7 +871,7 @@ class ControllerViewModel(
     }
 
     fun getReviewByProduction(productionID: String, productionType: String) {
-        // Start som en suspenderende funksjon innenfor en coroutine
+
         viewModelScope.launch {
             try {
                 // Hent anmeldelser fra Firestore
@@ -908,6 +910,129 @@ class ControllerViewModel(
         }
     }
 
+    private fun splitReviewID(reviewID: String): Triple<String, String, String> {
+
+        val parts = reviewID.split("_")
+
+        val collectionType = parts[0]  // "RMOV" for movie reviews, "RTV" for TV shows, etc.
+        val productionID = parts[1]   // "53344" for the production ID
+        val uuid = parts[2]           // UUID delen
+
+        // Returner de tre delene
+        return Triple(collectionType, productionID, uuid)
+    }
+
+    suspend fun getUsersReviews(user: User): List<ReviewDTO> {
+
+        val userReviews = user.myReviews
+
+        return getReviewsByUser(userReviews, user.id)
+    }
+
+    private suspend fun getReviewsByUser(reviewIDs: List<String>, userID: String): List<ReviewDTO> {
+
+        for (reviewID in reviewIDs) {
+
+            val (collectionType, productionID, uuid) = splitReviewID(reviewID)
+
+            var collectionID = "";
+
+            when (collectionType) {
+                "RMOV" -> collectionID = "movieReviews"
+                "RTV" -> collectionID = "tvShowReviews"
+            }
+
+            val user = userViewModel.getUser(userID)
+
+            val reviewsRaw = firestoreRepository.getReviewsByUser(collectionID, productionID, userID)
+
+            val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
+
+
+            val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+            if (user != null) {
+
+                Log.d("Firestore_User", user.id)
+                for (reviewObject in reviewsObjects) {
+
+                    var reviewDTO: ReviewDTO? = null;
+
+                    if (collectionType == "RMOV") {
+                        val production = getMovieByIdAsync(productionID)
+                        Log.d("Firestore_RMOV", productionID)
+                        Log.d("Firestore_RMOV", singleProductionData.value.toString())
+
+                        reviewDTO = production?.let { createReviewDTO(reviewObject, user, it) }
+                    }
+                    if (collectionType == "RTV") {
+                        val production = getTVShowByIdAsync(productionID)
+                        Log.d("Firestore_RTV", singleProductionData.value.toString())
+                        reviewDTO = production?.let { createReviewDTO(reviewObject, user, it) }
+
+                        Log.d("Firestore_dto", reviewDTO.toString())
+                    }
+
+                    if (reviewDTO != null) {
+                        reviewDTOList.add(reviewDTO)
+                    }
+                }
+            }
+
+            Log.d("Firestore_controller", reviewDTOList.toString())
+
+            return reviewDTOList
+
+        }
+
+        return emptyList()
+    }
+
+
+    private suspend fun getMovieByIdAsync(id: String): Production? {
+        Log.d("ViewModel", "getMovieById called with id: $id")
+
+        // Start API-kallet for å hente filmen
+        apiViewModel.getMovie(id)
+
+        // Vent på at movieData skal oppdateres
+        return try {
+            // Vent på at movieData skal inneholde et resultat
+            val movieResponse = withContext(Dispatchers.IO) {
+                // Bruk collect for å vente på at movieData er oppdatert
+                apiViewModel.movieData.firstOrNull { it != null }
+            }
+
+            // Hvis movieResponse er null, returner null
+            val production = movieResponse?.let { convertResponseToProduction(it) }
+            _singleProductionData.update { production }
+
+            Log.d("Controller", "Returning production: $production")
+            production
+        } catch (e: Exception) {
+            Log.e("Controller", "Error fetching movie data", e)
+            null
+        }
+    }
+
+    private suspend fun getTVShowByIdAsync(id: String): Production? {
+        Log.d("Controller", "getTVShowById called with id: $id")
+        apiViewModel.getShow(id)
+
+        return try {
+            val showResponse = withContext(Dispatchers.IO) {
+                apiViewModel.showData.firstOrNull { it != null }
+            }
+
+            val production = showResponse?.let { convertResponseToProduction(it) }
+            _singleProductionData.update { production }
+
+            production
+        } catch (e: Exception) {
+            Log.e("Controller_getTVShowByIdAsync", "Error fetching show data", e)
+            null
+        }
+    }
 
     private fun convertReviewJsonToReviewObject(reviewJson: Map<String, Any>?): Review? {
         if (reviewJson == null) return null

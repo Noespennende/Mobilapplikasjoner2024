@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -186,7 +188,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val profileBelongsToLoggedInUser = true /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
-    var profileOwnersReviews = exampleReviews /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
+    val profileOwnersReviews = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) } /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(profileOwner)
 
@@ -229,6 +231,12 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val handleSettingsButtonClick: () -> Unit = {
         settingsVisible = true
+    }
+
+    LaunchedEffect(user) {
+        val reviews = controllerViewModel.getUsersReviews(user).toMutableList()
+
+        profileOwnersReviews.value = reviews
     }
 
     //Graphics
@@ -341,7 +349,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
             //Review section
             item {
                 ReviewsSection(
-                    reviewList = profileOwnersReviews,
+                    reviewList = profileOwnersReviews.value,
                     header = "Reviews",
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleProductionImageClick = handleProductionClick,
@@ -354,7 +362,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         else if (activeTab == com.movielist.model.ProfileCategoryOptions.REVIEWS) {
             item {
                 ReviewsSection(
-                    reviewList = profileOwnersReviews,
+                    reviewList = profileOwnersReviews.value,
                     header = "Reviews by " + user.userName,
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleReviewClick = handleReviewClick,
