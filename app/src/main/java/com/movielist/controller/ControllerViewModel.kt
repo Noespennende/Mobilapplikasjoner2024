@@ -7,8 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.movielist.composables.firestoreRepository
+import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirebaseTimestampAdapter
+import com.movielist.data.FirestoreRepository
 import com.movielist.data.UUIDAdapter
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
@@ -23,6 +24,7 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
+import com.movielist.viewmodel.ReviewViewModel
 import com.movielist.viewmodel.UserViewModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -45,8 +47,11 @@ import java.util.Locale
 class ControllerViewModel(
     private val userViewModel: UserViewModel,
     private val authViewModel: AuthViewModel,
-    private val apiViewModel: ApiViewModel
+    private val apiViewModel: ApiViewModel,
+    private val reviewViewModel: ReviewViewModel
 ) : ViewModel() {
+
+    private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
 
     /* USER LOGIC */
 
@@ -806,6 +811,13 @@ class ControllerViewModel(
     private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
     val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
 
+    private val _reviewDTOs = MutableStateFlow<List<ReviewDTO>>(emptyList())
+    val reviewDTOs: StateFlow<List<ReviewDTO>> get() = _reviewDTOs
+
+    fun nullifyReviewDTOs() {
+        _reviewDTOs.value = emptyList()
+    }
+
     fun nullifySingleReviewDTOData() {
         _singleReviewDTOData.value = null
     }
@@ -813,11 +825,11 @@ class ControllerViewModel(
     fun getReviewById(reviewID: String, productionType: String, productionID: String) {
         viewModelScope.launch {
             try {
-                // Hent anmeldelser fra Firestore
-                val reviewRaw = firestoreRepository.getReviewById(reviewID, productionType, productionID)
 
-                val reviewObject = requireNotNull(convertReviewJsonToReviewObject(reviewRaw)) {
-                    "Review data is null for reviewID: $reviewID"
+                val reviewObject = requireNotNull(reviewViewModel.getReviewByID(reviewID, productionType, productionID)) {
+
+                    _singleReviewDTOData.value = null
+                    return@launch
                 }
 
                 val production = singleProductionData.value
@@ -826,48 +838,22 @@ class ControllerViewModel(
                     return@launch
                 }
 
-                // Lager map for enklere oversikt over reviewerID mot User-objekt
-                val reviewer = async {
+                val reviewer =
+                    async {
                     userViewModel.getUser(reviewObject.reviewerID)
                         ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous")
-                }.await()
+                    }.await()
 
-                // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
-                val reviewDTO = createReviewDTO(reviewObject, reviewer, production)
+                val reviewDTO = reviewViewModel.createReviewDTO(reviewObject, reviewer, production)
 
                 _singleReviewDTOData.value = reviewDTO
 
             } catch (exception: Exception) {
 
-                Log.d("GetReviews", "Failed to fetch reviews: $exception")
+                Log.d("Controller-getReviewById", "Failed to fetch reviews: $exception")
                 _reviewDTOs.value = emptyList()
             }
         }
-    }
-
-    private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {
-        return ReviewDTO(
-            reviewID = review.reviewID,
-            score = review.score,
-            productionID = review.productionID,
-            reviewerID = review.reviewerID,
-            reviewBody = review.reviewBody,
-            postDate = review.postDate,
-            likes = review.likes,
-            reviewerUserName = reviewer.userName,
-            reviewerProfileImage = reviewer.profileImageID,
-            productionPosterUrl = production.posterUrl,
-            productionTitle = production.title,
-            productionReleaseDate = production.releaseDate,
-            productionType = production.type
-        )
-    }
-
-    private val _reviewDTOs = MutableStateFlow<List<ReviewDTO>>(emptyList())
-    val reviewDTOs: StateFlow<List<ReviewDTO>> get() = _reviewDTOs
-
-    fun nullifyReviewDTOs() {
-        _reviewDTOs.value = emptyList()
     }
 
     fun getReviewByProduction(productionID: String, productionType: String) {
@@ -875,9 +861,7 @@ class ControllerViewModel(
         viewModelScope.launch {
             try {
                 // Hent anmeldelser fra Firestore
-                val reviewsRaw = firestoreRepository.getReviewByProduction(productionID, productionType)
-
-                val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
+                val reviewObjects = reviewViewModel.getReviewsByProduction(productionID, productionType)
 
                 val production = singleProductionData.value
                 if (production == null) {
@@ -887,7 +871,7 @@ class ControllerViewModel(
                 }
 
                 // Lager map for enklere oversikt over reviewerID mot User-objekt
-                val reviewers = reviewsObjects.map { review ->
+                val reviewers = reviewObjects.map { review ->
                     async {
                         review.reviewerID to (userViewModel.getUser(review.reviewerID)
                             ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous"))
@@ -895,9 +879,9 @@ class ControllerViewModel(
                 }.awaitAll().toMap() // Konverter til en Map for enkel matching
 
                 // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
-                val reviewDTOs = reviewsObjects.mapNotNull { review ->
+                val reviewDTOs = reviewObjects.mapNotNull { review ->
                     val reviewer = reviewers[review.reviewerID]
-                    reviewer?.let { createReviewDTO(review, it, production) }
+                    reviewer?.let { reviewViewModel.createReviewDTO(review, it, production) }
                 }
 
                 _reviewDTOs.value = reviewDTOs
@@ -910,17 +894,6 @@ class ControllerViewModel(
         }
     }
 
-    private fun splitReviewID(reviewID: String): Triple<String, String, String> {
-
-        val parts = reviewID.split("_")
-
-        val collectionType = parts[0]  // "RMOV" for movie reviews, "RTV" for TV shows, etc.
-        val productionID = parts[1]   // "53344" for the production ID
-        val uuid = parts[2]           // UUID delen
-
-        // Returner de tre delene
-        return Triple(collectionType, productionID, uuid)
-    }
 
     suspend fun getUsersReviews(user: User): List<ReviewDTO> {
 
@@ -933,28 +906,31 @@ class ControllerViewModel(
 
         for (reviewID in reviewIDs) {
 
-            val (collectionType, productionID, uuid) = splitReviewID(reviewID)
+            val (collectionType, productionID, uuid) = reviewViewModel.splitReviewID(reviewID)
 
-            var collectionID = "";
-
-            when (collectionType) {
-                "RMOV" -> collectionID = "movieReviews"
-                "RTV" -> collectionID = "tvShowReviews"
+            val collectionID = try {
+                when (collectionType) {
+                    "RMOV" -> "movieReviews"
+                    "RTV" -> "tvShowReviews"
+                    else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
+                }
+            } catch (e: IllegalArgumentException) {
+                return emptyList()
+                // Hvis collectionType ikke matcher, fang error og returner tom.
+                // Uten en av de gjeldende collectionTypene, vil koden som følger under feile,
+                // pga avhengig av collectionType
             }
 
             val user = userViewModel.getUser(userID)
 
-            val reviewsRaw = firestoreRepository.getReviewsByUser(collectionID, productionID, userID)
-
-            val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
-
+            val reviewObjects = reviewViewModel.getReviewsByUser(collectionID, productionID, userID)
 
             val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 
             if (user != null) {
 
                 Log.d("Firestore_User", user.id)
-                for (reviewObject in reviewsObjects) {
+                for (reviewObject in reviewObjects) {
 
                     var reviewDTO: ReviewDTO? = null;
 
@@ -963,12 +939,12 @@ class ControllerViewModel(
                         Log.d("Firestore_RMOV", productionID)
                         Log.d("Firestore_RMOV", singleProductionData.value.toString())
 
-                        reviewDTO = production?.let { createReviewDTO(reviewObject, user, it) }
+                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
                     }
                     if (collectionType == "RTV") {
                         val production = getTVShowByIdAsync(productionID)
                         Log.d("Firestore_RTV", singleProductionData.value.toString())
-                        reviewDTO = production?.let { createReviewDTO(reviewObject, user, it) }
+                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
 
                         Log.d("Firestore_dto", reviewDTO.toString())
                     }
@@ -987,7 +963,6 @@ class ControllerViewModel(
 
         return emptyList()
     }
-
 
     private suspend fun getMovieByIdAsync(id: String): Production? {
         Log.d("ViewModel", "getMovieById called with id: $id")
@@ -1032,31 +1007,6 @@ class ControllerViewModel(
             Log.e("Controller_getTVShowByIdAsync", "Error fetching show data", e)
             null
         }
-    }
-
-    private fun convertReviewJsonToReviewObject(reviewJson: Map<String, Any>?): Review? {
-        if (reviewJson == null) return null
-
-        val moshi = Moshi.Builder()
-            .add(FirebaseTimestampAdapter()) // Adapter for Firestore Timestamps
-            .add(UUIDAdapter())              // Adapter for UUID
-            .addLast(KotlinJsonAdapterFactory()) // For Kotlin-klasser
-            .build()
-
-        // Konverter Map til JSON-streng
-        val jsonAdapter = moshi.adapter(Review::class.java)
-        val json = mapToJson(reviewJson, moshi)
-
-        // Deserialiser JSON-streng til Review-objekt
-        return jsonToReview(json, jsonAdapter)
-    }
-
-    private fun mapToJson(map: Map<String, Any>, moshi: Moshi): String {
-        return moshi.adapter(Map::class.java).toJson(map)
-    }
-
-    private fun jsonToReview(json: String, jsonAdapter: JsonAdapter<Review>): Review? {
-        return jsonAdapter.fromJson(json)
     }
 
     fun createUserWithEmailAndPassword(
