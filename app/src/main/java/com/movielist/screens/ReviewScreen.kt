@@ -46,36 +46,41 @@ import java.util.Calendar
 @Composable
 fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavController, reviewID: String?) {
 
-    val reviewID by remember { mutableStateOf(reviewID) } /* <- IDen til reviewen som skal hentes ut av kontroller */
+    //val reviewID by remember { mutableStateOf(reviewID) } /* <- IDen til reviewen som skal hentes ut av kontroller */
     //val review by remember { mutableStateOf(null) } /* <- Denne må settes til Review objektet som matcher IDen over */
 
-    val productionType by remember { mutableStateOf("Movie") }
-    val productionID by remember { mutableStateOf("") }
+    //val productionType by remember { mutableStateOf("Movie") }
+    //val productionID by remember { mutableStateOf("") }
 
     val reviewDTO by controllerViewModel.singleReviewDTOData.collectAsState()
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     LaunchedEffect(reviewID) {
 
+        controllerViewModel.nullifySingleReviewDTOData()
         //controllerViewModel.nullifySingleProductionData()
         if (reviewID?.isNotEmpty() == true) {
             Log.d("ReviewTester", reviewID.toString())  // Før kall
-            Log.d("ReviewTester", "Production type is: '$productionType'")  // Logg `productionType`
+            // Logg `productionType`
 
-            controllerViewModel.getReview()
+            production?.let {controllerViewModel.getReviewById(reviewID, it.type, it.imdbID) }
 
+
+            /* Det under må være med, for tilfeller hvor navigering til ReviewScreen ikke kommer fra ProductionScreen
+            * - F.eks via ReviewsScreen eller HomeScreens "Top reviews" etc.
+            * */
             controllerViewModel.nullifySingleProductionData()
 
-            when (productionType) {
+            when (production?.type) {
                 "Movie" -> {
-                    Log.d("ReviewTester: Movie", reviewDTO?.reviewerID.toString())
-                    controllerViewModel.getMovieById("11631")
+                    Log.d("ReviewTesterScreen: Movie", reviewDTO?.reviewerID.toString())
+                    production?.let { controllerViewModel.getMovieById(it.imdbID) }
 
                 }
 
                 "TVShow" -> {
-                    Log.d("ReviewTester: TVShow", productionType)
-                    controllerViewModel.getTVShowById("61056")
+                    Log.d("ReviewTesterScreen: TVShow", production!!.type)
+                    production?.let { controllerViewModel.getTVShowById(it.imdbID) }
                 }
 
                 else -> {
@@ -87,7 +92,6 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
                 }
             }
 
-            //productionID = "";
         }
     }
 

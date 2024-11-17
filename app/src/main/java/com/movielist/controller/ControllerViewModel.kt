@@ -804,31 +804,43 @@ class ControllerViewModel(
     private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
     val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
 
-    fun getReview() {
-        // Logikk her som henter fra Firebase
+    fun nullifySingleReviewDTOData() {
+        _singleReviewDTOData.value = null
+    }
 
-        val reviewTemp = Review(
-            score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
-            reviewerID = "userIDhere",
-            productionID = "154423",
-            reviewBody = "It’s reasonably well-made, and visually compelling," +
-                    "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                    "to recommend..",
-            postDate = Calendar.getInstance(),
-            likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
-        )
+    fun getReviewById(reviewID: String, productionType: String, productionID: String) {
+        viewModelScope.launch {
+            try {
+                // Hent anmeldelser fra Firestore
+                val reviewRaw = firestoreRepository.getReviewById(reviewID, productionType, productionID)
 
-        val reviewerTemp = User(
-            id = "test",
-            email = "test@email.no",
-            userName = "tempUser",
-        )
+                val reviewObject = requireNotNull(convertReviewJsonToReviewObject(reviewRaw)) {
+                    "Review data is null for reviewID: $reviewID"
+                }
 
-        val productionTemp = Movie()
+                val production = singleProductionData.value
+                if (production == null) {
+                    Log.d("GetReviews", "Production data is null, aborting.")
+                    return@launch
+                }
 
-        val reviewDTO = createReviewDTO(reviewTemp, reviewerTemp, productionTemp)
+                // Lager map for enklere oversikt over reviewerID mot User-objekt
+                val reviewer = async {
+                    userViewModel.getUser(reviewObject.reviewerID)
+                        ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous")
+                }.await()
 
-        _singleReviewDTOData.update { reviewDTO }
+                // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
+                val reviewDTO = createReviewDTO(reviewObject, reviewer, production)
+
+                _singleReviewDTOData.value = reviewDTO
+
+            } catch (exception: Exception) {
+
+                Log.d("GetReviews", "Failed to fetch reviews: $exception")
+                _reviewDTOs.value = emptyList()
+            }
+        }
     }
 
     private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {

@@ -409,4 +409,44 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+    suspend fun getReviewById(
+        reviewID: String,        // ID for den spesifikke review-en
+        productionType: String,  // Type produksjon (Movie eller TVShow)
+        productionID: String    // ID for produksjonen (f.eks. 533535 for en film)
+    ): Map<String, Any>? {
+        val db = FirebaseFirestore.getInstance()
+
+        // Bestem hvilken samling som skal brukes basert på productionType
+        val collectionType = when (productionType) {
+            "Movie" -> "movieReviews"
+            "TVShow" -> "tvShowReviews"
+            else -> {
+                throw IllegalArgumentException("Invalid production type: $productionType")
+            }
+        }
+
+        return try {
+
+            val pathProduction = "reviews/$collectionType/$productionID"
+
+            // Naviger til dokumentet i pathen (f.eks reviews/moveReviews/533535/{reviewID})
+            val reviewDocument = db.collection(pathProduction)
+                .document(reviewID)
+
+            // Hent anmeldelsen fra dokumentet
+            val reviewData = reviewDocument.get().await()
+
+            if (reviewData.exists()) {
+                reviewData.data  // Returner anmeldelsesdataene som et Map<String, Any>
+
+            } else {
+                Log.d("Firestore-Reviews", "Review not found")
+                null
+            }
+        } catch (exception: Exception) {
+
+            Log.e("Firestore-Reviews", "Failed to fetch review with ID $reviewID for $productionType and ID $productionID", exception)
+            throw exception
+        }
+    }
 }
