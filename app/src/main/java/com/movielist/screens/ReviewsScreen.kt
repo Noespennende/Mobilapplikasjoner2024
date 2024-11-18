@@ -1,6 +1,5 @@
 package com.movielist.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +17,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
@@ -38,7 +38,6 @@ import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopNavbarBackground
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.ListItem
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ReviewsScreenTabs
@@ -125,8 +124,34 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     //Temp code delete the code above
 
     //function variables:
-    var friendsReviewsList = reviewsList
-    var popularReviewsThisMonthList =  reviewsList
+
+    var friendsReviewsList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val friendsReviewsListLastUpdatedTime = remember { mutableLongStateOf(System.currentTimeMillis()) }
+
+    LaunchedEffect(Unit) {
+
+        val currentTime = System.currentTimeMillis()
+
+        // Sjekker om det er første render eller har gått 2 timer siden sist oppdatering
+        if (friendsReviewsList.value.isEmpty()
+            || currentTime - friendsReviewsListLastUpdatedTime.longValue >= 7200000) {
+            val friendsReviews = controllerViewModel.getLoggedInUsersFriendsReviews()
+
+            friendsReviewsList.value = friendsReviews
+        }
+    }
+
+    var popularReviewsThisMonthList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+
+
+    LaunchedEffect(Unit) {
+
+        val popularThisMonthList = controllerViewModel.getTop10ReviewsThisMonth()
+
+        popularReviewsThisMonthList.value = popularThisMonthList
+
+    }
+
     var popularReviewsAllTimeList = reviewsList
 
     val productionType by remember { mutableStateOf("Movie") }
@@ -173,8 +198,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         item {
             if(activeTab == ReviewsScreenTabs.SUMMARY){
                 SummarySection(
-                    friendsReviewsList = friendsReviewsList,
-                    topThisMonthList = popularReviewsThisMonthList,
+                    friendsReviewsList = friendsReviewsList.value,
+                    topThisMonthList = popularReviewsThisMonthList.value,
                     handleReviewLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionClick,
                     handleProfilePictureClick = handleProfilePictureClick,
@@ -182,7 +207,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                 )
             } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
                 TopThisMonthSection(
-                    topThisMonthList = popularReviewsThisMonthList,
+                    topThisMonthList = popularReviewsThisMonthList.value,
                     handleReviewLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionClick,
                     handleProfilePictureClick = handleProfilePictureClick,
@@ -209,8 +234,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
 @Composable
 fun SummarySection (
-    friendsReviewsList: MutableList<ReviewDTO>,
-    topThisMonthList: MutableList<ReviewDTO>,
+    friendsReviewsList: List<ReviewDTO>,
+    topThisMonthList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
@@ -244,7 +269,7 @@ fun SummarySection (
 
 @Composable
 fun TopThisMonthSection (
-    topThisMonthList: MutableList<ReviewDTO>,
+    topThisMonthList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,

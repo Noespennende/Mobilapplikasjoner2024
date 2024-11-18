@@ -874,6 +874,33 @@ class ControllerViewModel(
             .take(10)
     }
 
+    suspend fun getTop10ReviewsThisMonth(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+        val reviewObjects = reviewViewModel.getReviewsFromThisMonth()
+
+        for (review in reviewObjects) {
+
+            val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+            val user = userViewModel.getUser(review.reviewerID)
+            if (user != null) {
+
+                val production = when (collectionType) {
+                    "RMOV" -> getMovieByIdAsync(review.productionID)
+                    "RTV" -> getTVShowByIdAsync(review.productionID)
+                    else -> break
+                }
+                val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                reviewDTO?.let { reviewDTOList.add(it) }
+            }
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.likes }
+            .take(10)
+    }
+
     fun getReviewById(reviewID: String, productionType: String, productionID: String) {
         viewModelScope.launch {
             try {
@@ -953,6 +980,22 @@ class ControllerViewModel(
 
         return getReviewsByUser(userReviews, user.id)
     }
+
+    suspend fun getLoggedInUsersFriendsReviews(): List<ReviewDTO> {
+        val friendsReviewsDTO: MutableList<ReviewDTO> = mutableListOf()
+
+        val friends = userViewModel.getUsersFriends()
+
+        for (friend in friends) {
+
+            val friendReviews = getUsersReviews(friend)
+
+            friendsReviewsDTO.addAll(friendReviews)
+        }
+
+        return friendsReviewsDTO
+    }
+
 
     private suspend fun getReviewsByUser(reviewIDs: List<String>, userID: String): List<ReviewDTO> {
 

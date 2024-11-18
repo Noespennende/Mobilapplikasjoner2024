@@ -544,5 +544,84 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+    suspend fun getReviewsFromThisMonth(): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+
+        /* Beregn starten og slutten av inneværende uke */
+
+        val currentDate = Calendar.getInstance()
+
+        // Beregn starten av måneden
+        val startOfMonth = currentDate.clone() as Calendar
+        startOfMonth.apply {
+            set(Calendar.DAY_OF_MONTH, 1) // Starten av denne måneden
+            set(Calendar.HOUR_OF_DAY, 0)  // Start på dagen
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // Beregn slutten av måneden
+        val endOfMonth = currentDate.clone() as Calendar
+        endOfMonth.apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH)) // Siste dag i måneden
+            set(Calendar.HOUR_OF_DAY, 23) // Slutt på dagen
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+
+        val startOfPeriod = startOfMonth.time
+        val endOfPeriod = endOfMonth.time
+
+        Log.d("Revieww", "startofPeriod: $startOfPeriod")
+        Log.d("Revieww", "endOfPeriod: $endOfPeriod")
+
+        /**/
+
+        try {
+
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+
+                // Hent dokumentet med productionIDs (henter movieReviews/tvShowReviews)
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                // er felt direkte i movieReviews/tvShowReviews
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+
+                    for (productionID in productionIDs) {
+
+                        // Hent anmeldelser i sub-kolleksjonen
+
+                        val reviews = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .whereGreaterThanOrEqualTo("postDate", startOfPeriod)
+                            .whereLessThan("postDate", endOfPeriod)
+                            .get()
+                            .await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+                    }
+                }
+            }
+
+            return allReviews
+        } catch (e: Exception) {
+            throw e // Bør nok håndteres annerledes :D
+        }
+    }
+
 
 }
