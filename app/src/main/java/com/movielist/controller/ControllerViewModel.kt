@@ -8,9 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.FirestoreRepository
-import com.movielist.data.UUIDAdapter
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
@@ -18,7 +16,6 @@ import com.movielist.model.ApiShowResponse
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
-import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -26,9 +23,6 @@ import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.ReviewViewModel
 import com.movielist.viewmodel.UserViewModel
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -850,6 +844,34 @@ class ControllerViewModel(
 
     fun nullifySingleReviewDTOData() {
         _singleReviewDTOData.value = null
+    }
+
+    suspend fun get10TopReviewsPastWeek(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+        // Hent anmeldelsene denne uken asynkront
+        val reviewObjects = reviewViewModel.getReviewsFromPastWeek()
+
+        for (review in reviewObjects) {
+
+            val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+            val user = userViewModel.getUser(review.reviewerID)
+            if (user != null) {
+
+                val production = when (collectionType) {
+                    "RMOV" -> getMovieByIdAsync(review.productionID)
+                    "RTV" -> getTVShowByIdAsync(review.productionID)
+                    else -> break
+                }
+                val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                reviewDTO?.let { reviewDTOList.add(it) }
+            }
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.score }
+            .take(10)
     }
 
     fun getReviewById(reviewID: String, productionType: String, productionID: String) {

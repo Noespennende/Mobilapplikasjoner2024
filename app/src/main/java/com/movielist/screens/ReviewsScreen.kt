@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -605,7 +606,7 @@ fun ReviewSummary (
                             )
                             //review date
                             Text(
-                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)}/${review.postDate.get(Calendar.YEAR)}",
+                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}/${review.postDate.get(Calendar.YEAR)}",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightRegular,

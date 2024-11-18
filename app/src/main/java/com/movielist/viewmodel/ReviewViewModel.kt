@@ -19,6 +19,20 @@ class ReviewViewModel(
 
     private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
 
+    suspend fun getReviewsFromPastWeek(): List<Review> {
+        return try {
+            // Henter anmeldelser for siste uken
+            val reviewsRaw = firestoreRepository.getReviewsFromPastWeek()
+            val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
+
+            // Returner listen med Review-objekter
+            reviewsObjects
+        } catch (exception: Exception) {
+            Log.d("ReviewViewModel", "Failed to fetch reviews: $exception")
+            emptyList()  // Returner en tom liste ved feil
+        }
+    }
+
     suspend fun getReviewsByProduction(productionID: String, productionType: String): List<Review> {
         return try {
             // Hent anmeldelser fra Firestore

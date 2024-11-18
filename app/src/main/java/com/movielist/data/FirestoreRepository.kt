@@ -10,6 +10,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.TVShow
 import kotlinx.coroutines.tasks.await
+import java.util.Calendar
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
@@ -483,5 +484,65 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         // Returner listen med dokumenter som Map<String, Any>
         return reviewsList
     }
+
+    suspend fun getReviewsFromPastWeek(): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+
+        /* Beregn starten og slutten av inneværende uke */
+
+        val currentDate = Calendar.getInstance()
+
+        val pastWeek = currentDate.clone() as Calendar
+        pastWeek.add(Calendar.DATE, -7)
+
+        val startOfPeriod = pastWeek.time
+        val endOfPeriod = currentDate.time
+
+        /**/
+
+        try {
+
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+
+                // Hent dokumentet med productionIDs (henter movieReviews/tvShowReviews)
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                // er felt direkte i movieReviews/tvShowReviews
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+
+                    for (productionID in productionIDs) {
+
+                        // Hent anmeldelser i sub-kolleksjonen
+
+                        val reviews = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .whereGreaterThanOrEqualTo("postDate", startOfPeriod)
+                            .whereLessThan("postDate", endOfPeriod)
+                            .get()
+                            .await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+                    }
+                }
+            }
+
+            return allReviews
+        } catch (e: Exception) {
+            throw e // Bør nok håndteres annerledes :D
+        }
+    }
+
 
 }
