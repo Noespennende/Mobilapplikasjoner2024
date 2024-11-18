@@ -116,7 +116,7 @@ class ControllerViewModel(
             genre = media.genres?.map { it.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(media.releaseDate) ?: Calendar.getInstance(),
             rating = media.voteAverage?.toInt(),
-            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.backdropPath,
+            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.posterPath,
 
         ))
     }
@@ -846,7 +846,7 @@ class ControllerViewModel(
         _singleReviewDTOData.value = null
     }
 
-    suspend fun get10TopReviewsPastWeek(): List<ReviewDTO> {
+    suspend fun getTop10ReviewsPastWeek(): List<ReviewDTO> {
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 
         // Hent anmeldelsene denne uken asynkront
