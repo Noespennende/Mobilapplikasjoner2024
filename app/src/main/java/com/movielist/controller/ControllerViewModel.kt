@@ -23,6 +23,7 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
+import com.movielist.model.VideoResult
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
@@ -144,14 +145,34 @@ class ControllerViewModel(
         //apiViewModel.getShow(seriesId)
     }
 
-    fun getShowSeason(seriesId: Int, seasonNumber: Int) {
+    fun getShowSeason(seriesId: String, seasonNumber: String) {
         Log.d("ControllerViewModel", "getShowSeason called")
         apiViewModel.getShowSeason(seriesId, seasonNumber)
     }
 
-    fun getShowEpisode(seriesId: Int, seasonNumber: Int, episodeNumber: Int) {
+    fun getShowEpisode(seriesId: String, seasonNumber: String, episodeNumber: String) {
         Log.d("ControllerViewModel", "getShowEpisode called")
         apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
+    }
+
+    fun getMovieCredits(movieId: String) {
+        Log.d("ControllerViewModel", "getMovieCredits called")
+        apiViewModel.getMovieCredits(movieId)
+    }
+
+    fun getShowCredits(seriesId: String) {
+        Log.d("ControllerViewModel", "getShowCredits called")
+        apiViewModel.getShowCredits(seriesId)
+    }
+
+    fun getMovieVideo(movieId: String) {
+        Log.d("ControllerViewModel", "getMovieVideo called")
+        apiViewModel.getMovieVideo(movieId)
+    }
+
+    fun getShowVideo(seriesId: String) {
+        Log.d("ControllerViewModel", "getShowVideo called")
+        apiViewModel.getShowVideo(seriesId)
     }
 
     private val _singleProductionData = MutableStateFlow<Production?>(null)
@@ -222,6 +243,7 @@ class ControllerViewModel(
     }
 
     private fun convertApiMovieResponseToMovie(result: ApiMovieResponse): Movie {
+
         return Movie(
             imdbID = result.id.toString(),
             title = result.title.orEmpty(),

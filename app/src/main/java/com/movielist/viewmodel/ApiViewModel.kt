@@ -6,10 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiAllMediaResponse
+import com.movielist.model.ApiMediaVideoResponse
+import com.movielist.model.ApiMovieCreditResponse
 import com.movielist.model.ApiMovieResponse
+import com.movielist.model.ApiShowCreditResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.ApiShowSeason
 import com.movielist.model.ApiShowSeasonEpisode
+import com.movielist.model.VideoResult
 import com.movielist.networking.ApiConfig
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +36,18 @@ class ApiViewModel() : ViewModel() {
 
     private val _showEpisodeData = MutableLiveData<ApiShowSeasonEpisode?>()
     val showEpisodeData: LiveData<ApiShowSeasonEpisode> get() = _showEpisodeData as LiveData<ApiShowSeasonEpisode>
+
+    private val _movieCreditData = MutableLiveData<ApiMovieCreditResponse?>(null)
+    val movieCreditData: LiveData<ApiMovieCreditResponse> get() = _movieCreditData as LiveData<ApiMovieCreditResponse>
+
+    private val _showCreditData = MutableLiveData<ApiShowCreditResponse?>()
+    val showCreditData: LiveData<ApiShowCreditResponse> get() = _showCreditData as LiveData<ApiShowCreditResponse>
+
+    private val _movieVideoData = MutableLiveData<List<VideoResult>?>()
+    val movieVideoData: MutableLiveData<List<VideoResult>?> get() = _movieVideoData
+
+    private val _showVideoData = MutableLiveData<ApiMediaVideoResponse?>()
+    val showVideoData: LiveData<ApiMediaVideoResponse> get() = _showVideoData as LiveData<ApiMediaVideoResponse>
 
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> get() = _isLoading
@@ -167,7 +183,7 @@ class ApiViewModel() : ViewModel() {
         })
     }
 
-    fun getShowSeason(seriesId: Int, seasonNumber: Int) {
+    fun getShowSeason(seriesId: String, seasonNumber: String) {
         _isLoading.value = true
         _isError.value = false
 
@@ -204,7 +220,7 @@ class ApiViewModel() : ViewModel() {
         })
     }
 
-    fun getShowEpisode(seriesId: Int, seasonNumber: Int, episodeNumber: Int) {
+    fun getShowEpisode(seriesId: String, seasonNumber: String, episodeNumber: String) {
         _isLoading.value = true
         _isError.value = false
 
@@ -241,6 +257,168 @@ class ApiViewModel() : ViewModel() {
         })
     }
 
+    fun getMovieCredits(movieId: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        Log.d("ApiVIEWMODel", "getMovieCredits Called")
+        val client = ApiConfig.getApiService().getMovieCredits(movieId)
+
+        client.enqueue(object : Callback<ApiMovieCreditResponse> {
+
+            override fun onResponse(
+                call: Call<ApiMovieCreditResponse?>,
+                response: Response<ApiMovieCreditResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getMovieCredits response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getMovieCredits received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _movieCreditData.value = responseBody
+            }
+
+            override fun onFailure(
+                call: Call<ApiMovieCreditResponse?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getMovieCredits call failed", t)}
+        })
+    }
+
+    fun getShowCredits(seriesId: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        Log.d("ApiVIEWMODel", "getShowCredits Called")
+        val client = ApiConfig.getApiService().getShowCredits(seriesId)
+
+        client.enqueue(object : Callback<ApiShowCreditResponse> {
+
+            override fun onResponse(
+                call: Call<ApiShowCreditResponse?>,
+                response: Response<ApiShowCreditResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getShowCredits response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getShowCredits received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _showCreditData.value = responseBody
+            }
+
+            override fun onFailure(
+                call: Call<ApiShowCreditResponse?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getShowCredits call failed", t)}
+        })
+    }
+
+    fun getMovieVideo(movieId: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        Log.d("ApiVIEWMODel", "getMovieVideo Called")
+        val client = ApiConfig.getApiService().getMovieVideo(movieId)
+
+        client.enqueue(object : Callback<ApiMediaVideoResponse> {
+
+            override fun onResponse(
+                call: Call<ApiMediaVideoResponse?>,
+                response: Response<ApiMediaVideoResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getMovieVideo response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getMovieVideo received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+
+                val movieList = responseBody.results
+
+                val filteredResults = movieList?.filter {
+                    it?.type == "Trailer" && it?.name == "Official Trailer"
+                }?.filterNotNull()
+
+                _isLoading.value = false
+                _movieVideoData.postValue(filteredResults ?: emptyList())
+                Log.d("ApiViewModel", "Video please be right: $filteredResults")
+
+            }
+
+            override fun onFailure(
+                call: Call<ApiMediaVideoResponse?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getMovieVideo call failed", t)}
+        })
+    }
+
+    fun getShowVideo(seriesId: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        Log.d("ApiVIEWMODel", "getShowVideo Called")
+        val client = ApiConfig.getApiService().getShowVideo(seriesId)
+
+        client.enqueue(object : Callback<ApiMediaVideoResponse> {
+
+            override fun onResponse(
+                call: Call<ApiMediaVideoResponse?>,
+                response: Response<ApiMediaVideoResponse?>
+            ) {
+                Log.d("ApiViewModel", "Raw getShowVideo response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response getShowVideo received: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+                _isLoading.value = false
+                _showVideoData.value = responseBody
+            }
+
+            override fun onFailure(
+                call: Call<ApiMediaVideoResponse?>,
+                t: Throwable
+            ) {
+                onError(t.message)
+                t.printStackTrace()
+
+                Log.e("ApiViewModel", "API getShowVideo call failed", t)}
+        })
+    }
+
+
     private fun onError(inputMessage: String?) {
 
         val message = if (inputMessage.isNullOrBlank() or inputMessage.isNullOrEmpty()) "Unknown Error"
@@ -253,5 +431,3 @@ class ApiViewModel() : ViewModel() {
         _isLoading.value = false
     }
 }
-
-

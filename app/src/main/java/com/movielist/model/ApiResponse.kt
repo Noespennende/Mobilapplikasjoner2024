@@ -227,14 +227,104 @@ data class ApiMovieResponse(
 	val title: String? = null,
 
 	@field:SerializedName("video")
-	val video: Boolean? = null,
+	val video: List<ApiMediaVideoResponse>? = null,
 
 	@field:SerializedName("vote_average")
 	val voteAverage: Double? = null,
 
 	@field:SerializedName("vote_count")
-	val voteCount: Int? = null
+	val voteCount: Int? = null,
+
 ) : ApiProductionResponse()
+
+data class ApiMovieCreditResponse(
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("cast")
+	val cast: List<MovieCastMember>? = null
+)
+
+data class MovieCastMember(
+
+	@field:SerializedName("adult")
+	val adult: Boolean? = null,
+
+	@field:SerializedName("gender")
+	val gender: Int? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("known_for_department")
+	val knownForDepartment: String? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("original_name")
+	val originalName: String? = null,
+
+	@field:SerializedName("popularity")
+	val popularity: Double? = null,
+
+	@field:SerializedName("profile_path")
+	val profilePath: String? = null,
+
+	@field:SerializedName("cast_id")
+	val castId: Int? = null,
+
+	@field:SerializedName("character")
+	val character: String? = null,
+
+	@field:SerializedName("credit_id")
+	val creditId: String? = null,
+
+	@field:SerializedName("order")
+	val order: Int? = null
+)
+
+data class ApiMediaVideoResponse(
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("results")
+	val results: List<VideoResult>? = null
+)
+
+data class VideoResult(
+
+	@field:SerializedName("iso_639_1")
+	val iso6391: String? = null,
+
+	@field:SerializedName("iso_3166_1")
+	val iso3166_1: String? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("key")
+	val key: String? = null,
+
+	@field:SerializedName("site")
+	val site: String? = null,
+
+	@field:SerializedName("size")
+	val size: Int? = null,
+
+	@field:SerializedName("type")
+	val type: String? = null,
+
+	@field:SerializedName("official")
+	val official: Boolean? = null,
+
+	@field:SerializedName("published_at")
+	val publishedAt: String? = null,
+
+	@field:SerializedName("id")
+	val videoId: String? = null
+)
 
 data class ProductionCompany(
 	@field:SerializedName("id")
@@ -342,6 +432,58 @@ data class ApiShowResponse(
 	val seasons: List<Season?>? = null
 ) : ApiProductionResponse()
 
+data class ApiShowCreditResponse (
+	@field:SerializedName("cast")
+	val cast: List<ShowCastMember>? = null
+)
+
+data class ShowCastMember(
+
+	@field:SerializedName("adult")
+	val adult: Boolean? = null,
+
+	@field:SerializedName("gender")
+	val gender: Int? = null,
+
+	@field:SerializedName("id")
+	val id: Int? = null,
+
+	@field:SerializedName("known_for_department")
+	val knownForDepartment: String? = null,
+
+	@field:SerializedName("name")
+	val name: String? = null,
+
+	@field:SerializedName("original_name")
+	val originalName: String? = null,
+
+	@field:SerializedName("popularity")
+	val popularity: Double? = null,
+
+	@field:SerializedName("profile_path")
+	val profilePath: String? = null,
+
+	@field:SerializedName("roles")
+	val roles: List<Role>? = null,
+
+	@field:SerializedName("total_episode_count")
+	val totalEpisodeCount: Int? = null,
+
+	@field:SerializedName("order")
+	val order: Int? = null
+)
+
+data class Role(
+
+	@field:SerializedName("credit_id")
+	val creditId: String? = null,
+
+	@field:SerializedName("character")
+	val character: String? = null,
+
+	@field:SerializedName("episode_count")
+	val episodeCount: Int? = null
+)
 
 data class ShowEpisode(
 	@field:SerializedName("id")
