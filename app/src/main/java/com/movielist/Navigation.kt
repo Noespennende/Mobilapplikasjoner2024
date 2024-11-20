@@ -13,8 +13,11 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.movielist.composables.BottomNavBar
 import com.movielist.composables.BottomNavbarAndMobileIconsBackground
+import com.movielist.composables.TopNav
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.NavbarOptions
+import com.movielist.model.Screens
+import com.movielist.model.User
 import com.movielist.screens.ComparisonScreen
 import com.movielist.screens.CreateUserScreen
 import com.movielist.screens.HomeScreen
@@ -36,6 +39,23 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     var aNavButtonIsActive by remember { mutableStateOf<Boolean>(true) }
     var activeNavButton by remember { mutableStateOf(NavbarOptions.HOME) }
+    var currentScreen by remember { mutableStateOf("Home") }
+
+    val handleScreenNameChange: (screen: Screens) -> Unit = {screen ->
+
+        if (screen == Screens.CREATEREVIEW){
+            currentScreen = "Write review"
+        } else if (screen == Screens.LOGINN){
+            currentScreen = "Login"
+        } else if (screen == Screens.CREATEUSER) {
+            currentScreen = "Create user"
+        }
+        else {
+            currentScreen = screen.toString().lowercase().replaceFirstChar { char ->
+                char.uppercase()
+            }
+        }
+    }
 
     val handleNavButtonClick: (navOption: NavbarOptions) -> Unit = {navOption ->
         activeNavButton = navOption
@@ -52,13 +72,24 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         }
     }
 
+    val handleProfileImageClick: () -> Unit = {
+        if (loggedInUser != null){
+            val user = loggedInUser as User
+            handleScreenNameChange(Screens.PROFILE)
+            navController.navigate(Screen.ProfileScreen.withArguments(user.id))
+        }
+
+    }
+    val handleLogoClick: () -> Unit = {
+        handleScreenNameChange(Screens.HOME)
+        navController.navigate(Screen.HomeScreen.withArguments())
+    }
+
     val startScreen =
         if (!isLoggedIn) {
             Screen.LoginScreen.route
         } else {
             //Screen.LoginScreen.route
-            Screen.HomeScreen.route
-
             Screen.HomeScreen.route
         }
 
@@ -72,6 +103,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             LoginPage(controllerViewModel, navController)
             aNavButtonIsActive = false
             activeNavButton = NavbarOptions.NONE
+            handleScreenNameChange(Screens.LOGINN)
 
         }
         composable(
@@ -79,6 +111,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             HomeScreen(controllerViewModel, navController)
             aNavButtonIsActive = true
+            handleScreenNameChange(Screens.HOME)
             activeNavButton = NavbarOptions.HOME
         }
         composable(
@@ -96,6 +129,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 navController,
                 userID = entry.arguments?.getString("userID")
             )
+            handleScreenNameChange(Screens.LIST)
             if(entry.arguments?.getString("userID") == loggedInUser?.id.toString())
             {
                 aNavButtonIsActive = true
@@ -112,11 +146,13 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             SearchPage(controllerViewModel, navController)
             aNavButtonIsActive = true
             activeNavButton = NavbarOptions.SEARCH
+            handleScreenNameChange(Screens.SEARCH)
         }
         composable(
             route = Screen.ReviewsScreen.withArguments()
         ) {
             ReviewsScreen(controllerViewModel, navController)
+            handleScreenNameChange(Screens.REVIEWS)
             aNavButtonIsActive = true
             activeNavButton = NavbarOptions.REVIEW
         }
@@ -135,6 +171,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 navController,
                 userID = entry.arguments?.getString("userID")
             )
+            handleScreenNameChange(Screens.PROFILE)
             if(entry.arguments?.getString("userID") == loggedInUser?.id.toString())
             {
                 aNavButtonIsActive = true
@@ -150,6 +187,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         ) {
             CreateUserScreen(controllerViewModel, navController)
             aNavButtonIsActive = false
+            handleScreenNameChange(Screens.CREATEUSER)
             activeNavButton = NavbarOptions.NONE
         }
         composable(
@@ -173,6 +211,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 productionID = entry.arguments?.getString("productionID"),
                 productionType = entry.arguments?.getString("productionType")
             )
+            handleScreenNameChange(Screens.PRODUCTION)
             aNavButtonIsActive = false
             activeNavButton = NavbarOptions.NONE
         }
@@ -192,6 +231,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 navController,
                 reviewID = entry.arguments?.getString("reviewID")
             )
+            handleScreenNameChange(Screens.REVIEW)
             aNavButtonIsActive = false
             activeNavButton = NavbarOptions.NONE
         }
@@ -211,6 +251,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
                 navController,
                 userToCompareToID = entry.arguments?.getString("userToCompareToID:")
             )
+            handleScreenNameChange(Screens.COMPARISON)
             aNavButtonIsActive = false
             activeNavButton = NavbarOptions.NONE
         }
@@ -218,6 +259,12 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
 
     //Navbar graphics
     if (isLoggedIn) {
+        TopNav(
+            loggedInUser = loggedInUser,
+            CurrentScreen = currentScreen,
+            handleProfileImageClick = handleProfileImageClick,
+            handleLogoClick = handleLogoClick
+        )
         BottomNavbarAndMobileIconsBackground()
         BottomNavBar(
             activeNavButton = activeNavButton,

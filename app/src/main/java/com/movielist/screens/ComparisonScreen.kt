@@ -36,7 +36,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
@@ -55,7 +55,7 @@ import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
@@ -150,7 +150,7 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
     //Graphics
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsBackgroundHeight + topNavBaHeight + 20.dp,
+            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
             start = horizontalPadding,
             end = horizontalPadding,
             bottom = bottomNavBarHeight +20.dp
@@ -248,7 +248,7 @@ fun TopNavBarComparisonScreen(
     Box(
         modifier = Modifier.wrapContentSize()
     ){
-        TopNavbarBackground()
+        TopScreensNavbarBackground()
         Column (
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier

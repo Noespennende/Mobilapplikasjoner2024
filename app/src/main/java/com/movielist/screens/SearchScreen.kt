@@ -27,7 +27,7 @@ import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.SearchSortOptions
@@ -177,7 +177,7 @@ fun TopNavBarSearchPage (
     Box(
         modifier = Modifier.wrapContentSize()
     ){
-        TopNavbarBackground()
+        TopScreensNavbarBackground()
 
         //Search bar and submit button button
         Column (

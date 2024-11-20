@@ -36,7 +36,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
@@ -324,7 +324,7 @@ fun TopNavBarReviewPage(
         modifier = Modifier
             .wrapContentSize()
     ){
-        TopNavbarBackground()
+        TopScreensNavbarBackground()
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
@@ -592,6 +592,8 @@ fun ReviewSummary (
                     //Review header and score
                     Column (
                         verticalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .fillMaxWidth(.5f)
                     )
                     {
                         //Header
@@ -619,7 +621,9 @@ fun ReviewSummary (
                         //Username and review date
                         Column (
                             verticalArrangement = Arrangement.spacedBy(3.dp),
-                            horizontalAlignment = Alignment.End
+                            horizontalAlignment = Alignment.End,
+                            modifier = Modifier
+                                .fillMaxWidth(.5f)
                         ){
                             //Username
                             Text(

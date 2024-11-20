@@ -66,8 +66,6 @@ class MainActivity : ComponentActivity() {
             //FirebaseTesting(controllerViewModel)
             Navigation(controllerViewModel)
 
-            TopMobileIconsBackground()
-
         }
     }
 }

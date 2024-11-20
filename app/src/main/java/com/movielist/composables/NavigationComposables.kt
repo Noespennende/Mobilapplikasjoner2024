@@ -2,6 +2,7 @@ package com.movielist.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,11 +21,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,21 +30,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.movielist.R
-import com.movielist.Screen
-import com.movielist.controller.ControllerViewModel
 import com.movielist.model.NavbarOptions
+import com.movielist.model.User
+import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.Gray
+import com.movielist.ui.theme.LightBlack
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
+import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
+import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 
 
@@ -336,7 +335,7 @@ fun BottomNavbarAndMobileIconsBackground (
 }
 
 @Composable
-fun TopNavbarBackground (
+fun TopScreensNavbarBackground (
     color: Color = Gray,
     sizeMultiplier: Float = 1f
 ) {
@@ -348,7 +347,7 @@ fun TopNavbarBackground (
             modifier = Modifier
                 .background(color)
                 .fillMaxWidth()
-                .height((topPhoneIconsBackgroundHeight + topNavBaHeight)*sizeMultiplier)
+                .height((topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight)*sizeMultiplier)
                 .align(Alignment.TopCenter)
         )
     }
@@ -356,5 +355,72 @@ fun TopNavbarBackground (
 }
 
 
+@Composable
+fun TopNav (
+    loggedInUser: User?,
+    CurrentScreen: String,
+    handleProfileImageClick: () -> Unit,
+    handleLogoClick: () -> Unit
+){
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        TopNavBackground()
+        Row(
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .height(topPhoneIconsAndNavBarBackgroundHeight)
+                .fillMaxWidth()
+                .padding(bottom = 8.dp, start = horizontalPadding, end = horizontalPadding)
+        )
+        {
+            Logo(
+                modifier = Modifier
+                    .height(18.dp)
+                    .width(18.dp)
+                    .clickable {
+                        handleLogoClick()
+                    }
+            )
+            Text(
+                text = CurrentScreen,
+                fontFamily = fontFamily,
+                fontWeight = weightBold,
+                fontSize = headerSize,
+                textAlign = TextAlign.Center,
+                color = White,
+                modifier = Modifier
+                )
 
+            if (loggedInUser != null){
+                ProfileImage(
+                    imageID = loggedInUser.profileImageID,
+                    userName = loggedInUser.userName,
+                    handleProfileImageClick = handleProfileImageClick,
+                    sizeMultiplier = .6f
+                )
+            }
+
+        }
+
+    }
+}
+
+@Composable
+fun TopNavBackground (
+    color: Color = LightBlack,
+){
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ){
+        Box(
+            modifier = Modifier
+                .background(color)
+                .fillMaxWidth()
+                .height(topPhoneIconsAndNavBarBackgroundHeight)
+                .align(Alignment.TopCenter)
+        )
+    }
+}
 

@@ -399,11 +399,11 @@ fun LoadingCurrentlyWatchingCard(
         // Card content
         Column(
             modifier = Modifier
-                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .height(265.dp + topPhoneIconsAndNavBarBackgroundHeight)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    top = (topPhoneIconsAndNavBarBackgroundHeight + 10.dp),
                     bottom = 10.dp
                 )
         ) {
@@ -472,11 +472,11 @@ fun CurrentlyWatchingCard(
         // Card content
         Column(
             modifier = Modifier
-                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .height(265.dp + topPhoneIconsAndNavBarBackgroundHeight)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    top = (topPhoneIconsAndNavBarBackgroundHeight + 10.dp),
                     bottom = 10.dp
                 )
         ) {

@@ -1,6 +1,5 @@
 package com.movielist.screens
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +42,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RoundProgressBar
 import com.movielist.composables.SettingsButton
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
@@ -67,7 +66,7 @@ import com.movielist.ui.theme.red
 import com.movielist.ui.theme.teal
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
@@ -243,7 +242,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     //Main Content
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsBackgroundHeight + topNavBaHeight + 20.dp,
+            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
             bottom = bottomNavBarHeight +20.dp
         ),
         verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -389,7 +388,7 @@ fun TopNavBarProfilePage(
     handleLibraryClick: () -> Unit,
     handleReviewsClick: () -> Unit
 ) {
-    TopNavbarBackground()
+    TopScreensNavbarBackground()
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ){

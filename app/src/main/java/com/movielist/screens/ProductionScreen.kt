@@ -57,7 +57,7 @@ import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 
@@ -163,7 +163,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     //Graphics:
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsBackgroundHeight + 20.dp,
+            top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
             bottom = bottomNavBarHeight +20.dp,
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp)

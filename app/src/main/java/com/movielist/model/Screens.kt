@@ -1,0 +1,5 @@
+package com.movielist.model
+
+enum class Screens {
+    HOME, LIST, SEARCH, REVIEWS, PROFILE, COMPARISON, PRODUCTION, REVIEW, CREATEREVIEW, SETTINGS, LOGINN, CREATEUSER
+}
