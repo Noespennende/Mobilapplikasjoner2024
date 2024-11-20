@@ -50,43 +50,7 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     LaunchedEffect(reviewID) {
-
-        controllerViewModel.nullifySingleReviewDTOData()
-        //controllerViewModel.nullifySingleProductionData()
-        if (reviewID?.isNotEmpty() == true) {
-            Log.d("ReviewTester", reviewID.toString())  // Før kall
-            // Logg `productionType`
-
-            production?.let {controllerViewModel.getReviewById(reviewID, it.type, it.imdbID) }
-
-
-            /* Det under må være med, for tilfeller hvor navigering til ReviewScreen ikke kommer fra ProductionScreen
-            * - F.eks via ReviewsScreen eller HomeScreens "Top reviews" etc.
-            * */
-            controllerViewModel.nullifySingleProductionData()
-
-            when (production?.type) {
-                "Movie" -> {
-                    Log.d("ReviewTesterScreen: Movie", reviewDTO?.reviewerID.toString())
-                    production?.let { controllerViewModel.setMovieById(it.imdbID) }
-
-                }
-
-                "TVShow" -> {
-                    Log.d("ReviewTesterScreen: TVShow", production!!.type)
-                    production?.let { controllerViewModel.setTVShowById(it.imdbID) }
-                }
-
-                else -> {
-                    // Hvis productionType ikke er Movie eller TVShow, nullifiser data
-                    // Hvis noe går galt, så ønsker vi ikke å vise siste production objekt,
-                    // men kanskje en error side eller noe slikt?
-                    // Passer på at  if (production == null) trigges i LazyColumn
-                    controllerViewModel.nullifySingleProductionData()
-                }
-            }
-
-        }
+        controllerViewModel.loadReviewData(reviewID)
     }
 
     val HandleLikeClick: () -> Unit = {

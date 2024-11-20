@@ -869,6 +869,7 @@ class ControllerViewModel(
             }
         }
 
+        Log.d("Reviews", reviewDTOList.toString())
         return reviewDTOList
             .sortedByDescending { it.score }
             .take(10)
@@ -925,6 +926,7 @@ class ControllerViewModel(
 
                 val reviewDTO = reviewViewModel.createReviewDTO(reviewObject, reviewer, production)
 
+                Log.d("Review", "her er jeg getReviewById - $reviewID $productionID")
                 _singleReviewDTOData.value = reviewDTO
 
             } catch (exception: Exception) {
@@ -973,6 +975,35 @@ class ControllerViewModel(
         }
     }
 
+
+    fun loadReviewData(reviewID: String?) {
+        viewModelScope.launch {
+
+            nullifySingleReviewDTOData()
+            nullifySingleProductionData()
+
+            val (collectionType, productionID, _) =
+                if (reviewID != null) reviewViewModel.splitReviewID(reviewID)
+                else Triple(null, null, null)
+
+            var production: Production? = null;
+            when (collectionType) {
+                "RMOV" -> productionID?.let { production = getMovieByIdAsync(it) }
+                "RTV" -> productionID?.let { production = getTVShowByIdAsync(it) }
+            }
+
+            if (!reviewID.isNullOrEmpty()) {
+                production?.let {
+                        Log.d("Review", "Yuhuu" + (production?.imdbID ?: "production null"))
+
+                    getReviewById(reviewID, it.type, it.imdbID)
+                    Log.d("Review", "loadReviewData $reviewID ${it.type} ${it.imdbID}")
+
+                    Log.d("Review", "Yuhuu" + it.imdbID)
+                }
+            }
+        }
+    }
 
     suspend fun getUsersReviews(user: User): List<ReviewDTO> {
 
@@ -1086,7 +1117,7 @@ class ControllerViewModel(
     }
 
     private suspend fun getTVShowByIdAsync(id: String): Production? {
-        Log.d("Controller", "getTVShowById called with id: $id")
+        Log.d("Controller", "getTVShowByIdAsync called with id: $id")
         apiViewModel.getShow(id)
 
         return try {
