@@ -58,6 +58,51 @@ class ApiViewModel() : ViewModel() {
     var errorMessage: String = ""
         private set
 
+    private val _searchResults = MutableStateFlow<List<AllMedia>>(emptyList())
+    val searchResults: StateFlow<List<AllMedia>> = _searchResults
+
+    fun searchMulti(query: String) {
+        _isLoading.value = true
+        _isError.value = false
+
+        val client = ApiConfig.getApiService().searchMulti(query)
+
+        client.enqueue(object : Callback<ApiAllMediaResponse> {
+
+            override fun onResponse(
+                call: Call<ApiAllMediaResponse>,
+                response: Response<ApiAllMediaResponse>
+            ) {
+                Log.d("ApiViewModel", "Raw searchMulti response: $response")
+
+                val responseBody = response.body()
+
+                Log.d("ApiViewModel", "Response received for searchMulti: $responseBody")
+
+                if (!response.isSuccessful || responseBody == null) {
+                    onError("Data Processing Error")
+                    return
+                }
+
+                val searchList = responseBody.results
+
+                val filteredResults = searchList?.filter {
+                    it?.mediaType == "tv" || it?.mediaType == "movie"
+                }?.filterNotNull()
+
+                _isLoading.value = false
+                _searchResults.value = filteredResults ?: emptyList()
+                Log.d("ApiViewModel", "Filtered search results: $filteredResults")
+            }
+
+            override fun onFailure(call: Call<ApiAllMediaResponse>, t: Throwable) {
+                onError(t.message)
+                t.printStackTrace()
+                Log.e("ApiViewModel", "API searchMulti call failed", t)
+            }
+        })
+    }
+
     fun getAllMedia() {
         _isLoading.value = true
         _isError.value = false

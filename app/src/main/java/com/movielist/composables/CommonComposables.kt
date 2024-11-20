@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -80,7 +79,7 @@ import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
 import com.movielist.ui.theme.sliderColors
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
@@ -276,7 +275,7 @@ fun TopMobileIconsBackground (
         modifier = Modifier
             .background(color)
             .fillMaxWidth()
-            .height(topPhoneIconsBackgroundHeight)
+            .height(topPhoneIconsAndNavBarBackgroundHeight)
     )
 }
 

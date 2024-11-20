@@ -9,6 +9,8 @@ import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.TVShow
+import kotlinx.coroutines.tasks.await
+import java.util.Calendar
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
@@ -98,25 +100,23 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             }
     }
 
-    fun fetchFirebaseUser(userID: String, onSuccess: (Map<String, Any>?) -> Unit) {
+    suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
         val db = Firebase.firestore
 
-        db.collection("users")
-            .document(userID)
-            .get()
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    val userJson = document.data // Map<String, Any>? - Firebase dokumentdata
-                    onSuccess(userJson) // Returner JSON til den som kaller funksjonen
-                } else {
-                    println("Document not found")
-                    onSuccess(null) // Ingen dokument funnet
-                }
-            }
-            .addOnFailureListener { exception ->
-                Log.w("FirebaseFailure", "Error getting document", exception)
-                onSuccess(null) // Returner null ved feil
-            }
+        return try {
+            // Bruk await direkte på Firebase Firestore get()-kallet
+            val document = db.collection("users")
+                .document(userID)
+                .get()
+                .await() // Suspenderende kall på get()
+
+            // Returner dokumentdata hvis dokumentet finnes
+            document.data
+        } catch (exception: Exception) {
+            // Håndter eventuelle feil og returner null
+            Log.w("FirebaseFailure", "Error getting document", exception)
+            null
+        }
     }
 
     fun addToCollection(
@@ -376,6 +376,252 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             }
     }
 
+
+    suspend fun getReviewByProduction(
+        productionID: String,
+        productionType: String
+    ): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+
+        val collection = when (productionType) {
+            "Movie" -> "movieReviews"
+            "TVShow" -> "tvShowReviews"
+            else -> null
+        }
+
+        if (collection == null) {
+            throw IllegalArgumentException("Invalid production type: $productionType")
+        }
+
+        return try {
+            // Hent alle reviews fra sub-kolleksjonen basert på productionID
+            val reviews = db.collection("reviews")
+                .document(collection)
+                .collection(productionID)
+                .get()
+                .await() // Bruker await for å vente på resultatet før vi går videre
+
+            // Samle alle reviews i en liste og returnere som en vanlig liste
+            reviews.documents.mapNotNull { it.data }
+        } catch (exception: Exception) {
+            // Kaster en feil hvis det skjer en unntak
+            throw exception
+        }
+    }
+
+    suspend fun getReviewById(
+        reviewID: String,        // ID for den spesifikke review-en
+        productionType: String,  // Type produksjon (Movie eller TVShow)
+        productionID: String    // ID for produksjonen (f.eks. 533535 for en film)
+    ): Map<String, Any>? {
+        val db = FirebaseFirestore.getInstance()
+
+        // Bestem hvilken samling som skal brukes basert på productionType
+        val collectionType = when (productionType) {
+            "Movie" -> "movieReviews"
+            "TVShow" -> "tvShowReviews"
+            else -> {
+                throw IllegalArgumentException("Invalid production type: $productionType")
+            }
+        }
+
+        return try {
+
+            val pathProduction = "reviews/$collectionType/$productionID"
+
+            // Naviger til dokumentet i pathen (f.eks reviews/moveReviews/533535/{reviewID})
+            val reviewDocument = db.collection(pathProduction)
+                .document(reviewID)
+
+            // Hent anmeldelsen fra dokumentet
+            val reviewData = reviewDocument.get().await()
+
+            if (reviewData.exists()) {
+                reviewData.data  // Returner anmeldelsesdataene som et Map<String, Any>
+
+            } else {
+                Log.d("Firestore-Reviews", "Review not found")
+                null
+            }
+        } catch (exception: Exception) {
+
+            Log.e("Firestore-Reviews", "Failed to fetch review with ID $reviewID for $productionType and ID $productionID", exception)
+            throw exception
+        }
+    }
+
+    suspend fun getReviewsByUser(collectionID: String, productionID: String, reviewerID: String): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+
+        // Resultatvariabel som holder alle reviews
+        val reviewsList = mutableListOf<Map<String, Any>>()
+
+        try {
+            // Hent anmeldelsene basert på reviewerID
+            val result = db.collection("reviews") // Hovedsamlingen
+                .document(collectionID) // Dokument for produksjonstype
+                .collection(productionID) // Samlingen for spesifik produksjonsID
+                .whereEqualTo("reviewerID", reviewerID) // Filtrere for reviewerID som samsvarer med reviewerID
+                .get() // Hent alle dokumentene som matcher
+                .await() // Bruker await() for å vente på resultatet
+
+            if (!result.isEmpty) {
+                // Hvis result er ikke tomt, legg til dataene til reviewsList
+                for (document in result) {
+                    // Legg til dokumentdata som et Map (dokumentet som er hentet fra Firestore)
+                    reviewsList.add(document.data)
+                }
+                // Logge for debugging
+                Log.d("Firestore-Reviews", "Funnet ${reviewsList.size} reviews.")
+            } else {
+                Log.d("Firestore-Reviews", "Ingen reviews funnet for reviewerID: $reviewerID.")
+            }
+        } catch (e: Exception) {
+            // Håndter feil
+            Log.d("Firestore-Reviews", "Feil ved henting av reviews: $e")
+        }
+
+        // Returner listen med dokumenter som Map<String, Any>
+        return reviewsList
+    }
+
+    suspend fun getReviewsFromPastWeek(): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+
+        /* Beregn starten og slutten av inneværende uke */
+
+        val currentDate = Calendar.getInstance()
+
+        val pastWeek = currentDate.clone() as Calendar
+        pastWeek.add(Calendar.DATE, -7)
+
+        val startOfPeriod = pastWeek.time
+        val endOfPeriod = currentDate.time
+
+        /**/
+
+        try {
+
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+
+                // Hent dokumentet med productionIDs (henter movieReviews/tvShowReviews)
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                // er felt direkte i movieReviews/tvShowReviews
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+
+                    for (productionID in productionIDs) {
+
+                        // Hent anmeldelser i sub-kolleksjonen
+
+                        val reviews = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .whereGreaterThanOrEqualTo("postDate", startOfPeriod)
+                            .whereLessThan("postDate", endOfPeriod)
+                            .get()
+                            .await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+                    }
+                }
+            }
+
+            return allReviews
+        } catch (e: Exception) {
+            throw e // Bør nok håndteres annerledes :D
+        }
+    }
+
+    suspend fun getReviewsFromThisMonth(): List<Map<String, Any>> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+
+        /* Beregn starten og slutten av inneværende uke */
+
+        val currentDate = Calendar.getInstance()
+
+        // Beregn starten av måneden
+        val startOfMonth = currentDate.clone() as Calendar
+        startOfMonth.apply {
+            set(Calendar.DAY_OF_MONTH, 1) // Starten av denne måneden
+            set(Calendar.HOUR_OF_DAY, 0)  // Start på dagen
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        // Beregn slutten av måneden
+        val endOfMonth = currentDate.clone() as Calendar
+        endOfMonth.apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH)) // Siste dag i måneden
+            set(Calendar.HOUR_OF_DAY, 23) // Slutt på dagen
+            set(Calendar.MINUTE, 59)
+            set(Calendar.SECOND, 59)
+            set(Calendar.MILLISECOND, 999)
+        }
+
+        val startOfPeriod = startOfMonth.time
+        val endOfPeriod = endOfMonth.time
+
+        Log.d("Revieww", "startofPeriod: $startOfPeriod")
+        Log.d("Revieww", "endOfPeriod: $endOfPeriod")
+
+        /**/
+
+        try {
+
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+
+                // Hent dokumentet med productionIDs (henter movieReviews/tvShowReviews)
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                // er felt direkte i movieReviews/tvShowReviews
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+
+                    for (productionID in productionIDs) {
+
+                        // Hent anmeldelser i sub-kolleksjonen
+
+                        val reviews = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .whereGreaterThanOrEqualTo("postDate", startOfPeriod)
+                            .whereLessThan("postDate", endOfPeriod)
+                            .get()
+                            .await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+                    }
+                }
+            }
+
+            return allReviews
+        } catch (e: Exception) {
+            throw e // Bør nok håndteres annerledes :D
+        }
+    }
 
 
 }

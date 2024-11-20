@@ -23,6 +23,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -208,6 +209,17 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
         //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
     }
+    
+    var top10ReviewsListPastWeek = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+
+
+    // Oppdateres/hentes hver gang Homescreen laster
+    // TODO: Hent når det har gått 24 timer siden sist henting i stedet (Oppdater Unit til noe annet)
+    LaunchedEffect(Unit) {
+        val topReviews = controllerViewModel.getTop10ReviewsPastWeek()
+
+        top10ReviewsListPastWeek.value = topReviews
+    }
 
 
     // Front page graphics
@@ -286,15 +298,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 }
             }
 
-            var top10ReviewsListPastWeek = reviewsListPastWeek
-                .sortedByDescending { it.score }
-                .take(10)
-
-            //TEMP KODE FLYTT UT
-
             //Top reviews this week:
             ReviewsSection(
-                reviewList = top10ReviewsListPastWeek,
+                reviewList = top10ReviewsListPastWeek.value,
                 header = "Top reviews this week",
                 handleLikeClick = handleReviewLikeButtonClick,
                 handleProductionImageClick = handleProductionButtonClick,
@@ -393,11 +399,11 @@ fun LoadingCurrentlyWatchingCard(
         // Card content
         Column(
             modifier = Modifier
-                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .height(265.dp + topPhoneIconsAndNavBarBackgroundHeight)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    top = (topPhoneIconsAndNavBarBackgroundHeight + 10.dp),
                     bottom = 10.dp
                 )
         ) {
@@ -466,11 +472,11 @@ fun CurrentlyWatchingCard(
         // Card content
         Column(
             modifier = Modifier
-                .height(265.dp + topPhoneIconsBackgroundHeight)
+                .height(265.dp + topPhoneIconsAndNavBarBackgroundHeight)
                 .padding(
                     start = 20.dp,
                     end = 20.dp,
-                    top = (topPhoneIconsBackgroundHeight + 10.dp),
+                    top = (topPhoneIconsAndNavBarBackgroundHeight + 10.dp),
                     bottom = 10.dp
                 )
         ) {

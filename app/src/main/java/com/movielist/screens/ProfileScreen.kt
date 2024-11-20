@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,7 +42,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RoundProgressBar
 import com.movielist.composables.SettingsButton
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Review
@@ -65,7 +66,7 @@ import com.movielist.ui.theme.red
 import com.movielist.ui.theme.teal
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
@@ -186,7 +187,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val profileBelongsToLoggedInUser = true /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
-    var profileOwnersReviews = exampleReviews /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
+    val profileOwnersReviews = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) } /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(profileOwner)
 
@@ -231,11 +232,17 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         settingsVisible = true
     }
 
+    LaunchedEffect(user) {
+        val reviews = controllerViewModel.getUsersReviews(user).toMutableList()
+
+        profileOwnersReviews.value = reviews
+    }
+
     //Graphics
     //Main Content
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsBackgroundHeight + topNavBaHeight + 20.dp,
+            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
             bottom = bottomNavBarHeight +20.dp
         ),
         verticalArrangement = Arrangement.spacedBy(15.dp)
@@ -341,7 +348,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
             //Review section
             item {
                 ReviewsSection(
-                    reviewList = profileOwnersReviews,
+                    reviewList = profileOwnersReviews.value,
                     header = "Reviews",
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleProductionImageClick = handleProductionClick,
@@ -354,7 +361,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         else if (activeTab == com.movielist.model.ProfileCategoryOptions.REVIEWS) {
             item {
                 ReviewsSection(
-                    reviewList = profileOwnersReviews,
+                    reviewList = profileOwnersReviews.value,
                     header = "Reviews by " + user.userName,
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleReviewClick = handleReviewClick,
@@ -381,7 +388,7 @@ fun TopNavBarProfilePage(
     handleLibraryClick: () -> Unit,
     handleReviewsClick: () -> Unit
 ) {
-    TopNavbarBackground()
+    TopScreensNavbarBackground()
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ){

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
@@ -16,8 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -29,10 +26,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Production
-import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
-import com.movielist.model.User
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.darkWhite
 import com.movielist.ui.theme.fontFamily
@@ -46,36 +40,41 @@ import java.util.Calendar
 @Composable
 fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavController, reviewID: String?) {
 
-    val reviewID by remember { mutableStateOf(reviewID) } /* <- IDen til reviewen som skal hentes ut av kontroller */
+    //val reviewID by remember { mutableStateOf(reviewID) } /* <- IDen til reviewen som skal hentes ut av kontroller */
     //val review by remember { mutableStateOf(null) } /* <- Denne må settes til Review objektet som matcher IDen over */
 
-    val productionType by remember { mutableStateOf("Movie") }
-    val productionID by remember { mutableStateOf("") }
+    //val productionType by remember { mutableStateOf("Movie") }
+    //val productionID by remember { mutableStateOf("") }
 
     val reviewDTO by controllerViewModel.singleReviewDTOData.collectAsState()
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     LaunchedEffect(reviewID) {
 
+        controllerViewModel.nullifySingleReviewDTOData()
         //controllerViewModel.nullifySingleProductionData()
         if (reviewID?.isNotEmpty() == true) {
             Log.d("ReviewTester", reviewID.toString())  // Før kall
-            Log.d("ReviewTester", "Production type is: '$productionType'")  // Logg `productionType`
+            // Logg `productionType`
 
-            controllerViewModel.getReview()
+            production?.let {controllerViewModel.getReviewById(reviewID, it.type, it.imdbID) }
 
+
+            /* Det under må være med, for tilfeller hvor navigering til ReviewScreen ikke kommer fra ProductionScreen
+            * - F.eks via ReviewsScreen eller HomeScreens "Top reviews" etc.
+            * */
             controllerViewModel.nullifySingleProductionData()
 
-            when (productionType) {
+            when (production?.type) {
                 "Movie" -> {
-                    Log.d("ReviewTester: Movie", reviewDTO?.reviewerID.toString())
-                    controllerViewModel.getMovieById("11631")
+                    Log.d("ReviewTesterScreen: Movie", reviewDTO?.reviewerID.toString())
+                    production?.let { controllerViewModel.setMovieById(it.imdbID) }
 
                 }
 
                 "TVShow" -> {
-                    Log.d("ReviewTester: TVShow", productionType)
-                    controllerViewModel.getTVShowById("61056")
+                    Log.d("ReviewTesterScreen: TVShow", production!!.type)
+                    production?.let { controllerViewModel.setTVShowById(it.imdbID) }
                 }
 
                 else -> {
@@ -87,7 +86,6 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
                 }
             }
 
-            //productionID = "";
         }
     }
 

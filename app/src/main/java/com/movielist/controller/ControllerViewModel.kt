@@ -4,52 +4,48 @@ import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
-import com.movielist.data.FirebaseTimestampAdapter
-import com.movielist.data.UUIDAdapter
+import com.google.firebase.firestore.FirebaseFirestore
+import com.movielist.data.FirestoreRepository
 import com.movielist.model.AllMedia
-import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
-import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.model.VideoResult
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
+import com.movielist.viewmodel.ReviewViewModel
 import com.movielist.viewmodel.UserViewModel
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
-
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.random.Random
 
 
 class ControllerViewModel(
     private val userViewModel: UserViewModel,
     private val authViewModel: AuthViewModel,
-    private val apiViewModel: ApiViewModel
+    private val apiViewModel: ApiViewModel,
+    private val reviewViewModel: ReviewViewModel
 ) : ViewModel() {
+
+    private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
 
     /* USER LOGIC */
 
@@ -65,6 +61,10 @@ class ControllerViewModel(
 
     private val _filteredMediaData = MutableLiveData<List<Production>>()
     val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
+
+    private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
+    val searchResults: StateFlow<List<Production>> get() = _searchResult
+
 
     init {
 
@@ -82,6 +82,33 @@ class ControllerViewModel(
         }
     }
 
+
+
+
+    fun searchMultibleMedia(query: String) {
+        apiViewModel.searchMulti(query)
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+
+                    val convertedSearchResults = searchResultsList.map { media ->
+                        if (media.mediaType.equals("movie", ignoreCase = true)) {
+                            convertToMovie(media)
+                        } else {
+                            convertToTVShow(media)
+                        }
+                    }
+
+                    _searchResult.value = convertedSearchResults
+                    Log.d("ControllerViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("ControllerViewModel", "Error collecting search results", e)
+            }
+        }
+    }
+
     private fun convertToMovie(media: AllMedia): Movie{
         return(Movie(
             imdbID = media.id.toString(),
@@ -90,7 +117,7 @@ class ControllerViewModel(
             genre = media.genres?.map { it.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(media.releaseDate) ?: Calendar.getInstance(),
             rating = media.voteAverage?.toInt(),
-            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.backdropPath,
+            posterUrl = "https://image.tmdb.org/t/p/w500/"+media.posterPath,
 
         ))
     }
@@ -182,8 +209,8 @@ class ControllerViewModel(
         _singleProductionData.value = null
     }
 
-    fun getMovieById(id: String) {
-        Log.d("ViewModel", "getMovieById called with id: $id")
+    fun setMovieById(id: String) {
+        Log.d("ViewModel", "setMovieById called with id: $id")
         apiViewModel.getMovie(id)
 
         viewModelScope.launch {
@@ -199,7 +226,7 @@ class ControllerViewModel(
         }
     }
 
-    fun getTVShowById(id: String) {
+    fun setTVShowById(id: String) {
         Log.d("Controller", "getTVShowById called with id: $id")
         apiViewModel.getShow(id)
 
@@ -278,57 +305,7 @@ class ControllerViewModel(
         )
     }
 
-    private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
-    val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
 
-
-    fun getReview() {
-        // Logikk her som henter fra Firebase
-
-        val reviewTemp = Review(
-            score = Random.nextInt(0, 10), //<- TEMP CODE: PUT IN REAL CODE
-            reviewerID = "userIDhere",
-            productionID = "154423",
-            reviewBody = "It’s reasonably well-made, and visually compelling," +
-                    "but it’s ultimately too derivative, and obvious in its thematic execution," +
-                    "to recommend..",
-            postDate = Calendar.getInstance(),
-            likes = Random.nextInt(0, 100) //<- TEMP CODE: PUT IN REAL CODE
-        )
-
-
-
-
-        val reviewerTemp = User(
-            id = "test",
-            email = "test@email.no",
-            userName = "tempUser",
-        )
-
-        val productionTemp = Movie()
-
-        val reviewDTO = createReviewDTO(reviewTemp, reviewerTemp, productionTemp)
-
-        _singleReviewDTOData.update { reviewDTO }
-    }
-
-    private fun createReviewDTO(review: Review, reviewer: User, production: Production): ReviewDTO {
-        return ReviewDTO(
-            reviewID = review.reviewID,
-            score = review.score,
-            productionID = review.productionID,
-            reviewerID = review.reviewerID,
-            reviewBody = review.reviewBody,
-            postDate = review.postDate,
-            likes = review.likes,
-            reviewerUserName = reviewer.userName,
-            reviewerProfileImage = reviewer.profileImageID,
-            productionPosterUrl = production.posterUrl,
-            productionTitle = production.title,
-            productionReleaseDate = production.releaseDate,
-            productionType = production.type
-        )
-    }
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
@@ -763,12 +740,14 @@ class ControllerViewModel(
         _friendsJustWatchedLoading.value = true
 
         viewModelScope.launch {
-            userViewModel.getUsersFriends { friendsList ->
+            try {
+                // Bruk den suspenderende funksjonen for å hente vennene
+                val friendsList = userViewModel.getUsersFriends()
+
                 val recentFriendsWatched = mutableListOf<ListItem>()
 
                 if (friendsList.isNotEmpty()) {
-
-                    if(friendsList.size > 2) {
+                    if (friendsList.size > 2) {
                         for (friend in friendsList) {
                             friend.completedCollection.lastOrNull()?.let { recentFriendsWatched.add(it) }
                         }
@@ -781,6 +760,10 @@ class ControllerViewModel(
 
                 // Oppdater StateFlow
                 _friendsWatchedList.value = recentFriendsWatched
+            } catch (e: Exception) {
+                // Håndter eventuelle feil her
+                Log.e("UserViewModel", "Failed to fetch user's friends", e)
+            } finally {
                 _friendsJustWatchedLoading.value = false
             }
         }
@@ -869,6 +852,278 @@ class ControllerViewModel(
         val listItem = user?.currentlyWatchingCollection?.find { it.production.imdbID == productionID }
 
         return listItem != null
+    }
+
+    private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
+    val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
+
+    private val _reviewDTOs = MutableStateFlow<List<ReviewDTO>>(emptyList())
+    val reviewDTOs: StateFlow<List<ReviewDTO>> get() = _reviewDTOs
+
+    fun nullifyReviewDTOs() {
+        _reviewDTOs.value = emptyList()
+    }
+
+    fun nullifySingleReviewDTOData() {
+        _singleReviewDTOData.value = null
+    }
+
+    suspend fun getTop10ReviewsPastWeek(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+        // Hent anmeldelsene denne uken asynkront
+        val reviewObjects = reviewViewModel.getReviewsFromPastWeek()
+
+        for (review in reviewObjects) {
+
+            val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+            val user = userViewModel.getUser(review.reviewerID)
+            if (user != null) {
+
+                val production = when (collectionType) {
+                    "RMOV" -> getMovieByIdAsync(review.productionID)
+                    "RTV" -> getTVShowByIdAsync(review.productionID)
+                    else -> break
+                }
+                val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                reviewDTO?.let { reviewDTOList.add(it) }
+            }
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.score }
+            .take(10)
+    }
+
+    suspend fun getTop10ReviewsThisMonth(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+        val reviewObjects = reviewViewModel.getReviewsFromThisMonth()
+
+        for (review in reviewObjects) {
+
+            val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+            val user = userViewModel.getUser(review.reviewerID)
+            if (user != null) {
+
+                val production = when (collectionType) {
+                    "RMOV" -> getMovieByIdAsync(review.productionID)
+                    "RTV" -> getTVShowByIdAsync(review.productionID)
+                    else -> break
+                }
+                val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                reviewDTO?.let { reviewDTOList.add(it) }
+            }
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.likes }
+            .take(10)
+    }
+
+    fun getReviewById(reviewID: String, productionType: String, productionID: String) {
+        viewModelScope.launch {
+            try {
+
+                val reviewObject = requireNotNull(reviewViewModel.getReviewByID(reviewID, productionType, productionID)) {
+
+                    _singleReviewDTOData.value = null
+                    return@launch
+                }
+
+                val production = singleProductionData.value
+                if (production == null) {
+                    Log.d("GetReviews", "Production data is null, aborting.")
+                    return@launch
+                }
+
+                val reviewer =
+                    async {
+                    userViewModel.getUser(reviewObject.reviewerID)
+                        ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous")
+                    }.await()
+
+                val reviewDTO = reviewViewModel.createReviewDTO(reviewObject, reviewer, production)
+
+                _singleReviewDTOData.value = reviewDTO
+
+            } catch (exception: Exception) {
+
+                Log.d("Controller-getReviewById", "Failed to fetch reviews: $exception")
+                _reviewDTOs.value = emptyList()
+            }
+        }
+    }
+
+    fun getReviewByProduction(productionID: String, productionType: String) {
+
+        viewModelScope.launch {
+            try {
+                // Hent anmeldelser fra Firestore
+                val reviewObjects = reviewViewModel.getReviewsByProduction(productionID, productionType)
+
+                val production = singleProductionData.value
+                if (production == null) {
+                    Log.d("GetReviews", "Production data is null, aborting.")
+                    _reviewDTOs.value = emptyList()
+                    return@launch
+                }
+
+                // Lager map for enklere oversikt over reviewerID mot User-objekt
+                val reviewers = reviewObjects.map { review ->
+                    async {
+                        review.reviewerID to (userViewModel.getUser(review.reviewerID)
+                            ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous"))
+                    }
+                }.awaitAll().toMap() // Konverter til en Map for enkel matching
+
+                // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
+                val reviewDTOs = reviewObjects.mapNotNull { review ->
+                    val reviewer = reviewers[review.reviewerID]
+                    reviewer?.let { reviewViewModel.createReviewDTO(review, it, production) }
+                }
+
+                _reviewDTOs.value = reviewDTOs
+                Log.d("GetReviews", "Updated StateFlow with ${reviewDTOs.size} reviews")
+            } catch (exception: Exception) {
+
+                Log.d("GetReviews", "Failed to fetch reviews: $exception")
+                _reviewDTOs.value = emptyList()
+            }
+        }
+    }
+
+
+    suspend fun getUsersReviews(user: User): List<ReviewDTO> {
+
+        val userReviews = user.myReviews
+
+        return getReviewsByUser(userReviews, user.id)
+    }
+
+    suspend fun getLoggedInUsersFriendsReviews(): List<ReviewDTO> {
+        val friendsReviewsDTO: MutableList<ReviewDTO> = mutableListOf()
+
+        val friends = userViewModel.getUsersFriends()
+
+        for (friend in friends) {
+
+            val friendReviews = getUsersReviews(friend)
+
+            friendsReviewsDTO.addAll(friendReviews)
+        }
+
+        return friendsReviewsDTO
+    }
+
+
+    private suspend fun getReviewsByUser(reviewIDs: List<String>, userID: String): List<ReviewDTO> {
+
+        for (reviewID in reviewIDs) {
+
+            val (collectionType, productionID, uuid) = reviewViewModel.splitReviewID(reviewID)
+
+            val collectionID = try {
+                when (collectionType) {
+                    "RMOV" -> "movieReviews"
+                    "RTV" -> "tvShowReviews"
+                    else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
+                }
+            } catch (e: IllegalArgumentException) {
+                return emptyList()
+                // Hvis collectionType ikke matcher, fang error og returner tom.
+                // Uten en av de gjeldende collectionTypene, vil koden som følger under feile,
+                // pga avhengig av collectionType
+            }
+
+            val user = userViewModel.getUser(userID)
+
+            val reviewObjects = reviewViewModel.getReviewsByUser(collectionID, productionID, userID)
+
+            val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+
+            if (user != null) {
+
+                Log.d("Firestore_User", user.id)
+                for (reviewObject in reviewObjects) {
+
+                    var reviewDTO: ReviewDTO? = null;
+
+                    if (collectionType == "RMOV") {
+                        val production = getMovieByIdAsync(productionID)
+                        Log.d("Firestore_RMOV", productionID)
+                        Log.d("Firestore_RMOV", singleProductionData.value.toString())
+
+                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
+                    }
+                    if (collectionType == "RTV") {
+                        val production = getTVShowByIdAsync(productionID)
+                        Log.d("Firestore_RTV", singleProductionData.value.toString())
+                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
+
+                        Log.d("Firestore_dto", reviewDTO.toString())
+                    }
+
+                    if (reviewDTO != null) {
+                        reviewDTOList.add(reviewDTO)
+                    }
+                }
+            }
+
+            Log.d("Firestore_controller", reviewDTOList.toString())
+
+            return reviewDTOList
+
+        }
+
+        return emptyList()
+    }
+
+    private suspend fun getMovieByIdAsync(id: String): Production? {
+        Log.d("ViewModel", "getMovieById called with id: $id")
+
+        // Start API-kallet for å hente filmen
+        apiViewModel.getMovie(id)
+
+        // Vent på at movieData skal oppdateres
+        return try {
+            // Vent på at movieData skal inneholde et resultat
+            val movieResponse = withContext(Dispatchers.IO) {
+                // Bruk collect for å vente på at movieData er oppdatert
+                apiViewModel.movieData.firstOrNull { it != null }
+            }
+
+            // Hvis movieResponse er null, returner null
+            val production = movieResponse?.let { convertResponseToProduction(it) }
+            _singleProductionData.update { production }
+
+            Log.d("Controller", "Returning production: $production")
+            production
+        } catch (e: Exception) {
+            Log.e("Controller", "Error fetching movie data", e)
+            null
+        }
+    }
+
+    private suspend fun getTVShowByIdAsync(id: String): Production? {
+        Log.d("Controller", "getTVShowById called with id: $id")
+        apiViewModel.getShow(id)
+
+        return try {
+            val showResponse = withContext(Dispatchers.IO) {
+                apiViewModel.showData.firstOrNull { it != null }
+            }
+
+            val production = showResponse?.let { convertResponseToProduction(it) }
+            _singleProductionData.update { production }
+
+            production
+        } catch (e: Exception) {
+            Log.e("Controller_getTVShowByIdAsync", "Error fetching show data", e)
+            null
+        }
     }
 
     fun createUserWithEmailAndPassword(

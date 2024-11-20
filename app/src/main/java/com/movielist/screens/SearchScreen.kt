@@ -27,13 +27,12 @@ import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProfileImage
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.model.userList
 import com.movielist.ui.theme.*
 import java.util.Calendar
 
@@ -72,20 +71,25 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
         )
     }
     //TEMP CODE DELETE ABOVE
-
-    val productionList: MutableList<Production> = tempShowList /*<-- Liste som inneholder søkeresultatene for Movies og TVSerier*/
+    val searchResultsList by controllerViewModel.searchResults.collectAsState()
+    //val productionList: MutableList<Production> = tempShowList /*<-- Liste som inneholder søkeresultatene for Movies og TVSerier*/
     val userList: MutableList<User> = tempUserList /* <-- Liste som inneholder søkeresultatene for brukere */
 
     var activeSortOption by remember { mutableStateOf(SearchSortOptions.MOVIESANDSHOWS) }
 
-    val handleSearchQuerry: (sortingOption: SearchSortOptions, searchQuerry:String) -> Unit = {sortingOption, searchQuerry ->
+    val handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery:String) -> Unit = {sortingOption, searchQuery ->
         activeSortOption = sortingOption
         //Kontroller logikk for å håndtere søk her
+        controllerViewModel.searchMultibleMedia(searchQuery)
     }
+
+
+
 
     val handleSortOptionsChange: (sortingOption: SearchSortOptions) -> Unit = {sortingOption ->
         activeSortOption = sortingOption
         //kontroller logikk for å håndtere sortering her
+
     }
 
     val handleUserClick: (userID: String) -> Unit = {userID ->
@@ -117,8 +121,12 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
             activeSortOption == SearchSortOptions.SHOW ||
             activeSortOption == SearchSortOptions.GENRE){
 
-            items(productionList) { prod ->
-                //Individual show search result items
+
+            val filtered = searchResultsList.filter {
+
+                it.type == "Movie" || it.type != "Movie"}
+            items(filtered) { prod ->
+
                 ProductionCardSearchPage(
                     production = prod,
                     handleProductionClick = handleProductionClick
@@ -138,7 +146,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     }
 
     TopNavBarSearchPage(
-        handleSearchQuerry = handleSearchQuerry,
+        handleSearchQuery = handleSearchQuery,
         handleSortOptionsChange = handleSortOptionsChange,
         activeSortOption = activeSortOption
     )
@@ -148,7 +156,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
 
 @Composable
 fun TopNavBarSearchPage (
-    handleSearchQuerry: (sortingOption: SearchSortOptions, searchQuerry: String) -> Unit,
+    handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery: String) -> Unit,
     handleSortOptionsChange: (sortOption: SearchSortOptions) -> Unit,
     activeSortOption: SearchSortOptions
 ){
@@ -169,7 +177,7 @@ fun TopNavBarSearchPage (
     Box(
         modifier = Modifier.wrapContentSize()
     ){
-        TopNavbarBackground()
+        TopScreensNavbarBackground()
 
         //Search bar and submit button button
         Column (
@@ -227,7 +235,7 @@ fun TopNavBarSearchPage (
                             ))
                         .clickable {
                             //SEARCH BUTTON LOGIC
-                            handleSearchQuerry(activeSortOption, searchQuery)
+                            handleSearchQuery(activeSortOption, searchQuery)
 
                         }
                 ){

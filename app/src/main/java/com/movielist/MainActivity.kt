@@ -15,6 +15,7 @@ import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
 import com.movielist.screens.CreateUserScreen
 import com.movielist.viewmodel.ApiViewModel
+import com.movielist.viewmodel.ReviewViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -22,6 +23,7 @@ class MainActivity : ComponentActivity() {
     private val authViewModel: AuthViewModel by viewModels()
     private val userViewModel: UserViewModel by viewModels()
     private val apiViewModel : ApiViewModel by viewModels()
+    private val reviewViewModel : ReviewViewModel by viewModels()
 
     private lateinit var controllerViewModel: ControllerViewModel
 
@@ -30,7 +32,7 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this) // Initializes Firebase
         enableEdgeToEdge()
 
-        controllerViewModel = ControllerViewModel(userViewModel, authViewModel, apiViewModel)
+        controllerViewModel = ControllerViewModel(userViewModel, authViewModel, apiViewModel, reviewViewModel)
 
         controllerViewModel.checkUserStatus()
 
@@ -68,8 +70,6 @@ class MainActivity : ComponentActivity() {
 
             //FirebaseTesting(controllerViewModel)
             Navigation(controllerViewModel)
-
-            TopMobileIconsBackground()
 
         }
     }

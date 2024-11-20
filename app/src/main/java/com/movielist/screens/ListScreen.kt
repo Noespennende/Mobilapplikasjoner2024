@@ -1,6 +1,5 @@
 package com.movielist.screens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +40,7 @@ import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.RatingSlider
-import com.movielist.composables.TopNavbarBackground
+import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
@@ -62,7 +61,7 @@ import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topNavBaHeight
-import com.movielist.ui.theme.topPhoneIconsBackgroundHeight
+import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
@@ -141,7 +140,7 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
     //List
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsBackgroundHeight + topNavBaHeight,
+            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight,
             start = horizontalPadding,
             end = horizontalPadding,
             bottom = bottomNavBarHeight+20.dp
@@ -187,7 +186,7 @@ fun TopNavBarListPage(
     Box(
         modifier = Modifier.wrapContentSize()
     ){
-        TopNavbarBackground()
+        TopScreensNavbarBackground()
         Column (
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
@@ -570,8 +569,8 @@ fun ListPageListItem (
                                     "Ep $watchedEpisodesCount of ${(listItem.production as TVShow).episodes.size}"
                                 }
                                 is Movie -> {
-                                    Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
-                                    Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
+                                    //Log.d("ListScreen","watchedEpisodesCount: $watchedEpisodesCount")
+                                    //Log.d("ListScreen","realEpisodesCount: ${listItem.currentEpisode}")
 
 
                                     // For filmer: vis lengden på filmen i minutter

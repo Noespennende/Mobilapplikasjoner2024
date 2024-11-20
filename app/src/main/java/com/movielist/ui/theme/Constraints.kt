@@ -11,10 +11,10 @@ val bottomNavBarHeight = 110.dp
 val bottomPhoneIconsOffset = 65.dp
 
 //Top phone icon constraints
-val topPhoneIconsBackgroundHeight = 35.dp
+val topPhoneIconsAndNavBarBackgroundHeight = 60.dp
 
 //top navbar constraints
-val topNavBarContentStart = topPhoneIconsBackgroundHeight + 10.dp
+val topNavBarContentStart = topPhoneIconsAndNavBarBackgroundHeight + 10.dp
 val topNavBaHeight = 85.dp
 
 //Show image constraints

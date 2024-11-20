@@ -63,4 +63,10 @@ interface ApiService {
     fun getShowVideo(
         @Path("series_id") seriesId: String,
         @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiMediaVideoResponse>
+
+    @GET("search/multi?language=en-US")
+    fun searchMulti(
+        @Query("query") query: String,
+        @Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"
+    ): Call<ApiAllMediaResponse>
 }
