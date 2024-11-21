@@ -81,6 +81,25 @@ class ControllerViewModel(
         }
     }
 
+    private val _profileOwner = MutableStateFlow<User?>(null)
+    val profileOwner: StateFlow<User?> get() = _profileOwner
+
+    suspend fun loadProfileOwner(userID: String) {
+        Log.d("Profile", "Loading profile for userID: $userID")
+
+        _profileOwner.value = if (userID == loggedInUser.value?.id) {
+
+            Log.d("Profile", "Profile owner is the logged-in user.")
+            loggedInUser.value
+        } else {
+
+            setOtherUser(userID)
+            val other = otherUser.firstOrNull { it?.id == userID }
+            Log.d("Profile", "Found other user: ${other?.userName}")
+            other
+        }
+    }
+
 
 
 
