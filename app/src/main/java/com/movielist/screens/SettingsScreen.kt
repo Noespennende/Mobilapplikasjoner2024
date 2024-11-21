@@ -41,12 +41,14 @@ import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
+import com.movielist.data.addUserToDatabase
 import com.movielist.model.ColorModes
 import com.movielist.model.Genders
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
+import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
@@ -91,6 +93,10 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     val handleAutodetectLocation: () -> Unit = {
 
+    }
+    
+    val handleColorModeChange: (mode: ColorModes) -> Unit = { mode ->  
+        //kontroller funksjon her
     }
 
     //Graphics
@@ -140,6 +146,13 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
                 location = user.location,
                 handleLocationEditedClick = handleLocationChange,
                 handleAutodetectLocationClick = handleAutodetectLocation
+            )
+        }
+
+        item {
+            EditColorMode(
+                handleColorModeChange = handleColorModeChange,
+                activeColorMode = user.colorMode
             )
         }
     }
@@ -789,7 +802,7 @@ fun EditLocation (
                 )
         )
 
-        //Update location button
+        //Autodetect button
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -800,7 +813,7 @@ fun EditLocation (
                 .padding(vertical = 10.dp, horizontal = 10.dp)
                 .fillMaxWidth()
                 .clickable {
-                    handleUpdateLocationClick()
+                    handleAutodetectLocationClick()
                 }
         ) {
             Text(
@@ -814,7 +827,7 @@ fun EditLocation (
                     .align(Alignment.Center)
             )
         }
-        //Update bio button
+        //Update location button
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
@@ -847,62 +860,138 @@ fun EditLocation (
 
 @Composable
 fun EditColorMode (
-    handleColorModeChange: (newMode: ColorModes) -> Unit
+    handleColorModeChange: (newMode: ColorModes) -> Unit,
+    activeColorMode: ColorModes,
+    activeColor: Color = Purple,
+    inactiveColor: Color = LightGray
 ){
+    var darkButtonColor by remember { mutableStateOf(
+        if(activeColorMode == ColorModes.DARKMODE) { activeColor}
+        else{inactiveColor}
+    )
+    }
+    var systemButtonColor by remember { mutableStateOf(
+        if(activeColorMode == ColorModes.SYSTEM) { activeColor}
+        else{inactiveColor}
+    ) }
+    var lightuttonColor by remember { mutableStateOf(
+        if(activeColorMode == ColorModes.LIGHTMODE) { activeColor}
+        else{inactiveColor}
+    ) }
 
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .background(
+                color = Gray,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .fillMaxWidth(.9f)
+            .padding(vertical = 10.dp,
+                horizontal = 20.dp)
+    ){
+        Text(
+            text = "Theme",
+            fontSize = headerSize,
+            fontFamily = fontFamily,
+            fontWeight = weightBold,
+            color = White,
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
 
-    Row() {
-        //Update bio button
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(
-                    color = Purple,
-                    shape = RoundedCornerShape(5.dp)
-                )
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-                .fillMaxWidth()
-                .clickable {
-                    handleColorModeChange(ColorModes.DARKMODE)
-                }
-        ) {
-            Text(
-                text = "Dark mode",
-                fontSize = headerSize,
-                fontWeight = weightBold,
-                fontFamily = fontFamily,
-                color = DarkGray,
-                textAlign = TextAlign.Center,
+            ) {
+            //Update bio button
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .align(Alignment.Center)
-            )
-        }
-        //Update bio button
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(
-                    color = Purple,
-                    shape = RoundedCornerShape(5.dp)
+                    .background(
+                        color = darkButtonColor,
+                        shape = RoundedCornerShape(
+                            topStart = 5.dp,
+                            bottomStart = 5.dp)
+                    )
+                    .fillMaxWidth(.3f)
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+                    .clickable {
+                        darkButtonColor = activeColor
+                        systemButtonColor = inactiveColor
+                        lightuttonColor = inactiveColor
+                        handleColorModeChange(ColorModes.DARKMODE)
+                    }
+            ) {
+                Text(
+                    text = "Dark",
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = DarkGray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.Center)
                 )
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-                .fillMaxWidth()
-                .clickable {
-                    handleColorModeChange(ColorModes.LIGHTMODE)
-                }
-        ) {
-            Text(
-                text = "Light Mode",
-                fontSize = headerSize,
-                fontWeight = weightBold,
-                fontFamily = fontFamily,
-                color = DarkGray,
-                textAlign = TextAlign.Center,
+            }
+            Box(
+                contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .align(Alignment.Center)
-            )
+                    .background(
+                        color = systemButtonColor,
+                        shape = RoundedCornerShape(0.dp)
+                    )
+                    .fillMaxWidth(.5f)
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+                    .clickable {
+                        darkButtonColor = inactiveColor
+                        systemButtonColor = activeColor
+                        lightuttonColor = inactiveColor
+                        handleColorModeChange(ColorModes.SYSTEM)
+                    }
+            ) {
+                Text(
+                    text = "System",
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = DarkGray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
+            //Update bio button
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .background(
+                        color = lightuttonColor,
+                        shape = RoundedCornerShape(
+                            topEnd = 5.dp,
+                            bottomEnd = 5.dp
+                        )
+                    )
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
+                    .clickable {
+                        darkButtonColor = inactiveColor
+                        systemButtonColor = inactiveColor
+                        lightuttonColor = activeColor
+                        handleColorModeChange(ColorModes.LIGHTMODE)
+                    }
+            ) {
+                Text(
+                    text = "Light",
+                    fontSize = headerSize,
+                    fontWeight = weightBold,
+                    fontFamily = fontFamily,
+                    color = DarkGray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                )
+            }
         }
     }
+
 }
 
 
