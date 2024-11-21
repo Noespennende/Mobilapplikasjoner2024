@@ -105,6 +105,39 @@ class ControllerViewModel(
         }
     }
 
+    fun getSharedProductions(comparingUser: User): Map<ListItem, ListItem> {
+
+        val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2()
+        val comparingUserProductions = comparingUser.getAllMoviesAndShows2()
+
+        if (loggedInUserProductions != null) {
+            Log.d("Profile", "we're in: ${loggedInUserProductions.count()} + ${comparingUserProductions.count()}")
+            val sharedProductions: Map<ListItem, ListItem> = loggedInUserProductions.associateWith { loggedInUserProduction ->
+                comparingUserProductions.find { it.production.imdbID == loggedInUserProduction.production.imdbID }
+            }.filterValues { it != null } as Map<ListItem, ListItem>
+
+            return sharedProductions
+        }
+
+        return emptyMap()
+    }
+
+    fun getUniqueProductions(
+        comparingUser: User,
+        sharedProductions: Map<ListItem, ListItem>
+    ): Pair<List<ListItem>, List<ListItem>> {
+        val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2() ?: emptyList()
+        val comparingUserProductions = comparingUser.getAllMoviesAndShows2()
+
+        // Hent kun de unike elementene som IKKE er i sharedShowsAndMovies
+        val loggedInUserShared = sharedProductions.keys
+        val comparingUserShared = sharedProductions.values
+        val uniqueToLoggedInUser = loggedInUserProductions.filter { it !in comparingUserProductions && it !in loggedInUserShared }
+        val uniqueToComparisonUser = comparingUserProductions.filter { it !in loggedInUserProductions && it !in comparingUserShared }
+
+        return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
+    }
+
 
 
 

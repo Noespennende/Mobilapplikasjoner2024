@@ -21,7 +21,7 @@ data class User (
     val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
     val droppedCollection:  MutableList<ListItem> = mutableListOf(),
     val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf()
-)
+) {
 
 fun movieGenrePercentage(user: User): Map<String, Double> {
     val allFilms = getAllMovies(user)
@@ -98,6 +98,7 @@ fun updateListItemScore(user: User, listType: String, itemId: String, newScore: 
     val targetList = when(listType){
         "completed" -> user.completedCollection
         "wantToWatch" -> user.wantToWatchCollection
+        "wantToWatch" -> user.wantToWatchCollection
         "dropped" -> user.droppedCollection
         "currentlyWatching" -> user.currentlyWatchingCollection
         else -> return false
@@ -116,6 +117,11 @@ fun updateListItemScore(user: User, listType: String, itemId: String, newScore: 
 
 fun isMovie(production: Production): Boolean {
     return production.type.lowercase() == "movie"
+}
+
+fun getAllMoviesAndShows2(): List<ListItem> {
+    val allShows = completedCollection + wantToWatchCollection + droppedCollection + currentlyWatchingCollection
+    return allShows
 }
 
 fun getAllMoviesAndShows(user: User): List<ListItem> {
@@ -271,3 +277,5 @@ fun writeReview(reviewer: User, score: Int, productionID: String, reviewBody: St
     return reviewer.copy(myReviews = updatedReviewList)
 }
 */
+
+}
