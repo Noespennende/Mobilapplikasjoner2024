@@ -195,8 +195,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
-    var settingsVisible by remember { mutableStateOf(false) }
-
     //function variables:
     val user by remember(profileOwner) {
         mutableStateOf(profileOwner ?: exampleUser)
@@ -229,7 +227,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     }
 
     val handleSettingsButtonClick: () -> Unit = {
-        settingsVisible = true
+        navController.navigate(Screen.SettingsScreen.withArguments())
     }
 
     LaunchedEffect(user) {
@@ -578,7 +576,7 @@ fun ProfileInfoSection (
             SettingsButton(
                 handleSettingsButtonClick = handleSettingsButtonClick,
                 filled = true,
-                sizeMultiplier = 1.3f,
+                sizeMultiplier = 1.0f,
                 backgroundColor = LightGray,
                 modifier = Modifier
                     .align(Alignment.End)

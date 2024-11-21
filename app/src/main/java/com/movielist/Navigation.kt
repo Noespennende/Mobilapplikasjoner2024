@@ -28,6 +28,7 @@ import com.movielist.screens.ProfilePage
 import com.movielist.screens.ReviewsScreen
 import com.movielist.screens.ReviewScreen
 import com.movielist.screens.SearchPage
+import com.movielist.screens.SettingsScreen
 
 
 @Composable
@@ -72,14 +73,21 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         }
     }
 
-    val handleProfileImageClick: () -> Unit = {
+    val handleTopNavProfileClick: () -> Unit = {
         if (loggedInUser != null){
             val user = loggedInUser as User
             handleScreenNameChange(Screens.PROFILE)
             navController.navigate(Screen.ProfileScreen.withArguments(user.id))
         }
-
     }
+
+    val handleTopNavSettingsClick: () -> Unit = {
+        if (loggedInUser != null) {
+            handleScreenNameChange(Screens.SETTINGS)
+            navController.navigate(Screen.SettingsScreen.withArguments())
+        }
+    }
+
     val handleLogoClick: () -> Unit = {
         handleScreenNameChange(Screens.HOME)
         navController.navigate(Screen.HomeScreen.withArguments())
@@ -236,6 +244,25 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             activeNavButton = NavbarOptions.NONE
         }
         composable(
+            route = Screen.SettingsScreen.withArguments() + "",
+            arguments = listOf(
+                navArgument("") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        )
+        { entry ->
+            SettingsScreen(
+                controllerViewModel,
+                navController,
+            )
+            handleScreenNameChange(Screens.SETTINGS)
+            aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
+        }
+        composable(
             route = Screen.ComparisonScreen.withArguments() + "/{userToCompareToID:}",
             arguments = listOf(
                 navArgument("userToCompareToID:") {
@@ -262,8 +289,9 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
         TopNav(
             loggedInUser = loggedInUser,
             CurrentScreen = currentScreen,
-            handleProfileImageClick = handleProfileImageClick,
-            handleLogoClick = handleLogoClick
+            handleProfileClick = handleTopNavProfileClick,
+            handleLogoClick = handleLogoClick,
+            handleSettingsClick = handleTopNavSettingsClick
         )
         BottomNavbarAndMobileIconsBackground()
         BottomNavBar(
