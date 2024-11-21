@@ -35,6 +35,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -81,6 +82,22 @@ class ControllerViewModel(
         }
     }
 
+    fun editUserBio(newBio: String){
+        loggedInUser.value?.bio = newBio
+    }
+
+    fun editUserGender(newGender: String){
+        loggedInUser.value?.gender = newGender
+    }
+
+    fun editUserWebsite(newWebsite: String){
+        loggedInUser.value?.website = newWebsite
+    }
+
+    fun editUserLocation(newLocation: String){
+        loggedInUser.value?.location = newLocation
+    }
+
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
 
@@ -104,7 +121,7 @@ class ControllerViewModel(
             other
         }
     }
-
+/*
     fun getSharedProductions(comparingUser: User): Map<ListItem, ListItem> {
 
         val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2()
@@ -136,7 +153,7 @@ class ControllerViewModel(
         val uniqueToComparisonUser = comparingUserProductions.filter { it !in loggedInUserProductions && it !in comparingUserShared }
 
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
-    }
+    }*/
 
 
 

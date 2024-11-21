@@ -76,19 +76,19 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     }
     val handleBioEditedClick: (newBio: String) -> Unit = {newBio ->
-        //Kontroller funksjon her
+        controllerViewModel.editUserBio(newBio)
     }
 
     val handleGenderChange: (newGender: String) -> Unit = {newGender ->
-        //Kontroller funksjon her
+        controllerViewModel.editUserGender(newGender)
     }
 
-    val handleWebsiteChange: (newWebsite: String) -> Unit = {nnewWebsite ->
-        //Kontroller funksjon her
+    val handleWebsiteChange: (newWebsite: String) -> Unit = {newWebsite ->
+        controllerViewModel.editUserWebsite(newWebsite)
     }
 
     val handleLocationChange: (newLocation: String) -> Unit = {newLocation ->
-        //Kontroller funksjon her
+        controllerViewModel.editUserLocation(newLocation)
     }
 
     val handleAutodetectLocation: () -> Unit = {
