@@ -76,20 +76,24 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
 
+    val profileOwner by controllerViewModel.profileOwner.collectAsState()
+
+    val profileBelongsToLoggedInUser by controllerViewModel.profileBelongsToLoggedInUser.collectAsState(true)
+
     // Innlogget bruker sin favorite-kolleksjon
-    val favoriteCollection: List<ListItem> = loggedInUser?.favoriteCollection ?: emptyList()
+    val favoriteCollection: List<ListItem> = profileOwner?.favoriteCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val completedCollection: List<ListItem> = loggedInUser?.completedCollection ?: emptyList()
+    val completedCollection: List<ListItem> = profileOwner?.completedCollection ?: emptyList()
 
     // Innlogget bruker sin wantToWatch-kolleksjon
-    val wantToWatchCollection: List<ListItem> = loggedInUser?.wantToWatchCollection ?: emptyList()
+    val wantToWatchCollection: List<ListItem> = profileOwner?.wantToWatchCollection ?: emptyList()
 
     // Innlogget bruker sin favorite-kolleksjon
-    val droppedCollection: List<ListItem> = loggedInUser?.droppedCollection ?: emptyList()
+    val droppedCollection: List<ListItem> = profileOwner?.droppedCollection ?: emptyList()
 
     // Innlogget bruker sin currentlyWatching-kolleksjon
-    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> = profileOwner?.currentlyWatchingCollection ?: emptyList()
 
     var activeCategory by remember { mutableStateOf(ListOptions.WATCHING) }
 
@@ -137,6 +141,13 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     //Graphics
 
+
+    LaunchedEffect(Unit) {
+        if (userID != null) {
+            controllerViewModel.loadProfileOwner(userID)
+        }
+    }
+
     //List
     LazyColumn(
         contentPadding = PaddingValues(
@@ -150,7 +161,7 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
     ) {
         item {
             ListPageList(
-                loggedInUsersList = isLoggedInUser,
+                loggedInUsersList = profileBelongsToLoggedInUser,
                 listItemList = displayedList,
                 handleProductionImageClick = handleProductionClick,
                 handleListItemRatingChange = handleListItemRatingsChange,
@@ -480,7 +491,7 @@ fun ListPageListItem (
                                 )
                                 .clickable {
                                     //Button onclick function
-                                    if (watchedEpisodesCount > 0){
+                                    if (watchedEpisodesCount > 0) {
                                         watchedEpisodesCount--
                                         listItem.currentEpisode = watchedEpisodesCount
 
