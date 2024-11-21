@@ -20,8 +20,9 @@ data class User (
     val completedCollection:  MutableList<ListItem> = mutableListOf(),
     val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
     val droppedCollection:  MutableList<ListItem> = mutableListOf(),
-    val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf()
-) {
+    val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf(),
+    val colorMode: ColorModes = ColorModes.DARKMODE
+)
 
 fun movieGenrePercentage(user: User): Map<String, Double> {
     val allFilms = getAllMovies(user)

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,8 +20,14 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,11 +36,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.movielist.R
 import com.movielist.model.NavbarOptions
+import com.movielist.model.TopNavDropdownOptions
 import com.movielist.model.User
-import com.movielist.ui.theme.DarkGray
+import com.movielist.ui.theme.DarkPurple
 import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LightBlack
 import com.movielist.ui.theme.LightGray
@@ -359,9 +368,27 @@ fun TopScreensNavbarBackground (
 fun TopNav (
     loggedInUser: User?,
     CurrentScreen: String,
-    handleProfileImageClick: () -> Unit,
+    handleProfileClick: () -> Unit,
+    handleSettingsClick: () -> Unit,
     handleLogoClick: () -> Unit
 ){
+
+    var dropDownExpanded by remember { mutableStateOf(false) }
+
+    val handleDropDownButtonClick: () -> Unit = {
+        dropDownExpanded = !dropDownExpanded
+    }
+
+    val handleDropDownCategoryClick: (option: TopNavDropdownOptions) -> Unit = {option ->
+        if (option == TopNavDropdownOptions.PROFILE){
+            dropDownExpanded = false
+            handleProfileClick()
+        } else if ( option == TopNavDropdownOptions.SETTINGS){
+            dropDownExpanded = false
+            handleSettingsClick()
+        }
+    }
+
     Box(
         modifier = Modifier.fillMaxSize()
     ){
@@ -394,17 +421,27 @@ fun TopNav (
                 )
 
             if (loggedInUser != null){
-                ProfileImage(
-                    imageID = loggedInUser.profileImageID,
-                    userName = loggedInUser.userName,
-                    handleProfileImageClick = handleProfileImageClick,
-                    sizeMultiplier = .6f
-                )
+                Box{
+                    ProfileImage(
+                        imageID = loggedInUser.profileImageID,
+                        userName = loggedInUser.userName,
+                        handleProfileImageClick = handleDropDownButtonClick,
+                        sizeMultiplier = .6f
+                    )
+
+                    TopNavDropDown(
+                        expanded = dropDownExpanded,
+                        handleDismiss = handleDropDownButtonClick,
+                        handleClick = handleDropDownCategoryClick
+                    )
+                }
+
             }
 
         }
 
     }
+
 }
 
 @Composable
@@ -423,4 +460,47 @@ fun TopNavBackground (
         )
     }
 }
+
+@Composable
+fun TopNavDropDown(
+    expanded: Boolean,
+    handleDismiss: () -> Unit,
+    handleClick: (TopNavDropdownOptions) -> Unit
+){
+
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = {handleDismiss()},
+        offset = DpOffset(x = 0.dp, y= 0.dp),
+        modifier = Modifier
+            .background(color = DarkPurple)
+            .width(100.dp)
+    ) {
+        TopNavDropdownOptions.entries.forEach(){
+                option -> DropdownMenuItem(
+            text = {
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                ){
+                    //MENU ITEM TEXT
+                    Text(
+                        text = option.toString().lowercase().replaceFirstChar { char -> char.uppercase() },
+                        fontSize = headerSize,
+                        fontWeight = weightBold,
+                        fontFamily = fontFamily,
+                        color = White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                    )
+                }
+            },
+            onClick = {
+                //On click logic for dropdown menu
+                handleClick(option)
+            })
+        }
+    }
+}
+
 
