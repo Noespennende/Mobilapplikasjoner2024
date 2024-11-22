@@ -82,29 +82,7 @@ class ControllerViewModel(
         }
     }
 
-    fun editUserBio(newBio: String){
-        loggedInUser.value?.let {
-            it.bio = newBio
-        }
-    }
 
-    fun editUserGender(newGender: String){
-        loggedInUser.value?.let{
-            it.gender = newGender
-        }
-    }
-
-    fun editUserWebsite(newWebsite: String){
-        loggedInUser.value?.let {
-            it.website = newWebsite
-        }
-    }
-
-    fun editUserLocation(newLocation: String){
-        loggedInUser.value?.let {
-            it.location = newLocation
-        }
-    }
 
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
@@ -129,16 +107,70 @@ class ControllerViewModel(
             other
         }
     }
-/*
+
+
+
+    fun editUserBio(newBio: String) {
+        _profileOwner.value?.let { user ->
+            user.bio = newBio
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("bio" to newBio)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserGender(newGender: String){
+        _profileOwner.value?.let { user ->
+            user.gender = newGender
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("gender" to newGender)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserWebsite(newWebsite: String){
+        _profileOwner.value?.let { user ->
+            user.website = newWebsite
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("website" to newWebsite)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserLocation(newLocation: String){
+        _profileOwner.value?.let { user ->
+            user.location = newLocation
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("location" to newLocation)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
     fun getSharedProductions(comparingUser: User): Map<ListItem, ListItem> {
 
         val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2()
-        val comparingUserProductions = comparingUser.getAllMoviesAndShows2()
+        val comparingUserProductions = comparingUser?.getAllMoviesAndShows2()
 
         if (loggedInUserProductions != null) {
-            Log.d("Profile", "we're in: ${loggedInUserProductions.count()} + ${comparingUserProductions.count()}")
+            Log.d("Profile", "we're in: ${loggedInUserProductions.count()} + ${comparingUserProductions?.count()}")
             val sharedProductions: Map<ListItem, ListItem> = loggedInUserProductions.associateWith { loggedInUserProduction ->
-                comparingUserProductions.find { it.production.imdbID == loggedInUserProduction.production.imdbID }
+                comparingUserProductions?.find { it.production.imdbID == loggedInUserProduction.production.imdbID }
             }.filterValues { it != null } as Map<ListItem, ListItem>
 
             return sharedProductions
@@ -161,7 +193,7 @@ class ControllerViewModel(
         val uniqueToComparisonUser = comparingUserProductions.filter { it !in loggedInUserProductions && it !in comparingUserShared }
 
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
-    }*/
+    }
 
 
 

@@ -51,6 +51,16 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
     }
 
+    fun updateUserField(userId: String, updates: Map<String, Any>) {
+        val user = db.collection("users").document(userId)
+
+        user.update(updates)
+
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Failed to update user field", exception)
+            }
+    }
+
     fun getUsersCompletedCollection(userID: String, onSuccess: (List<String>) -> Unit) {
         val db = Firebase.firestore
 
