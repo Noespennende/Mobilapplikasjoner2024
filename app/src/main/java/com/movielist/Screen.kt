@@ -14,6 +14,7 @@ sealed class Screen (
     object ProductionScreen : Screen("production_screen")
     object ReviewScreen : Screen("review_screen")
     object ComparisonScreen: Screen("comparison_screen")
+    object SettingsScreen: Screen("Settings_Screen")
 
 
     fun withArguments(vararg args: String): String {

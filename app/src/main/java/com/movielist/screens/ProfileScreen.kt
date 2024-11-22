@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -72,6 +73,7 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import com.movielist.ui.theme.yellow
+import kotlinx.coroutines.flow.firstOrNull
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -183,9 +185,11 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
 
-    val profileOwner by controllerViewModel.loggedInUser.collectAsState()
+    val profileOwner = controllerViewModel.profileOwner.collectAsState().value
 
-    val profileBelongsToLoggedInUser = true /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
+    val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+
+    var profileBelongsToLoggedInUser by remember { mutableStateOf(true) } /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
     val profileOwnersReviews = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) } /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
 
@@ -195,12 +199,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
-    var settingsVisible by remember { mutableStateOf(false) }
-
     //function variables:
-    val user by remember(profileOwner) {
-        mutableStateOf(profileOwner ?: exampleUser)
-    }
+    val user = profileOwner ?: exampleUser
+
     val isLoggedInUser by remember {
         mutableStateOf(true)
     }
@@ -229,13 +230,28 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     }
 
     val handleSettingsButtonClick: () -> Unit = {
-        settingsVisible = true
+        navController.navigate(Screen.SettingsScreen.withArguments())
     }
 
-    LaunchedEffect(user) {
-        val reviews = controllerViewModel.getUsersReviews(user).toMutableList()
 
-        profileOwnersReviews.value = reviews
+    LaunchedEffect(userID) {
+        if (userID != null) {
+            Log.d("Profile", "UserID: " + userID)
+            controllerViewModel.loadProfileOwner(userID)
+        }
+    }
+
+    LaunchedEffect(profileOwner) {
+        val owner = profileOwner
+
+        owner?.let {
+            profileBelongsToLoggedInUser = it.id == loggedInUser?.id
+            profileOwnersReviews.value = controllerViewModel.getUsersReviews(it).toMutableList()
+
+            Log.d("Profile", "Profile belongs to logged-in user: $profileBelongsToLoggedInUser - ${profileOwner.userName}")
+        } ?: run {
+            Log.d("Profile", "ProfileOwner is null")
+        }
     }
 
     //Graphics
@@ -578,7 +594,7 @@ fun ProfileInfoSection (
             SettingsButton(
                 handleSettingsButtonClick = handleSettingsButtonClick,
                 filled = true,
-                sizeMultiplier = 1.3f,
+                sizeMultiplier = 1.0f,
                 backgroundColor = LightGray,
                 modifier = Modifier
                     .align(Alignment.End)

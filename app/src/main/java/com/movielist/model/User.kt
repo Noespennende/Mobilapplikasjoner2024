@@ -9,163 +9,175 @@ data class User (
     val id: String = UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val profileImageID: String? = null,
-    val gender: String = "Prefer not to say",
-    val location: String = "It's a secret",
-    val website: String = "",
-    val bio: String = "",
+    var profileImageID: String? = null,
+    var gender: String = "Prefer not to say",
+    var location: String = "It's a secret",
+    var website: String = "",
+    var bio: String = "",
     val friendList: MutableList<String> = mutableListOf(),
     val myReviews: MutableList<String> = mutableListOf(), // Review-IDer
     val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val completedCollection:  MutableList<ListItem> = mutableListOf(),
     val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
     val droppedCollection:  MutableList<ListItem> = mutableListOf(),
-    val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf()
-)
+    val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf(),
+    val colorMode: ColorModes = ColorModes.DARKMODE
+) {
 
-fun movieGenrePercentage(user: User): Map<String, Double> {
-    val allFilms = getAllMovies(user)
-    val genreCounter = mutableMapOf<String, Int>()
-    var totalGenreCount = 0
+    fun movieGenrePercentage(user: User): Map<String, Double> {
+        val allFilms = getAllMovies(user)
+        val genreCounter = mutableMapOf<String, Int>()
+        var totalGenreCount = 0
 
-    allFilms.forEach { listItem ->
-        val movie = listItem.production as? Movie
-        movie?.let {
+        allFilms.forEach { listItem ->
+            val movie = listItem.production as? Movie
+            movie?.let {
 
-            it.genre.forEach { genre ->
-                genreCounter[genre] = genreCounter.getOrDefault(genre, 0) + 1
-                totalGenreCount++
+                it.genre.forEach { genre ->
+                    genreCounter[genre] = genreCounter.getOrDefault(genre, 0) + 1
+                    totalGenreCount++
+                }
             }
+        }
+
+        val sortedGenres = genreCounter.entries.sortedByDescending { it.value }.take(4)
+
+
+        val genrePercentage = mutableMapOf<String, Double>()
+
+        sortedGenres.forEach { (genre, count) ->
+            genrePercentage[genre] = (count.toDouble() / totalGenreCount) * 100
+        }
+
+        val remainingGenresCount = genreCounter.size - sortedGenres.size
+
+        if (remainingGenresCount > 0) {
+            genrePercentage["any"] = (remainingGenresCount.toDouble() / totalGenreCount) * 100
+        }
+
+        return genrePercentage
+    }
+
+
+    fun showGenrePercentage(user: User): Map<String, Double> {
+        val allShows = getAllshows(user)
+        val genreCounter = mutableMapOf<String, Int>()
+        var totalGenreCount = 0
+
+        allShows.forEach { listItem ->
+            val show = listItem.production as? Movie
+            show?.let {
+                it.genre.forEach { genre ->
+                    genreCounter[genre] = genreCounter.getOrDefault(genre, 0) + 1
+                    totalGenreCount++
+                }
+            }
+        }
+
+
+        val sortedGenres = genreCounter.entries.sortedByDescending { it.value }.take(4)
+
+
+        val genrePercentage = mutableMapOf<String, Double>()
+
+        sortedGenres.forEach { (genre, count) ->
+            genrePercentage[genre] =
+                (count.toDouble() / totalGenreCount) * 100// Round down to two decimal places
+        }
+
+
+        val remainingGenresCount = genreCounter.size - sortedGenres.size
+
+        if (remainingGenresCount > 0) {
+            genrePercentage["any"] =
+                (remainingGenresCount.toDouble() / totalGenreCount) * 100 // Round down to two decimal places
+        }
+
+        return genrePercentage
+    }
+
+
+    fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
+        val targetList = when (listType) {
+            "completed" -> user.completedCollection
+            "wantToWatch" -> user.wantToWatchCollection
+            "wantToWatch" -> user.wantToWatchCollection
+            "dropped" -> user.droppedCollection
+            "currentlyWatching" -> user.currentlyWatchingCollection
+            else -> return false
+        }
+
+        val listItem = targetList.find { it.id == itemId }
+
+        return if (listItem != null) {
+            listItem.score = newScore
+            listItem.lastUpdated = Calendar.getInstance()
+            true
+        } else {
+            false
         }
     }
 
-    val sortedGenres = genreCounter.entries.sortedByDescending { it.value }.take(4)
-
-
-    val genrePercentage = mutableMapOf<String, Double>()
-
-    sortedGenres.forEach { (genre, count) ->
-        genrePercentage[genre] = (count.toDouble() / totalGenreCount) * 100
+    fun isMovie(production: Production): Boolean {
+        return production.type.lowercase() == "movie"
     }
 
-    val remainingGenresCount = genreCounter.size - sortedGenres.size
-
-    if (remainingGenresCount > 0) {
-        genrePercentage["any"] = (remainingGenresCount.toDouble() / totalGenreCount) * 100
+    fun getAllMoviesAndShows2(): List<ListItem> {
+        val allShows =
+            completedCollection + wantToWatchCollection + droppedCollection + currentlyWatchingCollection
+        return allShows
     }
 
-    return genrePercentage
-}
+    fun getAllMoviesAndShows(user: User): List<ListItem> {
+        val allShows =
+            user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
+        return allShows
+    }
 
+    fun getAllMovies(user: User): List<ListItem> {
+        var allShows = getAllMoviesAndShows(user)
 
-fun showGenrePercentage(user: User): Map<String, Double> {
-    val allShows = getAllshows(user)
-    val genreCounter = mutableMapOf<String, Int>()
-    var totalGenreCount = 0
+        val finishedList = allShows.distinctBy { it.id }
+        val onlyMovies = finishedList.filter { listItem ->
+            isMovie(listItem.production as Movie)
+        }
 
-    allShows.forEach { listItem ->
-        val show = listItem.production as? Movie
-        show?.let {
-            it.genre.forEach { genre ->
-                genreCounter[genre] = genreCounter.getOrDefault(genre, 0) + 1
-                totalGenreCount++
-            }
+        return onlyMovies
+    }
+
+    fun getAllshows(user: User): List<ListItem> {
+        var allShows = getAllMoviesAndShows(user)
+
+        val finishedList = allShows.distinctBy { it.id }
+        val onlyShows = finishedList.filter { listItem ->
+            !isMovie(listItem.production)
+        }
+
+        return onlyShows
+    }
+
+    fun getUniqueShows(user: User): List<ListItem> {
+        val allShows =
+            user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
+
+        val uniqueShows = allShows.distinctBy { it.id }
+
+        println("test")
+        return uniqueShows
+    }
+
+    fun deleteUser(uuid: String) {
+        val userToDelete = userList.find { it.id == uuid }
+
+        if (userToDelete != null) {
+            userList.remove(userToDelete)
+            println("User ${userToDelete.userName} har blitt slettet")
+        } else {
+            println("Brukeren med ${uuid} ikke funnet")
         }
     }
 
-
-    val sortedGenres = genreCounter.entries.sortedByDescending { it.value }.take(4)
-
-
-    val genrePercentage = mutableMapOf<String, Double>()
-
-    sortedGenres.forEach { (genre, count) ->
-        genrePercentage[genre] = (count.toDouble() / totalGenreCount) * 100// Round down to two decimal places
-    }
-
-
-    val remainingGenresCount = genreCounter.size - sortedGenres.size
-
-    if (remainingGenresCount > 0) {
-        genrePercentage["any"] = (remainingGenresCount.toDouble() / totalGenreCount) * 100 // Round down to two decimal places
-    }
-
-    return genrePercentage
-}
-
-
-fun updateListItemScore(user: User, listType: String, itemId: String, newScore: Int): Boolean {
-    val targetList = when(listType){
-        "completed" -> user.completedCollection
-        "wantToWatch" -> user.wantToWatchCollection
-        "dropped" -> user.droppedCollection
-        "currentlyWatching" -> user.currentlyWatchingCollection
-        else -> return false
-    }
-
-    val listItem = targetList.find { it.id == itemId }
-
-    return if (listItem != null) {
-        listItem.score = newScore
-        listItem.lastUpdated = Calendar.getInstance()
-        true
-    } else {
-        false
-    }
-}
-
-fun isMovie(production: Production): Boolean {
-    return production.type.lowercase() == "movie"
-}
-
-fun getAllMoviesAndShows(user: User): List<ListItem> {
-    val allShows = user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
-    return allShows
-}
-
-fun getAllMovies(user: User): List<ListItem> {
-    var allShows = getAllMoviesAndShows(user)
-
-    val finishedList = allShows.distinctBy { it.id }
-    val onlyMovies = finishedList.filter { listItem ->
-        isMovie(listItem.production as Movie)
-    }
-
-    return onlyMovies
-}
-
-fun getAllshows(user: User): List<ListItem> {
-    var allShows = getAllMoviesAndShows(user)
-
-    val finishedList = allShows.distinctBy { it.id }
-    val onlyShows = finishedList.filter { listItem ->
-        !isMovie(listItem.production)
-    }
-
-    return onlyShows
-}
-
-fun getUniqueShows (user: User): List<ListItem>{
-    val allShows = user.completedCollection + user.wantToWatchCollection + user.droppedCollection + user.currentlyWatchingCollection
-
-    val uniqueShows = allShows.distinctBy { it.id }
-
-     println("test")
-    return  uniqueShows
-}
-
-fun deleteUser(uuid: String){
-    val userToDelete = userList.find{it.id == uuid}
-
-    if(userToDelete != null){
-        userList.remove(userToDelete)
-        println("User ${userToDelete.userName} har blitt slettet")
-    }else{
-        println("Brukeren med ${uuid} ikke funnet")
-    }
-}
-
-/*
+    /*
 fun addFriend(user: User, friend: User): User {
     val updatedFriendList = user.friendList.toMutableList()
 
@@ -199,56 +211,56 @@ fun removeFriend(user: User, friend: User) : User {
  */
 
 
+    fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
+        val commonMovies: MutableList<ListItem> = mutableListOf()
 
-fun favoriteMoviesInCommon(user: User, friend: User): List<ListItem> {
-    val commonMovies: MutableList<ListItem> = mutableListOf()
+        val userMovies = user.favoriteCollection
+        val friendMovies = friend.favoriteCollection
 
-    val userMovies = user.favoriteCollection
-    val friendMovies = friend.favoriteCollection
-
-    userMovies.forEach { movie ->
-        friendMovies.forEach { friendMovie ->
-            if (movie.id == friendMovie.id) {
-                commonMovies.add(movie)
+        userMovies.forEach { movie ->
+            friendMovies.forEach { friendMovie ->
+                if (movie.id == friendMovie.id) {
+                    commonMovies.add(movie)
+                }
             }
         }
+        return commonMovies
     }
-    return commonMovies
-}
 
-fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
-    val commonCompleted: MutableList<ListItem> = mutableListOf()
+    fun completedShowsInCommon(user: User, friend: User): List<ListItem> {
+        val commonCompleted: MutableList<ListItem> = mutableListOf()
 
-    user.completedCollection.filter { userShow ->
-        friend.completedCollection.any { friendShow -> userShow.id == friendShow.id }
-    }.forEach({common ->
-        commonCompleted.add(common)
-    })
-    return commonCompleted
-}
+        user.completedCollection.filter { userShow ->
+            friend.completedCollection.any { friendShow -> userShow.id == friendShow.id }
+        }.forEach({ common ->
+            commonCompleted.add(common)
+        })
+        return commonCompleted
+    }
 
-fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
-    val commonShows: MutableList<ListItem> = mutableListOf()
+    fun wantToWatchShowsInCommon(user: User, friend: User): List<ListItem> {
+        val commonShows: MutableList<ListItem> = mutableListOf()
 
-    user.wantToWatchCollection.filter { userShow ->
-        friend.wantToWatchCollection.any { friendShow -> userShow.id == friendShow.id }
-    }.forEach({commonShow ->
-        commonShows.add(commonShow)
-    })
+        user.wantToWatchCollection.filter { userShow ->
+            friend.wantToWatchCollection.any { friendShow -> userShow.id == friendShow.id }
+        }.forEach({ commonShow ->
+            commonShows.add(commonShow)
+        })
 
-    return commonShows
-}
+        return commonShows
+    }
 
-fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
-    val commonShows: MutableList<ListItem> = mutableListOf()
+    fun currentlyWatchShowsInCommon(user: User, friend: User): List<ListItem> {
+        val commonShows: MutableList<ListItem> = mutableListOf()
 
-    user.currentlyWatchingCollection.filter { userShow ->
-        friend.currentlyWatchingCollection.any { friendShow -> userShow.id == friendShow.id }
-    }.forEach({commonShow ->
-        commonShows.add(commonShow)
-    })
+        user.currentlyWatchingCollection.filter { userShow ->
+            friend.currentlyWatchingCollection.any { friendShow -> userShow.id == friendShow.id }
+        }.forEach({ commonShow ->
+            commonShows.add(commonShow)
+        })
 
-    return commonShows
+        return commonShows
+    }
 }
 
 
@@ -270,4 +282,6 @@ fun writeReview(reviewer: User, score: Int, productionID: String, reviewBody: St
 
     return reviewer.copy(myReviews = updatedReviewList)
 }
-*/
+
+
+}*/

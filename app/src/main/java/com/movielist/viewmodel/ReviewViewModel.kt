@@ -139,6 +139,11 @@ class ReviewViewModel(
 
         val parts = reviewID.split("_")
 
+        if (parts.size != 3) {
+            Log.d("splitReviewID", "Feil format på reviewID: $reviewID")
+        }
+
+
         val collectionType = parts[0]  // "RMOV" for movie reviews, "RTV" for TV shows, etc.
         val productionID = parts[1]   // "53344" for the production ID
         val uuid = parts[2]           // UUID delen

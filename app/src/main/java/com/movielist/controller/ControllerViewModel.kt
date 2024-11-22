@@ -36,6 +36,7 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -80,6 +81,119 @@ class ControllerViewModel(
 
             _filteredMediaData.postValue(convertedResults)
         }
+    }
+
+
+
+    private val _profileOwner = MutableStateFlow<User?>(null)
+    val profileOwner: StateFlow<User?> get() = _profileOwner
+
+    private val _profileBelongsToLoggedInUser = MutableStateFlow<Boolean>(true)
+    val profileBelongsToLoggedInUser: StateFlow<Boolean> get() = _profileBelongsToLoggedInUser
+
+    suspend fun loadProfileOwner(userID: String) {
+        Log.d("Profile", "Loading profile for userID: $userID")
+
+        _profileOwner.value = if (userID == loggedInUser.value?.id) {
+
+            _profileBelongsToLoggedInUser.value = true
+            Log.d("Profile", "Profile owner is the logged-in user.")
+            loggedInUser.value
+        } else {
+
+            _profileBelongsToLoggedInUser.value = false
+            setOtherUser(userID)
+            val other = otherUser.firstOrNull { it?.id == userID }
+            Log.d("Profile", "Found other user: ${other?.userName}")
+            other
+        }
+    }
+
+
+
+    fun editUserBio(newBio: String) {
+        _profileOwner.value?.let { user ->
+            user.bio = newBio
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("bio" to newBio)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserGender(newGender: String){
+        _profileOwner.value?.let { user ->
+            user.gender = newGender
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("gender" to newGender)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserWebsite(newWebsite: String){
+        _profileOwner.value?.let { user ->
+            user.website = newWebsite
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("website" to newWebsite)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun editUserLocation(newLocation: String){
+        _profileOwner.value?.let { user ->
+            user.location = newLocation
+
+            loggedInUser.value?.id?.let { userId ->
+                val myUpdates = mapOf("location" to newLocation)
+
+                firestoreRepository.updateUserField(userId, myUpdates)
+
+            }
+        }
+    }
+
+    fun getSharedProductions(comparingUser: User): Map<ListItem, ListItem> {
+
+        val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2()
+        val comparingUserProductions = comparingUser?.getAllMoviesAndShows2()
+
+        if (loggedInUserProductions != null) {
+            Log.d("Profile", "we're in: ${loggedInUserProductions.count()} + ${comparingUserProductions?.count()}")
+            val sharedProductions: Map<ListItem, ListItem> = loggedInUserProductions.associateWith { loggedInUserProduction ->
+                comparingUserProductions?.find { it.production.imdbID == loggedInUserProduction.production.imdbID }
+            }.filterValues { it != null } as Map<ListItem, ListItem>
+
+            return sharedProductions
+        }
+
+        return emptyMap()
+    }
+
+    fun getUniqueProductions(
+        comparingUser: User,
+        sharedProductions: Map<ListItem, ListItem>
+    ): Pair<List<ListItem>, List<ListItem>> {
+        val loggedInUserProductions = loggedInUser.value?.getAllMoviesAndShows2() ?: emptyList()
+        val comparingUserProductions = comparingUser.getAllMoviesAndShows2()
+
+        // Hent kun de unike elementene som IKKE er i sharedShowsAndMovies
+        val loggedInUserShared = sharedProductions.keys
+        val comparingUserShared = sharedProductions.values
+        val uniqueToLoggedInUser = loggedInUserProductions.filter { it !in comparingUserProductions && it !in loggedInUserShared }
+        val uniqueToComparisonUser = comparingUserProductions.filter { it !in loggedInUserProductions && it !in comparingUserShared }
+
+        return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
 
@@ -891,6 +1005,7 @@ class ControllerViewModel(
             }
         }
 
+        Log.d("Reviews", reviewDTOList.toString())
         return reviewDTOList
             .sortedByDescending { it.score }
             .take(10)
@@ -947,6 +1062,7 @@ class ControllerViewModel(
 
                 val reviewDTO = reviewViewModel.createReviewDTO(reviewObject, reviewer, production)
 
+                Log.d("Review", "her er jeg getReviewById - $reviewID $productionID")
                 _singleReviewDTOData.value = reviewDTO
 
             } catch (exception: Exception) {
@@ -995,6 +1111,35 @@ class ControllerViewModel(
         }
     }
 
+
+    fun loadReviewData(reviewID: String?) {
+        viewModelScope.launch {
+
+            nullifySingleReviewDTOData()
+            nullifySingleProductionData()
+
+            val (collectionType, productionID, _) =
+                if (reviewID != null) reviewViewModel.splitReviewID(reviewID)
+                else Triple(null, null, null)
+
+            var production: Production? = null;
+            when (collectionType) {
+                "RMOV" -> productionID?.let { production = getMovieByIdAsync(it) }
+                "RTV" -> productionID?.let { production = getTVShowByIdAsync(it) }
+            }
+
+            if (!reviewID.isNullOrEmpty()) {
+                production?.let {
+                        Log.d("Review", "Yuhuu" + (production?.imdbID ?: "production null"))
+
+                    getReviewById(reviewID, it.type, it.imdbID)
+                    Log.d("Review", "loadReviewData $reviewID ${it.type} ${it.imdbID}")
+
+                    Log.d("Review", "Yuhuu" + it.imdbID)
+                }
+            }
+        }
+    }
 
     suspend fun getUsersReviews(user: User): List<ReviewDTO> {
 
@@ -1108,7 +1253,7 @@ class ControllerViewModel(
     }
 
     private suspend fun getTVShowByIdAsync(id: String): Production? {
-        Log.d("Controller", "getTVShowById called with id: $id")
+        Log.d("Controller", "getTVShowByIdAsync called with id: $id")
         apiViewModel.getShow(id)
 
         return try {

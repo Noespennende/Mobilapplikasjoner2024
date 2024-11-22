@@ -119,6 +119,15 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.2.2")
 
+    //Camera
+    implementation (libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.extensions)
+    implementation ("com.google.accompanist:accompanist-permissions:0.25.1")
+    implementation("androidx.exifinterface:exifinterface:1.3.6")
+
+
     // mulig disse 3 kan fjernes
     implementation ("com.google.android.gms:play-services-base:18.1.0")
     implementation ("com.google.android.gms:play-services-base:18.5.0")
