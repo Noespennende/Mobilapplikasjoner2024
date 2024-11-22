@@ -83,19 +83,27 @@ class ControllerViewModel(
     }
 
     fun editUserBio(newBio: String){
-        loggedInUser.value?.bio = newBio
+        loggedInUser.value?.let {
+            it.bio = newBio
+        }
     }
 
     fun editUserGender(newGender: String){
-        loggedInUser.value?.gender = newGender
+        loggedInUser.value?.let{
+            it.gender = newGender
+        }
     }
 
     fun editUserWebsite(newWebsite: String){
-        loggedInUser.value?.website = newWebsite
+        loggedInUser.value?.let {
+            it.website = newWebsite
+        }
     }
 
     fun editUserLocation(newLocation: String){
-        loggedInUser.value?.location = newLocation
+        loggedInUser.value?.let {
+            it.location = newLocation
+        }
     }
 
     private val _profileOwner = MutableStateFlow<User?>(null)
