@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -31,6 +32,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -38,6 +42,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.auth.api.phone.SmsCodeAutofillClient.PermissionState
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
@@ -63,8 +71,12 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: NavController){
+
+    var cameraPermission: com.google.accompanist.permissions.PermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    var showCameraScreen: Boolean by remember { mutableStateOf(false) }
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val user = loggedInUser as User
@@ -73,7 +85,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     }
     val handleTakePhotoClick: () -> Unit = {
-
+        showCameraScreen = true
     }
     val handleBioEditedClick: (newBio: String) -> Unit = {newBio ->
         controllerViewModel.editUserBio(newBio)
@@ -99,7 +111,19 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         //kontroller funksjon her
     }
 
+    val handleImageCapture: (image:Bitmap) -> Unit  ={image ->
+        showCameraScreen = false
+
+        //Kontroller funksjon her
+    }
+
+
+    val handleCancelCameraPeromissionClick: () -> Unit = {
+        showCameraScreen = false
+    }
+
     //Graphics
+
     LazyColumn(
         contentPadding = PaddingValues(
             top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
@@ -156,6 +180,21 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
             )
         }
     }
+
+    if(showCameraScreen){
+        if(cameraPermission.status.isGranted){
+            CameraScreen(
+                handleImageCapture = handleImageCapture
+            )
+        } else {
+            NoPermissionScreen(
+                handleCancelClick = handleCancelCameraPeromissionClick,
+                handleRequestPermissionClick = cameraPermission::launchPermissionRequest
+            )
+        }
+
+    }
+
 }
 
 @Composable
@@ -164,7 +203,7 @@ fun ProfileImageSettings (
     handleAddImageFromPhoneClick: () -> Unit,
     handleTakePhotoClick: () -> Unit,
     iconColor: Color = White,
-    backgroundColor: Color = Purple
+    backgroundColor: Color = LightGray
 ){
 
     var expanded by remember { mutableStateOf(false) }
@@ -472,9 +511,8 @@ fun EditGender (
     var dropDownExpanded by remember { mutableStateOf(false) }
     var dropDownButtonText by remember { mutableStateOf(gender) }
 
-    Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+    Column (
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .background(
                 color = Gray,
@@ -715,7 +753,7 @@ fun EditLocation (
     handleLocationEditedClick: (updatedBio: String) -> Unit,
     handleAutodetectLocationClick: () -> Unit
 ){
-    val maxCharLenght = 30
+    val maxCharLenght = 60
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     var newLocation by remember { mutableStateOf(location) }
@@ -996,7 +1034,6 @@ fun EditColorMode (
 
 
 
-
 fun GenerateGenderText (gender: Genders): String {
     if (gender == Genders.PREFERNOTTOSAY){
         return "Prefer not to say"
@@ -1004,3 +1041,4 @@ fun GenerateGenderText (gender: Genders): String {
         return gender.toString().lowercase().replaceFirstChar { char -> char.uppercase() }
     }
 }
+

@@ -9,7 +9,7 @@ data class User (
     val id: String = UUID.randomUUID().toString(),
     val userName: String,
     val email: String,
-    val profileImageID: String? = null,
+    var profileImageID: String? = null,
     var gender: String = "Prefer not to say",
     var location: String = "It's a secret",
     var website: String = "",
