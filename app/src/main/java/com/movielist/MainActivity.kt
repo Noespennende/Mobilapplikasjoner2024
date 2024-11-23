@@ -58,7 +58,7 @@ class MainActivity : ComponentActivity() {
                     //controllerViewModel.getMovieById()
                     //controllerViewModel.getMovieCredits("933260")
                     //controllerViewModel.getShowCredits("94722")
-                    controllerViewModel.getMovieVideo("933260")
+                    //controllerViewModel.getMovieVideo("933260")
                     //controllerViewModel.getShowVideo("94722")
 
                 }

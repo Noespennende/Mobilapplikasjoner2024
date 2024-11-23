@@ -227,7 +227,7 @@ data class ApiMovieResponse(
 	val title: String? = null,
 
 	@field:SerializedName("video")
-	val video: List<ApiMediaVideoResponse>? = null,
+	val video: Boolean? = null,
 
 	@field:SerializedName("vote_average")
 	val voteAverage: Double? = null,

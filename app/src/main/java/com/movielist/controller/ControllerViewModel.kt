@@ -10,9 +10,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirestoreRepository
 import com.movielist.model.AllMedia
+import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
+import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -27,6 +29,7 @@ import com.movielist.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -66,7 +69,6 @@ class ControllerViewModel(
     private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
     val searchResults: StateFlow<List<Production>> get() = _searchResult
 
-
     init {
 
         apiViewModel.mediaData.observeForever { mediaList ->
@@ -82,8 +84,6 @@ class ControllerViewModel(
             _filteredMediaData.postValue(convertedResults)
         }
     }
-
-
 
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
@@ -108,8 +108,6 @@ class ControllerViewModel(
             other
         }
     }
-
-
 
     fun editUserBio(newBio: String) {
         _profileOwner.value?.let { user ->
@@ -196,9 +194,6 @@ class ControllerViewModel(
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
-
-
-
     fun searchMultibleMedia(query: String) {
         apiViewModel.searchMulti(query)
 
@@ -244,12 +239,9 @@ class ControllerViewModel(
             posterUrl = "https://image.tmdb.org/t/p/w500/"+media.posterPath,
             genre = media.genres?.map { it?.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(media.firstAirDate) ?: Calendar.getInstance(),
-
         )
         )
     }
-
-
 
     init {
 
@@ -281,9 +273,9 @@ class ControllerViewModel(
         apiViewModel.getMovie(movieId)
     }
 
-    fun getShow(seriesId: Int) {
+    fun getShow(seriesId: String) {
         Log.d("ControllerViewModel", "getShow called")
-        //apiViewModel.getShow(seriesId)
+        apiViewModel.getShow(seriesId)
     }
 
     fun getShowSeason(seriesId: String, seasonNumber: String) {
@@ -323,6 +315,54 @@ class ControllerViewModel(
         _singleProductionData.value = null
     }
 
+    private suspend fun fetchAdditionalMovieData(movieId: String): Pair<List<String>, String?> {
+        return try {
+            val credits = fetchMovieCredits(movieId)
+            val videoKey = fetchMovieVideo(movieId)
+            val trailerUrl = videoKey?.let { "https://www.youtube.com/watch?v=$it" }
+            Pair(credits, trailerUrl)
+        } catch (e: Exception) {
+            Log.e("ControllerViewModel", "Error fetching movie data for movieId: $movieId", e)
+            Pair(emptyList(), null)
+        }
+    }
+
+    private suspend fun fetchAdditionalShowData(seriesId: String): Pair<List<String>, String?> {
+        return try {
+            val credits = fetchShowCredits(seriesId)
+            val videoKey = fetchShowVideo(seriesId)
+            val trailerUrl = videoKey?.let { "https://www.youtube.com/watch?v=$it" }
+            Pair(credits, trailerUrl)
+        } catch (e: Exception) {
+            Log.e("ControllerViewModel", "Error fetching show data for seriesId: $seriesId", e)
+            Pair(emptyList(), null)
+        }
+    }
+
+    private suspend fun fetchMovieCredits(movieId: String): List<String> {
+        apiViewModel.getMovieCredits(movieId)
+        return apiViewModel.movieCreditData.firstOrNull()?.cast?.map { it.name.orEmpty() } ?: emptyList()
+    }
+
+    private suspend fun fetchMovieVideo(movieId: String): String? {
+        apiViewModel.getMovieVideo(movieId)
+        return apiViewModel.movieVideoData.firstOrNull()
+            ?.firstOrNull { it.type == "Trailer" && it.name == "Official Trailer" }
+            ?.key
+    }
+
+    private suspend fun fetchShowCredits(seriesId: String): List<String> {
+        apiViewModel.getShowCredits(seriesId)
+        return apiViewModel.showCreditData.firstOrNull()?.cast?.map { it.name.orEmpty() } ?: emptyList()
+    }
+
+    private suspend fun fetchShowVideo(seriesId: String): String? {
+        apiViewModel.getShowVideo(seriesId)
+        return apiViewModel.showVideoData.firstOrNull()
+            ?.firstOrNull { it.type == "Trailer" && it.name == "Official Trailer" }
+            ?.key
+    }
+
     fun setMovieById(id: String) {
         Log.d("ViewModel", "setMovieById called with id: $id")
         apiViewModel.getMovie(id)
@@ -357,11 +397,16 @@ class ControllerViewModel(
         }
     }
 
-    private fun convertResponseToProduction(result: ApiProductionResponse): Production {
+    private suspend fun convertResponseToProduction(result: ApiProductionResponse): Production {
         return when (result) {
-            is ApiMovieResponse -> convertApiMovieResponseToMovie(result)
-            is ApiShowResponse -> convertApiShowResponseToTVShow(result)
-            // Mangler ApiEpisodeResponse her
+            is ApiMovieResponse -> {
+                val (credits, trailerUrl) = fetchAdditionalMovieData(result.id.toString())
+                convertApiMovieResponseToMovie(result, credits, trailerUrl)
+            }
+            is ApiShowResponse -> {
+                val (credits, trailerUrl) = fetchAdditionalShowData(result.id.toString())
+                convertApiShowResponseToTVShow(result, credits, trailerUrl)
+            }
         }
     }
 
@@ -383,8 +428,11 @@ class ControllerViewModel(
         }
     }
 
-    private fun convertApiMovieResponseToMovie(result: ApiMovieResponse): Movie {
-
+    private fun convertApiMovieResponseToMovie(
+        result: ApiMovieResponse,
+        actors: List<String>,
+        trailerUrl: String?
+    ): Movie {
         return Movie(
             imdbID = result.id.toString(),
             title = result.title.orEmpty(),
@@ -392,15 +440,18 @@ class ControllerViewModel(
             posterUrl = "https://image.tmdb.org/t/p/w500" + result.posterPath,
             genre = result.genres?.map { it.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(result.releaseDate) ?: Calendar.getInstance(),
-            // actors = // Trenger nytt API Kall -> /3/movie/{movie_id}/credits
-            rating = result.voteAverage?.toInt(), // Forandres vel til interne ratings
-            // reviews = Kommer når Firebase implementasjon er klart
-            // trailerUrl = Trenger nytt API Kall -> /3/movie/{movie_id}/videos
+            actors = actors,
+            rating = result.voteAverage?.toInt(),
+            trailerUrl = trailerUrl.toString(),
             lengthMinutes = result.runtime
         )
     }
 
-    private fun convertApiShowResponseToTVShow(result: ApiShowResponse): TVShow {
+    private fun convertApiShowResponseToTVShow(
+        result: ApiShowResponse,
+        actors: List<String>,
+        trailerUrl: String?
+    ): TVShow {
         return TVShow(
             imdbID = result.id.toString(),
             title = result.name.orEmpty(),
@@ -408,18 +459,11 @@ class ControllerViewModel(
             posterUrl = "https://image.tmdb.org/t/p/w500" + result.posterPath,
             genre = result.genres?.map { it?.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(result.firstAirDate) ?: Calendar.getInstance(),
-            // actors =  // Trenger nytt API Kall -> /3/tv/{series_id}/aggregate_credits
-            rating = 0,
-            // reviews = Kommer når Firebase implementasjon er klart
-            // trailerUrl = Trenger nytt API Kall -> /3/movie/{movie_id}/videos
-            episodes = listOf(result.numberOfEpisodes.toString()),
-            // Må gjøres om til "numberOfEpisodes" og ikke liste, eller vi må gjøre Episode-kall for å få alle
+            actors = actors,
+            trailerUrl = trailerUrl.toString(),
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
-            // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
         )
     }
-
-
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
