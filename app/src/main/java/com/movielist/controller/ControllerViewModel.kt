@@ -2,6 +2,7 @@ package com.movielist.controller
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,7 +21,11 @@ import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.Production
 import com.movielist.model.ReviewDTO
+<<<<<<< HEAD
 import com.movielist.model.ShowResponse
+=======
+import com.movielist.model.SearchSortOptions
+>>>>>>> Controller
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.model.VideoResult
@@ -34,6 +39,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -86,7 +92,23 @@ class ControllerViewModel(
             _filteredMediaData.postValue(convertedResults)
         }
     }
+    private val _userSearchResults = MutableStateFlow<List<User>>(emptyList())
+    val userSearchResults: StateFlow<List<User>> = _userSearchResults
 
+<<<<<<< HEAD
+=======
+    fun searchUsers(query: String) {
+        viewModelScope.launch {
+            try {
+                val users = firestoreRepository.fetchUsersFromFirebase(query)
+                _userSearchResults.value = users ?: emptyList()
+            } catch (e: Exception) {
+                _userSearchResults.value = emptyList()
+            }
+        }
+    }
+
+>>>>>>> Controller
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
 
@@ -196,6 +218,59 @@ class ControllerViewModel(
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
+<<<<<<< HEAD
+=======
+
+    fun searchMedia(query: String, sortOptions: SearchSortOptions) {
+        apiViewModel.searchMulti(query)
+
+        if (sortOptions == SearchSortOptions.USER) {
+            viewModelScope.launch {
+                userViewModel.searchUsers(query)
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+                    val convertedSearchResults = when (sortOptions) {
+                        SearchSortOptions.MOVIESANDSHOWS -> {
+                            searchResultsList.map { media ->
+                                if (media.mediaType.equals("movie", ignoreCase = true)) {
+                                    convertToMovie(media)
+                                } else {
+                                    convertToTVShow(media)
+                                }
+                            }
+                        }
+                        SearchSortOptions.MOVIE -> {
+                            searchResultsList.filter { it.mediaType.equals("movie", ignoreCase = true) }
+                                .map { convertToMovie(it) }
+                        }
+                        SearchSortOptions.SHOW -> {
+                            searchResultsList.filter { it.mediaType.equals("tv", ignoreCase = true) }
+                                .map { convertToTVShow(it) }
+                        }
+                        SearchSortOptions.USER -> {
+                            userViewModel.searchResults.collect { userResults ->
+                                userResults.filter { it.userName.contains(query, ignoreCase = true) }
+                            }
+                        }
+                        else -> emptyList()
+                    }
+
+                    _searchResult.value = convertedSearchResults.sortedBy { it.title }
+                    Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("SearchViewModel", "Error searching media: ${e.message}")
+            }
+        }
+    }
+
+
+
+>>>>>>> Controller
     fun searchMultibleMedia(query: String) {
         apiViewModel.searchMulti(query)
 
