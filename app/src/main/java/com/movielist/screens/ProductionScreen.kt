@@ -151,7 +151,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     }
 
     val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
-        navController.navigate(Screen.ProfileScreen.withArguments(productionID))
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
     }
 
     val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
