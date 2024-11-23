@@ -95,6 +95,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.coil.compose.v210)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -126,6 +127,9 @@ dependencies {
     implementation(libs.androidx.camera.extensions)
     implementation ("com.google.accompanist:accompanist-permissions:0.25.1")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
+
+    //Phone Image
+    implementation(libs.coil.compose)
 
 
     // mulig disse 3 kan fjernes

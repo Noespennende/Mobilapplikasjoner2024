@@ -1,6 +1,11 @@
 package com.movielist.screens
 
 import android.graphics.Bitmap
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -32,9 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -45,11 +47,9 @@ import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.auth.api.phone.SmsCodeAutofillClient.PermissionState
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.data.addUserToDatabase
 import com.movielist.model.ColorModes
 import com.movielist.model.Genders
 import com.movielist.model.User
@@ -81,9 +81,11 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val user = loggedInUser as User
 
-    val handleAddImageFromPhoneClick: () -> Unit = {
+    val handleAddImageFromPhoneClick: (imageUri: Uri?) -> Unit = { imageUri ->
+        //Kontroller funksjon her
 
     }
+
     val handleTakePhotoClick: () -> Unit = {
         showCameraScreen = true
     }
@@ -113,7 +115,6 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     val handleImageCapture: (image:Bitmap) -> Unit  ={image ->
         showCameraScreen = false
-
         //Kontroller funksjon her
     }
 
@@ -136,10 +137,11 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         modifier = Modifier
             .fillMaxWidth()
     ) {
+
         item {
             ProfileImageSettings(
                 loggedInUser = user,
-                handleAddImageFromPhoneClick = handleAddImageFromPhoneClick,
+                handleImageAddedFromPhone = handleAddImageFromPhoneClick,
                 handleTakePhotoClick = handleTakePhotoClick
             )
         }
@@ -200,11 +202,20 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 @Composable
 fun ProfileImageSettings (
     loggedInUser: User,
-    handleAddImageFromPhoneClick: () -> Unit,
+    handleImageAddedFromPhone: (uri: Uri?) -> Unit,
     handleTakePhotoClick: () -> Unit,
     iconColor: Color = White,
     backgroundColor: Color = LightGray
 ){
+
+    var selectedImageUri by remember {mutableStateOf<Uri?>(null)}
+    val photoPicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {uri ->
+            selectedImageUri = uri
+            handleImageAddedFromPhone(selectedImageUri)
+        }
+    )
 
     var expanded by remember { mutableStateOf(false) }
 
@@ -219,7 +230,10 @@ fun ProfileImageSettings (
 
     val handleUploadImageClick: () -> Unit = {
         expanded = false
-        handleAddImageFromPhoneClick()
+        photoPicker.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
+        handleImageAddedFromPhone(selectedImageUri)
     }
 
     val handleCancelClick: () -> Unit = {
@@ -403,8 +417,10 @@ fun EditBio (
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
-            .padding(vertical = 10.dp,
-                horizontal = 20.dp)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
     ) {
         //Error message
         if (message.length > 0){
@@ -450,7 +466,7 @@ fun EditBio (
                     },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min =150.dp)
+                .heightIn(min = 150.dp)
         )
 
         Row(
@@ -519,8 +535,10 @@ fun EditGender (
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
-            .padding(vertical = 10.dp,
-                horizontal = 20.dp)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
     ){
         Text(
             text = "Gender",
@@ -649,8 +667,10 @@ fun EditWebsite (
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
-            .padding(vertical = 10.dp,
-                horizontal = 20.dp)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
     ) {
         //Error message
         if (message.length > 0){
@@ -778,8 +798,10 @@ fun EditLocation (
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
-            .padding(vertical = 10.dp,
-                horizontal = 20.dp)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
     ) {
         //Error message
         if (message.length > 0){
@@ -925,8 +947,10 @@ fun EditColorMode (
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
-            .padding(vertical = 10.dp,
-                horizontal = 20.dp)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
     ){
         Text(
             text = "Theme",
@@ -947,7 +971,8 @@ fun EditColorMode (
                         color = darkButtonColor,
                         shape = RoundedCornerShape(
                             topStart = 5.dp,
-                            bottomStart = 5.dp)
+                            bottomStart = 5.dp
+                        )
                     )
                     .fillMaxWidth(.3f)
                     .padding(vertical = 10.dp, horizontal = 10.dp)

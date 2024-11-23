@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -57,7 +58,7 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
         //Kontroller funksjon for like her:
     }
     val HandleUserClick: (userID: String) -> (Unit) = { userID ->
-        navController.navigate(Screen.ListScreen.route)
+        navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
     val HandleProductionClick: (showID: String) -> (Unit) = { showID ->
         navController.navigate((Screen.ProductionScreen.withArguments(showID)))
@@ -94,19 +95,21 @@ fun Review(
     //Main container
     Column {
         if (reviewDTO != null) {
+            ProductionImage(
+                imageID = reviewDTO.productionPosterUrl,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottom = 20.dp)
+                    .clickable {
+                        handleProductionClick(reviewDTO.productionID)
+                    }
+            )
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-
-                ProductionImage(
-                    imageID = reviewDTO.productionPosterUrl,
-                    modifier = Modifier
-                        .clickable {
-                            handleProductionClick(reviewDTO.productionID)
-                        }
-                )
 
                 //Review header, score and body
                 Column(
@@ -128,6 +131,8 @@ fun Review(
                             //Review header and score
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(5.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth(.5f)
                             )
                             {
                                 //Header
@@ -150,8 +155,9 @@ fun Review(
 
                             //Userinfo and review date
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                horizontalArrangement = Arrangement.End,
                                 modifier = Modifier
+                                    .fillMaxWidth()
                                     .clickable {
                                         handleUserClick(reviewDTO.reviewerID)
                                     }
@@ -175,18 +181,32 @@ fun Review(
                                             reviewDTO.postDate.get(
                                                 Calendar.MONTH
                                             )
-                                        }/${reviewDTO.postDate.get(Calendar.YEAR)}",
+                                        }",
+                                        fontSize = paragraphSize,
+                                        fontFamily = fontFamily,
+                                        fontWeight = weightRegular,
+                                        color = darkWhite
+                                    )
+                                    Text(
+                                        text = "${reviewDTO.postDate.get(Calendar.YEAR)}",
                                         fontSize = paragraphSize,
                                         fontFamily = fontFamily,
                                         fontWeight = weightRegular,
                                         color = darkWhite
                                     )
                                 }
+
                                 //profile picture
-                                ProfileImage(
-                                    imageID = reviewDTO.reviewerProfileImage,
-                                    userName = reviewDTO.reviewerUserName
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 10.dp)
+                                ){
+                                    ProfileImage(
+                                        imageID = reviewDTO.reviewerProfileImage,
+                                        userName = reviewDTO.reviewerUserName
+                                    )
+                                }
+
                             }
 
                         }
@@ -197,6 +217,7 @@ fun Review(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier
                             .fillMaxWidth()
+                            .fillMaxHeight()
                             .padding(top = 10.dp)
                     )
                     {
@@ -210,20 +231,22 @@ fun Review(
                                 .fillMaxWidth(.8f)
                         )
 
-                        Text(
-                            text = "${reviewDTO.likes} likes",
-                            fontSize = paragraphSize,
-                            fontFamily = fontFamily,
-                            fontWeight = weightBold,
-                            color = White,
-                        )
 
                     }
-
 
                 }
 
             }
+
+            Text(
+                text = "${reviewDTO.likes} likes",
+                fontSize = paragraphSize,
+                fontFamily = fontFamily,
+                fontWeight = weightBold,
+                color = White,
+                modifier = Modifier
+                    .align(Alignment.End)
+            )
 
             LineDevider()
 

@@ -959,7 +959,7 @@ fun StatisticsPieChart (
     //Sorts the genreToPercentageMap from lowest to highest based on the values
     val sortedMap = genreToPercentageMap.toList().sortedBy { (_, value) -> value }.toMap()
     val sortedList = sortedMap.values.toList()
-    val sumOfOthers = sortedList.dropLast(4).sum()
+    val sumOfOthers = 100 - sortedList.takeLast(4).sum()
     val lastValues = sortedList.takeLast(4)
     val percentageList = listOf(sumOfOthers) + lastValues
 

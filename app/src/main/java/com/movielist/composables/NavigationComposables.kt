@@ -404,8 +404,8 @@ fun TopNav (
         {
             Logo(
                 modifier = Modifier
-                    .height(18.dp)
-                    .width(18.dp)
+                    .height(20.dp)
+                    .width(20.dp)
                     .clickable {
                         handleLogoClick()
                     }
@@ -426,7 +426,7 @@ fun TopNav (
                         imageID = loggedInUser.profileImageID,
                         userName = loggedInUser.userName,
                         handleProfileImageClick = handleDropDownButtonClick,
-                        sizeMultiplier = .6f
+                        sizeMultiplier = .8f
                     )
 
                     TopNavDropDown(
