@@ -250,32 +250,10 @@ class ControllerViewModel(
                             searchResultsList.filter { it.mediaType.equals("tv", ignoreCase = true) }
                                 .map { convertToTVShow(it) }
                         }
-
-                        SearchSortOptions.GENRE -> {
-                            val genreId = genreMap.entries.find { it.value.equals(query, ignoreCase = true) }?.key
-                            println("Found GenreId for query '$query': $genreId")
-
-                            if (genreId != null) {
-                                println("Query: $query, GenreId: $genreId")
-
-
-                                searchResultsList.filter { media ->
-                                    println("Media Genre IDs: ${media.genreIds}")
-                                    media.genreIds?.any { it == genreId } == true
-                                }.map { media ->
-                                    if (media.mediaType.equals("movie", ignoreCase = true)) {
-                                        convertToMovie(media)
-                                    } else {
-                                        convertToTVShow(media)
-                                    }
-                                }
-                            } else {
-                                println("Invalid genre: $query")
-                                emptyList()
-                            }
-                        }
+                        
 
                         SearchSortOptions.USER -> TODO()
+                        SearchSortOptions.GENRE -> TODO(//denne skal droppes)
                     }
                     
                     _searchResult.value = convertedSearchResults.sortedBy { it.title }
