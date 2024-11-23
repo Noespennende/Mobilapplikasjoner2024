@@ -58,6 +58,7 @@ import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
+import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
 import kotlin.random.Random
@@ -638,10 +639,17 @@ fun ReviewSummary (
                             )
                             //review date
                             Text(
-                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}/${review.postDate.get(Calendar.YEAR)}",
+                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightRegular,
+                                color = darkWhite
+                            )
+                            Text(
+                                text = "${review.postDate.get(Calendar.YEAR)}",
+                                fontSize = paragraphSize,
+                                fontFamily = fontFamily,
+                                fontWeight = weightLight,
                                 color = darkWhite
                             )
                         }
