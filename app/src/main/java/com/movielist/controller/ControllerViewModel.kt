@@ -84,8 +84,19 @@ class ControllerViewModel(
             _filteredMediaData.postValue(convertedResults)
         }
     }
+    private val _userSearchResults = MutableStateFlow<List<User>>(emptyList())
+    val userSearchResults: StateFlow<List<User>> = _userSearchResults
 
-
+    fun searchUsers(query: String) {
+        viewModelScope.launch {
+            try {
+                val users = firestoreRepository.fetchUsersFromFirebase(query)
+                _userSearchResults.value = users ?: emptyList()
+            } catch (e: Exception) {
+                _userSearchResults.value = emptyList()
+            }
+        }
+    }
 
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
@@ -198,41 +209,20 @@ class ControllerViewModel(
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
-    val genreMap = mapOf(
-        28 to "Action",
-        35 to "Comedy",
-        18 to "Drama",
-        10749 to "Romance",
-        12 to "Adventure",
-        16 to "Animation",
-        80 to "Crime",
-        99 to "Documentary",
-        27 to "Horror",
-        10402 to "Music",
-        9648 to "Mystery",
-        10752 to "War",
-        37 to "Western",
-        53 to "Thriller",
-        14 to "Fantasy",
-        878 to "Science Fiction",
-        10759 to "Action & Adventure",
-        10762 to "Kids",
-        10763 to "News",
-        10764 to "Reality",
-        10765 to "Sci-Fi & Fantasy",
-        10766 to "Soap",
-        10767 to "Talk",
-        10768 to "War & Politics"
-    )
 
     fun searchMedia(query: String, sortOptions: SearchSortOptions) {
         apiViewModel.searchMulti(query)
+
+        if (sortOptions == SearchSortOptions.USER) {
+            viewModelScope.launch {
+                userViewModel.searchUsers(query)
+            }
+        }
 
         viewModelScope.launch {
             try {
                 apiViewModel.searchResults.collect { searchResultsList ->
                     val convertedSearchResults = when (sortOptions) {
-
                         SearchSortOptions.MOVIESANDSHOWS -> {
                             searchResultsList.map { media ->
                                 if (media.mediaType.equals("movie", ignoreCase = true)) {
@@ -250,12 +240,14 @@ class ControllerViewModel(
                             searchResultsList.filter { it.mediaType.equals("tv", ignoreCase = true) }
                                 .map { convertToTVShow(it) }
                         }
-                        
-
-                        SearchSortOptions.USER -> TODO()
-                        SearchSortOptions.GENRE -> TODO(//denne skal droppes)
+                        SearchSortOptions.USER -> {
+                            userViewModel.searchResults.collect { userResults ->
+                                userResults.filter { it.userName.contains(query, ignoreCase = true) }
+                            }
+                        }
+                        else -> emptyList()
                     }
-                    
+
                     _searchResult.value = convertedSearchResults.sortedBy { it.title }
                     Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
                 }
