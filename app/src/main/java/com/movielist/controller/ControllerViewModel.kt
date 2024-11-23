@@ -2,6 +2,7 @@ package com.movielist.controller
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -17,6 +18,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.ReviewDTO
+import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
@@ -28,6 +30,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -195,6 +198,94 @@ class ControllerViewModel(
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
+    val genreMap = mapOf(
+        28 to "Action",
+        35 to "Comedy",
+        18 to "Drama",
+        10749 to "Romance",
+        12 to "Adventure",
+        16 to "Animation",
+        80 to "Crime",
+        99 to "Documentary",
+        27 to "Horror",
+        10402 to "Music",
+        9648 to "Mystery",
+        10752 to "War",
+        37 to "Western",
+        53 to "Thriller",
+        14 to "Fantasy",
+        878 to "Science Fiction",
+        10759 to "Action & Adventure",
+        10762 to "Kids",
+        10763 to "News",
+        10764 to "Reality",
+        10765 to "Sci-Fi & Fantasy",
+        10766 to "Soap",
+        10767 to "Talk",
+        10768 to "War & Politics"
+    )
+
+    fun searchMedia(query: String, sortOptions: SearchSortOptions) {
+        apiViewModel.searchMulti(query)
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+                    val convertedSearchResults = when (sortOptions) {
+
+                        SearchSortOptions.MOVIESANDSHOWS -> {
+                            searchResultsList.map { media ->
+                                if (media.mediaType.equals("movie", ignoreCase = true)) {
+                                    convertToMovie(media)
+                                } else {
+                                    convertToTVShow(media)
+                                }
+                            }
+                        }
+                        SearchSortOptions.MOVIE -> {
+                            searchResultsList.filter { it.mediaType.equals("movie", ignoreCase = true) }
+                                .map { convertToMovie(it) }
+                        }
+                        SearchSortOptions.SHOW -> {
+                            searchResultsList.filter { it.mediaType.equals("tv", ignoreCase = true) }
+                                .map { convertToTVShow(it) }
+                        }
+
+                        SearchSortOptions.GENRE -> {
+                            val genreId = genreMap.entries.find { it.value.equals(query, ignoreCase = true) }?.key
+                            println("Found GenreId for query '$query': $genreId")
+
+                            if (genreId != null) {
+                                println("Query: $query, GenreId: $genreId")
+
+
+                                searchResultsList.filter { media ->
+                                    println("Media Genre IDs: ${media.genreIds}")
+                                    media.genreIds?.any { it == genreId } == true
+                                }.map { media ->
+                                    if (media.mediaType.equals("movie", ignoreCase = true)) {
+                                        convertToMovie(media)
+                                    } else {
+                                        convertToTVShow(media)
+                                    }
+                                }
+                            } else {
+                                println("Invalid genre: $query")
+                                emptyList()
+                            }
+                        }
+
+                        SearchSortOptions.USER -> TODO()
+                    }
+                    
+                    _searchResult.value = convertedSearchResults.sortedBy { it.title }
+                    Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("SearchViewModel", "Error searching media: ${e.message}")
+            }
+        }
+    }
 
 
 

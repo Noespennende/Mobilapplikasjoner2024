@@ -80,7 +80,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     val handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery:String) -> Unit = {sortingOption, searchQuery ->
         activeSortOption = sortingOption
         //Kontroller logikk for å håndtere søk her
-        controllerViewModel.searchMultibleMedia(searchQuery)
+        controllerViewModel.searchMedia(searchQuery, activeSortOption)
     }
 
 
