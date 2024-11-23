@@ -235,7 +235,7 @@ data class ApiMovieResponse(
 	@field:SerializedName("vote_count")
 	val voteCount: Int? = null,
 
-) : ApiProductionResponse()
+)
 
 data class ApiMovieCreditResponse(
 	@field:SerializedName("id")
@@ -283,6 +283,18 @@ data class MovieCastMember(
 	@field:SerializedName("order")
 	val order: Int? = null
 )
+
+data class MovieResponse(
+	val movieData: ApiMovieResponse,
+	val movieVideoData: List<VideoResult>?,
+	val movieCreditData: ApiMovieCreditResponse
+): ApiProductionResponse()
+
+data class ShowResponse(
+	val showData: ApiShowResponse,
+	val showVideoData: List<VideoResult>?,
+	val showCreditData: ApiShowCreditResponse
+): ApiProductionResponse()
 
 data class ApiMediaVideoResponse(
 
@@ -430,7 +442,7 @@ data class ApiShowResponse(
 
 	@field:SerializedName("seasons")
 	val seasons: List<Season?>? = null
-) : ApiProductionResponse()
+)
 
 data class ApiShowCreditResponse (
 	@field:SerializedName("cast")

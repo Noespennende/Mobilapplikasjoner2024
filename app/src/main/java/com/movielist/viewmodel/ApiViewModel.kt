@@ -14,9 +14,12 @@ import com.movielist.model.ApiShowCreditResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.ApiShowSeason
 import com.movielist.model.ApiShowSeasonEpisode
+import com.movielist.model.MovieResponse
+import com.movielist.model.ShowResponse
 import com.movielist.model.VideoResult
 import com.movielist.networking.ApiConfig
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +27,9 @@ import kotlinx.coroutines.launch
 import retrofit2.Callback
 import retrofit2.Call
 import retrofit2.Response
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 class ApiViewModel() : ViewModel() {
 
@@ -486,4 +492,219 @@ class ApiViewModel() : ViewModel() {
         _isError.value = true
         _isLoading.value = false
     }
+
+    /** Movies **/
+
+    private val _movieDataTest = MutableStateFlow<MovieResponse?>(null)
+    val movieDataTest: StateFlow<MovieResponse?> get() = _movieDataTest
+
+    fun getMovieDetails(movieID: String) {
+
+        viewModelScope.launch {
+
+            _isLoading.value = true
+            _isError.value = false
+
+            try {
+
+                val movieDeferred = async { getMovieData(movieID) }
+                val videoDeferred = async { getMovieVideoData(movieID) }
+                val creditDeferred = async { getMovieCreditData(movieID) }
+
+                // Vent på at kallene blir ferdig
+                val movieData = movieDeferred.await()
+                val movieVideoData = videoDeferred.await()
+                val movieCreditData = creditDeferred.await()
+
+                // Kombinerer resultatene i MovieResponse-typen
+                val movieResponse = MovieResponse(movieData, movieVideoData, movieCreditData)
+
+                _isLoading.value = false
+                _movieDataTest.value = movieResponse
+
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _isError.value = true
+                Log.e("ApiViewModel", "Error fetching movie details", e)
+            }
+        }
+    }
+
+    private suspend fun getMovieData(movieId: String): ApiMovieResponse {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getMovie(movieId)
+
+            client.enqueue(object : Callback<ApiMovieResponse> {
+
+                override fun onResponse(call: Call<ApiMovieResponse>, response: Response<ApiMovieResponse>) {
+                    if (response.isSuccessful) {
+                        cont.resume(response.body() ?: ApiMovieResponse())
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load movie data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiMovieResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+    suspend fun getMovieVideoData(movieId: String): List<VideoResult> {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getMovieVideo(movieId)
+
+            client.enqueue(object : Callback<ApiMediaVideoResponse> {
+
+                override fun onResponse(call: Call<ApiMediaVideoResponse>, response: Response<ApiMediaVideoResponse>) {
+                    if (response.isSuccessful) {
+                        val videoList = response.body()?.results?.filter {
+                            it?.type == "Trailer" && it?.name == "Official Trailer"
+                        } ?: emptyList()
+                        cont.resume(videoList)
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load movie video data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiMediaVideoResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+    suspend fun getMovieCreditData(movieID: String): ApiMovieCreditResponse {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getMovieCredits(movieID)
+
+            client.enqueue(object : Callback<ApiMovieCreditResponse> {
+
+                override fun onResponse(call: Call<ApiMovieCreditResponse>, response: Response<ApiMovieCreditResponse>) {
+                    if (response.isSuccessful) {
+                        // Hent cast-medlemmene
+                        cont.resume(response.body() ?: ApiMovieCreditResponse())
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load show credit data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiMovieCreditResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+
+    /** Show **/
+
+    private val _showDataTest = MutableStateFlow<ShowResponse?>(null)
+    val showDataTest: StateFlow<ShowResponse?> get() = _showDataTest
+
+    suspend fun getShowDetails(showID: String) {
+
+        viewModelScope.launch {
+            _isLoading.value = true
+            _isError.value = false
+
+            try {
+                val showDeferred = async { getShowData(showID) }
+                val videoDeferred = async { getShowVideoData(showID) }
+                val creditDeferred = async { getShowCreditData(showID) }
+
+                // Venter på at alle kallene blir ferdige
+                val showData = showDeferred.await()
+                val showVideoData = videoDeferred.await()
+                val showCreditData = creditDeferred.await()
+
+                // Kombiner i ShowResponse-typen
+                val showResponse = ShowResponse(showData, showVideoData, showCreditData)
+
+                _isLoading.value = false
+                _showDataTest.value = showResponse
+
+            } catch (e: Exception) {
+                _isLoading.value = false
+                _isError.value = true
+                Log.e("ApiViewModel", "Error fetching movie details", e)
+            }
+        }
+    }
+
+    private suspend fun getShowData(showID: String): ApiShowResponse {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getShow(showID)
+
+            client.enqueue(object : Callback<ApiShowResponse> {
+
+                override fun onResponse(call: Call<ApiShowResponse>, response: Response<ApiShowResponse>) {
+                    if (response.isSuccessful) {
+                        cont.resume(response.body() ?: ApiShowResponse())
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load movie data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiShowResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+    private suspend fun getShowVideoData(movieId: String): List<VideoResult> {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getShowVideo(movieId)
+
+            client.enqueue(object : Callback<ApiMediaVideoResponse> {
+
+                override fun onResponse(call: Call<ApiMediaVideoResponse>, response: Response<ApiMediaVideoResponse>) {
+                    if (response.isSuccessful) {
+                        val videoList = response.body()?.results?.filter {
+                            it.type == "Trailer"  && it?.name?.contains("Official Trailer", ignoreCase = true) == true
+                        } ?: emptyList()
+                        Log.d("Controller", "Her er jeg " + videoList.toString())
+                        cont.resume(videoList)
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load movie video data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiMediaVideoResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
+    suspend fun getShowCreditData(showID: String): ApiShowCreditResponse {
+
+        return suspendCoroutine { cont ->
+            val client = ApiConfig.getApiService().getShowCredits(showID)
+
+            client.enqueue(object : Callback<ApiShowCreditResponse> {
+
+                override fun onResponse(call: Call<ApiShowCreditResponse>, response: Response<ApiShowCreditResponse>) {
+                    if (response.isSuccessful) {
+                        // Hent cast-medlemmene
+                        cont.resume(response.body() ?: ApiShowCreditResponse())
+                    } else {
+                        cont.resumeWithException(Exception("Failed to load show credit data"))
+                    }
+                }
+
+                override fun onFailure(call: Call<ApiShowCreditResponse>, t: Throwable) {
+                    cont.resumeWithException(t)
+                }
+            })
+        }
+    }
+
 }
