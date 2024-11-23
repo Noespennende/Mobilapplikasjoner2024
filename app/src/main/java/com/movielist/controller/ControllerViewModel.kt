@@ -21,6 +21,7 @@ import com.movielist.model.MovieResponse
 import com.movielist.model.Production
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
+import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.model.VideoResult
@@ -34,6 +35,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -71,6 +73,7 @@ class ControllerViewModel(
     private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
     val searchResults: StateFlow<List<Production>> get() = _searchResult
 
+
     init {
 
         apiViewModel.mediaData.observeForever { mediaList ->
@@ -84,6 +87,19 @@ class ControllerViewModel(
             }
 
             _filteredMediaData.postValue(convertedResults)
+        }
+    }
+    private val _userSearchResults = MutableStateFlow<List<User>>(emptyList())
+    val userSearchResults: StateFlow<List<User>> = _userSearchResults
+
+    fun searchUsers(query: String) {
+        viewModelScope.launch {
+            try {
+                val users = firestoreRepository.fetchUsersFromFirebase(query)
+                _userSearchResults.value = users ?: emptyList()
+            } catch (e: Exception) {
+                _userSearchResults.value = emptyList()
+            }
         }
     }
 
@@ -110,6 +126,8 @@ class ControllerViewModel(
             other
         }
     }
+
+
 
     fun editUserBio(newBio: String) {
         _profileOwner.value?.let { user ->
@@ -196,6 +214,56 @@ class ControllerViewModel(
         return Pair(uniqueToLoggedInUser, uniqueToComparisonUser)
     }
 
+
+    fun searchMedia(query: String, sortOptions: SearchSortOptions) {
+        apiViewModel.searchMulti(query)
+
+        if (sortOptions == SearchSortOptions.USER) {
+            viewModelScope.launch {
+                userViewModel.searchUsers(query)
+            }
+        }
+
+        viewModelScope.launch {
+            try {
+                apiViewModel.searchResults.collect { searchResultsList ->
+                    val convertedSearchResults = when (sortOptions) {
+                        SearchSortOptions.MOVIESANDSHOWS -> {
+                            searchResultsList.map { media ->
+                                if (media.mediaType.equals("movie", ignoreCase = true)) {
+                                    convertToMovie(media)
+                                } else {
+                                    convertToTVShow(media)
+                                }
+                            }
+                        }
+                        SearchSortOptions.MOVIE -> {
+                            searchResultsList.filter { it.mediaType.equals("movie", ignoreCase = true) }
+                                .map { convertToMovie(it) }
+                        }
+                        SearchSortOptions.SHOW -> {
+                            searchResultsList.filter { it.mediaType.equals("tv", ignoreCase = true) }
+                                .map { convertToTVShow(it) }
+                        }
+                        SearchSortOptions.USER -> {
+                            userViewModel.searchResults.collect { userResults ->
+                                userResults.filter { it.userName.contains(query, ignoreCase = true) }
+                            }
+                        }
+                        else -> emptyList()
+                    }
+
+                    _searchResult.value = convertedSearchResults.sortedBy { it.title }
+                    Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
+                }
+            } catch (e: Exception) {
+                Log.e("SearchViewModel", "Error searching media: ${e.message}")
+            }
+        }
+    }
+
+
+
     fun searchMultibleMedia(query: String) {
         apiViewModel.searchMulti(query)
 
@@ -241,9 +309,12 @@ class ControllerViewModel(
             posterUrl = "https://image.tmdb.org/t/p/w500/"+media.posterPath,
             genre = media.genres?.map { it?.name.orEmpty() } ?: emptyList(),
             releaseDate = convertStringToCalendar(media.firstAirDate) ?: Calendar.getInstance(),
+
         )
         )
     }
+
+
 
     init {
 
@@ -376,6 +447,7 @@ class ControllerViewModel(
 
                 apiViewModel.movieDataTest.collect { movieResponse ->
                     val production = movieResponse?.let { convertResponseToProduction(it) }
+                    Log.d("Controller", "Observed production: $production")
                     _singleProductionData.update { production }
                 }
 
@@ -488,8 +560,11 @@ class ControllerViewModel(
             actors = actors,
             trailerUrl = trailerUrl.toString(),
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
+            // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
         )
     }
+
+
 
     // This function is for testing purposes - DELETE LATER
     fun addToShowTest() {
@@ -1151,9 +1226,8 @@ class ControllerViewModel(
                 val reviewObjects = reviewViewModel.getReviewsByProduction(productionID, productionType)
 
                 val production = singleProductionData.value
-
                 if (production == null) {
-                    Log.d("Controller", "GetReviewsByProduction - Production data is null, aborting.")
+                    Log.d("GetReviews", "Production data is null, aborting.")
                     _reviewDTOs.value = emptyList()
                     return@launch
                 }
@@ -1173,10 +1247,10 @@ class ControllerViewModel(
                 }
 
                 _reviewDTOs.value = reviewDTOs
-                Log.d("Controller", "GetReviewsByProduction - Updated StateFlow with ${reviewDTOs.size} reviews")
+                Log.d("GetReviews", "Updated StateFlow with ${reviewDTOs.size} reviews")
             } catch (exception: Exception) {
 
-                Log.d("GetReviews", "GetReviewsByProduction - Failed to fetch reviews: $exception")
+                Log.d("GetReviews", "Failed to fetch reviews: $exception")
                 _reviewDTOs.value = emptyList()
             }
         }
@@ -1297,19 +1371,18 @@ class ControllerViewModel(
         return emptyList()
     }
 
-
     private suspend fun getMovieByIdAsync(id: String): Production? {
         Log.d("ViewModel", "getMovieById called with id: $id")
 
         // Start API-kallet for å hente filmen
-        apiViewModel.getMovieDetails(id)
+        apiViewModel.getMovie(id)
 
         // Vent på at movieData skal oppdateres
         return try {
             // Vent på at movieData skal inneholde et resultat
             val movieResponse = withContext(Dispatchers.IO) {
                 // Bruk collect for å vente på at movieData er oppdatert
-                apiViewModel.movieDataTest.firstOrNull { it != null }
+                apiViewModel.movieData.firstOrNull { it != null }
             }
 
             // Hvis movieResponse er null, returner null
@@ -1326,11 +1399,11 @@ class ControllerViewModel(
 
     private suspend fun getTVShowByIdAsync(id: String): Production? {
         Log.d("Controller", "getTVShowByIdAsync called with id: $id")
-        apiViewModel.getShowDetails(id)
+        apiViewModel.getShow(id)
 
         return try {
             val showResponse = withContext(Dispatchers.IO) {
-                apiViewModel.showDataTest.firstOrNull { it != null }
+                apiViewModel.showData.firstOrNull { it != null }
             }
 
             val production = showResponse?.let { convertResponseToProduction(it) }

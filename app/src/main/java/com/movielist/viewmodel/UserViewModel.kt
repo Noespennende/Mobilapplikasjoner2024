@@ -37,6 +37,15 @@ class UserViewModel : ViewModel() {
     private val _otherUser = MutableStateFlow<User?>(null)
     val otherUser: StateFlow<User?> get() = _otherUser
 
+    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
+    val searchResults: StateFlow<List<User>> get() = _searchResults
+
+
+    suspend fun searchUsers(query: String) {
+        val users = firestoreRepository.fetchUsersFromFirebase(query)
+        _searchResults.value = users ?: emptyList()
+    }
+
     // Funksjon for å sette User-objekt for innloggede bruker
     fun setLoggedInUser(uid: String) {
         viewModelScope.launch {
