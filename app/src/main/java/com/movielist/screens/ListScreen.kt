@@ -406,6 +406,7 @@ fun ListPageListItem (
 
     var handleFavoriteClick: () -> Unit = {
         listItemFavorite = !listItemFavorite
+        listItem.loggedInUsersFavorite = listItemFavorite
         handleFavoriteClick(listItem, listItemFavorite)
     }
 
@@ -425,13 +426,15 @@ fun ListPageListItem (
     //Graphics
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
     )
     {
         LineDevider()
 
         //List item
         Row (
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             ProductionImage(
                 imageID = listItem.production.posterUrl,
@@ -446,8 +449,8 @@ fun ListPageListItem (
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 //Show title
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ){
                     //Title
                     Text(
@@ -455,7 +458,9 @@ fun ListPageListItem (
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
-                        color = White
+                        color = White,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                     //ReleaseYear
                     Text(
