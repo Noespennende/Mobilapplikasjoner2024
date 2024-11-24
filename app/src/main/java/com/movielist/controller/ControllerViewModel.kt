@@ -1375,14 +1375,14 @@ class ControllerViewModel(
         Log.d("ViewModel", "getMovieById called with id: $id")
 
         // Start API-kallet for å hente filmen
-        apiViewModel.getMovie(id)
+        apiViewModel.getMovieDetails(id)
 
         // Vent på at movieData skal oppdateres
         return try {
             // Vent på at movieData skal inneholde et resultat
             val movieResponse = withContext(Dispatchers.IO) {
                 // Bruk collect for å vente på at movieData er oppdatert
-                apiViewModel.movieData.firstOrNull { it != null }
+                apiViewModel.movieDataTest.firstOrNull { it != null }
             }
 
             // Hvis movieResponse er null, returner null
@@ -1399,11 +1399,11 @@ class ControllerViewModel(
 
     private suspend fun getTVShowByIdAsync(id: String): Production? {
         Log.d("Controller", "getTVShowByIdAsync called with id: $id")
-        apiViewModel.getShow(id)
+        apiViewModel.getShowDetails(id)
 
         return try {
             val showResponse = withContext(Dispatchers.IO) {
-                apiViewModel.showData.firstOrNull { it != null }
+                apiViewModel.showDataTest.firstOrNull { it != null }
             }
 
             val production = showResponse?.let { convertResponseToProduction(it) }
