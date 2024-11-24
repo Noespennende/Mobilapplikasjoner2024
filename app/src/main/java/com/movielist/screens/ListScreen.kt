@@ -120,8 +120,12 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         //Kontroller kall her:
     }
 
-    val handleListItemFavoriteClick: (favorited: Boolean) -> Unit = {favorited ->
-        //Kontroller kall her
+    val handleListItemFavoriteClick: (listItem: ListItem, favorited: Boolean) -> Unit = { listItem, favorited ->
+
+        val loggedInUserID = loggedInUser?.id
+        if (loggedInUserID != null) {
+            controllerViewModel.addOrRemoveFromUsersFavorites(loggedInUserID, listItem, favorited)
+        }
     }
 
     val handleCompareUserListsClick: () -> Unit = {
@@ -321,7 +325,7 @@ fun ListPageList (
     listItemList: List<ListItem>,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
-    handleListItemFavoriteClick: (favorite: Boolean) -> Unit,
+    handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit
 ){
     //Graphics
@@ -384,7 +388,7 @@ fun ListPageListItem (
     loggedInUsersList: Boolean,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
-    handleFavoriteClick: (favorite: Boolean) -> Unit
+    handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit
 ){
 
     //Graphics logic
@@ -402,7 +406,8 @@ fun ListPageListItem (
 
     var handleFavoriteClick: () -> Unit = {
         listItemFavorite = !listItemFavorite
-        handleFavoriteClick(listItemFavorite)
+        listItem.loggedInUsersFavorite = listItemFavorite
+        handleFavoriteClick(listItem, listItemFavorite)
     }
 
     val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
@@ -421,13 +426,15 @@ fun ListPageListItem (
     //Graphics
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
     )
     {
         LineDevider()
 
         //List item
         Row (
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             ProductionImage(
                 imageID = listItem.production.posterUrl,
@@ -442,8 +449,8 @@ fun ListPageListItem (
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 //Show title
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ){
                     //Title
                     Text(
@@ -451,7 +458,9 @@ fun ListPageListItem (
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
-                        color = White
+                        color = White,
+                        modifier = Modifier
+                            .fillMaxWidth()
                     )
                     //ReleaseYear
                     Text(

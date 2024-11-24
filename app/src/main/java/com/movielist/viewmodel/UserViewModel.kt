@@ -100,6 +100,83 @@ class UserViewModel : ViewModel() {
         return friendsList
     }
 
+    fun addOrRemoveFromUsersFavorites(userID: String, listItem: ListItem, isFavorite: Boolean) {
+        viewModelScope.launch {
+
+            val user = loggedInUser.value
+
+            when (isFavorite) {
+                true -> {
+
+                    if (user != null) {
+                        listItem.loggedInUsersFavorite = true
+                        val listItemMap = listItem.toMap()
+
+                        val listItemID = listItem.id
+
+                        firestoreRepository.batchUpdateFavoriteStatusAllCollections(
+                            userID,
+                            listItemID,
+                            true,
+                            onSuccess = {
+                                firestoreRepository.addToFavorites(userID, listItemMap,
+                                    onSuccess = {
+                                        updateUserObjectCollectionsFavoriteStatus(user, listItemID, true)
+                                        user.favoriteCollection.add(listItem)
+                                    },
+                                    onFailure = { /* Feilhåndtering */ }
+                                )
+                            },
+                            onFailure = { /* Feilhåndtering */ }
+                        )
+                    }
+
+                }
+
+                false -> {
+                    listItem.loggedInUsersFavorite = false
+
+                    firestoreRepository.batchUpdateFavoriteStatusAllCollections(
+                        userID,
+                        listItem.id,
+                        true,
+                        onSuccess = {
+                            firestoreRepository.removeFromFavorites(userID, listItem,
+                                onSuccess = {
+                                    user?.favoriteCollection?.remove(listItem)
+                                },
+                                onFailure = { /* Feilhåndtering */ },
+                                onNotFound = { /* Feilhåndtering */ }
+                            )
+                        },
+                        onFailure = { /* Feilhåndtering */ }
+                    )
+                }
+            }
+        }
+    }
+
+    // TODO : Flytte til intern User klasse metode
+    private fun updateUserObjectCollectionsFavoriteStatus(user: User, listItemID: String, isFavorite: Boolean) {
+        val collectionsToUpdate = listOf(
+            user.completedCollection,
+            user.wantToWatchCollection,
+            user.currentlyWatchingCollection,
+            user.droppedCollection
+        )
+
+        collectionsToUpdate.forEach { collection ->
+
+            collection.forEachIndexed { index, item ->
+                if (item.id == listItemID) {
+
+                    collection[index] = item.copy(loggedInUsersFavorite = isFavorite)
+                    Log.d("Firestore", collection[index].loggedInUsersFavorite.toString())
+                }
+            }
+        }
+    }
+
 
     fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String?, targetCollection: String) {
 
@@ -196,6 +273,7 @@ class UserViewModel : ViewModel() {
                 _loggedInUser.value = updatedUser
 
                 Log.d("Upload", "Profilbilde oppdatert!")
+
             } catch (e: Exception) {
                 Log.e("Upload", "Feil: ${e.message}")
             }

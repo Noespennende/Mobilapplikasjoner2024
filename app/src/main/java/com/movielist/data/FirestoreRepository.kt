@@ -2,6 +2,7 @@ package com.movielist.data
 
 import android.net.Uri
 import android.util.Log
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
@@ -24,7 +25,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         val db = Firebase.firestore
 
 
-
         //val docRef: DocumentReference = FirebaseFirestore.getInstance().document("users/testuser")
         /*
         *  Kan også bruke denne i stedet for db.collection().document().get()
@@ -39,7 +39,10 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 val firstName = document.getString("firstName")
                 val lastName = document.getString("lastName")
 
-                Log.d("FirebaseSuccess", "Document ID: $documentID, First Name: $firstName, Last Name: $lastName")
+                Log.d(
+                    "FirebaseSuccess",
+                    "Document ID: $documentID, First Name: $firstName, Last Name: $lastName"
+                )
 
                 val userData = mapOf(
                     "documentID" to documentID,
@@ -115,18 +118,18 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             }
     }
 
-    suspend fun fetchAllUsers():List<Map<String, Any>>?{
+    suspend fun fetchAllUsers(): List<Map<String, Any>>? {
         val db = Firebase.firestore
 
         return try {
             val document = db.collection("users").get().await()
 
-            val users = document.documents.map { document->
+            val users = document.documents.map { document ->
                 document.data ?: emptyMap()
             }
 
             users
-        }catch (exception: Exception) {
+        } catch (exception: Exception) {
             Log.w("FirebaseFailure", "Error getting document", exception)
             null
         }
@@ -199,6 +202,86 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 Log.e("FirestoreAdd", "Unknown target collection: $targetCollection")
                 onFailure(Exception("Unknown target collection"))
             }
+        }
+    }
+
+    fun addToFavorites(
+        userID: String,
+        listItemMap: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userDoc = Firebase.firestore.collection("users").document(userID)
+
+        Log.d("FirestoreUpdate", "Adding to favoriteCollection: $listItemMap")
+
+        userDoc.update("favoriteCollection", FieldValue.arrayUnion(listItemMap))
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun removeFromFavorites(
+        userID: String,
+        listItem: ListItem,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit,
+        onNotFound: () -> Unit
+    ) {
+        removeFromCollectionHelper(userID, listItem, "favoriteCollection", onSuccess, onFailure, onNotFound)
+    }
+
+    fun batchUpdateFavoriteStatusAllCollections(
+        userID: String,
+        listItemID: String,
+        isFavorite: Boolean,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userDocRef = db.collection("users").document(userID)
+
+        val collections = listOf("completedCollection", "currentlyWatchingCollection", "droppedCollection", "favoriteCollection", "wantToWatchCollection")
+
+        val batch = db.batch()
+
+        // Gå gjennom alle kolleksjon og finn og oppdater listItem
+        collections.forEach { collection ->
+            userDocRef.get()
+                .addOnSuccessListener { document ->
+                    val collectionList = document.get(collection) as? List<Map<String, Any>> ?: emptyList()
+
+                    val updatedCollection = collectionList.map { item ->
+                        if (item["id"] == listItemID) {
+                            // Her oppdaterer vi kun "loggedInUsersFavorite"
+                            item.toMutableMap().apply { put("loggedInUsersFavorite", isFavorite) }
+                        } else {
+                            item
+                        }
+                    }
+
+                    // Hvis det er en endring, legg til oppdateringen i batchen
+                    if (updatedCollection != collectionList) {
+                        val updateData = mapOf(collection to updatedCollection)
+                        batch.update(userDocRef, updateData)
+                        Log.d("Firestore", "$collection updated in batch")
+                    }
+
+                    // Når alle oppdateringene er samlet, commit batchen
+                    if (collections.indexOf(collection) == collections.size - 1) {
+                        batch.commit()
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Batch update completed successfully.")
+                                onSuccess()
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore", "Error committing batch update", exception)
+                                onFailure(exception)
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("Firestore", "Error fetching document for $collection", exception)
+                    onFailure(exception)
+                }
         }
     }
 
