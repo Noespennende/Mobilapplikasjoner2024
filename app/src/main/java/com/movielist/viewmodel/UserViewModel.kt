@@ -177,11 +177,8 @@ class UserViewModel : ViewModel() {
         }
     }
 
+    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String? = null, targetCollection: String) {
 
-    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String?, targetCollection: String) {
-
-
-        // Konverter listItem til map for lagring i Firestore
         val listItemMap = listItem.toMap()
 
         // Legg til i targetCollection og fjern fra sourceCollection
@@ -195,14 +192,17 @@ class UserViewModel : ViewModel() {
                         userID, listItem, sourceCollection,
                         onSuccess = {
                             Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         },
                         onFailure = {
                             Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         },
                         onNotFound = {
                             Log.e("FirestoreRemove", "Item not found in $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         }
                     )
@@ -214,6 +214,36 @@ class UserViewModel : ViewModel() {
                 Log.e("FirestoreAdd", "Failed to add to $targetCollection for user $userID", e)
             }
         )
+    }
+
+    fun updateCurrentEpisodeInCollection(collection: String, listItem: ListItem, currentEpisode: Int) {
+
+        val user = loggedInUser.value
+        val userID = user?.id
+
+        if (userID != null) {
+
+            val listItemID = listItem.id
+
+            firestoreRepository.updateCurrentEpisodeField(
+                userID,
+                listItemID,
+                listItem.currentEpisode,
+                collection,
+                onSuccess = {
+                    if(listItem.loggedInUsersFavorite) {
+                        firestoreRepository.updateCurrentEpisodeField(
+                            userID,
+                            listItemID,
+                            listItem.currentEpisode,
+                            "favoriteCollection",
+                            onFailure = { Log.d("UserViewModel", "updateCurrentEpisodeField failed for listItem $listItemID in $collection")})
+                    }
+                    listItem.currentEpisode = currentEpisode
+                },
+                onFailure = { /* Feilhåndtering */ }
+            )
+        }
     }
 
     fun removeProductionFromCollections(userID: String, listItem: ListItem, sourceCollection: String?) {
