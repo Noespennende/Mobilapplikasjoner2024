@@ -11,6 +11,7 @@ android {
     namespace = "com.movielist"
     compileSdk = 34
 
+
     defaultConfig {
         applicationId = "com.movielist"
         minSdk = 24
@@ -79,6 +80,8 @@ android {
     tasks.preBuild {
         dependsOn("generateGoogleServicesJson")
     }
+
+
 }
 
 dependencies {
@@ -96,6 +99,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.coil.compose.v210)
+    implementation(libs.androidx.constraintlayout)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -128,8 +132,13 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-permissions:0.25.1")
     implementation("androidx.exifinterface:exifinterface:1.3.6")
 
-    //Phone Image
+    //Import image from phone storage
     implementation(libs.coil.compose)
+
+    //Location services
+    implementation(libs.play.services.location)
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+    implementation("androidx.core:core-ktx:1.12.0")
 
 
     // mulig disse 3 kan fjernes

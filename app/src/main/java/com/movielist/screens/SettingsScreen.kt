@@ -1,7 +1,12 @@
 package com.movielist.screens
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -26,11 +31,14 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,20 +46,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.cast.CastRemoteDisplayLocalService.startService
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ColorModes
 import com.movielist.model.Genders
+import com.movielist.model.LocationService
 import com.movielist.model.User
 import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.DarkPurple
@@ -74,6 +86,7 @@ import com.movielist.ui.theme.weightRegular
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: NavController){
+
 
     var cameraPermission: com.google.accompanist.permissions.PermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     var showCameraScreen: Boolean by remember { mutableStateOf(false) }
@@ -106,7 +119,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     }
 
     val handleAutodetectLocation: () -> Unit = {
-
+        
     }
     
     val handleColorModeChange: (mode: ColorModes) -> Unit = { mode ->  
@@ -119,7 +132,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     }
 
 
-    val handleCancelCameraPeromissionClick: () -> Unit = {
+    val handleCancelCameraPermissionClick: () -> Unit = {
         showCameraScreen = false
     }
 
@@ -171,7 +184,6 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
             EditLocation(
                 location = user.location,
                 handleLocationEditedClick = handleLocationChange,
-                handleAutodetectLocationClick = handleAutodetectLocation
             )
         }
 
@@ -190,7 +202,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
             )
         } else {
             NoPermissionScreen(
-                handleCancelClick = handleCancelCameraPeromissionClick,
+                handleCancelClick = handleCancelCameraPermissionClick,
                 handleRequestPermissionClick = cameraPermission::launchPermissionRequest
             )
         }
@@ -767,17 +779,22 @@ fun EditWebsite (
 
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun EditLocation (
     location: String,
-    handleLocationEditedClick: (updatedBio: String) -> Unit,
-    handleAutodetectLocationClick: () -> Unit
+    handleLocationEditedClick: (updatedLocation: String) -> Unit,
 ){
+    val context = LocalContext.current
+    val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
     val maxCharLenght = 60
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     var newLocation by remember { mutableStateOf(location) }
-    var locationLenght by remember { mutableIntStateOf(maxCharLenght - newLocation.length)  }
+    var locationLenght by remember { mutableIntStateOf(maxCharLenght - newLocation.length) }
+    var country by remember { mutableStateOf("") }
+    var region by remember { mutableStateOf("") }
+    var isReceiverRegistered by remember { mutableStateOf(false) }
 
     val handleUpdateLocationClick: () -> Unit = {
         if (locationLenght >= 0){
@@ -786,42 +803,71 @@ fun EditLocation (
             handleLocationEditedClick(newLocation)
         } else {
             error = true
-            message = "Location text must be below  " + maxCharLenght.toString() + " characters"
+            message = "Location text must be below $maxCharLenght characters"
         }
     }
 
-    Column (
+    val handleAutodetectLocation: () -> Unit = {
+        if (!locationPermissionState.status.isGranted) {
+            locationPermissionState.launchPermissionRequest()
+        } else {
+            val startIntent = Intent(context, LocationService::class.java).apply {
+                action = LocationService.ACTION_START
+            }
+            context.startService(startIntent)
+            message = "Retrieving your location..."
+            isReceiverRegistered = true
+        }
+    }
+
+
+    // Your UI components below...
+    Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
-            .background(
-                color = Gray,
-                shape = RoundedCornerShape(5.dp)
-            )
-            .fillMaxWidth(.9f)
-            .padding(
-                vertical = 10.dp,
-                horizontal = 20.dp
-            )
+            .background(color = Gray, shape = RoundedCornerShape(5.dp))
+            .fillMaxWidth(0.9f)
+            .padding(vertical = 10.dp, horizontal = 20.dp)
     ) {
-        //Error message
-        if (message.length > 0){
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(color = Purple, shape = RoundedCornerShape(5.dp))
+                .padding(vertical = 10.dp, horizontal = 10.dp)
+                .fillMaxWidth()
+                .clickable {
+                    val testIntent = Intent(LocationService.LOCATION_UPDATE)
+                    testIntent.putExtra(LocationService.EXTRA_COUNTRY, "Norway")
+                    testIntent.putExtra(LocationService.EXTRA_REGION, "Oslo")
+                    context.sendBroadcast(testIntent)
+                }
+        ) {
+            Text(
+                text = "TEST BUTTON",
+                fontSize = headerSize,
+                fontWeight = weightBold,
+                fontFamily = fontFamily,
+                color = DarkGray,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+
+        if (message.isNotEmpty()) {
             Text(
                 text = message,
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if(error){red} else { White},
+                color = if (error) red else White,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(
-                        vertical = 10.dp,
-                        horizontal = 10.dp
-                    )
+                    .padding(vertical = 10.dp, horizontal = 10.dp)
                     .align(Alignment.CenterHorizontally)
             )
         }
 
-        //TextField
         OutlinedTextField(
             value = newLocation,
             onValueChange = {
@@ -845,8 +891,7 @@ fun EditLocation (
                     color = White,
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
         )
 
         Text(
@@ -854,27 +899,17 @@ fun EditLocation (
             fontSize = paragraphSize,
             fontFamily = fontFamily,
             fontWeight = weightLight,
-            color = if(locationLenght >= 0){White} else red,
-            modifier = Modifier
-                .padding(
-                    vertical = 10.dp,
-                    horizontal = 10.dp
-                )
+            color = if (locationLenght >= 0) White else red,
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
         )
 
-        //Autodetect button
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .background(
-                    color = Purple,
-                    shape = RoundedCornerShape(5.dp)
-                )
+                .background(color = Purple, shape = RoundedCornerShape(5.dp))
                 .padding(vertical = 10.dp, horizontal = 10.dp)
                 .fillMaxWidth()
-                .clickable {
-                    handleAutodetectLocationClick()
-                }
+                .clickable { handleAutodetectLocation() }
         ) {
             Text(
                 text = "Autodetect",
@@ -883,23 +918,17 @@ fun EditLocation (
                 fontFamily = fontFamily,
                 color = DarkGray,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center)
             )
         }
-        //Update location button
+
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .background(
-                    color = Purple,
-                    shape = RoundedCornerShape(5.dp)
-                )
+                .background(color = Purple, shape = RoundedCornerShape(5.dp))
                 .padding(vertical = 10.dp, horizontal = 10.dp)
                 .fillMaxWidth()
-                .clickable {
-                    handleUpdateLocationClick()
-                }
+                .clickable { handleUpdateLocationClick() }
         ) {
             Text(
                 text = "Update location",
@@ -908,13 +937,9 @@ fun EditLocation (
                 fontFamily = fontFamily,
                 color = DarkGray,
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .align(Alignment.Center)
+                modifier = Modifier.align(Alignment.Center)
             )
         }
-
-
-
     }
 }
 

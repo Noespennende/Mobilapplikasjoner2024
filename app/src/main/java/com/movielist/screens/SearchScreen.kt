@@ -118,8 +118,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     ) {
         if (activeSortOption == SearchSortOptions.MOVIESANDSHOWS ||
             activeSortOption == SearchSortOptions.MOVIE ||
-            activeSortOption == SearchSortOptions.SHOW ||
-            activeSortOption == SearchSortOptions.GENRE){
+            activeSortOption == SearchSortOptions.SHOW ){
 
 
             val filtered = searchResultsList.filter {
@@ -165,7 +164,7 @@ fun TopNavBarSearchPage (
     var dropDownExpanded by remember { mutableStateOf(false) }
     val sortOptions = listOf(
         SearchSortOptions.MOVIESANDSHOWS, SearchSortOptions.MOVIE, SearchSortOptions.SHOW,
-        SearchSortOptions.GENRE, SearchSortOptions.USER
+        SearchSortOptions.USER
     )
 
     var dropDownButtonText by remember {
