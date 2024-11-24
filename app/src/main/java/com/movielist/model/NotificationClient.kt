@@ -27,7 +27,7 @@ fun PostNotification(
         notificationManager.createNotificationChannel(channel)
     }
 
-    // Notification builder
+
     val notification = NotificationCompat.Builder(context, channelId)
         .setContentTitle(contentTitle)
         .setContentText(contentText)
@@ -35,7 +35,7 @@ fun PostNotification(
         .setOngoing(true)
         .build()
 
-    // Get NotificationManager and post the notification
+
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     notificationManager.notify(1, notification)
 }
