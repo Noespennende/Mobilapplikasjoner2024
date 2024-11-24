@@ -216,6 +216,36 @@ class UserViewModel : ViewModel() {
         )
     }
 
+    fun updateCurrentEpisodeInCollection(collection: String, listItem: ListItem, currentEpisode: Int) {
+
+        val user = loggedInUser.value
+        val userID = user?.id
+
+        if (userID != null) {
+
+            val listItemID = listItem.id
+
+            firestoreRepository.updateCurrentEpisodeField(
+                userID,
+                listItemID,
+                listItem.currentEpisode,
+                collection,
+                onSuccess = {
+                    if(listItem.loggedInUsersFavorite) {
+                        firestoreRepository.updateCurrentEpisodeField(
+                            userID,
+                            listItemID,
+                            listItem.currentEpisode,
+                            "favoriteCollection",
+                            onFailure = { Log.d("UserViewModel", "updateCurrentEpisodeField failed for listItem $listItemID in $collection")})
+                    }
+                    listItem.currentEpisode = currentEpisode
+                },
+                onFailure = { /* Feilhåndtering */ }
+            )
+        }
+    }
+
     fun removeProductionFromCollections(userID: String, listItem: ListItem, sourceCollection: String?) {
 
 
