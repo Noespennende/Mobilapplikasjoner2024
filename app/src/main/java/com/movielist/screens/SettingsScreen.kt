@@ -24,8 +24,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -70,6 +73,7 @@ import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -81,9 +85,30 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val user = loggedInUser as User
 
-    val handleAddImageFromPhoneClick: (imageUri: Uri?) -> Unit = { imageUri ->
-        //Kontroller funksjon her
 
+    /* Noe med noe popup beskjed - Snackbar? */
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarStatus by controllerViewModel.snackBarStatus.collectAsState()
+
+
+    LaunchedEffect(snackBarStatus) {
+        when (snackBarStatus) {
+            is ControllerViewModel.Status.Success -> {
+                snackbarHostState.showSnackbar("Profilbilde oppdatert!")
+            }
+            is ControllerViewModel.Status.Error -> {
+                val errorMessage = (snackBarStatus as ControllerViewModel.Status.Error).message
+                snackbarHostState.showSnackbar("Feil: $errorMessage")
+            }
+            null -> { }
+        }
+    }
+
+    val handleAddImageFromPhoneClick: (imageUri: Uri?) -> Unit = { imageUri ->
+        if (imageUri != null) {
+            controllerViewModel.updateProfileImage(imageUri)
+        }
     }
 
     val handleTakePhotoClick: () -> Unit = {
@@ -108,8 +133,8 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     val handleAutodetectLocation: () -> Unit = {
 
     }
-    
-    val handleColorModeChange: (mode: ColorModes) -> Unit = { mode ->  
+
+    val handleColorModeChange: (mode: ColorModes) -> Unit = { mode ->
         //kontroller funksjon her
     }
 
