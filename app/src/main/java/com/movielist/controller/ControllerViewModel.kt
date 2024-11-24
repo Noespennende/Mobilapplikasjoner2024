@@ -976,7 +976,7 @@ class ControllerViewModel(
         return emptyList()
     }
 
-    fun handleEpisodeCountChange(collectionOption: ListOptions, listItem: ListItem, watchedEpisodeCount: Int)  {
+    fun handleEpisodeCountChange(collectionOption: ListOptions, listItem: ListItem, watchedEpisodeCount: Int, isPlus: Boolean)  {
 
         viewModelScope.launch {
 
@@ -1000,11 +1000,12 @@ class ControllerViewModel(
             val user = loggedInUser.value
             val userID = user?.id
             val targetCollection = "completedCollection"
-            val fromCompletedToWatching = "currentlyWatchingCollection"
+            val ToWatching = "currentlyWatchingCollection"
 
             if (userID != null) {
                 when (production) {
                     is TVShow -> {
+                        Log.d("ControllerViewModel", "sourceCollection: $sourceCollection")
                         val productionTotalEpisode = production.episodes.size
 
                         val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
@@ -1030,9 +1031,21 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    fromCompletedToWatching
+                                    ToWatching
                                 )
                             }
+
+                            if (sourceCollection == "wantToWatchCollection"
+                                || (sourceCollection == "droppedCollection" && isPlus)) {
+
+                                userViewModel.addOrMoveToUsersCollection(
+                                    userID,
+                                    listItem,
+                                    sourceCollection,
+                                    ToWatching
+                                )
+                            }
+
                         }
                     }
 
@@ -1062,7 +1075,17 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    fromCompletedToWatching
+                                    ToWatching
+                                )
+                            }
+
+                            if (sourceCollection == "wantToWatchCollection" || sourceCollection == "droppedCollection") {
+
+                                userViewModel.addOrMoveToUsersCollection(
+                                    userID,
+                                    listItem,
+                                    sourceCollection,
+                                    ToWatching
                                 )
                             }
 
