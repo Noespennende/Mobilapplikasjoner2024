@@ -135,7 +135,9 @@ class ControllerViewModel(
         val profileUser = _profileOwner.value
 
         return if (currentUser != null && profileUser != null) {
-            if (profileUser.id in currentUser.followingList) {
+            val followingList = currentUser.followingList ?: emptyList()
+
+            if (profileUser.id in followingList) {
                 FollowStatus.FOLLOWING
             } else {
                 FollowStatus.NOTFOLLOWING

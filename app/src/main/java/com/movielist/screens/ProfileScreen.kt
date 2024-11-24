@@ -201,8 +201,14 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
-    var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) } //<- Kontroller funksjon som gir en FollowStatus enum som sier om logged in user følger brukeren som eier profilen
+    var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) }
 
+    LaunchedEffect(profileOwner, loggedInUser) {
+        if (profileOwner != null && loggedInUser != null) {
+
+            followStatus = controllerViewModel.determineFollowStatus()
+        }
+    }
     //function variables:
     val user = profileOwner ?: exampleUser
 
@@ -614,6 +620,11 @@ fun ProfileInfoSection (
     ) }
 
     var newFollowStatus by remember { mutableStateOf(followStatus) }
+
+    LaunchedEffect(followStatus) {
+        newFollowStatus = followStatus
+        followButtonColor = if (newFollowStatus == FollowStatus.NOTFOLLOWING) Purple else LightGray
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
