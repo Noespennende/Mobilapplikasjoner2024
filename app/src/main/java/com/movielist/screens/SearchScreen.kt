@@ -31,10 +31,8 @@ import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.model.SearchSortOptions
-import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.*
-import java.util.Calendar
 
 
 @Composable

@@ -51,7 +51,7 @@ import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.darkWhite
+import com.movielist.ui.theme.DarkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
@@ -464,7 +464,7 @@ fun ComparisonCard (
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
-                    color = darkWhite,
+                    color = DarkWhite,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .padding(top = 6.dp, bottom = 6.dp )
@@ -507,7 +507,7 @@ fun ComparisonCard (
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
-                    color = darkWhite,
+                    color = DarkWhite,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .padding(top = 6.dp, bottom = 6.dp)

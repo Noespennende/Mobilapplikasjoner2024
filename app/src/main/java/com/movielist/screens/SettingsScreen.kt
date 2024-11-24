@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -73,7 +72,7 @@ import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.red
+import com.movielist.ui.theme.Red
 import com.movielist.ui.theme.textFieldColors
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
@@ -465,7 +464,7 @@ fun EditBio (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if(error){red} else { White},
+                color = if(error){Red} else { White},
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -515,7 +514,7 @@ fun EditBio (
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
-                color = if(bioLenght >= 0){White} else red,
+                color = if(bioLenght >= 0){White} else Red,
                 modifier = Modifier
                     .padding(
                         vertical = 10.dp,
@@ -715,7 +714,7 @@ fun EditWebsite (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if(error){red} else { White},
+                color = if(error){Red} else { White},
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -764,7 +763,7 @@ fun EditWebsite (
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
-                color = if(websiteLenght >= 0){White} else red,
+                color = if(websiteLenght >= 0){White} else Red,
                 modifier = Modifier
                     .padding(
                         vertical = 10.dp,
@@ -892,7 +891,7 @@ fun EditLocation (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if (error) red else White,
+                color = if (error) Red else White,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -931,7 +930,7 @@ fun EditLocation (
             fontSize = paragraphSize,
             fontFamily = fontFamily,
             fontWeight = weightLight,
-            color = if (locationLenght >= 0) White else red,
+            color = if (locationLenght >= 0) White else Red,
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
         )
 

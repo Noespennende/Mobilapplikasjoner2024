@@ -30,9 +30,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
@@ -58,8 +58,6 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.White
 import com.movielist.ui.theme.*
 import java.util.Calendar
 import kotlin.random.Random
@@ -222,6 +220,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     }
 
 
+
     // Front page graphics
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -234,6 +233,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 handleRatingChange = handleUserRatingChange
             )
         }
+
 
         item {
             // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
@@ -360,22 +360,15 @@ fun CurrentlyWatchingScroller (
         } else {
             items(listOfShows.size) { i ->
                 CurrentlyWatchingCard(
-                    imageId = listOfShows[i].production.posterUrl,
-                    imageDescription = listOfShows[i].production.title,
-                    title = listOfShows[i].production.title,
-                    productionID = listOfShows[i].production.imdbID,
-                    productionType = listOfShows[i].production.type,
+                    listItem = listOfShows[i],
                     showLength = when (listOfShows[i].production) {
                         is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                         is Movie -> 1 // Returnerer lengden i minutter som Int
                         is Episode -> 1
                         else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                     },
-                    episodesWatched = listOfShows[i].currentEpisode,
                     onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
                     onImageClick = onImageClick,
-                    userRating = listOfShows[i].score,
-                    listItemID = listOfShows[i].id,
                     handleRatingChange = handleRatingChange
                 )
             }
@@ -394,7 +387,7 @@ fun LoadingCurrentlyWatchingCard(
     Card(
         modifier = modifier.width(350.dp),
         shape = RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp),
-        colors = CardDefaults.cardColors(containerColor = Gray)
+        colors = CardDefaults.cardColors(containerColor = LocalColor.current.backgroundLight)
     ) {
         // Card content
         Column(
@@ -420,7 +413,7 @@ fun LoadingCurrentlyWatchingCard(
                     .fillMaxWidth()
                     .height(150.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .background(Color.DarkGray)
+                    .background(LocalColor.current.background)
                     .padding(5.dp)
             )
 
@@ -430,26 +423,19 @@ fun LoadingCurrentlyWatchingCard(
 
 @Composable
 fun CurrentlyWatchingCard(
-    imageId: String? = null, // Nullable String for bilde-URL
-    imageDescription: String = "Image not available",
-    title: String,
+    listItem: ListItem,
     showLength: Int?,
-    episodesWatched: Int,
-    productionID: String,
-    productionType: String,
-    userRating: Int,
-    listItemID: String,
     modifier: Modifier = Modifier,
     onMarkAsWatched: () -> Unit,
     onImageClick: (showID: String, productionType: String) -> Unit,
     handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
     var watchedEpisodesCount: Int by remember {
-        mutableIntStateOf(episodesWatched)
+        mutableIntStateOf(listItem.currentEpisode)
     }
 
     var buttonText by remember {
-        mutableStateOf(generateButtonText(episodesWatched, showLength))
+        mutableStateOf(generateButtonText(listItem.currentEpisode, showLength))
     }
 
     var ratingAdded by remember { mutableStateOf(false) }
@@ -460,14 +446,14 @@ fun CurrentlyWatchingCard(
         ratingSliderVisible = false
         ratingAdded = true
         buttonText = "Rating updated!"
-        handleRatingChange(rating, listItemID)
+        handleRatingChange(rating, listItem.id)
     }
 
     // Card container
     Card(
         modifier = modifier.width(350.dp),
         shape = RoundedCornerShape(bottomEnd = 5.dp, bottomStart = 5.dp),
-        colors = CardDefaults.cardColors(containerColor = Gray)
+        colors = CardDefaults.cardColors(containerColor = LocalColor.current.backgroundLight)
     ) {
         // Card content
         Column(
@@ -483,18 +469,18 @@ fun CurrentlyWatchingCard(
             // Main image - Last inn bilde fra URL eller bruk placeholder
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(imageId)
+                    .data(listItem.production.posterUrl)
                     .placeholder(R.drawable.noimage) // placeholder når bildet lastes
                     .error(R.drawable.noimage) // vis samme placeholder ved feil
                     .build(),
-                contentDescription = imageDescription,
+                contentDescription = listItem.production.title,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .clickable {
-                        onImageClick(productionID, productionType)
+                        onImageClick(listItem.production.imdbID, listItem.production.type)
                     }
             )
 
@@ -511,9 +497,9 @@ fun CurrentlyWatchingCard(
                 ) {
                     // Title
                     Text(
-                        title,
+                        listItem.production.title,
                         style = TextStyle(
-                            color = White,
+                            color = LocalColor.current.secondary,
                             fontSize = 18.sp,
                             fontWeight = weightRegular
                         )
@@ -522,7 +508,7 @@ fun CurrentlyWatchingCard(
                     Text(
                         "Ep $watchedEpisodesCount of $showLength",
                         style = TextStyle(
-                            color = White,
+                            color = LocalColor.current.secondary,
                             fontSize = 18.sp,
                             fontWeight = weightLight
                         )
@@ -549,7 +535,7 @@ fun CurrentlyWatchingCard(
                         onMarkAsWatched()
                     },
                     shape = RoundedCornerShape(5.dp),
-                    colors = ButtonDefaults.buttonColors(Purple),
+                    colors = ButtonDefaults.buttonColors(LocalColor.current.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -559,7 +545,7 @@ fun CurrentlyWatchingCard(
                         buttonText,
                         fontSize = headerSize,
                         fontWeight = weightRegular,
-                        color = DarkGray
+                        color = LocalColor.current.background
                     )
                 }
             }
@@ -567,7 +553,7 @@ fun CurrentlyWatchingCard(
     }
 
     RatingSlider(
-        rating = userRating,
+        rating = listItem.score,
         visible = ratingSliderVisible,
         onValueChangeFinished = handleRatingChange
     )
@@ -599,7 +585,7 @@ fun TheUsersYouFollowJustWatched (
             fontFamily = fontFamily,
             fontSize = headerSize,
             fontWeight = weightBold,
-            color = White,
+            color = LocalColor.current.secondary,
             modifier = Modifier
                 .padding(vertical = 10.dp, horizontal = horizontalPadding)
         )
@@ -660,7 +646,7 @@ fun LoadingCard() {
     ){
         Text(
             text = "Placeholder",
-            color = White,
+            color = LocalColor.current.secondary,
             fontFamily = fontFamily,
             fontWeight = weightLight,
             fontSize = 12.sp
@@ -678,7 +664,8 @@ fun FriendsWatchedInfo(
 
     ) {
     Row(
-        horizontalArrangement =  Arrangement.spacedBy(3.dp)
+        horizontalArrangement =  Arrangement.spacedBy(3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         ProfileImage(
             imageID = profileImageID,
@@ -690,7 +677,7 @@ fun FriendsWatchedInfo(
         ){
             Text(
                 text = "Ep $episodesWatched of $showLenght",
-                color = White,
+                color = LocalColor.current.secondary,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = 12.sp

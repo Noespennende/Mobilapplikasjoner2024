@@ -49,7 +49,7 @@ import com.movielist.ui.theme.DarkGray
 import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
-import com.movielist.ui.theme.darkWhite
+import com.movielist.ui.theme.DarkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
@@ -643,14 +643,14 @@ fun ReviewSummary (
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightRegular,
-                                color = darkWhite
+                                color = DarkWhite
                             )
                             Text(
                                 text = "${review.postDate.get(Calendar.YEAR)}",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightLight,
-                                color = darkWhite
+                                color = DarkWhite
                             )
                         }
                         //profile picture
@@ -679,7 +679,7 @@ fun ReviewSummary (
                         fontSize = paragraphSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
-                        color = darkWhite,
+                        color = DarkWhite,
                     )
                     if (ReviewBodyIsTruncated(review.reviewBody)){
                         Text(

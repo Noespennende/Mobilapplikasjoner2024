@@ -1,9 +1,7 @@
 package com.movielist.composables
 
-import android.util.Log
 import androidx.compose.animation.core.Ease
 import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -69,14 +67,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Production
 import com.movielist.model.ShowSortOptions
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkGrayTransparent
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
-import com.movielist.ui.theme.darkWhite
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
@@ -96,7 +87,7 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 fun Background () {
     Box(
         modifier = Modifier
-            .background(DarkGray)
+            .background(LocalColor.current.background)
             .fillMaxSize()
     )
 }
@@ -106,8 +97,8 @@ fun Background () {
 fun ProgressBar (
     currentNumber: Int,
     endNumber: Int,
-    foregroundColor: Color = Purple,
-    backgroundColor: Color = DarkPurple,
+    foregroundColor: Color = LocalColor.current.primary,
+    backgroundColor: Color = LocalColor.current.tertiary,
     strokeWith: Float = 20f,
     animationDuration: Int = 1000,
     animationDelay: Int = 0,
@@ -200,7 +191,7 @@ fun ProgressBar (
 
 @Composable
 fun LineDevider (
-    color: Color = Gray,
+    color: Color = LocalColor.current.backgroundAlternative,
     strokeWith: Float = 5f,
 )
 {
@@ -238,7 +229,7 @@ fun LineDevider (
 
 @Composable
 fun LineDeviderVertical (
-    color: Color = Gray,
+    color: Color = LocalColor.current.backgroundAlternative,
     strokeWith: Float = 5f,
     modifier: Modifier = Modifier
 )
@@ -274,7 +265,7 @@ fun LineDeviderVertical (
 
 @Composable
 fun TopMobileIconsBackground (
-    color: Color = DarkGrayTransparent,
+    color: Color = LocalColor.current.backgroundAlternative,
 ) {
     Box(
         modifier = Modifier
@@ -370,7 +361,7 @@ fun ProfileImage(
 fun RatingsGraphics(
     score: Int,
     sizeMultiplier: Float = 1.0f,
-    color: Color = White,
+    color: Color = LocalColor.current.secondary,
     loggedInUsersScore: Boolean = false,
     modifier: Modifier = Modifier
 ) {
@@ -417,7 +408,7 @@ fun RatingsGraphics(
                 painter = painterResource(id = R.drawable.empty_star),
                 contentDescription = "Star",
                 contentScale = ContentScale.Crop,
-                colorFilter = ColorFilter.tint(darkWhite),
+                colorFilter = ColorFilter.tint(LocalColor.current.quinary),
                 alignment = Alignment.Center,
                 modifier = Modifier
                     .size((11*sizeMultiplier).dp)
@@ -427,7 +418,7 @@ fun RatingsGraphics(
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = 11.sp* sizeMultiplier,
-                color = darkWhite,
+                color = LocalColor.current.quinary,
                 textAlign = TextAlign.Center
             )
         }
@@ -438,7 +429,7 @@ fun RatingsGraphics(
             fontFamily = fontFamily,
             fontWeight = weightRegular,
             fontSize = 11.sp * sizeMultiplier,
-            color = darkWhite
+            color = LocalColor.current.quinary
         )
     }
 }
@@ -449,12 +440,15 @@ fun LikeButton (
     liked: Boolean = false,
     handleLikeClick: () -> Unit
 ) {
+    val primaryColor = LocalColor.current.primary
+    val quinaryColor = LocalColor.current.quinary
+
     var buttonText by remember {
         mutableStateOf("Like")
     }
 
     var buttonColor by remember {
-        mutableStateOf(LightGray)
+        mutableStateOf(quinaryColor)
     }
 
     var buttonClicked by remember {
@@ -467,13 +461,13 @@ fun LikeButton (
 
     val handleLikeButtonClick: () -> Unit = {
         if (buttonClicked) {
-            buttonColor = LightGray
+            buttonColor = quinaryColor
             buttonClicked = false
             buttonText = "Like"
             heartIcon = R.drawable.heart_hollow
 
         } else {
-            buttonColor = Purple
+            buttonColor = primaryColor
             buttonClicked = true
             buttonText = "Liked"
             heartIcon = R.drawable.heart_filled
@@ -532,12 +526,16 @@ fun FavoriteButton (
     favorited: Boolean = false,
     handleFavoriteClick: () -> Unit
 ) {
+
+    val primaryColor = LocalColor.current.primary
+    val quinaryColor = LocalColor.current.quinary
+
     var buttonText by remember {
         mutableStateOf("Add to favorites")
     }
 
     var buttonColor by remember {
-        mutableStateOf(LightGray)
+        mutableStateOf(quinaryColor)
     }
 
     var buttonClicked by remember {
@@ -550,13 +548,13 @@ fun FavoriteButton (
 
     val handleFavoriteButtonClick: () -> Unit = {
         if (buttonClicked) {
-            buttonColor = LightGray
+            buttonColor = quinaryColor
             buttonClicked = false
             buttonText = "Add to favorites"
             heartIcon = R.drawable.heart_hollow
 
         } else {
-            buttonColor = Purple
+            buttonColor = primaryColor
             buttonClicked = true
             buttonText = "Favorite"
             heartIcon = R.drawable.heart_filled
@@ -628,7 +626,7 @@ fun ProductionListSidesroller (
             fontFamily = fontFamily,
             fontSize = headerSize,
             fontWeight = weightBold,
-            color = White,
+            color = LocalColor.current.secondary,
             modifier = textModifier
         )
         LazyRow (
@@ -669,7 +667,7 @@ fun ListItemListSidesroller (
             fontFamily = fontFamily,
             fontSize = headerSize,
             fontWeight = weightBold,
-            color = White,
+            color = LocalColor.current.secondary,
             modifier = textModifier
         )
         LazyRow (
@@ -697,7 +695,7 @@ fun RoundProgressBar (
     percentage: Float = 1f,
     startAngle: Float = -90f,
     sweepAngle: Float = 360f,
-    color: Color = Purple,
+    color: Color = LocalColor.current.primary,
     strikeWith: Dp = 8.dp,
     radius: Dp = 100.dp,
     animationDuration: Int = 1000,
@@ -796,7 +794,7 @@ fun RatingSlider (
                 //Background box
                 Box(
                     modifier = modifier
-                        .background(Gray, shape = RoundedCornerShape(5.dp))
+                        .background(LocalColor.current.backgroundLight, shape = RoundedCornerShape(5.dp))
                         .padding(top = 20.dp, start = 10.dp, end = 10.dp, bottom = 5.dp)
                 ){
                     //Content
@@ -808,7 +806,7 @@ fun RatingSlider (
                         //Stars
                         RatingsGraphics(
                             score = scoreInput,
-                            color = Purple,
+                            color = LocalColor.current.primary,
                             loggedInUsersScore = true,
                             sizeMultiplier = 2f
                         )
@@ -884,7 +882,7 @@ fun LogoWithName (
                 fontFamily = fontFamily,
                 fontSize = fontSize,
                 fontWeight = weightLight,
-                color = Purple
+                color = LocalColor.current.primary
             )
             Text(
                 text = "List",
@@ -892,7 +890,7 @@ fun LogoWithName (
                 fontFamily = fontFamily,
                 fontSize = fontSize,
                 fontWeight = FontWeight.Black,
-                color = Purple
+                color = LocalColor.current.primary
             )
         }
 
@@ -961,7 +959,7 @@ fun ProductionSortSelectButton (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = Purple,
+                    color = LocalColor.current.primary,
                     textAlign = TextAlign.Center
                 )
                 Text(
@@ -969,7 +967,7 @@ fun ProductionSortSelectButton (
                     fontSize = paragraphSize,
                     fontWeight = weightLight,
                     fontFamily = fontFamily,
-                    color = Purple,
+                    color = LocalColor.current.primary,
                 )
 
             }
@@ -980,7 +978,7 @@ fun ProductionSortSelectButton (
                 onDismissRequest = {dropDownExpanded = false},
                 offset = DpOffset(x = 50.dp, y= 0.dp),
                 modifier = Modifier
-                    .background(color = DarkPurple)
+                    .background(color = LocalColor.current.tertiary)
                     .width(100.dp)
             ) {
                 sortOptions.forEach{
@@ -995,7 +993,7 @@ fun ProductionSortSelectButton (
                                 fontSize = headerSize,
                                 fontWeight = weightBold,
                                 fontFamily = fontFamily,
-                                color = White,
+                                color = LocalColor.current.secondary,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -1020,8 +1018,8 @@ fun ProductionSortSelectButton (
 fun SettingsButton(
     modifier: Modifier = Modifier,
     sizeMultiplier: Float = 1f,
-    iconColor: Color = White,
-    backgroundColor: Color = DarkPurple,
+    iconColor: Color = LocalColor.current.secondary,
+    backgroundColor: Color = LocalColor.current.tertiary,
     filled: Boolean = false,
     handleSettingsButtonClick: () -> Unit
 ) {

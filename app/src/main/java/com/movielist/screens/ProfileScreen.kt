@@ -63,14 +63,14 @@ import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.darkWhite
+import com.movielist.ui.theme.DarkWhite
 import com.movielist.ui.theme.fontFamily
-import com.movielist.ui.theme.green
+import com.movielist.ui.theme.Green
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.red
-import com.movielist.ui.theme.teal
+import com.movielist.ui.theme.Red
+import com.movielist.ui.theme.Teal
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -78,7 +78,7 @@ import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
-import com.movielist.ui.theme.yellow
+import com.movielist.ui.theme.Yellow
 import kotlinx.coroutines.delay
 import java.util.Calendar
 import kotlin.random.Random
@@ -749,7 +749,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite,
+                color = DarkWhite,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -791,7 +791,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite,
+                color = DarkWhite,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -834,7 +834,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite,
+                color = DarkWhite,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -873,7 +873,7 @@ fun BioSection (
             fontFamily = fontFamily,
             fontWeight = weightLight,
             fontSize = paragraphSize,
-            color = darkWhite,
+            color = DarkWhite,
             textAlign = TextAlign.Start
         )
     }
@@ -1071,7 +1071,7 @@ fun StatisticsPieChart (
     val lastValues = sortedList.takeLast(4)
     val percentageList = listOf(sumOfOthers) + lastValues
 
-    val colorList: Array<Color> = arrayOf(red, green, Purple, yellow, teal)
+    val colorList: Array<Color> = arrayOf(Red, Green, Purple, Yellow, Teal)
 
     var index = 0
     var cumulativePercentage = 0f
@@ -1143,7 +1143,7 @@ fun StatisticsList (
 {
     //Sort genreToPercentageMap from highest to lowest based on the value
     val sortedMap = genreToPercentageMap.toList().sortedByDescending { (_, value) -> value }.toMap()
-    val colorList: Array<Color> = arrayOf(teal, yellow, Purple, green)
+    val colorList: Array<Color> = arrayOf(Teal, Yellow, Purple, Green)
     var other = 100
     var index = 0
 
@@ -1176,7 +1176,7 @@ fun StatisticsList (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = red,
+                color = Red,
                 textAlign = TextAlign.Start,
             )
         }
@@ -1233,7 +1233,7 @@ fun StatisticsList (
             ProgressBar(
                 currentNumber = other,
                 endNumber = 100,
-                foregroundColor = red,
+                foregroundColor = Red,
                 backgroundColor = Gray,
             )
 
