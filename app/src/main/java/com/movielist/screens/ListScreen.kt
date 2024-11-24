@@ -132,25 +132,12 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         navController.navigate(Screen.ComparisonScreen.withArguments(listOwnderID.toString()))
     }
 
-    val handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit = { listItem, episodeCount ->
+    val handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit = { listItem, episodeCount, isPlus ->
 
-        controllerViewModel.updateCurrentEpisodeInCollection(activeCategory, listItem, episodeCount)
+        listItem.currentEpisode = episodeCount
+        controllerViewModel.handleEpisodeCountChange(activeCategory, listItem, episodeCount, isPlus)
 
     }
-
-    val handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int)  -> Unit =
-        { listItem, watchedEpisodeCount, productionTotalEpisode ->
-        // Controller Kall
-       /*
-
-        showLength = when (listOfShows[i].production) {
-            is TVShow -> (listOfShows[i].production as TVShow).episodes.size
-
-            */
-
-
-        }
-
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -191,7 +178,6 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
                 handleListItemFavoriteClick = handleListItemFavoriteClick,
                 handleCompareUserClick = handleCompareUserListsClick,
                 handleEpisodeCountChange = handleEpisodeCountChange,
-                handleMarkCompleted = handleMarkCompleted,
             )
         }
     }
@@ -348,8 +334,7 @@ fun ListPageList (
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
     handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit,
-    handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit,
-    handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int) -> Unit
+    handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit,
 ){
     //Graphics
     Column(
@@ -400,7 +385,6 @@ fun ListPageList (
                 handleListItemRatingChange = handleListItemRatingChange,
                 handleFavoriteClick = handleListItemFavoriteClick,
                 handleEpisodeCountChange = handleEpisodeCountChange,
-                handleMarkCompleted = handleMarkCompleted
             )
         }
     }
@@ -414,8 +398,7 @@ fun ListPageListItem (
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
     handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
-    handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit,
-    handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int) -> Unit
+    handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit,
 ){
 
     //Graphics logic
@@ -443,9 +426,11 @@ fun ListPageListItem (
         ratingsSliderIsVisible = false
     }
 
-    val handleEpisodeCount = {
-        handleEpisodeCountChange(listItem, watchedEpisodesCount)
+    val handleEpisodeCount = { isPlus: Boolean ->
+        handleEpisodeCountChange(listItem, watchedEpisodesCount, isPlus)
     }
+
+
 
     // Passer på at watchedEpisodeCount oppdaterer seg for produksjonen
     // (Fikser bug hvor filmer f.eks har 5 som Ep of 1 (Ep 5 of 1),
@@ -535,7 +520,7 @@ fun ListPageListItem (
                                         watchedEpisodesCount--
                                         listItem.currentEpisode = watchedEpisodesCount
 
-                                        handleEpisodeCount()
+                                        handleEpisodeCount(false)
 
                                         // Log utskrift for å dobbeltsjekke at begge variablene oppdateres
                                         //Log.d("MinusBtn_VariableTest", "currentEpisode: " + listItem.currentEpisode.toString())
@@ -571,23 +556,23 @@ fun ListPageListItem (
                                 .clickable {
                                     when (val production = listItem.production) {
                                         is TVShow -> {
-                                            // For TV-serier: Sjekk om det er flere episoder igjen å se
-                                            if (watchedEpisodesCount < production.episodes.size) {
-                                                watchedEpisodesCount++
-                                                listItem.currentEpisode = watchedEpisodesCount
 
-                                                handleEpisodeCount()
+                                            val productionTotalEpisodes = production.episodes.size;
+                                            // For TV-serier: Sjekk om det er flere episoder igjen å se
+                                            if (watchedEpisodesCount < productionTotalEpisodes) {
+                                                watchedEpisodesCount++
+
+                                                handleEpisodeCount(true)
                                             }
+
                                         }
 
                                         is Movie -> {
                                             // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
                                             if (watchedEpisodesCount == 0) {
                                                 watchedEpisodesCount = 1
-                                                listItem.currentEpisode = watchedEpisodesCount
 
-
-                                                handleMarkCompleted(listItem, watchedEpisodesCount, 1)
+                                                handleEpisodeCount(true)
                                             }
 
                                         }
