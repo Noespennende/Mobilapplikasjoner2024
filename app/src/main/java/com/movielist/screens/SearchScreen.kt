@@ -39,48 +39,24 @@ import java.util.Calendar
 
 @Composable
 fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavController) {
-    //TEMP CODE DELETE THIS
 
-    val tempShowList = mutableListOf<Production>()
-    val tempUserList = mutableListOf<User>()
 
-    for (i in 0..50) {
-        tempShowList.add(
-            TVShow(
-                imdbID = "123",
-                title = "Silo",
-                description = "TvShow Silo description here",
-                genre = listOf("Action"),
-                releaseDate = Calendar.getInstance(),
-                actors = emptyList(),
-                rating = 4,
-                reviews = ArrayList(),
-                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                episodes = listOf("01", "02", "03", "04", "05", "06",
-                    "07", "08", "09", "10", "11", "12"),
-                seasons = listOf("1", "2", "3")
-            ),
-        )
-
-        tempUserList.add(
-            User(
-                email = "lol@email.com",
-                userName = "Jane User",
-                profileImageID = R.drawable.profilepicture.toString()
-            )
-        )
-    }
-    //TEMP CODE DELETE ABOVE
     val searchResultsList by controllerViewModel.searchResults.collectAsState()
-    //val productionList: MutableList<Production> = tempShowList /*<-- Liste som inneholder søkeresultatene for Movies og TVSerier*/
-    val userList: MutableList<User> = tempUserList /* <-- Liste som inneholder søkeresultatene for brukere */
+    val userList by controllerViewModel.userSearchResults.collectAsState()
 
     var activeSortOption by remember { mutableStateOf(SearchSortOptions.MOVIESANDSHOWS) }
 
     val handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery:String) -> Unit = {sortingOption, searchQuery ->
         activeSortOption = sortingOption
         //Kontroller logikk for å håndtere søk her
-        controllerViewModel.searchMultibleMedia(searchQuery)
+        when (activeSortOption) {
+            SearchSortOptions.USER -> {
+                controllerViewModel.searchUsers(searchQuery)
+            }
+            else -> {
+                controllerViewModel.searchMedia(searchQuery, activeSortOption)
+            }
+        }
     }
 
 

@@ -1,5 +1,6 @@
 package com.movielist.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,6 +37,15 @@ class UserViewModel : ViewModel() {
 
     private val _otherUser = MutableStateFlow<User?>(null)
     val otherUser: StateFlow<User?> get() = _otherUser
+
+    private val _searchResults = MutableStateFlow<List<User>>(emptyList())
+    val searchResults: StateFlow<List<User>> get() = _searchResults
+
+
+    suspend fun searchUsers(query: String) {
+        val users = firestoreRepository.fetchUsersFromFirebase(query)
+        _searchResults.value = users ?: emptyList()
+    }
 
     // Funksjon for å sette User-objekt for innloggede bruker
     fun setLoggedInUser(uid: String) {
@@ -171,6 +181,25 @@ class UserViewModel : ViewModel() {
             "wantToWatchCollection" -> user?.wantToWatchCollection?.add(listItem)
             "droppedCollection" -> user?.droppedCollection?.add(listItem)
             "completedCollection" -> user?.completedCollection?.add(listItem)
+        }
+    }
+
+    fun updateProfileImage(imageUri : Uri) {
+
+        viewModelScope.launch {
+
+            try {
+                val imageUrl = firestoreRepository.uploadProfileImage(imageUri) // Laster opp og får URL
+                firestoreRepository.saveImageUrlToUserDoc(imageUrl) // Lagre URL i Firestore
+
+                val updatedUser = loggedInUser.value?.copy(profileImageID = imageUrl)
+                _loggedInUser.value = updatedUser
+
+                Log.d("Upload", "Profilbilde oppdatert!")
+            } catch (e: Exception) {
+                Log.e("Upload", "Feil: ${e.message}")
+            }
+
         }
     }
 

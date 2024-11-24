@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -741,6 +743,9 @@ fun YouTubeVideoEmbed(
     lifeCycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier
 ){
+    // Passer på at urlen som brukes er up-to-date med den som kommer inn
+    val currentVideoUrl by rememberUpdatedState(videoUrl)
+
     AndroidView(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
@@ -751,7 +756,7 @@ fun YouTubeVideoEmbed(
                 lifeCycleOwner.lifecycle.addObserver(this)
                 addYouTubePlayerListener(object: AbstractYouTubePlayerListener(){
                     override fun onReady(youTubePlayer: YouTubePlayer) {
-                        youTubePlayer.loadVideo(videoUrl, 0f)
+                        youTubePlayer.loadVideo(currentVideoUrl, 0f)
                     }
                 })
             }

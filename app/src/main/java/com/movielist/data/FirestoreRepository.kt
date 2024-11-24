@@ -1,16 +1,21 @@
 package com.movielist.data
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.TVShow
+import com.movielist.model.User
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.UUID
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
@@ -108,6 +113,55 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 Log.e("TAG", "Error fetching document", exception)
                 onFailure(exception)
             }
+    }
+
+    suspend fun fetchAllUsers():List<Map<String, Any>>?{
+        val db = Firebase.firestore
+
+        return try {
+            val document = db.collection("users").get().await()
+
+            val users = document.documents.map { document->
+                document.data ?: emptyMap()
+            }
+
+            users
+        }catch (exception: Exception) {
+            Log.w("FirebaseFailure", "Error getting document", exception)
+            null
+        }
+    }
+
+    suspend fun fetchUsersFromFirebase(query: String): List<User>? {
+        val db = Firebase.firestore
+
+        return try {
+            val querySnapshot = db.collection("users")
+                .whereGreaterThanOrEqualTo("userName", query)
+                .whereLessThanOrEqualTo("userName", query)
+                .get()
+                .await()
+
+            querySnapshot.documents.map { document ->
+                val email = document.getString("email") ?: ""
+                val userName = document.getString("userName") ?: ""
+
+                val profileImageID = document.get("profileImageID")
+                val profileImageIDString = when (profileImageID) {
+                    is String -> profileImageID
+                    else -> ""
+                }
+
+                User(
+                    email = email,
+                    userName = userName,
+                    profileImageID = profileImageIDString
+                )
+            }
+        } catch (exception: Exception) {
+            Log.w("FirebaseFailure", "Error fetching users", exception)
+            null
+        }
     }
 
     suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
@@ -633,5 +687,35 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+
+    suspend fun uploadProfileImage(imageUri: Uri?): String {
+        if (imageUri == null) throw IllegalArgumentException("Ingen bilde valgt")
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val storageRef = FirebaseStorage.getInstance().reference
+
+        val imageRef = storageRef.child("profile_pictures/$userId/${UUID.randomUUID()}.jpg")
+
+        // Laster opp bilde
+        imageRef.putFile(imageUri).await()
+
+        // Returnerer URL-en
+        return imageRef.downloadUrl.await().toString()
+    }
+
+    suspend fun saveImageUrlToUserDoc(imageUrl: String) {
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val db = FirebaseFirestore.getInstance()
+
+        val userDocRef = db.collection("users").document(userId)
+        val userProfileData = mapOf("profileImageID" to imageUrl)
+
+        userDocRef.update(userProfileData).await()
+    }
 
 }

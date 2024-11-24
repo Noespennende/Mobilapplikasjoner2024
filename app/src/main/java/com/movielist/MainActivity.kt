@@ -58,6 +58,8 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(firebaseUser) {
                 if (firebaseUser != null) {
                     controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+
+                
                 }
 
             }

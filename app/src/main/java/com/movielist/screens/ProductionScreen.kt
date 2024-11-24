@@ -84,9 +84,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
         controllerViewModel.nullifyReviewDTOs()
 
-        if (productionType != null) {
-            controllerViewModel.getReviewByProduction(productionID, productionType)
-        }
 
         // Håndter produksjonsdata basert på productionType
         if (productionID.isNotEmpty()) {
@@ -115,11 +112,13 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         }
     }
 
-    LaunchedEffect(listOfReviews) {
-        // Når listOfReviews endres, kan du logge eller oppdatere UI med de nye anmeldelsene
-        Log.d("GetReviews", "Reviews updated with ${listOfReviews?.size} reviews")
-    }
+    LaunchedEffect(production) {
+        // Venter med å hente reviews til production er oppdatert
 
+        if (productionType != null) {
+            controllerViewModel.getReviewByProduction(productionID, productionType)
+        }
+    }
 
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
@@ -152,7 +151,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     }
 
     val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
-        navController.navigate(Screen.ProfileScreen.withArguments(productionID))
+        navController.navigate(Screen.ProfileScreen.withArguments(profileID))
     }
 
     val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
