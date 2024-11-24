@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +47,7 @@ import com.movielist.composables.RoundProgressBar
 import com.movielist.composables.SettingsButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.FollowStatus
 import com.movielist.model.ListItem
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
@@ -73,7 +76,6 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import com.movielist.ui.theme.yellow
-import kotlinx.coroutines.flow.firstOrNull
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -199,6 +201,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
+    var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) } //<- Kontroller funksjon som gir en FollowStatus enum som sier om logged in user følger brukeren som eier profilen
+
     //function variables:
     val user = profileOwner ?: exampleUser
 
@@ -231,6 +235,11 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val handleSettingsButtonClick: () -> Unit = {
         navController.navigate(Screen.SettingsScreen.withArguments())
+    }
+
+    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = {newFollowStatus ->
+        followStatus = newFollowStatus
+        //Kontroller funksjon for å håndtere follow / Unfollow her
     }
 
 
@@ -277,8 +286,10 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 {
                     ProfileInfoSection(
                         user = user,
+                        followStatus = followStatus ,
                         loggedInUsersProfile = profileBelongsToLoggedInUser,
-                        handleSettingsButtonClick = handleSettingsButtonClick
+                        handleSettingsButtonClick = handleSettingsButtonClick,
+                        handleFollowUnfollowClick = handleFollowUnfollowClick
                     )
                 }
 
@@ -457,7 +468,7 @@ fun ProfileCategoryOptions(
     inactiveButtonColor: Color = LightGray,
     handleSummaryClick: () -> Unit,
     handleLibraryClick: () -> Unit,
-    handleReviewsClick: () -> Unit
+    handleReviewsClick: () -> Unit,
 ){
 
     //Button graphics logic
@@ -583,8 +594,21 @@ fun ProfileCategoryOptions(
 fun ProfileInfoSection (
     user: User,
     loggedInUsersProfile: Boolean,
-    handleSettingsButtonClick: () -> Unit
+    followStatus: FollowStatus,
+    handleSettingsButtonClick: () -> Unit,
+    handleFollowUnfollowClick: (followStatus: FollowStatus) -> Unit
 ){
+
+    var followButtonColor by remember { mutableStateOf(
+        if (followStatus == FollowStatus.NOTFOLLOWING){
+            Purple
+        } else {
+            LightGray
+        }
+    ) }
+
+    var newFollowStatus by remember { mutableStateOf(followStatus) }
+
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
@@ -598,16 +622,53 @@ fun ProfileInfoSection (
                 backgroundColor = LightGray,
                 modifier = Modifier
                     .align(Alignment.End)
+                    .padding(bottom = 10.dp)
             )
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(bottom = 15.dp)
+            ){
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .clickable {
+                            if (newFollowStatus == FollowStatus.NOTFOLLOWING){
+                                newFollowStatus = FollowStatus.FOLLOWING
+                                followButtonColor = LightGray
+                                handleFollowUnfollowClick(newFollowStatus)
+                            } else {
+                                newFollowStatus = FollowStatus.NOTFOLLOWING
+                                followButtonColor = Purple
+                                handleFollowUnfollowClick(newFollowStatus)
+                            }
+                        }
+                        .background(
+                            color = followButtonColor,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                        .width(150.dp)
+                        .height(30.dp)
+                ) {
+                    Text(
+                        text = if (newFollowStatus == FollowStatus.NOTFOLLOWING){"Follow"} else {"Unfollow"},
+                        fontSize = paragraphSize,
+                        fontWeight = weightBold,
+                        color = DarkGray
+                    )
+                }
+            }
         }
 
         //Bio Section
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .fillMaxWidth()
         ){
-            LeftProfileSection(
+            UserInfo(
                 gender = user.gender,
                 location = user.location,
                 website = user.website
@@ -638,101 +699,134 @@ fun ProfileInfoSection (
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun LeftProfileSection(
+fun UserInfo(
     gender: String,
     location: String,
     website: String
 ){
-    Column(
+    FlowRow (
         verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .width(160.dp)
+            .fillMaxWidth()
     ) {
         //Gender
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.profile),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(17.dp)
-            )
-            Text(
-                text = "Gender:",
-                fontFamily = fontFamily,
-                fontWeight = weightBold,
-                fontSize = paragraphSize,
-                color = White
-            )
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(17.dp)
+                )
+                Text(
+                    text = "Gender:",
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    fontSize = paragraphSize,
+                    color = White
+                )
 
+            }
             Text(
                 text = gender,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite
+                color = darkWhite,
+                modifier = Modifier
+                    .padding(
+                        top = 5.dp
+                    )
             )
         }
 
         //Location
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.location),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(17.dp)
-            )
-            Text(
-                text = "Location:",
-                fontFamily = fontFamily,
-                fontWeight = weightBold,
-                fontSize = paragraphSize,
-                color = White
-            )
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
 
+        ){
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.location),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(17.dp)
+                )
+                Text(
+                    text = "Location:",
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    fontSize = paragraphSize,
+                    color = White
+                )
+
+            }
             Text(
                 text = location,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite
+                color = darkWhite,
+                modifier = Modifier
+                    .padding(
+                        top = 5.dp
+                    )
             )
         }
 
-        //Website
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ){
-            Image(
-                painter = painterResource(id = R.drawable.location),
-                contentDescription = "",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(17.dp)
-            )
-            Text(
-                text = "Website:",
-                fontFamily = fontFamily,
-                fontWeight = weightBold,
-                fontSize = paragraphSize,
-                color = White
-            )
 
+        //Website
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            ){
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.globe),
+                    contentDescription = "",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(17.dp)
+                )
+                Text(
+                    text = "Website:",
+                    fontFamily = fontFamily,
+                    fontWeight = weightBold,
+                    fontSize = paragraphSize,
+                    color = White
+                )
+
+            }
             Text(
                 text = website,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = darkWhite
+                color = darkWhite,
+                modifier = Modifier
+                    .padding(
+                        top = 5.dp
+                    )
+
             )
         }
     }
@@ -751,7 +845,7 @@ fun BioSection (
     Column (
         verticalArrangement = Arrangement.spacedBy(5.dp),
         modifier = Modifier
-            .width(160.dp)
+            .fillMaxWidth()
     ) {
         Text(
             text = "Bio:",

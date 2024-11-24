@@ -428,7 +428,7 @@ fun EditBio (
     bio: String,
     handleBioEditedClick: (updatedBio: String) -> Unit
 ){
-    val maxCharLenght = 130
+    val maxCharLenght = 230
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     var newBio by remember { mutableStateOf(bio) }
@@ -771,7 +771,7 @@ fun EditWebsite (
                         horizontal = 10.dp
                     )
             )
-            //Update bio button
+            //Update website button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -840,12 +840,44 @@ fun EditLocation (
             }
             context.startService(startIntent)
             message = "Retrieving your location..."
-            isReceiverRegistered = true
+
+            if (!isReceiverRegistered) {
+                val receiver = object : BroadcastReceiver() {
+                    override fun onReceive(ctx: Context?, intent: Intent?) {
+                        if (intent?.action == LocationService.LOCATION_UPDATE) {
+                            country = intent.getStringExtra(LocationService.EXTRA_COUNTRY) ?: ""
+                            region = intent.getStringExtra(LocationService.EXTRA_REGION) ?: ""
+                            newLocation = "$region, $country"
+                            message = "Location updated!"
+                            error = false
+
+                            handleLocationEditedClick(newLocation)
+
+                            val stopIntent = Intent(context, LocationService::class.java).apply {
+                                action = LocationService.ACTION_STOP
+                            }
+                            context.startService(stopIntent)
+
+
+                            LocalBroadcastManager.getInstance(context).unregisterReceiver(this)
+                            isReceiverRegistered = false
+                        } else {
+                            message = "Ops, something went wrong. Please try again."
+                            error = true
+                        }
+                    }
+                }
+
+                LocalBroadcastManager.getInstance(context).registerReceiver(
+                    receiver,
+                    IntentFilter(LocationService.LOCATION_UPDATE)
+                )
+                isReceiverRegistered = true
+            }
         }
     }
 
 
-    // Your UI components below...
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
@@ -853,30 +885,6 @@ fun EditLocation (
             .fillMaxWidth(0.9f)
             .padding(vertical = 10.dp, horizontal = 20.dp)
     ) {
-
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .background(color = Purple, shape = RoundedCornerShape(5.dp))
-                .padding(vertical = 10.dp, horizontal = 10.dp)
-                .fillMaxWidth()
-                .clickable {
-                    val testIntent = Intent(LocationService.LOCATION_UPDATE)
-                    testIntent.putExtra(LocationService.EXTRA_COUNTRY, "Norway")
-                    testIntent.putExtra(LocationService.EXTRA_REGION, "Oslo")
-                    context.sendBroadcast(testIntent)
-                }
-        ) {
-            Text(
-                text = "TEST BUTTON",
-                fontSize = headerSize,
-                fontWeight = weightBold,
-                fontFamily = fontFamily,
-                color = DarkGray,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
 
         if (message.isNotEmpty()) {
             Text(
@@ -1012,7 +1020,7 @@ fun EditColorMode (
             horizontalArrangement = Arrangement.spacedBy(5.dp),
 
             ) {
-            //Update bio button
+            //Darkmode button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -1070,7 +1078,7 @@ fun EditColorMode (
                         .align(Alignment.Center)
                 )
             }
-            //Update bio button
+            //Lightmode button
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
