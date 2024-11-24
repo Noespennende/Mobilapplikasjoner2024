@@ -177,11 +177,8 @@ class UserViewModel : ViewModel() {
         }
     }
 
+    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String? = null, targetCollection: String) {
 
-    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String?, targetCollection: String) {
-
-
-        // Konverter listItem til map for lagring i Firestore
         val listItemMap = listItem.toMap()
 
         // Legg til i targetCollection og fjern fra sourceCollection
@@ -195,14 +192,17 @@ class UserViewModel : ViewModel() {
                         userID, listItem, sourceCollection,
                         onSuccess = {
                             Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         },
                         onFailure = {
                             Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         },
                         onNotFound = {
                             Log.e("FirestoreRemove", "Item not found in $sourceCollection")
+
                             updateUserCollections(listItem, sourceCollection, targetCollection)
                         }
                     )

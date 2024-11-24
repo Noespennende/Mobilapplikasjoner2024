@@ -559,6 +559,7 @@ class ControllerViewModel(
             releaseDate = convertStringToCalendar(result.firstAirDate) ?: Calendar.getInstance(),
             actors = actors,
             trailerUrl = trailerUrl.toString(),
+            episodes  = (1..(result.numberOfEpisodes ?: 1)).map { it.toString() },
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
             // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
         )
@@ -1064,11 +1065,12 @@ class ControllerViewModel(
             if (productionData != null) {
                 listItem = ListItem(production = productionData)
             }
+
             Log.e("UserViewModel", "List item with productionID: $productionID not found in any collection.")
         }
 
-        if (sourceCollection == null || sourceCollection == targetCollection) {
-            Log.e("UserViewModel", "Invalid source or target collection.")
+        if (sourceCollection == targetCollection) {
+            Log.e("UserViewModel", "source and target collection is the same")
         }
 
         if (listItem != null) {
