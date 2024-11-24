@@ -192,7 +192,8 @@ class UserViewModel : ViewModel() {
                 val imageUrl = firestoreRepository.uploadProfileImage(imageUri) // Laster opp og får URL
                 firestoreRepository.saveImageUrlToUserDoc(imageUrl) // Lagre URL i Firestore
 
-                loggedInUser.value?.profileImageID = imageUrl
+                val updatedUser = loggedInUser.value?.copy(profileImageID = imageUrl)
+                _loggedInUser.value = updatedUser
 
                 Log.d("Upload", "Profilbilde oppdatert!")
             } catch (e: Exception) {
