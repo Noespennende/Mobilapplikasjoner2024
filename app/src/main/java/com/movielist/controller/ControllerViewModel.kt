@@ -976,20 +976,13 @@ class ControllerViewModel(
         return emptyList()
     }
 
-    fun handleEpisodeCountChange(collectionOption: ListOptions, listItem: ListItem, watchedEpisodeCount: Int, isPlus: Boolean)  {
+    fun handleEpisodeCountChange(listItem: ListItem, watchedEpisodeCount: Int, isPlus: Boolean)  {
 
         viewModelScope.launch {
 
-            // TODO : Bytte ut collectionOption med annen Enum
-            val sourceCollection = when (collectionOption) {
-                ListOptions.WATCHING -> "currentlyWatchingCollection"
-                ListOptions.COMPLETED -> "completedCollection"
-                ListOptions.WANTTOWATCH -> "wantToWatchCollection"
-                ListOptions.DROPPED -> "droppedCollection"
-                ListOptions.REMOVEFROMLIST -> ""
-            }
+            val sourceCollection = findListItemCollection(listItem)
 
-            if (sourceCollection == "") {
+            if (sourceCollection == null) {
 
                 Log.d("ControllerViewModel", "sourceCollection is RemoveFromList for listItem")
                 return@launch
@@ -1157,6 +1150,25 @@ class ControllerViewModel(
     fun addOrRemoveFromUsersFavorites(userID: String, listItem: ListItem, isFavorite: Boolean) {
 
         userViewModel.addOrRemoveFromUsersFavorites(userID, listItem, isFavorite)
+    }
+
+    fun findListItemCollection(listItem: ListItem): String? {
+
+        val user = loggedInUser.value
+
+        var sourceCollection: String? = null;
+        if (user != null) {
+            sourceCollection = when {
+                user.currentlyWatchingCollection.contains(listItem) -> "currentlyWatchingCollection"
+                user.wantToWatchCollection.contains(listItem) -> "wantToWatchCollection"
+                user.droppedCollection.contains(listItem) -> "droppedCollection"
+                user.completedCollection.contains(listItem) -> "completedCollection"
+                else -> null
+            }
+        }
+
+        return sourceCollection
+
     }
 
     fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {

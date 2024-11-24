@@ -209,6 +209,16 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
         //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
     }
+
+    val handleMarkAsWatched: (listItem: ListItem) -> Unit = { listItem ->
+
+        Log.d("ControllerViewModel", listItem.currentEpisode.toString())
+
+        val newCurrentEpisode = ++listItem.currentEpisode
+        Log.d("ControllerViewModel", newCurrentEpisode.toString())
+        controllerViewModel.handleEpisodeCountChange(listItem, newCurrentEpisode, true)
+
+    }
     
     var top10ReviewsListPastWeek = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
@@ -231,7 +241,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             CurrentlyWatchingScroller(
                 listOfShows = currentlyWatchingCollection,
                 onImageClick = handleProductionButtonClick,
-                handleRatingChange = handleUserRatingChange
+                handleRatingChange = handleUserRatingChange,
+                handleMarkAsWatched = handleMarkAsWatched
             )
         }
 
@@ -243,7 +254,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
 
             //denne må stå her for å gjøre kallet til getAllMedia
-            var apiMovies = controllerViewModel.getAllMedia().toString()
+            //var apiMovies = controllerViewModel.getAllMedia().toString()
 
             var test = controllerViewModel.filteredMediaData.value
 
@@ -323,7 +334,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
     onImageClick: (showID: String, productionType: String) -> Unit,
-    handleRatingChange: (rating: Int, listItemID: String) -> Unit
+    handleRatingChange: (rating: Int, listItemID: String) -> Unit,
+    handleMarkAsWatched: (listItem: ListItem) -> Unit
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -343,6 +355,7 @@ fun CurrentlyWatchingScroller (
     val clickTimes by remember {mutableStateOf(mutableMapOf<String, Long>())}
     fun mostRecentButtonClick(show: ListItem) {
         clickTimes[show.id] = System.currentTimeMillis() // Registerer når currentEpisode på watchedEpisodesCount oppdateres (knapp trykkes)
+
 
         allCurrentlyWatchingShows = listOfShows.sortedByDescending {clickTimes[it.id]}.toMutableList()
     }
@@ -372,7 +385,7 @@ fun CurrentlyWatchingScroller (
                         else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                     },
                     episodesWatched = listOfShows[i].currentEpisode,
-                    onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
+                    onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]); handleMarkAsWatched(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
                     onImageClick = onImageClick,
                     userRating = listOfShows[i].score,
                     listItemID = listOfShows[i].id,

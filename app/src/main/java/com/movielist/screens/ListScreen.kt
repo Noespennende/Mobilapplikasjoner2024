@@ -135,7 +135,7 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
     val handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit = { listItem, episodeCount, isPlus ->
 
         listItem.currentEpisode = episodeCount
-        controllerViewModel.handleEpisodeCountChange(activeCategory, listItem, episodeCount, isPlus)
+        controllerViewModel.handleEpisodeCountChange(listItem, episodeCount, isPlus)
 
     }
     /*
