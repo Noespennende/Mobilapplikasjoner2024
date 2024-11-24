@@ -188,7 +188,13 @@ class UserViewModel : ViewModel() {
         }
     }
 
-    fun addOrMoveToUsersCollection(userID: String, listItem: ListItem, sourceCollection: String? = null, targetCollection: String) {
+    fun addOrMoveToUsersCollection(
+        userID: String,
+        listItem: ListItem,
+        sourceCollection: String? = null,
+        targetCollection: String,
+        onSuccess: (() -> Unit)? = null
+    ) {
 
         val listItemMap = listItem.toMap()
 
@@ -205,6 +211,8 @@ class UserViewModel : ViewModel() {
                             Log.d("FirestoreRemove", "Successfully removed from $sourceCollection")
 
                             updateUserCollections(listItem, sourceCollection, targetCollection)
+
+                            onSuccess?.invoke()
                         },
                         onFailure = {
                             Log.e("FirestoreRemove", "Failed to remove from $sourceCollection")

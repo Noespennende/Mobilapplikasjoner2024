@@ -1036,7 +1036,13 @@ class ControllerViewModel(
         return emptyList()
     }
 
-    fun handleEpisodeCountChange(collectionOption: ListOptions, listItem: ListItem, watchedEpisodeCount: Int, isPlus: Boolean)  {
+    fun handleEpisodeCountChange(
+        collectionOption: ListOptions,
+        listItem: ListItem,
+        watchedEpisodeCount: Int,
+        isPlus: Boolean,
+        onMoveToCollection: () -> Unit
+    )  {
 
         viewModelScope.launch {
 
@@ -1082,8 +1088,13 @@ class ControllerViewModel(
                                 userID,
                                 listItem,
                                 sourceCollection,
-                                targetCollection
+                                targetCollection,
+                                onSuccess = {
+                                    onMoveToCollection()
+                                }
                             )
+
+                            onMoveToCollection()
                         } else {
 
                             if (sourceCollection == targetCollection) {
@@ -1091,8 +1102,13 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
+
+                                onMoveToCollection()
                             }
 
                             if (sourceCollection == "wantToWatchCollection"
@@ -1102,8 +1118,13 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
+
+                                onMoveToCollection()
                             }
 
                         }
@@ -1126,7 +1147,10 @@ class ControllerViewModel(
                                 userID,
                                 listItem,
                                 sourceCollection,
-                                targetCollection
+                                targetCollection,
+                                onSuccess = {
+                                    onMoveToCollection()
+                                }
                             )
                         } else {
 
@@ -1135,7 +1159,10 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
                             }
 
@@ -1145,7 +1172,10 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
                             }
 
