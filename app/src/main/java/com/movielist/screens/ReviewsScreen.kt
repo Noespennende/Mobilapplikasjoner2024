@@ -74,7 +74,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         id = "IDfromFirebase",
         userName = "UserN",
         email = "user@email.com",
-        friendList = mutableListOf(),
+        followingList = mutableListOf(),
     )
 
     val reviewProduction = TVShow(

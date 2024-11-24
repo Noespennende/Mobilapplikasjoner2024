@@ -95,7 +95,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         id = "IDfromFirebase",
         userName = "UserN",
         email = "user@email.com",
-        friendList = mutableListOf(),
+        followingList = mutableListOf(),
     )
 
     val reviewProduction = TVShow(
@@ -201,8 +201,14 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
-    var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) } //<- Kontroller funksjon som gir en FollowStatus enum som sier om logged in user følger brukeren som eier profilen
+    var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) }
 
+    LaunchedEffect(profileOwner, loggedInUser) {
+        if (profileOwner != null && loggedInUser != null) {
+
+            followStatus = controllerViewModel.determineFollowStatus()
+        }
+    }
     //function variables:
     val user = profileOwner ?: exampleUser
 
@@ -237,9 +243,15 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         navController.navigate(Screen.SettingsScreen.withArguments())
     }
 
-    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = {newFollowStatus ->
-        followStatus = newFollowStatus
-        //Kontroller funksjon for å håndtere follow / Unfollow her
+    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = { newFollowStatus ->
+        val profileOwnerUser = profileOwner
+        if (profileOwnerUser != null) {
+            if (newFollowStatus == FollowStatus.FOLLOWING) {
+                controllerViewModel.addUserToFollowerList(profileOwnerUser)
+            } else if (newFollowStatus == FollowStatus.NOTFOLLOWING) {
+                controllerViewModel.removeUserFromFollowerList(profileOwnerUser)
+            }
+        }
     }
 
 
@@ -608,6 +620,11 @@ fun ProfileInfoSection (
     ) }
 
     var newFollowStatus by remember { mutableStateOf(followStatus) }
+
+    LaunchedEffect(followStatus) {
+        newFollowStatus = followStatus
+        followButtonColor = if (newFollowStatus == FollowStatus.NOTFOLLOWING) Purple else LightGray
+    }
 
     Column(
         verticalArrangement = Arrangement.spacedBy(5.dp),

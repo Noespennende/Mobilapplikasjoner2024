@@ -119,7 +119,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         id = "IDfromFirebase",
         userName = "UserN",
         email = "user@email.com",
-        friendList = mutableListOf(),
+        followingList = mutableListOf(),
     )
 
     val reviewProduction = TVShow(
@@ -171,7 +171,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         id = "testid",
         userName = "User Userson",
         email = "test@email.no",
-        friendList = mutableListOf(),
+        followingList = mutableListOf(),
         myReviews = mutableListOf(),
         favoriteCollection = mutableListOf(),
         completedCollection = listItemList,
@@ -216,7 +216,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
         val newCurrentEpisode = ++listItem.currentEpisode
         Log.d("ControllerViewModel", newCurrentEpisode.toString())
-        controllerViewModel.handleEpisodeCountChange(listItem, newCurrentEpisode, true)
+        controllerViewModel.handleEpisodeCountChange(listItem, newCurrentEpisode, true, onMoveToCollection = {})
 
     }
     

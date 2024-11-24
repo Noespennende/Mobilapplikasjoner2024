@@ -17,6 +17,7 @@ import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
+import com.movielist.model.FollowStatus
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
@@ -46,6 +47,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -129,7 +131,64 @@ class ControllerViewModel(
         }
     }
 
+    fun determineFollowStatus(): FollowStatus {
+        val currentUser = loggedInUser.value
+        val profileUser = _profileOwner.value
 
+        return if (currentUser != null && profileUser != null) {
+            val followingList = currentUser.followingList ?: emptyList()
+
+            if (profileUser.id in followingList) {
+                FollowStatus.FOLLOWING
+            } else {
+                FollowStatus.NOTFOLLOWING
+            }
+        } else {
+            FollowStatus.NOTFOLLOWING
+        }
+    }
+
+    fun addUserToFollowerList(otherUser: User){
+        val user = loggedInUser.value
+
+        if (user != null) {
+            Log.d("FollowerList", "Attempting to add user ${otherUser.id} to ${user.id}'s following list.")
+
+            val updatedFollowerList = user.followingList.toMutableList().apply {
+                if (!contains(otherUser.id)) {
+                    add(otherUser.id)
+                    Log.d("FollowerList", "User ${otherUser.id} successfully added to ${user.id}'s following list.")
+                } else {
+                    Log.d("FollowerList", "User ${otherUser.id} is already in the following list.")
+                }
+            }
+
+            val updatedUser = user.copy(followingList = updatedFollowerList)
+
+            userViewModel.updateLoggedInUser(updatedUser)
+
+            Log.d("FollowerList", "Updated USER following list after addition: ${updatedFollowerList}")
+        }
+    }
+
+    fun removeUserFromFollowerList(otherUser: User) {
+        val user = loggedInUser.value
+
+        if (user != null) {
+            Log.d("FollowerList", "Attempting to remove user ${otherUser.id} from ${user.id}'s following list.")
+
+
+            val updatedFollowerList = user.followingList.toMutableList().apply {
+                removeAll { it == otherUser.id }
+            }
+
+            val updatedUser = user.copy(followingList = updatedFollowerList)
+
+            userViewModel.updateLoggedInUser(updatedUser)
+
+            Log.d("FollowerList", "Updated USER following list after removal: ${updatedFollowerList}")
+        }
+    }
 
     fun editUserBio(newBio: String) {
         _profileOwner.value?.let { user ->
@@ -200,6 +259,7 @@ class ControllerViewModel(
         return emptyMap()
     }
 
+
     fun getUniqueProductions(
         comparingUser: User,
         sharedProductions: Map<ListItem, ListItem>
@@ -256,7 +316,7 @@ class ControllerViewModel(
                     }
 
                     _searchResult.value = convertedSearchResults.sortedBy { it.title }
-                    Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
+
                 }
             } catch (e: Exception) {
                 Log.e("SearchViewModel", "Error searching media: ${e.message}")
@@ -733,7 +793,7 @@ class ControllerViewModel(
     fun getMostRecentProductionFromFriends(): List<ListItem> {
         val friendProductionsWatched = mutableListOf<ListItem>()
 
-        loggedInUser.value?.friendList?.forEach { friend ->
+        loggedInUser.value?.followingList?.forEach { friend ->
             //friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
             //friend.completedCollection.forEach { friendProductionsWatched.add(it) }
             //friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
@@ -976,7 +1036,11 @@ class ControllerViewModel(
         return emptyList()
     }
 
-    fun handleEpisodeCountChange(listItem: ListItem, watchedEpisodeCount: Int, isPlus: Boolean)  {
+    fun handleEpisodeCountChange(
+        listItem: ListItem,
+        watchedEpisodeCount: Int,
+        isPlus: Boolean,
+        onMoveToCollection: () -> Unit)  {
 
         viewModelScope.launch {
 
@@ -1015,8 +1079,13 @@ class ControllerViewModel(
                                 userID,
                                 listItem,
                                 sourceCollection,
-                                targetCollection
+                                targetCollection,
+                                onSuccess = {
+                                    onMoveToCollection()
+                                }
                             )
+
+                            onMoveToCollection()
                         } else {
 
                             if (sourceCollection == targetCollection) {
@@ -1024,8 +1093,13 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
+
+                                onMoveToCollection()
                             }
 
                             if (sourceCollection == "wantToWatchCollection"
@@ -1035,8 +1109,13 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
+
+                                onMoveToCollection()
                             }
 
                         }
@@ -1059,7 +1138,10 @@ class ControllerViewModel(
                                 userID,
                                 listItem,
                                 sourceCollection,
-                                targetCollection
+                                targetCollection,
+                                onSuccess = {
+                                    onMoveToCollection()
+                                }
                             )
                         } else {
 
@@ -1068,7 +1150,10 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
                             }
 
@@ -1078,7 +1163,10 @@ class ControllerViewModel(
                                     userID,
                                     listItem,
                                     sourceCollection,
-                                    ToWatching
+                                    ToWatching,
+                                    onSuccess = {
+                                        onMoveToCollection()
+                                    }
                                 )
                             }
 
@@ -1216,8 +1304,6 @@ class ControllerViewModel(
             userViewModel.addOrMoveToUsersCollection(userID, listItem, sourceCollection, targetCollection)
         }
     }
-
-
 
     fun removeProductionFromCollections(productionID: String) {
 

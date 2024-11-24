@@ -132,12 +132,27 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         navController.navigate(Screen.ComparisonScreen.withArguments(listOwnderID.toString()))
     }
 
+
+
+    var refreshState by remember { mutableIntStateOf(0) }
+
     val handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit = { listItem, episodeCount, isPlus ->
 
         listItem.currentEpisode = episodeCount
-        controllerViewModel.handleEpisodeCountChange(listItem, episodeCount, isPlus)
+        controllerViewModel.handleEpisodeCountChange(listItem, episodeCount, isPlus,
+            onMoveToCollection = {
+                refreshState++
+            })
 
     }
+
+    LaunchedEffect(refreshState) {
+        if (userID != null) {
+            controllerViewModel.loadProfileOwner(userID)
+        }
+    }
+
+
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -150,6 +165,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
     * */
 
     //Graphics
+
+
 
 
     LaunchedEffect(Unit) {
