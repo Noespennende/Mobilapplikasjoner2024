@@ -16,15 +16,11 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
 import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 // ViewModel for å håndtere bruker-logikk
 class UserViewModel : ViewModel() {
@@ -42,9 +38,24 @@ class UserViewModel : ViewModel() {
     val searchResults: StateFlow<List<User>> get() = _searchResults
 
 
+
+
     suspend fun searchUsers(query: String) {
         val users = firestoreRepository.fetchUsersFromFirebase(query)
         _searchResults.value = users ?: emptyList()
+    }
+
+    fun updateLoggedInUser(updatedUser: User) {
+        viewModelScope.launch {
+            try {
+                _loggedInUser.value = updatedUser
+
+                firestoreRepository.updateUser(updatedUser)
+
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Error updating logged-in user: ${e.message}")
+            }
+        }
     }
 
     // Funksjon for å sette User-objekt for innloggede bruker
@@ -81,7 +92,7 @@ class UserViewModel : ViewModel() {
     suspend fun getUsersFriends(): MutableList<User> {
         val friendsList: MutableList<User> = mutableListOf()
 
-        val friendIDList = loggedInUser.value?.friendList ?: return friendsList
+        val friendIDList = loggedInUser.value?.followingList ?: return friendsList
 
         val totalFriends = friendIDList.size
         var loadedFriends = 0

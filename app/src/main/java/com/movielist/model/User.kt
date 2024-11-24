@@ -14,7 +14,7 @@ data class User (
     var location: String = "It's a secret",
     var website: String = "",
     var bio: String = "",
-    val friendList: MutableList<String> = mutableListOf(),
+    val followingList: MutableList<String> = mutableListOf(),
     val myReviews: MutableList<String> = mutableListOf(), // Review-IDer
     val favoriteCollection:  MutableList<ListItem> = mutableListOf(),
     val completedCollection:  MutableList<ListItem> = mutableListOf(),

@@ -95,7 +95,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         id = "IDfromFirebase",
         userName = "UserN",
         email = "user@email.com",
-        friendList = mutableListOf(),
+        followingList = mutableListOf(),
     )
 
     val reviewProduction = TVShow(
@@ -237,9 +237,15 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         navController.navigate(Screen.SettingsScreen.withArguments())
     }
 
-    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = {newFollowStatus ->
-        followStatus = newFollowStatus
-        //Kontroller funksjon for å håndtere follow / Unfollow her
+    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = { newFollowStatus ->
+        val profileOwnerUser = profileOwner
+        if (profileOwnerUser != null) {
+            if (newFollowStatus == FollowStatus.FOLLOWING) {
+                controllerViewModel.addUserToFollowerList(profileOwnerUser)
+            } else if (newFollowStatus == FollowStatus.NOTFOLLOWING) {
+                controllerViewModel.removeUserFromFollowerList(profileOwnerUser)
+            }
+        }
     }
 
 

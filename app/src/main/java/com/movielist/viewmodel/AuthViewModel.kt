@@ -91,7 +91,7 @@ class AuthViewModel : ViewModel() {
                                             id = user.uid,
                                             userName = username,
                                             email = email,
-                                            friendList = mutableListOf(),
+                                            followingList = mutableListOf(),
                                             myReviews = mutableListOf(),
                                             favoriteCollection = mutableListOf(),
                                             completedCollection = mutableListOf(),

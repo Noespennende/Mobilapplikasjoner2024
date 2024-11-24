@@ -56,6 +56,18 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
     }
 
+    fun updateUser(user: User) {
+        val userRef = db.collection("users").document(user.id)
+
+        userRef.update("followingList", user.followingList)
+            .addOnSuccessListener {
+                Log.d("Firebase", "User ${user.id} updated successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firebase", "Error updating user ${user.id}", e)
+            }
+    }
+
     fun updateUserField(userId: String, updates: Map<String, Any>) {
         val user = db.collection("users").document(userId)
 

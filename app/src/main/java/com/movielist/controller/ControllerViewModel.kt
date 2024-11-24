@@ -17,6 +17,7 @@ import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
+import com.movielist.model.FollowStatus
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
@@ -44,6 +45,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -60,7 +62,7 @@ class ControllerViewModel(
     val currentFirebaseUser: StateFlow<FirebaseUser?> = authViewModel.currentUser
 
     val isLoggedIn: State<Boolean> = authViewModel.isLoggedIn
-    val loggedInUser: StateFlow<User?> = userViewModel.loggedInUser
+    var loggedInUser: StateFlow<User?> = userViewModel.loggedInUser
     val otherUser: StateFlow<User?> = userViewModel.otherUser
 
     fun setLoggedInUser(uid: String) {
@@ -127,7 +129,62 @@ class ControllerViewModel(
         }
     }
 
+    fun determineFollowStatus(): FollowStatus {
+        val currentUser = loggedInUser.value
+        val profileUser = _profileOwner.value
 
+        return if (currentUser != null && profileUser != null) {
+            if (profileUser.id in currentUser.followingList) {
+                FollowStatus.FOLLOWING
+            } else {
+                FollowStatus.NOTFOLLOWING
+            }
+        } else {
+            FollowStatus.NOTFOLLOWING
+        }
+    }
+
+    fun addUserToFollowerList(otherUser: User){
+        val user = loggedInUser.value
+
+        if (user != null) {
+            Log.d("FollowerList", "Attempting to add user ${otherUser.id} to ${user.id}'s following list.")
+
+            val updatedFollowerList = user.followingList.toMutableList().apply {
+                if (!contains(otherUser.id)) {
+                    add(otherUser.id)
+                    Log.d("FollowerList", "User ${otherUser.id} successfully added to ${user.id}'s following list.")
+                } else {
+                    Log.d("FollowerList", "User ${otherUser.id} is already in the following list.")
+                }
+            }
+
+            val updatedUser = user.copy(followingList = updatedFollowerList)
+
+            userViewModel.updateLoggedInUser(updatedUser)
+
+            Log.d("FollowerList", "Updated USER following list after addition: ${updatedFollowerList}")
+        }
+    }
+
+    fun removeUserFromFollowerList(otherUser: User) {
+        val user = loggedInUser.value
+
+        if (user != null) {
+            Log.d("FollowerList", "Attempting to remove user ${otherUser.id} from ${user.id}'s following list.")
+
+
+            val updatedFollowerList = user.followingList.toMutableList().apply {
+                removeAll { it == otherUser.id }
+            }
+
+            val updatedUser = user.copy(followingList = updatedFollowerList)
+
+            userViewModel.updateLoggedInUser(updatedUser)
+
+            Log.d("FollowerList", "Updated USER following list after removal: ${updatedFollowerList}")
+        }
+    }
 
     fun editUserBio(newBio: String) {
         _profileOwner.value?.let { user ->
@@ -198,6 +255,7 @@ class ControllerViewModel(
         return emptyMap()
     }
 
+
     fun getUniqueProductions(
         comparingUser: User,
         sharedProductions: Map<ListItem, ListItem>
@@ -254,7 +312,7 @@ class ControllerViewModel(
                     }
 
                     _searchResult.value = convertedSearchResults.sortedBy { it.title }
-                    Log.d("SearchViewModel", "Search results updated: $convertedSearchResults")
+
                 }
             } catch (e: Exception) {
                 Log.e("SearchViewModel", "Error searching media: ${e.message}")
@@ -730,7 +788,7 @@ class ControllerViewModel(
     fun getMostRecentProductionFromFriends(): List<ListItem> {
         val friendProductionsWatched = mutableListOf<ListItem>()
 
-        loggedInUser.value?.friendList?.forEach { friend ->
+        loggedInUser.value?.followingList?.forEach { friend ->
             //friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
             //friend.completedCollection.forEach { friendProductionsWatched.add(it) }
             //friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
