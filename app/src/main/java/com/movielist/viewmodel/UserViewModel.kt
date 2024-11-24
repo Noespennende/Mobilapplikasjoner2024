@@ -196,6 +196,7 @@ class UserViewModel : ViewModel() {
                 _loggedInUser.value = updatedUser
 
                 Log.d("Upload", "Profilbilde oppdatert!")
+
             } catch (e: Exception) {
                 Log.e("Upload", "Feil: ${e.message}")
             }

@@ -1,16 +1,17 @@
 package com.movielist.controller
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.core.net.toUri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 import com.movielist.data.FirestoreRepository
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
@@ -34,16 +35,15 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import java.util.UUID
 
 
 class ControllerViewModel(
@@ -1419,16 +1419,69 @@ class ControllerViewModel(
     private val _snackBarStatus = MutableStateFlow<Status?>(null)
     val snackBarStatus: StateFlow<Status?> = _snackBarStatus
 
-    fun updateProfileImage(imageUri: Uri) {
+
+    private fun bitmapToUri(context: Context, bitmap: Bitmap): Uri {
+        val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
+        FileOutputStream(file).use { outputStream ->
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        }
+        return file.toUri()
+    }
+
+
+    private fun deleteFile(file: File) {
+        if (file.exists()) {
+            val deleted = file.delete()
+            if (deleted) {
+                Log.d("FileDelete", "File deleted successfully")
+            } else {
+                Log.e("FileDelete", "Failed to delete file")
+            }
+        } else {
+            Log.e("FileDelete", "File does not exist")
+        }
+    }
+
+    fun handleAlbumPickProfileImage(imageUri: Uri) {
+
         viewModelScope.launch {
             try {
+
                 userViewModel.updateProfileImage(imageUri)
+
                 _snackBarStatus.value = Status.Success
             } catch (e: Exception) {
                 _snackBarStatus.value = Status.Error(e.message ?: "Noe gikk galt")
             }
         }
     }
+
+    fun handleCapturedProfileImage(context: Context, image: Bitmap) {
+
+        viewModelScope.launch {
+
+            val imageUri = withContext(Dispatchers.IO) {
+                bitmapToUri(context, image)
+            }
+
+            try {
+                userViewModel.updateProfileImage(imageUri)
+
+                _snackBarStatus.value = Status.Success
+            } catch (e: Exception) {
+                _snackBarStatus.value = Status.Error(e.message ?: "Noe gikk galt")
+            } finally {
+
+                imageUri.path?.let {
+                    withContext(Dispatchers.IO) {
+                        deleteFile(File(it))
+                    }
+                }
+            }
+        }
+    }
+
+
 
     fun clearSnackbarMessage() {
         _snackBarStatus.value = null

@@ -1,12 +1,8 @@
 package com.movielist.screens
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -32,14 +28,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,13 +47,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.android.gms.cast.CastRemoteDisplayLocalService.startService
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
@@ -84,7 +75,6 @@ import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -119,13 +109,14 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     val handleAddImageFromPhoneClick: (imageUri: Uri?) -> Unit = { imageUri ->
         if (imageUri != null) {
-            controllerViewModel.updateProfileImage(imageUri)
+            controllerViewModel.handleAlbumPickProfileImage(imageUri)
         }
     }
 
     val handleTakePhotoClick: () -> Unit = {
         showCameraScreen = true
     }
+
     val handleBioEditedClick: (newBio: String) -> Unit = {newBio ->
         controllerViewModel.editUserBio(newBio)
     }
@@ -150,15 +141,20 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         //kontroller funksjon her
     }
 
+    val context = LocalContext.current
+
     val handleImageCapture: (image:Bitmap) -> Unit  ={image ->
         showCameraScreen = false
-        //Kontroller funksjon her
+
+        controllerViewModel.handleCapturedProfileImage(context, image)
+
     }
 
 
     val handleCancelCameraPermissionClick: () -> Unit = {
         showCameraScreen = false
     }
+
 
     //Graphics
 
