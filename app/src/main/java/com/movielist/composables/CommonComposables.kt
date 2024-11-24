@@ -1,6 +1,9 @@
 package com.movielist.composables
 
 import android.util.Log
+import androidx.compose.animation.core.Ease
+import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -699,18 +702,22 @@ fun RoundProgressBar (
     radius: Dp = 100.dp,
     animationDuration: Int = 1000,
     animationDelay: Int = 0,
-    strokeCap: StrokeCap = StrokeCap.Round
+    strokeCap: StrokeCap = StrokeCap.Round,
+    easing: Easing = Ease
 ) {
     var animationPlayed by remember {
         mutableStateOf(false)
     }
-    val currentPercentage = animateFloatAsState(
+
+    var currentPercentage = animateFloatAsState(
         targetValue = if(animationPlayed) {percentage} else {0f},
         animationSpec = tween(
             durationMillis = animationDuration,
-            delayMillis = animationDelay
+            delayMillis = animationDelay,
+            easing = easing,
         )
     )
+
 
     LaunchedEffect( key1 = true) {
         animationPlayed = true

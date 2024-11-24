@@ -1,6 +1,9 @@
 package com.movielist.screens
 
 import android.util.Log
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -76,6 +79,7 @@ import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import com.movielist.ui.theme.yellow
+import kotlinx.coroutines.delay
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -715,11 +719,13 @@ fun UserInfo(
         //Gender
         Column(
             verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ){
                 Image(
                     painter = painterResource(id = R.drawable.profile),
@@ -733,7 +739,8 @@ fun UserInfo(
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
                     fontSize = paragraphSize,
-                    color = White
+                    color = White,
+                    textAlign = TextAlign.Center,
                 )
 
             }
@@ -743,6 +750,7 @@ fun UserInfo(
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
                 color = darkWhite,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
                         top = 5.dp
@@ -754,6 +762,8 @@ fun UserInfo(
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth(.3f)
 
         ){
             Row(
@@ -782,6 +792,7 @@ fun UserInfo(
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
                 color = darkWhite,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
                         top = 5.dp
@@ -794,11 +805,13 @@ fun UserInfo(
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                    .fillMaxWidth(.3f)
             ){
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ){
                 Image(
                     painter = painterResource(id = R.drawable.globe),
@@ -822,6 +835,7 @@ fun UserInfo(
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
                 color = darkWhite,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
                         top = 5.dp
@@ -1064,23 +1078,41 @@ fun StatisticsPieChart (
 
     val pieChartRadius = 70.dp
     val pieChartStrokeWidth = 8.dp
+    val animationTimeMultiplicationFactor = 7
+    var animationDurationTimes = percentageList.map { it.toLong() * animationTimeMultiplicationFactor }
+
+    val currentProgressBar = remember { mutableStateOf(0) }
+
+    //helper effect to make the bars animate one after another
+    LaunchedEffect(percentageList) {
+        animationDurationTimes.forEachIndexed  { i, duration ->
+            currentProgressBar.value = i
+            delay(duration)
+        }
+    }
 
 
     Box()
     {
 
         //Progress bar for remaining values
-        for(percentage in percentageList)
+        for((i, percentage) in percentageList.withIndex())
         {
             val color = if (index < colorList.size) colorList[index] else Gray
 
             RoundProgressBar(
+                percentage = if (currentProgressBar.value >= i) {1f} else {0f},
                 startAngle = 360 * cumulativePercentage,
                 sweepAngle = 360 * (percentage.toFloat() / 100f),
                 strokeCap = StrokeCap.Butt,
                 strikeWith = pieChartStrokeWidth,
                 radius = pieChartRadius,
-                color = color
+                color = color,
+                animationDuration = animationDurationTimes[i].toInt(),
+                easing = if(i == 0 ){
+                    EaseIn} else if (i == percentageList.size -1) {
+                    EaseOut} else {
+                    LinearEasing}
             )
             cumulativePercentage += percentage.toFloat() / 100f
 

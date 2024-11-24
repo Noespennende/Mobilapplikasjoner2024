@@ -678,7 +678,7 @@ fun EditWebsite (
     website: String,
     handleWebsiteEditedClick: (updatedBio: String) -> Unit
 ){
-    val maxCharLenght = 30
+    val maxCharLenght = 50
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     var newWebsite by remember { mutableStateOf(website) }
@@ -811,7 +811,7 @@ fun EditLocation (
 ){
     val context = LocalContext.current
     val locationPermissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    val maxCharLenght = 60
+    val maxCharLenght = 50
     var message by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
     var newLocation by remember { mutableStateOf(location) }

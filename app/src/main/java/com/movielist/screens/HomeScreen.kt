@@ -269,7 +269,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
         item {
 
-            YourFriendsJustWatched(
+            TheUsersYouFollowJustWatched(
                 listOfShows = friendsWatchedList.toMutableList(),
                 handleShowButtonClick = handleProductionButtonClick
             )
@@ -577,7 +577,7 @@ fun CurrentlyWatchingCard(
 
 
 @Composable
-fun YourFriendsJustWatched (
+fun TheUsersYouFollowJustWatched (
     listOfShows: MutableList<ListItem>,
     handleShowButtonClick: (showID: String, productionType: String) -> Unit
 ) {
@@ -595,7 +595,7 @@ fun YourFriendsJustWatched (
     ) {
         //Header
         Text(
-            "Your friends just watched",
+            "New updates from users you follow",
             fontFamily = fontFamily,
             fontSize = headerSize,
             fontWeight = weightBold,

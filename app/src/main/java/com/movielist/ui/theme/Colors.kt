@@ -1,10 +1,11 @@
 package com.movielist.ui.theme
 
-import android.transition.Slide
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.SliderColors
 import androidx.compose.material3.TextFieldColors
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+
 
 //Main colors
 val Purple = Color(0xFFc38fff)
