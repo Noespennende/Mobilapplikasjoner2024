@@ -17,6 +17,7 @@ import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
+import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
@@ -975,23 +976,87 @@ class ControllerViewModel(
         return emptyList()
     }
 
-    fun updateCurrentEpisodeInCollection(collectionOption: ListOptions, listItem: ListItem, currentEpisode: Int)  {
+    fun handleEpisodeCountChange(collectionOption: ListOptions, listItem: ListItem, watchedEpisodeCount: Int)  {
 
-        // TODO : Bytte ut collectionOption med annen Enum
-        val collection = when (collectionOption) {
-            ListOptions.WATCHING -> "currentlyWatchingCollection"
-            ListOptions.COMPLETED -> "completedCollection"
-            ListOptions.WANTTOWATCH -> "wantToWatchCollection"
-            ListOptions.DROPPED -> "droppedCollection"
-            ListOptions.REMOVEFROMLIST -> ""
-        }
-        if (collection != "") {
-            userViewModel.updateCurrentEpisodeInCollection(collection, listItem, currentEpisode)
-        } else {
-            Log.d("ControllerViewModel", "updateCurrentEpisodeInCollection, listOption is RemoveFromList")
-        }
+        viewModelScope.launch {
 
+            // TODO : Bytte ut collectionOption med annen Enum
+            val sourceCollection = when (collectionOption) {
+                ListOptions.WATCHING -> "currentlyWatchingCollection"
+                ListOptions.COMPLETED -> "completedCollection"
+                ListOptions.WANTTOWATCH -> "wantToWatchCollection"
+                ListOptions.DROPPED -> "droppedCollection"
+                ListOptions.REMOVEFROMLIST -> ""
+            }
+
+            if (sourceCollection == "") {
+
+                Log.d("ControllerViewModel", "sourceCollection is RemoveFromList for listItem")
+                return@launch
+            }
+
+
+            val production = listItem.production
+            val user = loggedInUser.value
+            val userID = user?.id
+            val targetCollection = "completedCollection"
+
+            if (userID != null) {
+                when (production) {
+                    is TVShow -> {
+                        val productionTotalEpisode = production.episodes.size
+
+                        val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
+
+                        if (productionIsComplete) {
+                            userViewModel.updateCurrentEpisodeInCollection(
+                                sourceCollection,
+                                listItem,
+                                watchedEpisodeCount
+                            )
+
+                            userViewModel.addOrMoveToUsersCollection(
+                                userID,
+                                listItem,
+                                sourceCollection,
+                                targetCollection
+                            )
+                        } else {
+                            userViewModel.updateCurrentEpisodeInCollection(
+                                sourceCollection,
+                                listItem,
+                                watchedEpisodeCount
+                            )
+                        }
+                    }
+
+                    is Movie -> {
+                        val productionTotalEpisode = 1
+
+                        val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
+
+                        if (productionIsComplete) {
+                            userViewModel.addOrMoveToUsersCollection(
+                                userID,
+                                listItem,
+                                sourceCollection,
+                                targetCollection
+                            )
+                        } else {
+                            userViewModel.updateCurrentEpisodeInCollection(
+                                sourceCollection,
+                                listItem,
+                                watchedEpisodeCount
+                            )
+                        }
+                    }
+
+                    is Episode -> TODO()
+                }
+            }
+        }
     }
+
 
 
     private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())

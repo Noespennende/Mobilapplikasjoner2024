@@ -134,23 +134,10 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     val handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit = { listItem, episodeCount ->
 
-        controllerViewModel.updateCurrentEpisodeInCollection(activeCategory, listItem, episodeCount)
+        listItem.currentEpisode = episodeCount
+        controllerViewModel.handleEpisodeCountChange(activeCategory, listItem, episodeCount)
 
     }
-
-    val handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int)  -> Unit =
-        { listItem, watchedEpisodeCount, productionTotalEpisode ->
-        // Controller Kall
-       /*
-
-        showLength = when (listOfShows[i].production) {
-            is TVShow -> (listOfShows[i].production as TVShow).episodes.size
-
-            */
-
-
-        }
-
     /*
         Her kan man da da lage sjekk:
         om isLoggedInUser == true -> hent loggedInUser lister
@@ -191,7 +178,6 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
                 handleListItemFavoriteClick = handleListItemFavoriteClick,
                 handleCompareUserClick = handleCompareUserListsClick,
                 handleEpisodeCountChange = handleEpisodeCountChange,
-                handleMarkCompleted = handleMarkCompleted,
             )
         }
     }
@@ -349,7 +335,6 @@ fun ListPageList (
     handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit,
     handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit,
-    handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int) -> Unit
 ){
     //Graphics
     Column(
@@ -400,7 +385,6 @@ fun ListPageList (
                 handleListItemRatingChange = handleListItemRatingChange,
                 handleFavoriteClick = handleListItemFavoriteClick,
                 handleEpisodeCountChange = handleEpisodeCountChange,
-                handleMarkCompleted = handleMarkCompleted
             )
         }
     }
@@ -415,7 +399,6 @@ fun ListPageListItem (
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
     handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int)  -> Unit,
-    handleMarkCompleted: (listItem: ListItem, watchedEpisodeCount: Int, productionTotalEpisode: Int) -> Unit
 ){
 
     //Graphics logic
@@ -571,23 +554,23 @@ fun ListPageListItem (
                                 .clickable {
                                     when (val production = listItem.production) {
                                         is TVShow -> {
+
+                                            val productionTotalEpisodes = production.episodes.size;
                                             // For TV-serier: Sjekk om det er flere episoder igjen å se
-                                            if (watchedEpisodesCount < production.episodes.size) {
+                                            if (watchedEpisodesCount < productionTotalEpisodes) {
                                                 watchedEpisodesCount++
-                                                listItem.currentEpisode = watchedEpisodesCount
 
                                                 handleEpisodeCount()
                                             }
+
                                         }
 
                                         is Movie -> {
                                             // For filmer: Siden en film ikke har episoder, setter vi watchedEpisodesCount til 1
                                             if (watchedEpisodesCount == 0) {
                                                 watchedEpisodesCount = 1
-                                                listItem.currentEpisode = watchedEpisodesCount
 
-
-                                                handleMarkCompleted(listItem, watchedEpisodesCount, 1)
+                                                handleEpisodeCount()
                                             }
 
                                         }
