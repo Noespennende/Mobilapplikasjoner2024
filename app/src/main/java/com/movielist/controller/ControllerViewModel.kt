@@ -19,6 +19,7 @@ import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
 import com.movielist.model.ListItem
+import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.Production
@@ -617,6 +618,7 @@ class ControllerViewModel(
             releaseDate = convertStringToCalendar(result.firstAirDate) ?: Calendar.getInstance(),
             actors = actors,
             trailerUrl = trailerUrl.toString(),
+            episodes  = (1..(result.numberOfEpisodes ?: 1)).map { it.toString() },
             seasons = result.seasons?.map { it?.seasonNumber.toString() } ?: emptyList()
             // ^^ Seasons må nok forandres - er mer info om en sesong som kan være fint å ha?
         )
@@ -1031,6 +1033,24 @@ class ControllerViewModel(
         return emptyList()
     }
 
+    fun updateCurrentEpisodeInCollection(collectionOption: ListOptions, listItem: ListItem, currentEpisode: Int)  {
+
+        // TODO : Bytte ut collectionOption med annen Enum
+        val collection = when (collectionOption) {
+            ListOptions.WATCHING -> "currentlyWatchingCollection"
+            ListOptions.COMPLETED -> "completedCollection"
+            ListOptions.WANTTOWATCH -> "wantToWatchCollection"
+            ListOptions.DROPPED -> "droppedCollection"
+            ListOptions.REMOVEFROMLIST -> ""
+        }
+        if (collection != "") {
+            userViewModel.updateCurrentEpisodeInCollection(collection, listItem, currentEpisode)
+        } else {
+            Log.d("ControllerViewModel", "updateCurrentEpisodeInCollection, listOption is RemoveFromList")
+        }
+
+    }
+
 
     private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())
     val friendsWatchedList: StateFlow<List<ListItem>> get() = _friendsWatchedList
@@ -1086,6 +1106,11 @@ class ControllerViewModel(
         }
     }
 
+    fun addOrRemoveFromUsersFavorites(userID: String, listItem: ListItem, isFavorite: Boolean) {
+
+        userViewModel.addOrRemoveFromUsersFavorites(userID, listItem, isFavorite)
+    }
+
     fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
 
         val userID = loggedInUser.value?.id
@@ -1116,12 +1141,15 @@ class ControllerViewModel(
             val productionData = singleProductionData.value
             if (productionData != null) {
                 listItem = ListItem(production = productionData)
+
+                Log.d("UserViewModel", "$targetCollection")
             }
+
             Log.e("UserViewModel", "List item with productionID: $productionID not found in any collection.")
         }
 
-        if (sourceCollection == null || sourceCollection == targetCollection) {
-            Log.e("UserViewModel", "Invalid source or target collection.")
+        if (sourceCollection == targetCollection) {
+            Log.e("UserViewModel", "source and target collection is the same")
         }
 
         if (listItem != null) {
