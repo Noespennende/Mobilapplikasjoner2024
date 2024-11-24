@@ -1028,6 +1028,11 @@ class ControllerViewModel(
         }
     }
 
+    fun addOrRemoveFromUsersFavorites(userID: String, listItem: ListItem, isFavorite: Boolean) {
+
+        userViewModel.addOrRemoveFromUsersFavorites(userID, listItem, isFavorite)
+    }
+
     fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
 
         val userID = loggedInUser.value?.id

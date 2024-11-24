@@ -120,8 +120,12 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         //Kontroller kall her:
     }
 
-    val handleListItemFavoriteClick: (favorited: Boolean) -> Unit = {favorited ->
-        //Kontroller kall her
+    val handleListItemFavoriteClick: (listItem: ListItem, favorited: Boolean) -> Unit = { listItem, favorited ->
+
+        val loggedInUserID = loggedInUser?.id
+        if (loggedInUserID != null) {
+            controllerViewModel.addOrRemoveFromUsersFavorites(loggedInUserID, listItem, favorited)
+        }
     }
 
     val handleCompareUserListsClick: () -> Unit = {
@@ -321,7 +325,7 @@ fun ListPageList (
     listItemList: List<ListItem>,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
-    handleListItemFavoriteClick: (favorite: Boolean) -> Unit,
+    handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit
 ){
     //Graphics
@@ -384,7 +388,7 @@ fun ListPageListItem (
     loggedInUsersList: Boolean,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
-    handleFavoriteClick: (favorite: Boolean) -> Unit
+    handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit
 ){
 
     //Graphics logic
@@ -402,7 +406,7 @@ fun ListPageListItem (
 
     var handleFavoriteClick: () -> Unit = {
         listItemFavorite = !listItemFavorite
-        handleFavoriteClick(listItemFavorite)
+        handleFavoriteClick(listItem, listItemFavorite)
     }
 
     val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
