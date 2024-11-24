@@ -1,5 +1,6 @@
 package com.movielist.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -180,6 +181,24 @@ class UserViewModel : ViewModel() {
             "wantToWatchCollection" -> user?.wantToWatchCollection?.add(listItem)
             "droppedCollection" -> user?.droppedCollection?.add(listItem)
             "completedCollection" -> user?.completedCollection?.add(listItem)
+        }
+    }
+
+    fun updateProfileImage(imageUri : Uri) {
+
+        viewModelScope.launch {
+
+            try {
+                val imageUrl = firestoreRepository.uploadProfileImage(imageUri) // Laster opp og får URL
+                firestoreRepository.saveImageUrlToUserDoc(imageUrl) // Lagre URL i Firestore
+
+                loggedInUser.value?.profileImageID = imageUrl
+
+                Log.d("Upload", "Profilbilde oppdatert!")
+            } catch (e: Exception) {
+                Log.e("Upload", "Feil: ${e.message}")
+            }
+
         }
     }
 

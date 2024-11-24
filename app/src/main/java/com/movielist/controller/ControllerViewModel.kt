@@ -1,20 +1,21 @@
 package com.movielist.controller
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import com.movielist.data.FirestoreRepository
 import com.movielist.model.AllMedia
-import com.movielist.model.ApiEpisodeResponse
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
@@ -24,7 +25,6 @@ import com.movielist.model.ShowResponse
 import com.movielist.model.SearchSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.model.VideoResult
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.ReviewViewModel
@@ -32,18 +32,18 @@ import com.movielist.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.log
+import java.util.UUID
 
 
 class ControllerViewModel(
@@ -1415,6 +1415,31 @@ class ControllerViewModel(
             null
         }
     }
+
+    private val _snackBarStatus = MutableStateFlow<Status?>(null)
+    val snackBarStatus: StateFlow<Status?> = _snackBarStatus
+
+    fun updateProfileImage(imageUri: Uri) {
+        viewModelScope.launch {
+            try {
+                userViewModel.updateProfileImage(imageUri)
+                _snackBarStatus.value = Status.Success
+            } catch (e: Exception) {
+                _snackBarStatus.value = Status.Error(e.message ?: "Noe gikk galt")
+            }
+        }
+    }
+
+    fun clearSnackbarMessage() {
+        _snackBarStatus.value = null
+    }
+
+    sealed class Status {
+        object Success : Status()
+        data class Error(val message: String) : Status()
+    }
+
+
 
     fun createUserWithEmailAndPassword(
         username: String,

@@ -1,10 +1,13 @@
 package com.movielist.data
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
@@ -12,6 +15,7 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.UUID
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
@@ -683,5 +687,35 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+
+    suspend fun uploadProfileImage(imageUri: Uri?): String {
+        if (imageUri == null) throw IllegalArgumentException("Ingen bilde valgt")
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val storageRef = FirebaseStorage.getInstance().reference
+
+        val imageRef = storageRef.child("profile_pictures/$userId/${UUID.randomUUID()}.jpg")
+
+        // Laster opp bilde
+        imageRef.putFile(imageUri).await()
+
+        // Returnerer URL-en
+        return imageRef.downloadUrl.await().toString()
+    }
+
+    suspend fun saveImageUrlToUserDoc(imageUrl: String) {
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val db = FirebaseFirestore.getInstance()
+
+        val userDocRef = db.collection("users").document(userId)
+        val userProfileData = mapOf("profileImageID" to imageUrl)
+
+        userDocRef.update(userProfileData).await()
+    }
 
 }
