@@ -237,7 +237,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         navController.navigate(Screen.SettingsScreen.withArguments())
     }
 
-    val handleFollowUnfollowClick: (followStatus: FollowStatus) -> Unit = {followStatus ->
+    val handleFollowUnfollowClick: (newFollowStatus: FollowStatus) -> Unit = {newFollowStatus ->
+        followStatus = newFollowStatus
         //Kontroller funksjon for å håndtere follow / Unfollow her
     }
 
