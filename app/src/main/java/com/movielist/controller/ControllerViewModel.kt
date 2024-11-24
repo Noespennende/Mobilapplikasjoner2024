@@ -1000,6 +1000,7 @@ class ControllerViewModel(
             val user = loggedInUser.value
             val userID = user?.id
             val targetCollection = "completedCollection"
+            val fromCompletedToWatching = "currentlyWatchingCollection"
 
             if (userID != null) {
                 when (production) {
@@ -1008,12 +1009,13 @@ class ControllerViewModel(
 
                         val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
 
+                        userViewModel.updateCurrentEpisodeInCollection(
+                            sourceCollection,
+                            listItem,
+                            watchedEpisodeCount
+                        )
+
                         if (productionIsComplete) {
-                            userViewModel.updateCurrentEpisodeInCollection(
-                                sourceCollection,
-                                listItem,
-                                watchedEpisodeCount
-                            )
 
                             userViewModel.addOrMoveToUsersCollection(
                                 userID,
@@ -1022,11 +1024,15 @@ class ControllerViewModel(
                                 targetCollection
                             )
                         } else {
-                            userViewModel.updateCurrentEpisodeInCollection(
-                                sourceCollection,
-                                listItem,
-                                watchedEpisodeCount
-                            )
+
+                            if (sourceCollection == targetCollection) {
+                                userViewModel.addOrMoveToUsersCollection(
+                                    userID,
+                                    listItem,
+                                    sourceCollection,
+                                    fromCompletedToWatching
+                                )
+                            }
                         }
                     }
 
@@ -1035,7 +1041,14 @@ class ControllerViewModel(
 
                         val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
 
+                        userViewModel.updateCurrentEpisodeInCollection(
+                            sourceCollection,
+                            listItem,
+                            watchedEpisodeCount
+                        )
+
                         if (productionIsComplete) {
+
                             userViewModel.addOrMoveToUsersCollection(
                                 userID,
                                 listItem,
@@ -1043,11 +1056,16 @@ class ControllerViewModel(
                                 targetCollection
                             )
                         } else {
-                            userViewModel.updateCurrentEpisodeInCollection(
-                                sourceCollection,
-                                listItem,
-                                watchedEpisodeCount
-                            )
+
+                            if (sourceCollection == targetCollection) {
+                                userViewModel.addOrMoveToUsersCollection(
+                                    userID,
+                                    listItem,
+                                    sourceCollection,
+                                    fromCompletedToWatching
+                                )
+                            }
+
                         }
                     }
 
@@ -1163,6 +1181,8 @@ class ControllerViewModel(
             userViewModel.addOrMoveToUsersCollection(userID, listItem, sourceCollection, targetCollection)
         }
     }
+
+
 
     fun removeProductionFromCollections(productionID: String) {
 
