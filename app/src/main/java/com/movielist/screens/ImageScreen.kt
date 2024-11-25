@@ -38,11 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkGrayTransparent
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
@@ -91,14 +87,14 @@ fun CameraScreen (
             ){
                 //Photo button
                 ExtendedFloatingActionButton(
-                    containerColor = Purple,
+                    containerColor = LocalColor.current.primary,
                     content = {
                         Text(
                             text = if (isFrontfacingCamera){"Use back camera"} else {"Use front camera"},
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = DarkGray,
+                            color = LocalColor.current.background,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                         )
@@ -110,14 +106,14 @@ fun CameraScreen (
 
                 //Photo button
                 ExtendedFloatingActionButton(
-                    containerColor = Purple,
+                    containerColor = LocalColor.current.primary,
                     content = {
                         Text(
                             text = "Take a photo",
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = DarkGray,
+                            color = LocalColor.current.background,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                         )
@@ -197,7 +193,7 @@ fun NoPermissionScreen(
             .fillMaxHeight()
             .fillMaxWidth()
             .background(
-                color = DarkGrayTransparent,
+                color = LocalColor.current.backgroundAlternative,
                 shape = RoundedCornerShape(5.dp)
             )
 
@@ -208,7 +204,7 @@ fun NoPermissionScreen(
             modifier = Modifier
                 .fillMaxWidth(.7f)
                 .background(
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .padding(horizontal = 20.dp, vertical = 20.dp)
@@ -218,7 +214,7 @@ fun NoPermissionScreen(
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
             )
@@ -227,7 +223,7 @@ fun NoPermissionScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -241,7 +237,7 @@ fun NoPermissionScreen(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -253,7 +249,7 @@ fun NoPermissionScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -267,7 +263,7 @@ fun NoPermissionScreen(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)

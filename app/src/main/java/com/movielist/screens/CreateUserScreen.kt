@@ -27,10 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.controller.ControllerViewModel
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.textFieldColors
@@ -86,7 +84,7 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .background(
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .fillMaxWidth(.9f)
@@ -100,7 +98,7 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
                     textAlign = TextAlign.Center,
-                    color = Color.Red,
+                    color = LocalColor.current.complimentaryThree,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
@@ -111,19 +109,19 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                 value = username,
                 onValueChange = { username = it},
                 singleLine = true,
-                colors = textFieldColors,
+                colors = LocalTextFieldColors.current.textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 ),
                 label = {Text(
                     "Username",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,19 +132,19 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                 value = email,
                 onValueChange = { email = it},
                 singleLine = true,
-                colors = textFieldColors,
+                colors = LocalTextFieldColors.current.textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 ),
                 label = {Text(
                     "email",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -157,19 +155,19 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                 value = password,
                 onValueChange = { password = it},
                 singleLine = true,
-                colors = textFieldColors,
+                colors = LocalTextFieldColors.current.textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 ),
                 label = {Text(
                     "Password",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,7 +182,7 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                     .fillMaxWidth()
                     .height(50.dp)
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp))
             ){
                 Text(
@@ -192,7 +190,7 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                 )
@@ -205,7 +203,7 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 textAlign = TextAlign.Center,
-                color = Purple,
+                color = LocalColor.current.primary,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .clickable {

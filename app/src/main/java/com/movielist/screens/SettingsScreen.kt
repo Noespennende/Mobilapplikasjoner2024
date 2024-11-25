@@ -12,6 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -61,18 +62,13 @@ import com.movielist.model.ColorModes
 import com.movielist.model.Genders
 import com.movielist.model.LocationService
 import com.movielist.model.User
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.Red
 import com.movielist.ui.theme.textFieldColors
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
@@ -239,8 +235,8 @@ fun ProfileImageSettings (
     loggedInUser: User,
     handleImageAddedFromPhone: (uri: Uri?) -> Unit,
     handleTakePhotoClick: () -> Unit,
-    iconColor: Color = White,
-    backgroundColor: Color = LightGray
+    iconColor: Color = LocalColor.current.secondary,
+    backgroundColor: Color = LocalColor.current.backgroundLight
 ){
 
     var selectedImageUri by remember {mutableStateOf<Uri?>(null)}
@@ -335,7 +331,7 @@ fun ProfileImageDropDown(
             modifier = Modifier
                 .fillMaxWidth(.7f)
                 .background(
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .padding(horizontal = 5.dp, vertical = 10.dp)
@@ -345,7 +341,7 @@ fun ProfileImageDropDown(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -359,7 +355,7 @@ fun ProfileImageDropDown(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -371,7 +367,7 @@ fun ProfileImageDropDown(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -385,7 +381,7 @@ fun ProfileImageDropDown(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -397,7 +393,7 @@ fun ProfileImageDropDown(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -411,7 +407,7 @@ fun ProfileImageDropDown(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -448,7 +444,7 @@ fun EditBio (
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .background(
-                color = Gray,
+                color = LocalColor.current.backgroundLight,
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
@@ -464,7 +460,7 @@ fun EditBio (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if(error){Red} else { White},
+                color = if(error){LocalColor.current.error} else { LocalColor.current.secondary},
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -483,12 +479,12 @@ fun EditBio (
                 bioLenght = maxCharLenght - newBio.length
                             },
             singleLine = false,
-            colors = textFieldColors,
+            colors = LocalTextFieldColors.current.textFieldColors,
             textStyle = TextStyle(
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
-                color = White,
+                color = LocalColor.current.secondary,
             ),
             label = {
                 Text(
@@ -496,7 +492,7 @@ fun EditBio (
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     )
                     },
             modifier = Modifier
@@ -514,7 +510,7 @@ fun EditBio (
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
-                color = if(bioLenght >= 0){White} else Red,
+                color = if(bioLenght >= 0){LocalColor.current.secondary} else LocalColor.current.complimentaryThree,
                 modifier = Modifier
                     .padding(
                         vertical = 10.dp,
@@ -526,11 +522,11 @@ fun EditBio (
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
-                    .fillMaxWidth(.5f)
+                    .fillMaxWidth(.7f)
                     .clickable {
                         handleUpdateBioClick()
                     }
@@ -540,7 +536,7 @@ fun EditBio (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -566,7 +562,7 @@ fun EditGender (
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .background(
-                color = Gray,
+                color = LocalColor.current.backgroundLight,
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
@@ -580,7 +576,7 @@ fun EditGender (
             fontSize = headerSize,
             fontWeight = weightBold,
             fontFamily = fontFamily,
-            color = White,
+            color = LocalColor.current.secondary,
             textAlign = TextAlign.Center,
             modifier = Modifier
         )
@@ -597,7 +593,7 @@ fun EditGender (
                     .padding(vertical = 5.dp)
                     .align(Alignment.Center)
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .clickable {
@@ -620,7 +616,7 @@ fun EditGender (
                         fontSize = headerSize,
                         fontWeight = weightBold,
                         fontFamily = fontFamily,
-                        color = DarkGray,
+                        color = LocalColor.current.background,
                         textAlign = TextAlign.Center
                     )
                     Text(
@@ -628,7 +624,7 @@ fun EditGender (
                         fontSize = paragraphSize,
                         fontWeight = weightLight,
                         fontFamily = fontFamily,
-                        color = DarkGray,
+                        color = LocalColor.current.background,
                     )
 
                 }
@@ -638,7 +634,7 @@ fun EditGender (
                     onDismissRequest = {dropDownExpanded = false},
                     offset = DpOffset(x = 30.dp, y= 0.dp),
                     modifier = Modifier
-                        .background(color = DarkPurple)
+                        .background(color = LocalColor.current.tertiary)
                 ) {
                     Genders.entries.forEach{
                             option -> DropdownMenuItem(
@@ -652,7 +648,7 @@ fun EditGender (
                                     fontSize = headerSize,
                                     fontWeight = weightBold,
                                     fontFamily = fontFamily,
-                                    color = White,
+                                    color = LocalColor.current.secondary,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .align(Alignment.Center)
@@ -698,7 +694,7 @@ fun EditWebsite (
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
             .background(
-                color = Gray,
+                color = LocalColor.current.backgroundLight,
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
@@ -714,7 +710,7 @@ fun EditWebsite (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if(error){Red} else { White},
+                color = if(error){LocalColor.current.error} else { LocalColor.current.secondary},
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -733,12 +729,12 @@ fun EditWebsite (
                 websiteLenght = maxCharLenght - newWebsite.length
             },
             singleLine = true,
-            colors = textFieldColors,
+            colors = LocalTextFieldColors.current.textFieldColors,
             textStyle = TextStyle(
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
-                color = White,
+                color = LocalColor.current.secondary,
             ),
             label = {
                 Text(
@@ -746,7 +742,7 @@ fun EditWebsite (
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )
             },
             modifier = Modifier
@@ -763,7 +759,7 @@ fun EditWebsite (
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
-                color = if(websiteLenght >= 0){White} else Red,
+                color = if(websiteLenght >= 0){LocalColor.current.secondary} else LocalColor.current.complimentaryThree,
                 modifier = Modifier
                     .padding(
                         vertical = 10.dp,
@@ -775,11 +771,11 @@ fun EditWebsite (
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
-                    .fillMaxWidth(.5f)
+                    .fillMaxWidth(.7f)
                     .clickable {
                         handleUpdateWebsiteClick()
                     }
@@ -789,7 +785,7 @@ fun EditWebsite (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -880,7 +876,7 @@ fun EditLocation (
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier
-            .background(color = Gray, shape = RoundedCornerShape(5.dp))
+            .background(color = LocalColor.current.backgroundLight, shape = RoundedCornerShape(5.dp))
             .fillMaxWidth(0.9f)
             .padding(vertical = 10.dp, horizontal = 20.dp)
     ) {
@@ -891,7 +887,7 @@ fun EditLocation (
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
-                color = if (error) Red else White,
+                color = if (error) LocalColor.current.error else LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -906,12 +902,12 @@ fun EditLocation (
                 locationLenght = maxCharLenght - newLocation.length
             },
             singleLine = true,
-            colors = textFieldColors,
+            colors = LocalTextFieldColors.current.textFieldColors,
             textStyle = TextStyle(
                 fontSize = headerSize,
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
-                color = White,
+                color = LocalColor.current.secondary,
             ),
             label = {
                 Text(
@@ -919,7 +915,7 @@ fun EditLocation (
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )
             },
             modifier = Modifier.fillMaxWidth()
@@ -930,14 +926,14 @@ fun EditLocation (
             fontSize = paragraphSize,
             fontFamily = fontFamily,
             fontWeight = weightLight,
-            color = if (locationLenght >= 0) White else Red,
+            color = if (locationLenght >= 0) LocalColor.current.secondary else LocalColor.current.complimentaryThree,
             modifier = Modifier.padding(vertical = 10.dp, horizontal = 10.dp)
         )
 
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .background(color = Purple, shape = RoundedCornerShape(5.dp))
+                .background(color = LocalColor.current.primary, shape = RoundedCornerShape(5.dp))
                 .padding(vertical = 10.dp, horizontal = 10.dp)
                 .fillMaxWidth()
                 .clickable { handleAutodetectLocation() }
@@ -947,7 +943,7 @@ fun EditLocation (
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = DarkGray,
+                color = LocalColor.current.background,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -956,7 +952,7 @@ fun EditLocation (
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .background(color = Purple, shape = RoundedCornerShape(5.dp))
+                .background(color = LocalColor.current.primary, shape = RoundedCornerShape(5.dp))
                 .padding(vertical = 10.dp, horizontal = 10.dp)
                 .fillMaxWidth()
                 .clickable { handleUpdateLocationClick() }
@@ -966,7 +962,7 @@ fun EditLocation (
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = DarkGray,
+                color = LocalColor.current.background,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
             )
@@ -978,8 +974,8 @@ fun EditLocation (
 fun EditColorMode (
     handleColorModeChange: (newMode: ColorModes) -> Unit,
     activeColorMode: ColorModes,
-    activeColor: Color = Purple,
-    inactiveColor: Color = LightGray
+    activeColor: Color = LocalColor.current.primary,
+    inactiveColor: Color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primaryLight
 ){
     var darkButtonColor by remember { mutableStateOf(
         if(activeColorMode == ColorModes.DARKMODE) { activeColor}
@@ -999,7 +995,7 @@ fun EditColorMode (
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier
             .background(
-                color = Gray,
+                color = LocalColor.current.backgroundLight,
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth(.9f)
@@ -1013,7 +1009,7 @@ fun EditColorMode (
             fontSize = headerSize,
             fontFamily = fontFamily,
             fontWeight = weightBold,
-            color = White,
+            color = LocalColor.current.secondary,
         )
         Row(
             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -1044,7 +1040,7 @@ fun EditColorMode (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -1071,7 +1067,7 @@ fun EditColorMode (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -1102,7 +1098,7 @@ fun EditColorMode (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)

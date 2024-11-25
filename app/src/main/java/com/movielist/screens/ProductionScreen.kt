@@ -3,6 +3,7 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,10 +49,7 @@ import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.TVShow
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
@@ -208,7 +206,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             //Stat stection
             item {
                 production?.let { production ->
-                    statsSection(
+                    StatsSection(
                         production = production,
                     )
                 }
@@ -310,7 +308,7 @@ fun ImageAndName(
                 fontSize = headerSize * 1.3,
                 fontWeight = weightBold,
                 textAlign = TextAlign.Center,
-                color = White,
+                color = LocalColor.current.secondary,
                 modifier = Modifier
                     .padding(top= 10.dp)
             )
@@ -322,14 +320,14 @@ fun ImageAndName(
             fontSize = headerSize,
             fontWeight = weightRegular,
             textAlign = TextAlign.Center,
-            color = White
+            color = LocalColor.current.secondary
         )
 
     }
 }
 
 @Composable
-fun statsSection(
+fun StatsSection(
     production: Production,
 ){
 
@@ -353,7 +351,7 @@ fun statsSection(
                     fontFamily = fontFamily,
                     fontSize = headerSize,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 10.dp, bottom = 5.dp)
@@ -363,7 +361,7 @@ fun statsSection(
                     fontFamily = fontFamily,
                     fontSize = headerSize,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding()
@@ -379,7 +377,7 @@ fun statsSection(
                 fontFamily = fontFamily,
                 fontSize = headerSize,
                 fontWeight = weightRegular,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(top = 10.dp, bottom = 5.dp)
@@ -401,7 +399,7 @@ fun statsSection(
                     fontFamily = fontFamily,
                     fontSize = headerSize,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(top = 10.dp, bottom = 5.dp)
@@ -411,7 +409,7 @@ fun statsSection(
                     fontFamily = fontFamily,
                     fontSize = headerSize,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding()
@@ -427,7 +425,7 @@ fun statsSection(
                         fontFamily = fontFamily,
                         fontSize = headerSize,
                         fontWeight = weightRegular,
-                        color = White,
+                        color = LocalColor.current.secondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(top = 10.dp, bottom = 5.dp)
@@ -437,7 +435,7 @@ fun statsSection(
                         fontFamily = fontFamily,
                         fontSize = headerSize,
                         fontWeight = weightRegular,
-                        color = White,
+                        color = LocalColor.current.secondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding()
@@ -512,7 +510,7 @@ fun ListInfo (
                     fontFamily = fontFamily,
                     fontSize = headerSize,
                     fontWeight = weightRegular,
-                    color = Purple,
+                    color = LocalColor.current.primary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .padding(bottom = 5.dp)
@@ -523,7 +521,7 @@ fun ListInfo (
                     score = userScoreFormatted,
                     sizeMultiplier = 1.5f,
                     loggedInUsersScore = true,
-                    color = Purple
+                    color = LocalColor.current.primary
                 )
 
 
@@ -539,7 +537,7 @@ fun ListInfo (
                 .width(150.dp)
                 .padding(vertical = 5.dp)
                 .background(
-                    color = DarkPurple,
+                    color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .clickable {
@@ -553,7 +551,7 @@ fun ListInfo (
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = White,
+                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                 textAlign = TextAlign.Center
             )
             //DROP DOWN MENU
@@ -562,7 +560,7 @@ fun ListInfo (
                 onDismissRequest = { dropDownExpanded = false },
                 offset = DpOffset(x = 0.dp, y = 0.dp),
                 modifier = Modifier
-                    .background(color = DarkPurple)
+                    .background(if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
                     .width(150.dp)
             ) {
                 ListOptions.entries.forEach { option ->
@@ -577,7 +575,7 @@ fun ListInfo (
                                     fontSize = headerSize,
                                     fontWeight = weightBold,
                                     fontFamily = fontFamily,
-                                    color = White,
+                                    color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .align(Alignment.Center)
@@ -607,7 +605,7 @@ fun productionDescription(
         fontSize = paragraphSize,
         fontWeight = weightRegular,
         textAlign = TextAlign.Start,
-        color = White,
+        color = LocalColor.current.secondary,
         modifier = modifier
             .padding(horizontal = horizontalPadding)
     )
@@ -621,7 +619,7 @@ fun ExtractYoutubeVideoIDFromUrl ( url: String): String{
 fun GenreSection(
     production: Production,
     modifier: Modifier = Modifier,
-    boxColor: Color = Gray
+    boxColor: Color = LocalColor.current.backgroundLight
 ){
     if (production!!.genre.size > 0){
         LazyRow (
@@ -643,7 +641,7 @@ fun GenreSection(
                         fontSize = paragraphSize,
                         fontWeight = weightRegular,
                         textAlign = TextAlign.Center,
-                        color = Color.White,
+                        color = LocalColor.current.secondary,
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                     )
@@ -659,7 +657,7 @@ fun GenreSection(
 fun ActorsSection(
     production: Production,
     modifier: Modifier = Modifier,
-    boxColor: Color = Gray
+    boxColor: Color = LocalColor.current.backgroundLight
 ){
     if (production.genre.size > 0){
         Column(
@@ -672,7 +670,7 @@ fun ActorsSection(
                 fontSize = headerSize,
                 fontWeight = weightRegular,
                 textAlign = TextAlign.Start,
-                color = White,
+                color = LocalColor.current.secondary,
                 modifier = Modifier
                     .padding(start = horizontalPadding, bottom = 10.dp)
             )
@@ -695,7 +693,7 @@ fun ActorsSection(
                             fontSize = paragraphSize,
                             fontWeight = weightRegular,
                             textAlign = TextAlign.Center,
-                            color = White,
+                            color = LocalColor.current.secondary,
                             modifier = Modifier
                                 .padding(horizontal = 8.dp)
                         )

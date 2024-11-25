@@ -46,12 +46,8 @@ import com.movielist.model.Movie
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.DarkWhite
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
@@ -300,7 +296,7 @@ fun TopNavBarComparisonScreen(
                         fontFamily = fontFamily,
                         fontSize = headerSize,
                         fontWeight = weightBold,
-                        color = White,
+                        color = LocalColor.current.secondary,
                     )
                     ProfileImage(
                         imageID = loggedInUser.profileImageID,
@@ -313,7 +309,7 @@ fun TopNavBarComparisonScreen(
                 //VerticalLineDevider
                 LineDeviderVertical(
                     strokeWith = 9f,
-                    color = LightGray,
+                    color = LocalColor.current.backgroundLight,
                     modifier = Modifier
                         .height(35.dp)
                 )
@@ -334,7 +330,7 @@ fun TopNavBarComparisonScreen(
                         fontFamily = fontFamily,
                         fontSize = headerSize,
                         fontWeight = weightBold,
-                        color = White,
+                        color = LocalColor.current.secondary,
                     )
                 }
             }
@@ -345,7 +341,7 @@ fun TopNavBarComparisonScreen(
 @Composable
 fun ComparisonScreenHeader (
     headerText: String,
-    color: Color = White,
+    color: Color = LocalColor.current.secondary,
     modifier: Modifier = Modifier
 ){
     Text(
@@ -421,7 +417,7 @@ fun ComparisonCard (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = headerSize,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(end = 5.dp)
@@ -431,7 +427,7 @@ fun ComparisonCard (
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
                 fontSize = headerSize,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
             )
         }
@@ -452,7 +448,7 @@ fun ComparisonCard (
                 RatingsGraphics(
                     score = loggedInUserRating,
                     sizeMultiplier = 1.3f,
-                    color = Purple,
+                    color = LocalColor.current.primary,
                     loggedInUsersScore = true,
                     modifier = Modifier.clickable {
                         ratingsSliderVisible = true
@@ -464,7 +460,7 @@ fun ComparisonCard (
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
-                    color = DarkWhite,
+                    color = LocalColor.current.quinary,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .padding(top = 6.dp, bottom = 6.dp )
@@ -498,7 +494,7 @@ fun ComparisonCard (
                 RatingsGraphics(
                     score = listItemForLoggedInUser.score,
                     sizeMultiplier = 1.3f,
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     loggedInUsersScore = false,
                 )
 
@@ -507,7 +503,7 @@ fun ComparisonCard (
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
-                    color = DarkWhite,
+                    color = LocalColor.current.quinary,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .padding(top = 6.dp, bottom = 6.dp)
@@ -515,8 +511,8 @@ fun ComparisonCard (
                 ProgressBar(
                     currentNumber = listItemForComparisonUser.currentEpisode,
                     endNumber = productionLenght,
-                    foregroundColor = LightGray,
-                    backgroundColor = Gray
+                    foregroundColor = LocalColor.current.backgroundLight,
+                    backgroundColor = LocalColor.current.backgroundLight
                 )
             }
         }

@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,10 +27,8 @@ import com.movielist.Screen
 import com.movielist.composables.LogoWithName
 import com.movielist.controller.ControllerViewModel
 import com.movielist.data.logInWithEmailAndPassword
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.textFieldColors
@@ -59,7 +56,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
             verticalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
                 .background(
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .fillMaxWidth(.9f)
@@ -74,7 +71,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = Color.Red,
+                    color = LocalColor.current.error,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                 )
@@ -86,19 +83,19 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                 value = email,
                 onValueChange = { email = it},
                 singleLine = true,
-                colors = textFieldColors,
+                colors = LocalTextFieldColors.current.textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 ),
                 label = {Text(
                     "email",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -109,19 +106,19 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                 value = password,
                 onValueChange = { password = it},
                 singleLine = true,
-                colors = textFieldColors,
+                colors = LocalTextFieldColors.current.textFieldColors,
                 textStyle = TextStyle(
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 ),
                 label = {Text(
                     "Password",
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                 )},
                 modifier = Modifier
                     .fillMaxWidth()
@@ -143,7 +140,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     .fillMaxWidth()
                     .height(50.dp)
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp))
             ){
                 Text(
@@ -151,7 +148,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     fontSize = headerSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     modifier = Modifier
                         .align(alignment = Alignment.Center)
                 )
@@ -164,7 +161,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 textAlign = TextAlign.Center,
-                color = Purple,
+                color = LocalColor.current.primary,
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .clickable {

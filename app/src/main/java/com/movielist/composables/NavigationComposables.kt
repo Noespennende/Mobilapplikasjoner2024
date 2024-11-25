@@ -3,6 +3,7 @@ package com.movielist.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -466,7 +467,7 @@ fun TopNavDropDown(
         onDismissRequest = {handleDismiss()},
         offset = DpOffset(x = 0.dp, y= 0.dp),
         modifier = Modifier
-            .background(color = LocalColor.current.tertiary)
+            .background(color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
             .width(100.dp)
     ) {
         TopNavDropdownOptions.entries.forEach(){
@@ -481,7 +482,7 @@ fun TopNavDropDown(
                         fontSize = headerSize,
                         fontWeight = weightBold,
                         fontFamily = fontFamily,
-                        color = LocalColor.current.secondary,
+                        color = if(isSystemInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .align(Alignment.Center)

@@ -3,6 +3,7 @@ package com.movielist.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -169,7 +170,7 @@ fun TopNavBarSearchPage (
                     value = searchQuery,
                     onValueChange = { searchQuery = it},
                     singleLine = true,
-                    colors = textFieldColors,
+                    colors = LocalTextFieldColors.current.textFieldColors,
                     shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp),
                     modifier = Modifier
                         .fillMaxWidth(.75f)
@@ -178,7 +179,7 @@ fun TopNavBarSearchPage (
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
-                        color = White,
+                        color = LocalColor.current.secondary,
                     ),
                     label = {
                         //Searchbar label
@@ -188,7 +189,7 @@ fun TopNavBarSearchPage (
                                 fontSize = headerSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightBold,
-                                color = White,
+                                color = LocalColor.current.secondary,
                                 modifier = Modifier
                                     .padding(start = 10.dp)
                             )
@@ -203,7 +204,7 @@ fun TopNavBarSearchPage (
                         .width(80.dp)
                         .padding(top = 8.dp)
                         .background(
-                            color = Purple,
+                            color = LocalColor.current.primary,
                             shape = RoundedCornerShape(topEnd = 5.dp, bottomEnd = 5.dp
                             ))
                         .clickable {
@@ -216,7 +217,7 @@ fun TopNavBarSearchPage (
                         painter = painterResource(id = R.drawable.search),
                         contentDescription = "Search",
                         contentScale = ContentScale.Crop,
-                        colorFilter = ColorFilter.tint(DarkGray),
+                        colorFilter = ColorFilter.tint(LocalColor.current.background),
                         modifier = Modifier
                             .size(26.dp)
                             .align(Alignment.Center)
@@ -238,7 +239,7 @@ fun TopNavBarSearchPage (
                         .padding(top = 15.dp)
                         .align(Alignment.Center)
                         .background(
-                            color = Gray,
+                            color = if(isSystemInDarkTheme())LocalColor.current.backgroundLight else LocalColor.current.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .clickable {
@@ -261,7 +262,7 @@ fun TopNavBarSearchPage (
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = Purple,
+                            color = if(isSystemInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
                             textAlign = TextAlign.Center
                         )
                         Text(
@@ -269,7 +270,7 @@ fun TopNavBarSearchPage (
                             fontSize = paragraphSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
-                            color = Purple,
+                            color = if(isSystemInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
                         )
 
                     }
@@ -280,7 +281,7 @@ fun TopNavBarSearchPage (
                         onDismissRequest = {dropDownExpanded = false},
                         offset = DpOffset(x = 50.dp, y= 0.dp),
                         modifier = Modifier
-                            .background(color = DarkPurple)
+                            .background(color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
                             .width(100.dp)
                     ) {
                         sortOptions.forEach{
@@ -295,7 +296,7 @@ fun TopNavBarSearchPage (
                                         fontSize = headerSize,
                                         fontWeight = weightBold,
                                         fontFamily = fontFamily,
-                                        color = White,
+                                        color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier
                                             .align(Alignment.Center)
@@ -344,7 +345,7 @@ fun ProductionCardSearchPage(
             fontSize = headerSize,
             fontWeight = weightBold,
             fontFamily = fontFamily,
-            color = White,
+            color = LocalColor.current.secondary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .padding(top = 5.dp)
@@ -378,7 +379,7 @@ fun UserCardSearchPage(
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = White,
+            color = LocalColor.current.secondary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .width(150.dp)

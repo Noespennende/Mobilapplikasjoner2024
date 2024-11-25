@@ -7,6 +7,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -56,21 +58,12 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
 import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.DarkWhite
 import com.movielist.ui.theme.fontFamily
-import com.movielist.ui.theme.Green
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.Red
-import com.movielist.ui.theme.Teal
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -78,7 +71,6 @@ import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
-import com.movielist.ui.theme.Yellow
 import kotlinx.coroutines.delay
 import java.util.Calendar
 import kotlin.random.Random
@@ -459,7 +451,7 @@ fun UsernameHeadline (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = White,
+            color = LocalColor.current.secondary,
             modifier = Modifier
                 .padding(horizontal = 10.dp)
         )
@@ -468,8 +460,8 @@ fun UsernameHeadline (
 
 @Composable
 fun ProfileCategoryOptions(
-    activeButtonColor: Color = Purple,
-    inactiveButtonColor: Color = LightGray,
+    activeButtonColor: Color = LocalColor.current.primary,
+    inactiveButtonColor: Color = if(isSystemInDarkTheme())LocalColor.current.background else LocalColor.current.primaryLight,
     handleSummaryClick: () -> Unit,
     handleLibraryClick: () -> Unit,
     handleReviewsClick: () -> Unit,
@@ -521,7 +513,7 @@ fun ProfileCategoryOptions(
                     "Summary",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -554,7 +546,7 @@ fun ProfileCategoryOptions(
                     "Library",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -587,7 +579,7 @@ fun ProfileCategoryOptions(
                     "Reviews",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -603,11 +595,16 @@ fun ProfileInfoSection (
     handleFollowUnfollowClick: (followStatus: FollowStatus) -> Unit
 ){
 
+
+    val primaryColor = LocalColor.current.primary
+    val backgroundColor = LocalColor.current.backgroundLight
+    val backgroundLightColor = LocalColor.current.backgroundLight
+
     var followButtonColor by remember { mutableStateOf(
         if (followStatus == FollowStatus.NOTFOLLOWING){
-            Purple
+            primaryColor
         } else {
-            LightGray
+            backgroundColor
         }
     ) }
 
@@ -623,7 +620,7 @@ fun ProfileInfoSection (
                 handleSettingsButtonClick = handleSettingsButtonClick,
                 filled = true,
                 sizeMultiplier = 1.0f,
-                backgroundColor = LightGray,
+                backgroundColor = LocalColor.current.backgroundLight,
                 modifier = Modifier
                     .align(Alignment.End)
                     .padding(bottom = 10.dp)
@@ -641,11 +638,11 @@ fun ProfileInfoSection (
                         .clickable {
                             if (newFollowStatus == FollowStatus.NOTFOLLOWING){
                                 newFollowStatus = FollowStatus.FOLLOWING
-                                followButtonColor = LightGray
+                                followButtonColor = backgroundLightColor
                                 handleFollowUnfollowClick(newFollowStatus)
                             } else {
                                 newFollowStatus = FollowStatus.NOTFOLLOWING
-                                followButtonColor = Purple
+                                followButtonColor = primaryColor
                                 handleFollowUnfollowClick(newFollowStatus)
                             }
                         }
@@ -660,7 +657,7 @@ fun ProfileInfoSection (
                         text = if (newFollowStatus == FollowStatus.NOTFOLLOWING){"Follow"} else {"Unfollow"},
                         fontSize = paragraphSize,
                         fontWeight = weightBold,
-                        color = DarkGray
+                        color = LocalColor.current.background
                     )
                 }
             }
@@ -731,6 +728,7 @@ fun UserInfo(
                     painter = painterResource(id = R.drawable.profile),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(LocalColor.current.secondary),
                     modifier = Modifier
                         .size(17.dp)
                 )
@@ -739,7 +737,7 @@ fun UserInfo(
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
                     fontSize = paragraphSize,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Center,
                 )
 
@@ -749,7 +747,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = DarkWhite,
+                color = LocalColor.current.quinary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -774,6 +772,7 @@ fun UserInfo(
                     painter = painterResource(id = R.drawable.location),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(LocalColor.current.secondary),
                     modifier = Modifier
                         .size(17.dp)
                 )
@@ -782,7 +781,7 @@ fun UserInfo(
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
                     fontSize = paragraphSize,
-                    color = White
+                    color = LocalColor.current.secondary
                 )
 
             }
@@ -791,7 +790,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = DarkWhite,
+                color = LocalColor.current.quinary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -817,6 +816,7 @@ fun UserInfo(
                     painter = painterResource(id = R.drawable.globe),
                     contentDescription = "",
                     contentScale = ContentScale.Crop,
+                    colorFilter = ColorFilter.tint(LocalColor.current.secondary),
                     modifier = Modifier
                         .size(17.dp)
                 )
@@ -825,7 +825,7 @@ fun UserInfo(
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
                     fontSize = paragraphSize,
-                    color = White
+                    color = LocalColor.current.secondary
                 )
 
             }
@@ -834,7 +834,7 @@ fun UserInfo(
                 fontFamily = fontFamily,
                 fontWeight = weightLight,
                 fontSize = paragraphSize,
-                color = DarkWhite,
+                color = LocalColor.current.quinary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
@@ -866,14 +866,14 @@ fun BioSection (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = paragraphSize,
-            color = White
+            color = LocalColor.current.secondary
         )
         Text(
             text = bio,
             fontFamily = fontFamily,
             fontWeight = weightLight,
             fontSize = paragraphSize,
-            color = DarkWhite,
+            color = LocalColor.current.quinary,
             textAlign = TextAlign.Start
         )
     }
@@ -900,14 +900,14 @@ fun SummarySection (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
             Text(
                 text = "Films",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
 
         }
@@ -921,14 +921,14 @@ fun SummarySection (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
             Text(
                 text = "Shows",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
 
         }
@@ -942,14 +942,14 @@ fun SummarySection (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
             Text(
                 text = "Following",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
 
         }
@@ -963,14 +963,14 @@ fun SummarySection (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
             Text(
                 text = "Followers",
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = White
+                color = LocalColor.current.secondary
             )
 
         }
@@ -995,7 +995,7 @@ fun StatisticsSection(
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = White,
+            color = LocalColor.current.secondary,
             textAlign = TextAlign.Start
         )
         Column(
@@ -1022,7 +1022,7 @@ fun StatisticsSection(
                         .width(200.dp)
                 ) {
                     LineDevider(
-                        color = DarkPurple,
+                        color = if(isSystemInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.secondaryLight,
                         strokeWith = 10f
                     )
                 }
@@ -1071,7 +1071,7 @@ fun StatisticsPieChart (
     val lastValues = sortedList.takeLast(4)
     val percentageList = listOf(sumOfOthers) + lastValues
 
-    val colorList: Array<Color> = arrayOf(Red, Green, Purple, Yellow, Teal)
+    val colorList: Array<Color> = arrayOf(LocalColor.current.complimentaryThree, LocalColor.current.ComplimentaryFour, LocalColor.current.primary, LocalColor.current.complimentaryOne, LocalColor.current.complimentaryTwo)
 
     var index = 0
     var cumulativePercentage = 0f
@@ -1098,7 +1098,7 @@ fun StatisticsPieChart (
         //Progress bar for remaining values
         for((i, percentage) in percentageList.withIndex())
         {
-            val color = if (index < colorList.size) colorList[index] else Gray
+            val color = if (index < colorList.size) colorList[index] else LocalColor.current.backgroundLight
 
             RoundProgressBar(
                 percentage = if (currentProgressBar.value >= i) {1f} else {0f},
@@ -1128,7 +1128,7 @@ fun StatisticsPieChart (
             fontFamily = fontFamily,
             fontWeight = weightBold,
             fontSize = headerSize,
-            color = White,
+            color = LocalColor.current.secondary,
             textAlign = TextAlign.Center,
             modifier = Modifier
                 .align(Alignment.Center)
@@ -1143,7 +1143,7 @@ fun StatisticsList (
 {
     //Sort genreToPercentageMap from highest to lowest based on the value
     val sortedMap = genreToPercentageMap.toList().sortedByDescending { (_, value) -> value }.toMap()
-    val colorList: Array<Color> = arrayOf(Teal, Yellow, Purple, Green)
+    val colorList: Array<Color> = arrayOf(LocalColor.current.complimentaryTwo, LocalColor.current.complimentaryOne, LocalColor.current.primary, LocalColor.current.ComplimentaryFour)
     var other = 100
     var index = 0
 
@@ -1176,7 +1176,7 @@ fun StatisticsList (
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
                 fontSize = paragraphSize,
-                color = Red,
+                color = LocalColor.current.complimentaryThree,
                 textAlign = TextAlign.Start,
             )
         }
@@ -1192,7 +1192,7 @@ fun StatisticsList (
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     textAlign = TextAlign.Start,
                 )
                 index++
@@ -1206,7 +1206,7 @@ fun StatisticsList (
                 fontFamily = fontFamily,
                 fontWeight = weightRegular,
                 fontSize = paragraphSize,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Start,
             )
 
@@ -1223,7 +1223,7 @@ fun StatisticsList (
                     currentNumber = percentage,
                     endNumber = 100,
                     foregroundColor = colorList[index],
-                    backgroundColor = Gray,
+                    backgroundColor = LocalColor.current.backgroundLight,
                 )
                 index++
                 if (index >= 4) break
@@ -1233,8 +1233,8 @@ fun StatisticsList (
             ProgressBar(
                 currentNumber = other,
                 endNumber = 100,
-                foregroundColor = Red,
-                backgroundColor = Gray,
+                foregroundColor = LocalColor.current.complimentaryThree,
+                backgroundColor = LocalColor.current.backgroundLight,
             )
 
         }

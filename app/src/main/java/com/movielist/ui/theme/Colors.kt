@@ -8,7 +8,9 @@ import androidx.compose.ui.graphics.Color
 
 data class Colors (
     val primary: Color = Purple, //Purple
+    val primaryLight: Color = LightPurple,
     val secondary: Color = White, //White
+    val secondaryLight: Color = BlueGray,
     val tertiary: Color = DarkPurple, //DarkPurple
     val quaternary: Color = LightGray, //LightGray
     val quinary: Color = DarkWhite, //DarkWhite
@@ -18,16 +20,21 @@ data class Colors (
     val backgroundAlternative: Color = DarkGrayTransparent, //DarkGray transparent
 
     val complimentaryOne: Color = Yellow, //Yellow
-    val complimentaryTwo: Color = Green, //Teal
+    val complimentaryTwo: Color = Teal, //Teal
     val complimentaryThree: Color = Red, //Red
     val ComplimentaryFour: Color = Green, //Green
+
 
     val error: Color = Red //Red
 )
 
+data class InputFieldColors(
+    val textFieldColors: TextFieldColors = textFieldColors()
+)
+
 
 val LocalColor = compositionLocalOf { Colors() }
-
+val LocalTextFieldColors = compositionLocalOf { InputFieldColors() }
 
 //Main colors
 val Purple = Color(0xFFc38fff)
@@ -42,7 +49,7 @@ val DarkWhite = Color(0xFFaeaeae)
 val White = Color(0xFFffffff)
 val DarkGrayTransparent = Color(0xE6101010)
 val BlueWhite = Color(0xFFedf1f2)
-val BlueGray = Color(0xFFeef2f3)
+val BlueGray = Color(0xFFb1bbbe)
 
 //Complimentary colors
 val Yellow = Color(0xFFfcb969)
@@ -50,8 +57,8 @@ val Teal = Color(0xFF54b4ae)
 val Red = Color(0xFFbf5656)
 val Green = Color(0xFF74c276)
 
-val textFieldColors = TextFieldColors(
-    focusedTextColor = White,
+fun textFieldColors(): TextFieldColors = TextFieldColors(
+    focusedTextColor = BlueWhite,
     unfocusedTextColor = White,
     disabledTextColor = Gray,
     errorTextColor = Color.Red,
@@ -96,6 +103,52 @@ val textFieldColors = TextFieldColors(
     unfocusedSupportingTextColor = White
 )
 
+fun textFieldColorsLightTheme(): TextFieldColors = TextFieldColors(
+    focusedTextColor = DarkGray,
+    unfocusedTextColor = DarkGray,
+    disabledTextColor = Gray,
+    errorTextColor = Red,
+    focusedContainerColor = BlueWhite,
+    unfocusedContainerColor = BlueWhite,
+    disabledPrefixColor = BlueWhite,
+    unfocusedIndicatorColor = Color.Transparent,
+    focusedIndicatorColor = Purple,
+    textSelectionColors = TextSelectionColors(handleColor = DarkGray, backgroundColor = Gray),
+    cursorColor = DarkGray,
+    disabledContainerColor = BlueWhite,
+    disabledIndicatorColor = Gray,
+    disabledLabelColor = Gray,
+    disabledLeadingIconColor = Gray,
+    disabledSuffixColor = Gray,
+    disabledPlaceholderColor = Gray,
+    disabledSupportingTextColor = Gray,
+    disabledTrailingIconColor = Gray,
+    errorContainerColor = BlueWhite,
+    errorCursorColor = DarkGray,
+    errorPlaceholderColor = Red,
+    errorIndicatorColor = Red,
+    errorLabelColor = BlueWhite,
+    errorLeadingIconColor = Red,
+    errorPrefixColor = Red,
+    errorSuffixColor = Red,
+    errorSupportingTextColor = DarkGray,
+    errorTrailingIconColor = Red,
+    focusedLabelColor = DarkGray,
+    focusedPrefixColor = DarkGray,
+    focusedSuffixColor = DarkGray,
+    focusedPlaceholderColor = DarkGray,
+    focusedTrailingIconColor = DarkGray,
+    focusedLeadingIconColor = DarkGray,
+    focusedSupportingTextColor = DarkGray,
+    unfocusedLabelColor = DarkGray,
+    unfocusedPrefixColor = DarkGray,
+    unfocusedSuffixColor = DarkGray,
+    unfocusedPlaceholderColor = DarkGray,
+    unfocusedLeadingIconColor = DarkGray,
+    unfocusedTrailingIconColor = DarkGray,
+    unfocusedSupportingTextColor = DarkGray
+)
+
 val sliderColors = SliderColors(
     activeTrackColor = Purple,
     activeTickColor = Purple,
@@ -116,5 +169,9 @@ val lightColorScheme = Colors(
     background = BlueWhite,
     backgroundLight = White,
     backgroundAlternative = White,
-    backgroundDark = White
+    backgroundDark = White,
+    quinary = Gray
 )
+
+
+

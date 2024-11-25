@@ -430,6 +430,7 @@ fun CurrentlyWatchingCard(
     onImageClick: (showID: String, productionType: String) -> Unit,
     handleRatingChange: (rating: Int, listItemID: String) -> Unit
 ) {
+    
     var watchedEpisodesCount: Int by remember {
         mutableIntStateOf(listItem.currentEpisode)
     }
