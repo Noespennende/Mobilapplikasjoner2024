@@ -21,7 +21,7 @@ data class User (
     val wantToWatchCollection:  MutableList<ListItem> = mutableListOf(),
     val droppedCollection:  MutableList<ListItem> = mutableListOf(),
     val currentlyWatchingCollection:  MutableList<ListItem> = mutableListOf(),
-    val colorMode: ColorModes = ColorModes.DARKMODE
+    val colorMode: ColorThemes = ColorThemes.DARKMODE
 ) {
 
     fun movieGenrePercentage(user: User): Map<String, Double> {

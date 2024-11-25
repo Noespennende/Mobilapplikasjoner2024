@@ -3,7 +3,6 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,12 +50,12 @@ import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
-import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
 import kotlin.random.Random
@@ -334,7 +333,7 @@ fun TopNavBarReviewPage(
             ProductionSortSelectButton(
                 handleSortChange = handleSortChange
             )
-            ReviewTabOptions(handleTabChange = handleTabChange)
+            ReviewCategoryOptions(handleTabChange = handleTabChange)
         }
 
 
@@ -343,25 +342,22 @@ fun TopNavBarReviewPage(
 
 
 @Composable
-fun ReviewTabOptions (
+fun ReviewCategoryOptions (
     activeButtonColor: Color = LocalColor.current.primary,
-    inactiveButtonColor: Color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primaryLight,
+    inactiveButtonColor: Color = if(isAppInDarkTheme()) LocalColor.current.quaternary else LocalColor.current.primaryLight,
     handleTabChange: (reviewsScreenTabs: ReviewsScreenTabs) -> Unit
 ){
 
-    //Button graphics logic
-    var summaryButtonColor by remember {
-        mutableStateOf(activeButtonColor)
-    }
-    var topThisMonthButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
-    var topAllTimeButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
     var activeButton by remember {
         mutableStateOf(ReviewsScreenTabs.SUMMARY)
     }
+    //Button graphics logic
+    var summaryButtonColor = if (activeButton == ReviewsScreenTabs.SUMMARY) activeButtonColor else inactiveButtonColor
+
+    var topThisMonthButtonColor =  if (activeButton == ReviewsScreenTabs.TOPTHISMONTH) activeButtonColor else inactiveButtonColor
+
+    var topAllTimeButtonColor = if (activeButton == ReviewsScreenTabs.TOPALLTIME) activeButtonColor else inactiveButtonColor
+
 
     //Graphics
     LazyRow(
@@ -378,9 +374,6 @@ fun ReviewTabOptions (
                         if (activeButton != ReviewsScreenTabs.SUMMARY) {
 
                             activeButton = ReviewsScreenTabs.SUMMARY
-                            summaryButtonColor = activeButtonColor
-                            topThisMonthButtonColor = inactiveButtonColor
-                            topAllTimeButtonColor = inactiveButtonColor
                             handleTabChange(ReviewsScreenTabs.SUMMARY)
                         }
                     }
@@ -410,9 +403,6 @@ fun ReviewTabOptions (
                         if (activeButton != ReviewsScreenTabs.TOPTHISMONTH) {
 
                             activeButton = ReviewsScreenTabs.TOPTHISMONTH
-                            summaryButtonColor = inactiveButtonColor
-                            topThisMonthButtonColor = activeButtonColor
-                            topAllTimeButtonColor = inactiveButtonColor
                             handleTabChange(ReviewsScreenTabs.TOPTHISMONTH)
                         }
                     }
@@ -442,9 +432,6 @@ fun ReviewTabOptions (
                         if (activeButton != ReviewsScreenTabs.TOPALLTIME) {
 
                             activeButton = ReviewsScreenTabs.TOPALLTIME
-                            summaryButtonColor = inactiveButtonColor
-                            topThisMonthButtonColor = inactiveButtonColor
-                            topAllTimeButtonColor = activeButtonColor
                             handleTabChange(ReviewsScreenTabs.TOPALLTIME)
                         }
 
@@ -530,7 +517,7 @@ fun ReviewsSection(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.secondary,
+                    color = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.secondary,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(
@@ -578,10 +565,6 @@ fun ReviewSummary (
                 .padding(
                     start = 5.dp
                 )
-                .clickable {
-                    Log.d("Review", "her er jeg ${review.reviewID}")
-                    handleReviewClick(review.reviewID)
-                }
         ) {
             Row (
             ){
@@ -626,7 +609,7 @@ fun ReviewSummary (
                             verticalArrangement = Arrangement.spacedBy(3.dp),
                             horizontalAlignment = Alignment.End,
                             modifier = Modifier
-                                .fillMaxWidth(.5f)
+                                .fillMaxWidth(.6f)
                         ){
                             //Username
                             Text(
@@ -639,17 +622,10 @@ fun ReviewSummary (
                             )
                             //review date
                             Text(
-                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}",
+                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}/${review.postDate.get(Calendar.YEAR)}",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightRegular,
-                                color = LocalColor.current.quinary
-                            )
-                            Text(
-                                text = "${review.postDate.get(Calendar.YEAR)}",
-                                fontSize = paragraphSize,
-                                fontFamily = fontFamily,
-                                fontWeight = weightLight,
                                 color = LocalColor.current.quinary
                             )
                         }
@@ -681,17 +657,19 @@ fun ReviewSummary (
                         fontWeight = weightRegular,
                         color = LocalColor.current.quinary,
                     )
-                    if (ReviewBodyIsTruncated(review.reviewBody)){
-                        Text(
-                            text = "(Click to read more)",
-                            fontSize = paragraphSize,
-                            fontFamily = fontFamily,
-                            fontWeight = weightRegular,
-                            color = LocalColor.current.primary,
-                            modifier = Modifier
-                                .fillMaxWidth(.8f)
-                        )
-                    }
+
+                    Text(
+                        text = "(Click to see full review)",
+                        fontSize = paragraphSize,
+                        fontFamily = fontFamily,
+                        fontWeight = weightRegular,
+                        color = LocalColor.current.primary,
+                        modifier = Modifier
+                            .fillMaxWidth(.8f)
+                            .clickable {
+                                handleReviewClick(review.reviewID)
+                            }
+                    )
                 }
 
 

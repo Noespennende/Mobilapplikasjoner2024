@@ -54,6 +54,7 @@ import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
@@ -537,7 +538,7 @@ fun ListInfo (
                 .width(150.dp)
                 .padding(vertical = 5.dp)
                 .background(
-                    color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary,
+                    color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .clickable {
@@ -551,7 +552,7 @@ fun ListInfo (
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                 textAlign = TextAlign.Center
             )
             //DROP DOWN MENU
@@ -560,7 +561,7 @@ fun ListInfo (
                 onDismissRequest = { dropDownExpanded = false },
                 offset = DpOffset(x = 0.dp, y = 0.dp),
                 modifier = Modifier
-                    .background(if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
+                    .background(if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
                     .width(150.dp)
             ) {
                 ListOptions.entries.forEach { option ->
@@ -575,7 +576,7 @@ fun ListInfo (
                                     fontSize = headerSize,
                                     fontWeight = weightBold,
                                     fontFamily = fontFamily,
-                                    color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                                    color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .align(Alignment.Center)

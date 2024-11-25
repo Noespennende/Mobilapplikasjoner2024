@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,6 +50,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.navigation.NavController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -58,29 +61,33 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.movielist.R
 import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.ColorModes
+import com.movielist.model.ColorThemes
 import com.movielist.model.Genders
+import com.movielist.model.LocalStorageKeys
 import com.movielist.model.LocationService
 import com.movielist.model.User
+import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.textFieldColors
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: NavController){
+fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: NavController, localStorage: DataStore<Preferences>){
 
 
-    var cameraPermission: com.google.accompanist.permissions.PermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val cameraPermission: com.google.accompanist.permissions.PermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     var showCameraScreen: Boolean by remember { mutableStateOf(false) }
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
@@ -91,6 +98,19 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     val snackbarHostState = remember { SnackbarHostState() }
     val snackBarStatus by controllerViewModel.snackBarStatus.collectAsState()
+    val scope = rememberCoroutineScope()
+    val colorThemeState by  localStorage.data.map { it[LocalStorageKeys().colorTheme] ?: ColorThemes.DARKMODE.toString() }.collectAsState(ColorThemes.DARKMODE.toString())
+    val activeColorTheme: ColorThemes = when (colorThemeState) {
+        ColorThemes.DARKMODE.toString() -> {
+            ColorThemes.DARKMODE
+        }
+        ColorThemes.SYSTEM.toString() -> {
+            ColorThemes.SYSTEM
+        }
+        else -> {
+            ColorThemes.LIGHTMODE
+        }
+    }
 
 
     LaunchedEffect(snackBarStatus) {
@@ -132,12 +152,12 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         controllerViewModel.editUserLocation(newLocation)
     }
 
-    val handleAutodetectLocation: () -> Unit = {
-        
-    }
-
-    val handleColorModeChange: (mode: ColorModes) -> Unit = { mode ->
-        //kontroller funksjon her
+    val handleColorModeChange: (theme: ColorThemes) -> Unit = { theme ->
+        scope.launch {
+            localStorage.edit { dataStore ->
+                dataStore[LocalStorageKeys().colorTheme] = theme.toString()
+            }
+        }
     }
 
     val context = LocalContext.current
@@ -148,7 +168,6 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         controllerViewModel.handleCapturedProfileImage(context, image)
 
     }
-
 
     val handleCancelCameraPermissionClick: () -> Unit = {
         showCameraScreen = false
@@ -209,7 +228,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         item {
             EditColorMode(
                 handleColorModeChange = handleColorModeChange,
-                activeColorMode = user.colorMode
+                activeColorTheme = activeColorTheme
             )
         }
     }
@@ -972,24 +991,18 @@ fun EditLocation (
 
 @Composable
 fun EditColorMode (
-    handleColorModeChange: (newMode: ColorModes) -> Unit,
-    activeColorMode: ColorModes,
+    handleColorModeChange: (newMode: ColorThemes) -> Unit,
+    activeColorTheme: ColorThemes,
     activeColor: Color = LocalColor.current.primary,
-    inactiveColor: Color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primaryLight
+    inactiveColor: Color = if(isAppInDarkTheme()) LocalColor.current.quinary else LocalColor.current.primaryLight
 ){
-    var darkButtonColor by remember { mutableStateOf(
-        if(activeColorMode == ColorModes.DARKMODE) { activeColor}
-        else{inactiveColor}
-    )
-    }
-    var systemButtonColor by remember { mutableStateOf(
-        if(activeColorMode == ColorModes.SYSTEM) { activeColor}
-        else{inactiveColor}
-    ) }
-    var lightuttonColor by remember { mutableStateOf(
-        if(activeColorMode == ColorModes.LIGHTMODE) { activeColor}
-        else{inactiveColor}
-    ) }
+    var darkButtonColor = if(activeColorTheme == ColorThemes.DARKMODE) { activeColor} else {inactiveColor}
+
+
+    var systemButtonColor = if(activeColorTheme == ColorThemes.SYSTEM) { activeColor}  else {inactiveColor}
+
+    var lightButtonColor =  if(activeColorTheme == ColorThemes.LIGHTMODE) { activeColor}  else {inactiveColor}
+
 
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1031,8 +1044,8 @@ fun EditColorMode (
                     .clickable {
                         darkButtonColor = activeColor
                         systemButtonColor = inactiveColor
-                        lightuttonColor = inactiveColor
-                        handleColorModeChange(ColorModes.DARKMODE)
+                        lightButtonColor = inactiveColor
+                        handleColorModeChange(ColorThemes.DARKMODE)
                     }
             ) {
                 Text(
@@ -1058,8 +1071,8 @@ fun EditColorMode (
                     .clickable {
                         darkButtonColor = inactiveColor
                         systemButtonColor = activeColor
-                        lightuttonColor = inactiveColor
-                        handleColorModeChange(ColorModes.SYSTEM)
+                        lightButtonColor = inactiveColor
+                        handleColorModeChange(ColorThemes.SYSTEM)
                     }
             ) {
                 Text(
@@ -1078,7 +1091,7 @@ fun EditColorMode (
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = lightuttonColor,
+                        color = lightButtonColor,
                         shape = RoundedCornerShape(
                             topEnd = 5.dp,
                             bottomEnd = 5.dp
@@ -1089,8 +1102,8 @@ fun EditColorMode (
                     .clickable {
                         darkButtonColor = inactiveColor
                         systemButtonColor = inactiveColor
-                        lightuttonColor = activeColor
-                        handleColorModeChange(ColorModes.LIGHTMODE)
+                        lightButtonColor = activeColor
+                        handleColorModeChange(ColorThemes.LIGHTMODE)
                     }
             ) {
                 Text(

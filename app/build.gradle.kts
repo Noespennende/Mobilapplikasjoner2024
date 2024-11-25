@@ -124,6 +124,10 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.2.2")
 
+    //Local preferences storage
+    api(libs.datastore.preferences)
+    api(libs.datastore)
+
     //Camera
     implementation (libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)

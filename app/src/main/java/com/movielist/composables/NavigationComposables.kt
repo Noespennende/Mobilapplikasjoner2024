@@ -48,6 +48,7 @@ import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -467,7 +468,7 @@ fun TopNavDropDown(
         onDismissRequest = {handleDismiss()},
         offset = DpOffset(x = 0.dp, y= 0.dp),
         modifier = Modifier
-            .background(color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
+            .background(color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
             .width(100.dp)
     ) {
         TopNavDropdownOptions.entries.forEach(){
@@ -482,7 +483,7 @@ fun TopNavDropDown(
                         fontSize = headerSize,
                         fontWeight = weightBold,
                         fontFamily = fontFamily,
-                        color = if(isSystemInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                        color = if(isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .align(Alignment.Center)
