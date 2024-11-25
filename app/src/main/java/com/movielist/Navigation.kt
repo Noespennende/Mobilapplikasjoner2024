@@ -6,6 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,7 +34,7 @@ import com.movielist.screens.SettingsScreen
 
 
 @Composable
-fun Navigation (controllerViewModel: ControllerViewModel) {
+fun Navigation (controllerViewModel: ControllerViewModel, localStorage: DataStore<Preferences>) {
     //Nav controller
     val navController = rememberNavController()
     controllerViewModel.checkUserStatus()
@@ -257,6 +259,7 @@ fun Navigation (controllerViewModel: ControllerViewModel) {
             SettingsScreen(
                 controllerViewModel,
                 navController,
+                localStorage
             )
             handleScreenNameChange(Screens.SETTINGS)
             aNavButtonIsActive = false

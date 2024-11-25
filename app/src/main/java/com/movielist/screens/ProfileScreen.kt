@@ -64,6 +64,7 @@ import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -473,26 +474,21 @@ fun UsernameHeadline (
 @Composable
 fun ProfileCategoryOptions(
     activeButtonColor: Color = LocalColor.current.primary,
-    inactiveButtonColor: Color = if(isSystemInDarkTheme())LocalColor.current.background else LocalColor.current.primaryLight,
+    inactiveButtonColor: Color = if(isAppInDarkTheme())LocalColor.current.quaternary else LocalColor.current.primaryLight,
     handleSummaryClick: () -> Unit,
     handleLibraryClick: () -> Unit,
     handleReviewsClick: () -> Unit,
 ){
 
-    //Button graphics logic
-    var summaryButtonColor by remember {
-        mutableStateOf(activeButtonColor)
-    }
-    var libaryButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
-    var reviewsButtonColor by remember {
-        mutableStateOf(inactiveButtonColor)
-    }
-
     var activeButton by remember {
         mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY)
     }
+    //Button graphics logic
+    var summaryButtonColor = if(activeButton == com.movielist.model.ProfileCategoryOptions.SUMMARY) activeButtonColor else inactiveButtonColor
+    var libaryButtonColor = if(activeButton == com.movielist.model.ProfileCategoryOptions.LIBRARY) activeButtonColor else inactiveButtonColor
+    var reviewsButtonColor  = if(activeButton == com.movielist.model.ProfileCategoryOptions.REVIEWS) activeButtonColor else inactiveButtonColor
+
+
 
     //Graphics
     LazyRow(
@@ -508,9 +504,6 @@ fun ProfileCategoryOptions(
                         //OnClickFunction
                         if (activeButton != com.movielist.model.ProfileCategoryOptions.SUMMARY) {
                             activeButton = com.movielist.model.ProfileCategoryOptions.SUMMARY
-                            summaryButtonColor = activeButtonColor
-                            libaryButtonColor = inactiveButtonColor
-                            reviewsButtonColor = inactiveButtonColor
                             handleSummaryClick()
                         }
                     }
@@ -540,10 +533,6 @@ fun ProfileCategoryOptions(
                         if (activeButton != com.movielist.model.ProfileCategoryOptions.LIBRARY) {
 
                             activeButton = com.movielist.model.ProfileCategoryOptions.LIBRARY
-                            summaryButtonColor = inactiveButtonColor
-                            libaryButtonColor = activeButtonColor
-                            reviewsButtonColor = inactiveButtonColor
-
                             handleLibraryClick()
                         }
                     }
@@ -573,9 +562,6 @@ fun ProfileCategoryOptions(
                         if (activeButton != com.movielist.model.ProfileCategoryOptions.REVIEWS) {
 
                             activeButton = com.movielist.model.ProfileCategoryOptions.REVIEWS
-                            summaryButtonColor = inactiveButtonColor
-                            libaryButtonColor = inactiveButtonColor
-                            reviewsButtonColor = activeButtonColor
                             handleReviewsClick()
                         }
 
@@ -1039,7 +1025,7 @@ fun StatisticsSection(
                         .width(200.dp)
                 ) {
                     LineDevider(
-                        color = if(isSystemInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.secondaryLight,
+                        color = if(isAppInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.secondaryLight,
                         strokeWith = 10f
                     )
                 }

@@ -7,25 +7,25 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 data class Colors (
-    val primary: Color = Purple, //Purple
+    val primary: Color = Purple,
     val primaryLight: Color = LightPurple,
-    val secondary: Color = White, //White
+    val secondary: Color = White,
     val secondaryLight: Color = BlueGray,
-    val tertiary: Color = DarkPurple, //DarkPurple
-    val quaternary: Color = LightGray, //LightGray
-    val quinary: Color = DarkWhite, //DarkWhite
-    val backgroundLight: Color = Gray, //Gray
-    val background: Color = DarkGray, //Dark Gray
-    val backgroundDark: Color = LightBlack, //Light black
-    val backgroundAlternative: Color = DarkGrayTransparent, //DarkGray transparent
+    val tertiary: Color = DarkPurple,
+    val quaternary: Color = LightGray,
+    val quinary: Color = DarkWhite,
+    val backgroundLight: Color = Gray,
+    val background: Color = DarkGray,
+    val backgroundDark: Color = LightBlack,
+    val backgroundAlternative: Color = DarkGrayTransparent,
 
-    val complimentaryOne: Color = Yellow, //Yellow
-    val complimentaryTwo: Color = Teal, //Teal
-    val complimentaryThree: Color = Red, //Red
-    val ComplimentaryFour: Color = Green, //Green
+    val complimentaryOne: Color = Yellow,
+    val complimentaryTwo: Color = Teal,
+    val complimentaryThree: Color = Red,
+    val ComplimentaryFour: Color = Green,
 
 
-    val error: Color = Red //Red
+    val error: Color = Red
 )
 
 data class InputFieldColors(

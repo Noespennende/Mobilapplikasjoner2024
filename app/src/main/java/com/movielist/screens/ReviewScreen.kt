@@ -176,17 +176,8 @@ fun Review(
                                     //review date
                                     Text(
                                         text = "${reviewDTO.postDate.get(Calendar.DATE)}/${
-                                            reviewDTO.postDate.get(
-                                                Calendar.MONTH
-                                            )
-                                        }",
-                                        fontSize = paragraphSize,
-                                        fontFamily = fontFamily,
-                                        fontWeight = weightRegular,
-                                        color = LocalColor.current.quinary
-                                    )
-                                    Text(
-                                        text = "${reviewDTO.postDate.get(Calendar.YEAR)}",
+                                            reviewDTO.postDate.get(Calendar.MONTH)}/" +
+                                                "${reviewDTO.postDate.get(Calendar.YEAR)}",
                                         fontSize = paragraphSize,
                                         fontFamily = fontFamily,
                                         fontWeight = weightRegular,

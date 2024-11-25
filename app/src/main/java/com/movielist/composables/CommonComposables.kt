@@ -72,6 +72,7 @@ import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
 import com.movielist.ui.theme.showImageWith
@@ -192,7 +193,7 @@ fun ProgressBar (
 
 @Composable
 fun LineDevider (
-    color: Color = if(isSystemInDarkTheme())LocalColor.current.backgroundAlternative else LocalColor.current.secondaryLight,
+    color: Color = if(isAppInDarkTheme())LocalColor.current.backgroundLight else LocalColor.current.secondaryLight,
     strokeWith: Float = 5f,
 )
 {
@@ -230,7 +231,7 @@ fun LineDevider (
 
 @Composable
 fun LineDeviderVertical (
-    color: Color = LocalColor.current.backgroundAlternative,
+    color: Color = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.backgroundAlternative,
     strokeWith: Float = 5f,
     modifier: Modifier = Modifier
 )
@@ -960,7 +961,7 @@ fun ProductionSortSelectButton (
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = LocalColor.current.primary,
+                    color = if(isAppInDarkTheme()){ LocalColor.current.primary} else {LocalColor.current.primary},
                     textAlign = TextAlign.Center
                 )
                 Text(
@@ -968,7 +969,7 @@ fun ProductionSortSelectButton (
                     fontSize = paragraphSize,
                     fontWeight = weightLight,
                     fontFamily = fontFamily,
-                    color = LocalColor.current.primary,
+                    color = if(isAppInDarkTheme()){ LocalColor.current.primary} else {LocalColor.current.primary},
                 )
 
             }
@@ -979,7 +980,7 @@ fun ProductionSortSelectButton (
                 onDismissRequest = {dropDownExpanded = false},
                 offset = DpOffset(x = 50.dp, y= 0.dp),
                 modifier = Modifier
-                    .background(color = LocalColor.current.tertiary)
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
                     .width(100.dp)
             ) {
                 sortOptions.forEach{
@@ -994,7 +995,7 @@ fun ProductionSortSelectButton (
                                 fontSize = headerSize,
                                 fontWeight = weightBold,
                                 fontFamily = fontFamily,
-                                color = LocalColor.current.secondary,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .align(Alignment.Center)

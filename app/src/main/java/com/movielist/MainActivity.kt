@@ -12,13 +12,14 @@ import androidx.activity.viewModels
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import com.movielist.viewmodel.AuthViewModel
 import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.createDataStore
 import com.movielist.ui.theme.ApplicationTheme
-import com.movielist.ui.theme.LocalColor
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.ReviewViewModel
 
@@ -66,7 +67,10 @@ class MainActivity : ComponentActivity() {
 
                 Background()
                 //FirebaseTesting(controllerViewModel)
-                Navigation(controllerViewModel)
+                Navigation(
+                    controllerViewModel = controllerViewModel,
+                    localStorage = remember {createDataStore(applicationContext)}
+                    )
             }
 
 

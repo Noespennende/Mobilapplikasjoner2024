@@ -56,6 +56,7 @@ import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.topNavBaHeight
@@ -256,7 +257,7 @@ fun ListCategoryOptions (
     activeCategory: ListOptions,
     onCategoryChange: (ListOptions) -> Unit,
     activeButtonColor: Color = LocalColor.current.primary,
-    inactiveButtonColor: Color = if(isSystemInDarkTheme())LocalColor.current.background else LocalColor.current.primaryLight,
+    inactiveButtonColor: Color = if(isAppInDarkTheme())LocalColor.current.quaternary else LocalColor.current.primaryLight,
     watchedListCount: Int,
     completedListCount: Int,
     wantToWatchListCount: Int,
@@ -522,7 +523,7 @@ fun ListPageListItem (
                                 .height(30.dp)
                                 .fillMaxWidth(.5f)
                                 .background(
-                                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
+                                    color = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
                                     shape = RoundedCornerShape(
                                         topStart = 10.dp,
                                         bottomStart = 10.dp,
@@ -549,7 +550,7 @@ fun ListPageListItem (
                                 text = "-",
                                 fontSize = 20.sp,
                                 fontWeight = weightBold,
-                                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
+                                color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
                             )
                         }
 
@@ -561,7 +562,7 @@ fun ListPageListItem (
                                 .height(30.dp)
                                 .fillMaxWidth(1f)
                                 .background(
-                                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
+                                    color = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
                                     shape = RoundedCornerShape(
                                         topStart = 0.dp,
                                         bottomStart = 0.dp,
@@ -602,7 +603,7 @@ fun ListPageListItem (
                                 text = "+",
                                 fontSize = 20.sp,
                                 fontWeight = weightBold,
-                                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
+                                color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
                             )
                         }
                     }

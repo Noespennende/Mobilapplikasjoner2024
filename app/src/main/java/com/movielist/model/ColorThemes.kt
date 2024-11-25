@@ -1,5 +1,5 @@
 package com.movielist.model
 
-enum class ColorModes {
+enum class ColorThemes {
     DARKMODE, LIGHTMODE, SYSTEM
 }

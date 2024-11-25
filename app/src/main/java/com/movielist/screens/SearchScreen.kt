@@ -239,7 +239,7 @@ fun TopNavBarSearchPage (
                         .padding(top = 15.dp)
                         .align(Alignment.Center)
                         .background(
-                            color = if(isSystemInDarkTheme())LocalColor.current.backgroundLight else LocalColor.current.primary,
+                            color = if(isAppInDarkTheme())LocalColor.current.backgroundLight else LocalColor.current.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .clickable {
@@ -262,7 +262,7 @@ fun TopNavBarSearchPage (
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = if(isSystemInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
+                            color = if(isAppInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
                             textAlign = TextAlign.Center
                         )
                         Text(
@@ -270,7 +270,7 @@ fun TopNavBarSearchPage (
                             fontSize = paragraphSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
-                            color = if(isSystemInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
+                            color = if(isAppInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
                         )
 
                     }
@@ -281,7 +281,7 @@ fun TopNavBarSearchPage (
                         onDismissRequest = {dropDownExpanded = false},
                         offset = DpOffset(x = 50.dp, y= 0.dp),
                         modifier = Modifier
-                            .background(color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
+                            .background(color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
                             .width(100.dp)
                     ) {
                         sortOptions.forEach{
@@ -296,7 +296,7 @@ fun TopNavBarSearchPage (
                                         fontSize = headerSize,
                                         fontWeight = weightBold,
                                         fontFamily = fontFamily,
-                                        color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                                        color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
                                         textAlign = TextAlign.Center,
                                         modifier = Modifier
                                             .align(Alignment.Center)
