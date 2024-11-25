@@ -3,12 +3,12 @@ package com.movielist.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -42,12 +42,7 @@ import com.movielist.R
 import com.movielist.model.NavbarOptions
 import com.movielist.model.TopNavDropdownOptions
 import com.movielist.model.User
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightBlack
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
@@ -64,8 +59,8 @@ import com.movielist.ui.theme.weightBold
 
 @Composable
 fun BottomNavBar(
-    activeColor: Color = Purple,
-    inactiveColor: Color = LightGray,
+    activeColor: Color = LocalColor.current.primary,
+    inactiveColor: Color = LocalColor.current.quaternary,
     sizeMultiplier: Float = 1f,
     activeNavButton: NavbarOptions,
     handleNavButtonClick: (NavbarOptions) -> Unit
@@ -326,7 +321,7 @@ fun BottomNavBar(
 
 @Composable
 fun BottomNavbarAndMobileIconsBackground (
-    color: Color = Gray,
+    color: Color = LocalColor.current.backgroundLight,
 ) {
 
     Box(
@@ -345,7 +340,7 @@ fun BottomNavbarAndMobileIconsBackground (
 
 @Composable
 fun TopScreensNavbarBackground (
-    color: Color = Gray,
+    color: Color = LocalColor.current.backgroundLight,
     sizeMultiplier: Float = 1f
 ) {
 
@@ -416,7 +411,7 @@ fun TopNav (
                 fontWeight = weightBold,
                 fontSize = headerSize,
                 textAlign = TextAlign.Center,
-                color = White,
+                color = LocalColor.current.secondary,
                 modifier = Modifier
                 )
 
@@ -446,7 +441,7 @@ fun TopNav (
 
 @Composable
 fun TopNavBackground (
-    color: Color = LightBlack,
+    color: Color = LocalColor.current.backgroundDark,
 ){
     Box(
         modifier = Modifier.fillMaxSize()
@@ -467,13 +462,12 @@ fun TopNavDropDown(
     handleDismiss: () -> Unit,
     handleClick: (TopNavDropdownOptions) -> Unit
 ){
-
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = {handleDismiss()},
         offset = DpOffset(x = 0.dp, y= 0.dp),
         modifier = Modifier
-            .background(color = DarkPurple)
+            .background(color = if(isSystemInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
             .width(100.dp)
     ) {
         TopNavDropdownOptions.entries.forEach(){
@@ -488,7 +482,7 @@ fun TopNavDropDown(
                         fontSize = headerSize,
                         fontWeight = weightBold,
                         fontFamily = fontFamily,
-                        color = White,
+                        color = if(isSystemInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .align(Alignment.Center)

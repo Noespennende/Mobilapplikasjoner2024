@@ -3,6 +3,7 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
@@ -45,11 +47,7 @@ import com.movielist.model.ReviewsScreenTabs
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
-import com.movielist.ui.theme.darkWhite
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
@@ -346,8 +344,8 @@ fun TopNavBarReviewPage(
 
 @Composable
 fun ReviewTabOptions (
-    activeButtonColor: Color = Purple,
-    inactiveButtonColor: Color = LightGray,
+    activeButtonColor: Color = LocalColor.current.primary,
+    inactiveButtonColor: Color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primaryLight,
     handleTabChange: (reviewsScreenTabs: ReviewsScreenTabs) -> Unit
 ){
 
@@ -397,7 +395,7 @@ fun ReviewTabOptions (
                     "Summary",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -429,7 +427,7 @@ fun ReviewTabOptions (
                     "Top this month",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -462,7 +460,7 @@ fun ReviewTabOptions (
                     "Top all time",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -490,7 +488,7 @@ fun ReviewsSection(
         fontSize = headerSize,
         fontWeight = weightBold,
         fontFamily = fontFamily,
-        color = White,
+        color = LocalColor.current.secondary,
         modifier = Modifier
             .padding(
                 top = verticalPadding,
@@ -532,12 +530,13 @@ fun ReviewsSection(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = LightGray,
+                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.secondary,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(
                             top = verticalPadding,
-                            start = horizontalPadding)
+                            start = horizontalPadding,
+                            bottom = 20.dp)
                 )
             }
 
@@ -606,7 +605,7 @@ fun ReviewSummary (
                             fontSize = paragraphSize,
                             fontFamily = fontFamily,
                             fontWeight = weightBold,
-                            color = White
+                            color = LocalColor.current.secondary
                         )
                         //Score
                         RatingsGraphics(
@@ -635,7 +634,8 @@ fun ReviewSummary (
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightBold,
-                                color = White
+                                textAlign = TextAlign.End,
+                                color = LocalColor.current.secondary
                             )
                             //review date
                             Text(
@@ -643,14 +643,14 @@ fun ReviewSummary (
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightRegular,
-                                color = darkWhite
+                                color = LocalColor.current.quinary
                             )
                             Text(
                                 text = "${review.postDate.get(Calendar.YEAR)}",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightLight,
-                                color = darkWhite
+                                color = LocalColor.current.quinary
                             )
                         }
                         //profile picture
@@ -679,7 +679,7 @@ fun ReviewSummary (
                         fontSize = paragraphSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
-                        color = darkWhite,
+                        color = LocalColor.current.quinary,
                     )
                     if (ReviewBodyIsTruncated(review.reviewBody)){
                         Text(
@@ -687,7 +687,7 @@ fun ReviewSummary (
                             fontSize = paragraphSize,
                             fontFamily = fontFamily,
                             fontWeight = weightRegular,
-                            color = Purple,
+                            color = LocalColor.current.primary,
                             modifier = Modifier
                                 .fillMaxWidth(.8f)
                         )
@@ -700,7 +700,7 @@ fun ReviewSummary (
                     fontSize = paragraphSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,
-                    color = White,
+                    color = LocalColor.current.secondary,
                     modifier = Modifier
                         .align(Alignment.Bottom)
                 )

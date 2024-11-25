@@ -3,12 +3,8 @@ package com.movielist.screens
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.ExifInterface
-import android.net.Uri
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.LinearLayout
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContract
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageProxy
@@ -25,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Scaffold
@@ -37,23 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil.compose.AsyncImage
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkGrayTransparent
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import java.io.ByteArrayInputStream
@@ -99,14 +87,14 @@ fun CameraScreen (
             ){
                 //Photo button
                 ExtendedFloatingActionButton(
-                    containerColor = Purple,
+                    containerColor = LocalColor.current.primary,
                     content = {
                         Text(
                             text = if (isFrontfacingCamera){"Use back camera"} else {"Use front camera"},
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = DarkGray,
+                            color = LocalColor.current.background,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                         )
@@ -118,14 +106,14 @@ fun CameraScreen (
 
                 //Photo button
                 ExtendedFloatingActionButton(
-                    containerColor = Purple,
+                    containerColor = LocalColor.current.primary,
                     content = {
                         Text(
                             text = "Take a photo",
                             fontSize = headerSize,
                             fontWeight = weightBold,
                             fontFamily = fontFamily,
-                            color = DarkGray,
+                            color = LocalColor.current.background,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
                         )
@@ -205,7 +193,7 @@ fun NoPermissionScreen(
             .fillMaxHeight()
             .fillMaxWidth()
             .background(
-                color = DarkGrayTransparent,
+                color = LocalColor.current.backgroundAlternative,
                 shape = RoundedCornerShape(5.dp)
             )
 
@@ -216,7 +204,7 @@ fun NoPermissionScreen(
             modifier = Modifier
                 .fillMaxWidth(.7f)
                 .background(
-                    color = Gray,
+                    color = LocalColor.current.backgroundLight,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .padding(horizontal = 20.dp, vertical = 20.dp)
@@ -226,7 +214,7 @@ fun NoPermissionScreen(
                 fontSize = headerSize,
                 fontWeight = weightBold,
                 fontFamily = fontFamily,
-                color = White,
+                color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
             )
@@ -235,7 +223,7 @@ fun NoPermissionScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -249,7 +237,7 @@ fun NoPermissionScreen(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)
@@ -261,7 +249,7 @@ fun NoPermissionScreen(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .background(
-                        color = Purple,
+                        color = LocalColor.current.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(vertical = 10.dp, horizontal = 10.dp)
@@ -275,7 +263,7 @@ fun NoPermissionScreen(
                     fontSize = headerSize,
                     fontWeight = weightBold,
                     fontFamily = fontFamily,
-                    color = DarkGray,
+                    color = LocalColor.current.background,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .align(Alignment.Center)

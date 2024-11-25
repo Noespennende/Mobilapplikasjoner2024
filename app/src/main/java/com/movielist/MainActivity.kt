@@ -17,6 +17,8 @@ import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
+import com.movielist.ui.theme.ApplicationTheme
+import com.movielist.ui.theme.LocalColor
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.ReviewViewModel
 
@@ -52,23 +54,21 @@ class MainActivity : ComponentActivity() {
         controllerViewModel.checkUserStatus()
 
         setContent {
+            ApplicationTheme {
 
-            val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()
+                val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()
 
-            LaunchedEffect(firebaseUser) {
-                if (firebaseUser != null) {
-                    controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
-
-                
+                LaunchedEffect(firebaseUser) {
+                    if (firebaseUser != null) {
+                        controllerViewModel.setLoggedInUser(firebaseUser!!.uid)
+                    }
                 }
 
+                Background()
+                //FirebaseTesting(controllerViewModel)
+                Navigation(controllerViewModel)
             }
 
-
-            Background()
-
-            //FirebaseTesting(controllerViewModel)
-            Navigation(controllerViewModel)
 
         }
     }

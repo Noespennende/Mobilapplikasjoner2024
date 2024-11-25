@@ -3,6 +3,7 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -50,12 +51,7 @@ import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
-import com.movielist.ui.theme.DarkGray
-import com.movielist.ui.theme.DarkPurple
-import com.movielist.ui.theme.Gray
-import com.movielist.ui.theme.LightGray
-import com.movielist.ui.theme.Purple
-import com.movielist.ui.theme.White
+import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
@@ -259,8 +255,8 @@ fun TopNavBarListPage(
 fun ListCategoryOptions (
     activeCategory: ListOptions,
     onCategoryChange: (ListOptions) -> Unit,
-    activeButtonColor: Color = Purple,
-    inactiveButtonColor: Color = LightGray,
+    activeButtonColor: Color = LocalColor.current.primary,
+    inactiveButtonColor: Color = if(isSystemInDarkTheme())LocalColor.current.background else LocalColor.current.primaryLight,
     watchedListCount: Int,
     completedListCount: Int,
     wantToWatchListCount: Int,
@@ -272,11 +268,6 @@ fun ListCategoryOptions (
     var completedButtonColor = if (activeCategory == ListOptions.COMPLETED) activeButtonColor else inactiveButtonColor
     var wantToWatchButtonColor = if (activeCategory == ListOptions.WANTTOWATCH) activeButtonColor else inactiveButtonColor
     var droppedButtonColor = if (activeCategory == ListOptions.DROPPED) activeButtonColor else inactiveButtonColor
-
-    var activeButton by remember {
-        mutableStateOf(ListOptions.WATCHING)
-    }
-
 
 
     //Graphics
@@ -294,7 +285,7 @@ fun ListCategoryOptions (
                     .width(150.dp)
                     .height(30.dp)
             ) {
-                Text("Watching ($watchedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = DarkGray)
+                Text("Watching ($watchedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = LocalColor.current.background)
             }
         }
         item {
@@ -306,7 +297,7 @@ fun ListCategoryOptions (
                     .width(150.dp)
                     .height(30.dp)
             ) {
-                Text("Completed ($completedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = DarkGray)
+                Text("Completed ($completedListCount)", fontSize = paragraphSize, fontWeight = weightBold, color = LocalColor.current.background)
             }
         }
 
@@ -324,7 +315,7 @@ fun ListCategoryOptions (
                     "Want to watch ($wantToWatchListCount)",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -343,7 +334,7 @@ fun ListCategoryOptions (
                     "Dropped ($droppedListCount)",
                     fontSize = paragraphSize,
                     fontWeight = weightBold,
-                    color = DarkGray
+                    color = LocalColor.current.background
                 )
             }
         }
@@ -384,7 +375,7 @@ fun ListPageList (
                             handleCompareUserClick()
                         }
                         .background(
-                            color = LightGray,
+                            color = LocalColor.current.backgroundLight,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .width(150.dp)
@@ -394,7 +385,7 @@ fun ListPageList (
                         "Compare to your list",
                         fontSize = paragraphSize,
                         fontWeight = weightBold,
-                        color = DarkGray
+                        color = LocalColor.current.background
                     )
                 }
             }
@@ -499,7 +490,7 @@ fun ListPageListItem (
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightBold,
-                        color = White,
+                        color = LocalColor.current.secondary,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
@@ -509,7 +500,7 @@ fun ListPageListItem (
                         fontSize = headerSize,
                         fontFamily = fontFamily,
                         fontWeight = weightRegular,
-                        color = White
+                        color = LocalColor.current.secondary
                     )
                 }
 
@@ -531,7 +522,7 @@ fun ListPageListItem (
                                 .height(30.dp)
                                 .fillMaxWidth(.5f)
                                 .background(
-                                    color = Gray,
+                                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
                                     shape = RoundedCornerShape(
                                         topStart = 10.dp,
                                         bottomStart = 10.dp,
@@ -558,7 +549,7 @@ fun ListPageListItem (
                                 text = "-",
                                 fontSize = 20.sp,
                                 fontWeight = weightBold,
-                                color = White
+                                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
                             )
                         }
 
@@ -570,7 +561,7 @@ fun ListPageListItem (
                                 .height(30.dp)
                                 .fillMaxWidth(1f)
                                 .background(
-                                    color = Gray,
+                                    color = if(isSystemInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.primary,
                                     shape = RoundedCornerShape(
                                         topStart = 0.dp,
                                         bottomStart = 0.dp,
@@ -611,7 +602,7 @@ fun ListPageListItem (
                                 text = "+",
                                 fontSize = 20.sp,
                                 fontWeight = weightBold,
-                                color = White
+                                color = if(isSystemInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight
                             )
                         }
                     }
@@ -649,7 +640,7 @@ fun ListPageListItem (
                             fontSize = headerSize,
                             fontWeight = weightLight,
                             fontFamily = fontFamily,
-                            color = White
+                            color = LocalColor.current.secondary
                         )
                         //Episode Rating
                         if(loggedInUsersList){
@@ -675,7 +666,7 @@ fun ListPageListItem (
                                 ){
                                     //Ratings stars
                                     RatingsGraphics(
-                                        color = Purple,
+                                        color = LocalColor.current.primary,
                                         score = listItemRating,
                                         sizeMultiplier = 1.5f,
                                         loggedInUsersScore = loggedInUsersList
@@ -686,7 +677,7 @@ fun ListPageListItem (
                         } else {
                             //Ratings stars
                             RatingsGraphics(
-                                color =  White,
+                                color =  LocalColor.current.secondary,
                                 score = listItemRating,
                                 sizeMultiplier = 1.5f
                             )
@@ -701,8 +692,8 @@ fun ListPageListItem (
                             is Movie -> 1
                             else -> 0
                         },
-                        foregroundColor = if(loggedInUsersList){Purple}else{LightGray},
-                        backgroundColor = if(loggedInUsersList){DarkPurple}else{Gray},
+                        foregroundColor = if(loggedInUsersList){LocalColor.current.primary}else{LocalColor.current.backgroundLight},
+                        backgroundColor = if(loggedInUsersList){LocalColor.current.tertiary}else{LocalColor.current.backgroundLight},
                     )
                 }
             }
