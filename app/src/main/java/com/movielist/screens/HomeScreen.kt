@@ -204,15 +204,23 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
-    val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
+    val handleUserRatingChange: (listItem: ListItem, score: Int) -> Unit = {listItem, score ->
         //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
+
+        controllerViewModel.handleListItemScoreChange(listItem, score)
+
     }
 
-    val handleMarkAsWatched: (listItem: ListItem) -> Unit = { listItem ->
+    val handleMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int)
+    -> Unit = { listItem, watchedEpisodesCount, showLength ->
 
         Log.d("ControllerViewModel", listItem.currentEpisode.toString())
 
-        val newCurrentEpisode = ++listItem.currentEpisode
+        var newCurrentEpisode: Int = watchedEpisodesCount
+        if(watchedEpisodesCount < showLength) {
+            newCurrentEpisode = ++listItem.currentEpisode
+        }
+
         Log.d("ControllerViewModel", newCurrentEpisode.toString())
         controllerViewModel.handleEpisodeCountChange(listItem, newCurrentEpisode, true, onMoveToCollection = {})
 
@@ -334,8 +342,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
     onImageClick: (showID: String, productionType: String) -> Unit,
-    handleRatingChange: (rating: Int, listItemID: String) -> Unit,
-    handleMarkAsWatched: (listItem: ListItem) -> Unit
+    handleRatingChange: (listItem: ListItem, score: Int) -> Unit,
+    handleMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int)  -> Unit
 ) {
 
     //TEMP KODE: FLYTT UT
@@ -353,11 +361,15 @@ fun CurrentlyWatchingScroller (
 
     // Holder på oversikten over nyligste klikk
     val clickTimes by remember {mutableStateOf(mutableMapOf<String, Long>())}
-    fun mostRecentButtonClick(show: ListItem) {
-        clickTimes[show.id] = System.currentTimeMillis() // Registerer når currentEpisode på watchedEpisodesCount oppdateres (knapp trykkes)
 
+    val mostRecentButtonClick: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int) -> Unit = { listItem, watchedEpisodesCount, showLength ->
+        clickTimes[listItem.id] = System.currentTimeMillis() // Registerer når currentEpisode på watchedEpisodesCount oppdateres (knapp trykkes)
 
-        allCurrentlyWatchingShows = listOfShows.sortedByDescending {clickTimes[it.id]}.toMutableList()
+        Log.d("Controlelr", "Handle Mark As Watched is triggered")
+
+        handleMarkAsWatched(listItem, watchedEpisodesCount, showLength)
+
+        allCurrentlyWatchingShows = listOfShows.sortedByDescending { clickTimes[it.id] }.toMutableList()
     }
 
     //Graphics
@@ -380,7 +392,7 @@ fun CurrentlyWatchingScroller (
                         is Episode -> 1
                         else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                     },
-                    onMarkAsWatched = { mostRecentButtonClick(listOfShows[i]) },// Registrerer når "Mark as Watched" er trykket
+                    onMarkAsWatched = mostRecentButtonClick,// Registrerer når "Mark as Watched" er trykket
                     onImageClick = onImageClick,
                     handleRatingChange = handleRatingChange
                 )
@@ -439,9 +451,9 @@ fun CurrentlyWatchingCard(
     listItem: ListItem,
     showLength: Int?,
     modifier: Modifier = Modifier,
-    onMarkAsWatched: () -> Unit,
+    onMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int) -> Unit,
     onImageClick: (showID: String, productionType: String) -> Unit,
-    handleRatingChange: (rating: Int, listItemID: String) -> Unit
+    handleRatingChange: (listItem: ListItem, score: Int) -> Unit
 ) {
     
     var watchedEpisodesCount: Int by remember {
@@ -456,11 +468,15 @@ fun CurrentlyWatchingCard(
 
     var ratingSliderVisible by remember { mutableStateOf(false) }
 
-    val handleRatingChange: (rating: Int) -> Unit = {rating ->
+    val handleRatingChange: (production: ListItem?, rating: Int) -> Unit = { production, rating ->
+
+        if(production != null) {
+            handleRatingChange(production, rating)
+        }
         ratingSliderVisible = false
         ratingAdded = true
         buttonText = "Rating updated!"
-        handleRatingChange(rating, listItem.id)
+
     }
 
     // Card container
@@ -536,6 +552,10 @@ fun CurrentlyWatchingCard(
                 Button(
                     onClick = {
                         // Button onclick function
+
+
+                        onMarkAsWatched(listItem, watchedEpisodesCount, showLength)
+
                         if (watchedEpisodesCount < showLength) {
                             watchedEpisodesCount++
                         } else {
@@ -546,7 +566,6 @@ fun CurrentlyWatchingCard(
                             buttonText = generateButtonText(watchedEpisodesCount, showLength)
                         }
 
-                        onMarkAsWatched()
                     },
                     shape = RoundedCornerShape(5.dp),
                     colors = ButtonDefaults.buttonColors(LocalColor.current.primary),
@@ -567,6 +586,7 @@ fun CurrentlyWatchingCard(
     }
 
     RatingSlider(
+        listItem = listItem,
         rating = listItem.score,
         visible = ratingSliderVisible,
         onValueChangeFinished = handleRatingChange

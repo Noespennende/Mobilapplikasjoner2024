@@ -1262,7 +1262,7 @@ class ControllerViewModel(
         userViewModel.addOrRemoveFromUsersFavorites(userID, listItem, isFavorite)
     }
 
-    private fun findListItemCollection(listItem: ListItem): String? {
+    fun findListItemCollection(listItem: ListItem): String? {
 
         val user = loggedInUser.value
 
@@ -1281,6 +1281,23 @@ class ControllerViewModel(
 
     }
 
+    fun findProductionInUsersCollection(productionID: String): ListItem? {
+
+        val user = loggedInUser.value
+
+        var listItem: ListItem? = null
+
+        if (user != null) {
+            listItem =
+                user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
+                    ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
+                    ?: user.droppedCollection.find { it.production.imdbID == productionID }
+                    ?: user.completedCollection.find { it.production.imdbID == productionID }
+        }
+
+        return listItem
+    }
+
     fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
 
         val userID = loggedInUser.value?.id
@@ -1292,10 +1309,7 @@ class ControllerViewModel(
         }
 
         // Finn riktig listItem i de forskjellige samlingene
-        var listItem = user.currentlyWatchingCollection.find { it.production.imdbID == productionID }
-            ?: user.wantToWatchCollection.find { it.production.imdbID == productionID }
-            ?: user.droppedCollection.find { it.production.imdbID == productionID }
-            ?: user.completedCollection.find { it.production.imdbID == productionID }
+        var listItem = findProductionInUsersCollection(productionID)
 
         // Sjekk hvilken samling listItem tilhører (kilden)
         val sourceCollection = when {

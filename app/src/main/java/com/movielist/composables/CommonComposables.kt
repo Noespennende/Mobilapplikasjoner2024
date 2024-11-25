@@ -8,7 +8,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -773,17 +772,18 @@ fun YouTubeVideoEmbed(
 
 @Composable
 fun RatingSlider (
+    listItem: ListItem?,
     rating: Int = 0,
     visible: Boolean,
     modifier: Modifier = Modifier,
-    onValueChangeFinished: (Int) -> Unit
+    onValueChangeFinished: (listItem: ListItem?, score: Int) -> Unit
 ){
     var scoreInput by remember { mutableIntStateOf(rating) }
 
     if (visible){
         Popup (
             onDismissRequest = {
-                onValueChangeFinished(rating)
+                onValueChangeFinished(listItem, rating)
             },
             alignment = Alignment.Center,
 
@@ -820,7 +820,7 @@ fun RatingSlider (
                             valueRange = 0f..10f,
                             colors = sliderColors,
                             onValueChangeFinished = {
-                                onValueChangeFinished(scoreInput)
+                                onValueChangeFinished(listItem, scoreInput)
                             }
                         )
                     }
@@ -845,23 +845,23 @@ fun GenerateShowSortOptionName (
     }
 }
 
-fun GenerateListOptionName (
+fun generateListOptionName (
     listOption: ListOptions?
 ): String
 {
-    if(listOption == ListOptions.WANTTOWATCH)
-    {
-        return "Want to watch"
-    }
-    else if (listOption == null) {
-        return "Add to library"
-    }
-    else if (listOption == ListOptions.REMOVEFROMLIST){
-        return "Remove from list"
-    }
-    else
-    {
-        return listOption.toString().lowercase().replaceFirstChar { it.uppercase() }
+    return when (listOption) {
+        ListOptions.WANTTOWATCH -> {
+            "Want to watch"
+        }
+        null -> {
+            "Add to library"
+        }
+        ListOptions.REMOVEFROMLIST -> {
+            "Remove from list"
+        }
+        else -> {
+            listOption.toString().lowercase().replaceFirstChar { it.uppercase() }
+        }
     }
 }
 

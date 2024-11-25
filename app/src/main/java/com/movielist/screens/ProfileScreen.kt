@@ -58,12 +58,14 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
+import com.movielist.ui.theme.LightGray
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.Purple
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
