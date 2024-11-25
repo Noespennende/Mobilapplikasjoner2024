@@ -653,7 +653,7 @@ fun EditGender (
                     onDismissRequest = {dropDownExpanded = false},
                     offset = DpOffset(x = 30.dp, y= 0.dp),
                     modifier = Modifier
-                        .background(color = LocalColor.current.tertiary)
+                        .background(color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
                 ) {
                     Genders.entries.forEach{
                             option -> DropdownMenuItem(
@@ -667,7 +667,7 @@ fun EditGender (
                                     fontSize = headerSize,
                                     fontWeight = weightBold,
                                     fontFamily = fontFamily,
-                                    color = LocalColor.current.secondary,
+                                    color = if(isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier
                                         .align(Alignment.Center)

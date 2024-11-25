@@ -31,6 +31,7 @@ import com.movielist.screens.ReviewsScreen
 import com.movielist.screens.ReviewScreen
 import com.movielist.screens.SearchPage
 import com.movielist.screens.SettingsScreen
+import com.movielist.screens.WriteReviewScreen
 
 
 @Composable
@@ -46,7 +47,7 @@ fun Navigation (controllerViewModel: ControllerViewModel, localStorage: DataStor
 
     val handleScreenNameChange: (screen: Screens) -> Unit = {screen ->
 
-        if (screen == Screens.CREATEREVIEW){
+        if (screen == Screens.WRITEREVIEW){
             currentScreen = "Write review"
         } else if (screen == Screens.LOGINN){
             currentScreen = "Login"
@@ -282,6 +283,27 @@ fun Navigation (controllerViewModel: ControllerViewModel, localStorage: DataStor
                 userToCompareToID = entry.arguments?.getString("userToCompareToID:")
             )
             handleScreenNameChange(Screens.COMPARISON)
+            aNavButtonIsActive = false
+            activeNavButton = NavbarOptions.NONE
+        }
+        composable(
+            route = Screen.WriteReviewScreen.withArguments() + "/{productionID}/{productionType}",
+            arguments = listOf(
+                navArgument("userToCompareToID:") {
+                    type = NavType.StringType
+                    defaultValue = ""
+                    nullable = true
+                }
+            )
+        )
+        { entry ->
+            WriteReviewScreen(
+                controllerViewModel,
+                navController,
+                productionID = entry.arguments?.getString("roductionID"),
+                productionType = entry.arguments?.getString("productionType")
+            )
+            handleScreenNameChange(Screens.WRITEREVIEW)
             aNavButtonIsActive = false
             activeNavButton = NavbarOptions.NONE
         }

@@ -610,7 +610,7 @@ fun ProfileInfoSection (
 
     LaunchedEffect(followStatus) {
         newFollowStatus = followStatus
-        followButtonColor = if (newFollowStatus == FollowStatus.NOTFOLLOWING) Purple else LightGray
+        followButtonColor = if (newFollowStatus == FollowStatus.NOTFOLLOWING) primaryColor else backgroundColor
     }
 
     Column(

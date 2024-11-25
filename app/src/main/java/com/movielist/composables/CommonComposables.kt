@@ -404,6 +404,7 @@ fun RatingsGraphics(
     } else if (loggedInUsersScore) {
         Row (
             horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically,
             modifier = modifier
         ) {
             Image(

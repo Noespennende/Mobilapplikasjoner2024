@@ -3,7 +3,6 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,6 +58,8 @@ import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun ProductionScreen (navController: NavController, controllerViewModel: ControllerViewModel, productionID: String?, productionType: String?){
@@ -157,6 +158,10 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
+    val handleWriteAReviewClick: () -> Unit = {
+        navController.navigate(Screen.WriteReviewScreen.withArguments(productionID, productionType.toString()))
+    }
+
 
     //Graphics:
     LazyColumn(
@@ -169,12 +174,12 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         //Top info
         if (production == null) {
             item {
-                Text(text = "test")
+                Text(text = "Loading...")
             }
         } else {
             item {
                 production?.let { production ->
-                    ImageAndName(
+                    ProductionScreenImageAndName(
                         production = production,
                     )
                 }
@@ -256,6 +261,43 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                 }
             }
 
+            item {
+                //Write a review button
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                ){
+                    //Write a review button
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(150.dp)
+                            .padding(vertical = 5.dp)
+                            .background(
+                                color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary,
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                            .clickable {
+                                handleWriteAReviewClick()
+                            }
+                    ) {
+                        //BUTTON TEXT
+                        Text(
+                            text = "Write a review",
+                            fontSize = headerSize,
+                            fontWeight = weightBold,
+                            fontFamily = fontFamily,
+                            color = if (isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+            }
+
             //Project reviews
             item {
                 production?.let { production ->
@@ -277,43 +319,36 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 }
 
 @Composable
-fun ImageAndName(
+fun ProductionScreenImageAndName(
+    modefier: Modifier = Modifier,
     production: Production,
-    customModefier: Modifier = Modifier
 ){
 
-    //Variables
-
-    val formattedDate = "test"
-    //val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(production?.releaseDate?.time
+    val formattedDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(production.releaseDate.time)
 
     //graphics
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = customModefier
+        modifier = modefier
             .fillMaxWidth()
     ) {
         //Image
-        if (production != null) {
-            ProductionImage(
-                imageID = production.posterUrl,
-                imageDescription = production.title,
-            )
-        }
+        ProductionImage(
+            imageID = production.posterUrl,
+            imageDescription = production.title,
+        )
 
         //Title
-        if (production != null) {
-            Text(
-                text = production.title,
-                fontFamily = fontFamily,
-                fontSize = headerSize * 1.3,
-                fontWeight = weightBold,
-                textAlign = TextAlign.Center,
-                color = LocalColor.current.secondary,
-                modifier = Modifier
-                    .padding(top= 10.dp)
-            )
-        }
+        Text(
+            text = production.title,
+            fontFamily = fontFamily,
+            fontSize = headerSize * 1.3,
+            fontWeight = weightBold,
+            textAlign = TextAlign.Center,
+            color = LocalColor.current.secondary,
+            modifier = Modifier
+                .padding(top= 10.dp)
+        )
         //Date
         Text(
             text = formattedDate,
@@ -705,3 +740,4 @@ fun ActorsSection(
         }
     }
 }
+
