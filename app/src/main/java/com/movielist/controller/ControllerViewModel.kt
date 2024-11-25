@@ -1179,6 +1179,29 @@ class ControllerViewModel(
         }
     }
 
+    fun handleListItemScoreChange(listItem: ListItem, score: Int)  {
+
+        viewModelScope.launch {
+
+            val sourceCollection = findListItemCollection(listItem)
+
+            if (sourceCollection == null) {
+
+                Log.d("ControllerViewModel", "sourceCollection is RemoveFromList for listItem")
+                return@launch
+            }
+
+            val user = loggedInUser.value
+            val userID = user?.id
+
+
+            if (userID != null) {
+                userViewModel.updateScoreInCollection(sourceCollection, listItem, score)
+            }
+        }
+    }
+
+
 
 
     private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())
@@ -1200,7 +1223,6 @@ class ControllerViewModel(
         }
 
     }
-
 
     private fun getProductionsFromFriendsWatchedList() {
         _friendsJustWatchedLoading.value = true
@@ -1240,7 +1262,7 @@ class ControllerViewModel(
         userViewModel.addOrRemoveFromUsersFavorites(userID, listItem, isFavorite)
     }
 
-    fun findListItemCollection(listItem: ListItem): String? {
+    private fun findListItemCollection(listItem: ListItem): String? {
 
         val user = loggedInUser.value
 

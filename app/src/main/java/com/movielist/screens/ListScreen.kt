@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -116,8 +118,14 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         //Kontroller funksjon for å håndtere sorting
     }
 
-    val handleListItemRatingsChange: (score: Int, showID: String) -> Unit = { score, showID ->
+    val handleListItemRatingsChange: (listItem: ListItem, score: Int) -> Unit = { listItem, score ->
         //Kontroller kall her:
+
+        Log.d("ControllerViewModel", listItem.score.toString())
+        Log.d("ControllerViewModel", score.toString())
+        controllerViewModel.handleListItemScoreChange(listItem, score)
+        Log.d("ControllerViewModel", listItem.score.toString())
+        Log.d("ControllerViewModel", listItem.score.toString())
     }
 
     val handleListItemFavoriteClick: (listItem: ListItem, favorited: Boolean) -> Unit = { listItem, favorited ->
@@ -348,7 +356,7 @@ fun ListPageList (
     loggedInUsersList: Boolean,
     listItemList: List<ListItem>,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
-    handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
+    handleListItemRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit,
     handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit,
@@ -413,7 +421,7 @@ fun ListPageListItem (
     listItem: ListItem,
     loggedInUsersList: Boolean,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
-    handleListItemRatingChange: (score: Int, listItemID: String) -> Unit,
+    handleListItemRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit,
 ){
@@ -423,7 +431,7 @@ fun ListPageListItem (
         mutableIntStateOf(listItem.currentEpisode)
     }
 
-    var listItemRating: Int by remember {
+    var listItemRating by remember {
         mutableIntStateOf(listItem.score)
     }
 
@@ -438,7 +446,7 @@ fun ListPageListItem (
     }
 
     val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
-        handleListItemRatingChange(rating, listItem.id)
+        handleListItemRatingChange(listItem, rating)
         listItemRating = rating
         ratingsSliderIsVisible = false
     }

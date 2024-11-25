@@ -338,6 +338,49 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 onFailure(exception)
             }
     }
+
+
+    fun updateScoreField(
+        userID: String,
+        listItemID: String,
+        score: Int,
+        collection: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        val userDocRef = db.collection("users").document(userID)
+
+
+        userDocRef.get()
+            .addOnSuccessListener { document ->
+
+                val collectionList = document.get(collection) as? List<Map<String, Any>> ?: emptyList()
+
+                val updatedCollection = collectionList.map { item ->
+                    if (item["id"] == listItemID) {
+
+                        item.toMutableMap().apply { put("score", score) }
+                    } else {
+                        item
+                    }
+                }
+
+                val updateData = mapOf(collection to updatedCollection)
+                userDocRef.update(updateData)
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "$collection updated successfully.")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Firestore", "Error updating $collection", exception)
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error fetching document for $collection", exception)
+                onFailure(exception)
+            }
+    }
     
     // Spesifikke funksjoner for hver samling
     private fun addToCompletedCollection(

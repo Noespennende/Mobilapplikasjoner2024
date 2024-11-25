@@ -235,6 +235,33 @@ class UserViewModel : ViewModel() {
         )
     }
 
+    fun updateScoreInCollection(collection: String, listItem: ListItem, score: Int) {
+
+        val user = loggedInUser.value
+        val userID = user?.id
+
+        if (userID != null) {
+
+            val listItemID = listItem.id
+
+            listItem.score = score
+
+            firestoreRepository.updateScoreField(userID, listItemID, score, collection,
+                onSuccess = {
+                    if(listItem.loggedInUsersFavorite) {
+                        firestoreRepository.updateScoreField(
+                            userID,
+                            listItemID,
+                            score,
+                            "favoriteCollection",
+                            onFailure = { Log.d("UserViewModel", "updateScoreInCollection failed for listItem $listItemID in favoriteCollection")})
+
+                    }
+                },
+                onFailure = { /* */ })
+            }
+    }
+
     fun updateCurrentEpisodeInCollection(collection: String, listItem: ListItem, currentEpisode: Int) {
 
         val user = loggedInUser.value
