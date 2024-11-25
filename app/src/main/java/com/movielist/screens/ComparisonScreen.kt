@@ -389,9 +389,10 @@ fun ComparisonCard (
 
     var ratingsSliderVisible by remember { mutableStateOf(false) }
 
-    val handleRatingsChange: (listItem: ListItem?, newRating: Int) -> Unit = {listItem, newRating ->
+    val handleRatingsChange: (newRating: Int) -> Unit = { newRating ->
         ratingsSliderVisible = false
         loggedInUserRating = newRating
+
         handleListItemRatingsChange(listItemForLoggedInUser.id, newRating)
     }
 

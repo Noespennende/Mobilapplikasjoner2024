@@ -776,14 +776,14 @@ fun RatingSlider (
     rating: Int = 0,
     visible: Boolean,
     modifier: Modifier = Modifier,
-    onValueChangeFinished: (listItem: ListItem?, score: Int) -> Unit
+    onValueChangeFinished: (score: Int) -> Unit
 ){
     var scoreInput by remember { mutableIntStateOf(rating) }
 
     if (visible){
         Popup (
             onDismissRequest = {
-                onValueChangeFinished(listItem, rating)
+                onValueChangeFinished(rating)
             },
             alignment = Alignment.Center,
 
@@ -820,7 +820,7 @@ fun RatingSlider (
                             valueRange = 0f..10f,
                             colors = sliderColors,
                             onValueChangeFinished = {
-                                onValueChangeFinished(listItem, scoreInput)
+                                onValueChangeFinished(scoreInput)
                             }
                         )
                     }

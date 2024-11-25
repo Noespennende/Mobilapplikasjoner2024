@@ -78,7 +78,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     /* Lytter etter endring i movieData fra ControllerViewModel */
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
-    var usersListItem: ListItem? = null
+    var usersListItem by remember { mutableStateOf<ListItem?>(null) }
+
 
     // Trengs for å laste inn
 
@@ -112,9 +113,9 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
             Log.d("GetReviews", "listOfReviews has now ${listOfReviews?.size} reviews")
 
-            val usersListItemTemp = controllerViewModel.findProductionInUsersCollection(productionID)
+            usersListItem = controllerViewModel.findProductionInUsersCollection(productionID)
 
-            val collection = usersListItemTemp?.let { controllerViewModel.findListItemCollection(it) }
+            val collection = usersListItem?.let { controllerViewModel.findListItemCollection(it) }
 
             memberOfUserList = when (collection) {
                 "currentlyWatchingCollection" -> ListOptions.WATCHING
@@ -138,7 +139,12 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
         userScore = score
-        //Kontroller kall her:
+
+        if (usersListItem != null) {
+
+            controllerViewModel.handleListItemScoreChange(usersListItem!!, score)
+        }
+
     }
 
     val handleUserListCategoryChange: (userListCategory: ListOptions?) -> Unit = {userListCategory ->
@@ -206,9 +212,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                     listItem = usersListItem,
                     memberOfUserList = memberOfUserList,
                     userScore = userScore,
-                    handleScoreChange = { score ->
-                        handleScoreChange(score)
-                    },
+                    handleScoreChange = handleScoreChange,
                     handleUserListChange = {listOption ->
                         handleUserListCategoryChange(listOption)
                     }
@@ -473,7 +477,7 @@ fun ListInfo (
     listItem: ListItem?,
     memberOfUserList: ListOptions?,
     userScore: Int?,
-    handleScoreChange: (Int) -> (Unit),
+    handleScoreChange: (score: Int) -> (Unit),
     handleUserListChange: (ListOptions) -> (Unit)
 ){
 
@@ -495,10 +499,12 @@ fun ListInfo (
         ratingsSliderIsVisible = !ratingsSliderIsVisible
     }
 
-    val handleScoreSliderChange: (listItem: ListItem?, score: Int) -> Unit = { listItem, score ->
+    val handleScoreSliderChange: (score: Int) -> Unit = { score ->
         userScoreFormatted = score
         ratingsSliderIsVisible = false
+
         handleScoreChange(score)
+
     }
 
     Row (

@@ -437,13 +437,11 @@ fun ListPageListItem (
         handleFavoriteClick(listItem, listItemFavorite)
     }
 
-    val handleListItemScoreChange: (listItem: ListItem?, rating: Int) -> Unit = {listItem, rating ->
+    val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
         listItemRating = rating
         ratingsSliderIsVisible = false
 
-        if (listItem != null) {
-            handleListItemRatingChange(listItem, rating)
-        }
+        handleListItemRatingChange(listItem, rating)
     }
 
     val handleEpisodeCount = { isPlus: Boolean ->

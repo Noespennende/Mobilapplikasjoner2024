@@ -468,11 +468,10 @@ fun CurrentlyWatchingCard(
 
     var ratingSliderVisible by remember { mutableStateOf(false) }
 
-    val handleRatingChange: (production: ListItem?, rating: Int) -> Unit = { production, rating ->
+    val handleRatingChanged: (rating: Int) -> Unit = { rating ->
 
-        if(production != null) {
-            handleRatingChange(production, rating)
-        }
+        handleRatingChange(listItem, rating)
+
         ratingSliderVisible = false
         ratingAdded = true
         buttonText = "Rating updated!"
@@ -589,7 +588,7 @@ fun CurrentlyWatchingCard(
         listItem = listItem,
         rating = listItem.score,
         visible = ratingSliderVisible,
-        onValueChangeFinished = handleRatingChange
+        onValueChangeFinished = handleRatingChanged
     )
 }
 
