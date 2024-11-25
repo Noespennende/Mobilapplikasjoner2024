@@ -115,6 +115,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
             usersListItem = controllerViewModel.findProductionInUsersCollection(productionID)
 
+            userScore = usersListItem?.score ?: 0
+
             val collection = usersListItem?.let { controllerViewModel.findListItemCollection(it) }
 
             memberOfUserList = when (collection) {
@@ -486,7 +488,10 @@ fun ListInfo (
         derivedStateOf { generateListOptionName(memberOfUserList) }
     }
 
-    var userScoreFormatted by remember { if (userScore != null) {mutableIntStateOf(userScore)} else {mutableIntStateOf(0) }}
+    val userScoreFormatted by remember(userScore) {
+        derivedStateOf { userScore ?: 0 }
+    }
+
     var ratingsSliderIsVisible by remember { mutableStateOf(false) }
 
     val handleListCategoryChange: (listOption: ListOptions) -> Unit = {
@@ -500,7 +505,7 @@ fun ListInfo (
     }
 
     val handleScoreSliderChange: (score: Int) -> Unit = { score ->
-        userScoreFormatted = score
+        //userScoreFormatted = score
         ratingsSliderIsVisible = false
 
         handleScoreChange(score)
