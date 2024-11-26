@@ -63,10 +63,9 @@ import com.movielist.composables.ProfileImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ColorThemes
 import com.movielist.model.Genders
-import com.movielist.model.LocalStorageKeys
+import com.movielist.data.LocalStorageKeys
 import com.movielist.model.LocationService
 import com.movielist.model.User
-import com.movielist.ui.theme.Gray
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.bottomNavBarHeight
@@ -99,6 +98,8 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     val snackbarHostState = remember { SnackbarHostState() }
     val snackBarStatus by controllerViewModel.snackBarStatus.collectAsState()
     val scope = rememberCoroutineScope()
+
+    //Local storage of color theme settings
     val colorThemeState by  localStorage.data.map { it[LocalStorageKeys().colorTheme] ?: ColorThemes.DARKMODE.toString() }.collectAsState(ColorThemes.DARKMODE.toString())
     val activeColorTheme: ColorThemes = when (colorThemeState) {
         ColorThemes.DARKMODE.toString() -> {
@@ -150,6 +151,10 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
 
     val handleLocationChange: (newLocation: String) -> Unit = {newLocation ->
         controllerViewModel.editUserLocation(newLocation)
+    }
+
+    val handleLogoutClick: () -> Unit = {
+        //Kontroller funksjon her
     }
 
     val handleColorModeChange: (theme: ColorThemes) -> Unit = { theme ->
@@ -229,6 +234,12 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
             EditColorMode(
                 handleColorModeChange = handleColorModeChange,
                 activeColorTheme = activeColorTheme
+            )
+        }
+
+        item {
+            LogOutButton (
+                handleLogoutClick = handleLogoutClick
             )
         }
     }
@@ -1122,7 +1133,45 @@ fun EditColorMode (
 
 }
 
+@Composable
+fun LogOutButton (
+    handleLogoutClick: () -> Unit
+) {
 
+    Column (
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        modifier = Modifier
+            .background(
+                color = LocalColor.current.backgroundLight,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .fillMaxWidth(.9f)
+            .padding(
+                vertical = 10.dp,
+                horizontal = 20.dp
+            )
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .background(color = LocalColor.current.primary, shape = RoundedCornerShape(5.dp))
+                .padding(vertical = 10.dp, horizontal = 10.dp)
+                .fillMaxWidth()
+                .clickable { handleLogoutClick() }
+        ) {
+            Text(
+                text = "Sign out",
+                fontSize = headerSize,
+                fontWeight = weightBold,
+                fontFamily = fontFamily,
+                color = LocalColor.current.background,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
+    }
+
+}
 
 fun GenerateGenderText (gender: Genders): String {
     if (gender == Genders.PREFERNOTTOSAY){

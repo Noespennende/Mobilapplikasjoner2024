@@ -13,6 +13,7 @@ data class Colors (
     val secondaryLight: Color = BlueGray,
     val tertiary: Color = DarkPurple,
     val quaternary: Color = LightGray,
+    val quaternaryLight: Color = LightBlueGray,
     val quinary: Color = DarkWhite,
     val backgroundLight: Color = Gray,
     val background: Color = DarkGray,
@@ -50,6 +51,7 @@ val White = Color(0xFFffffff)
 val DarkGrayTransparent = Color(0xE6101010)
 val BlueWhite = Color(0xFFedf1f2)
 val BlueGray = Color(0xFFb1bbbe)
+val LightBlueGray = Color(0xffd9e2eb)
 
 //Complimentary colors
 val Yellow = Color(0xFFfcb969)

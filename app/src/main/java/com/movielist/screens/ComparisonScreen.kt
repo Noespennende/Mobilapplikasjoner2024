@@ -51,6 +51,7 @@ import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
+import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
@@ -407,9 +408,9 @@ fun ComparisonCard (
             .fillMaxWidth()
     ) {
         //Header
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 10.dp)
@@ -422,7 +423,6 @@ fun ComparisonCard (
                 color = LocalColor.current.secondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .padding(end = 5.dp)
             )
             Text(
                 text = "(" + productionYear + ")",
@@ -496,7 +496,7 @@ fun ComparisonCard (
                 RatingsGraphics(
                     score = listItemForLoggedInUser.score,
                     sizeMultiplier = 1.3f,
-                    color = LocalColor.current.backgroundLight,
+                    color = if(isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.quaternary,
                     loggedInUsersScore = false,
                 )
 
@@ -513,8 +513,8 @@ fun ComparisonCard (
                 ProgressBar(
                     currentNumber = listItemForComparisonUser.currentEpisode,
                     endNumber = productionLenght,
-                    foregroundColor = LocalColor.current.backgroundLight,
-                    backgroundColor = LocalColor.current.backgroundLight
+                    foregroundColor =  if(isAppInDarkTheme()) LocalColor.current.quaternary else LocalColor.current.quaternary,
+                    backgroundColor = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.backgroundLight
                 )
             }
         }

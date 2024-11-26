@@ -103,7 +103,7 @@ fun ProgressBar (
     currentNumber: Int,
     endNumber: Int,
     foregroundColor: Color = LocalColor.current.primary,
-    backgroundColor: Color = LocalColor.current.tertiary,
+    backgroundColor: Color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primaryLight,
     strokeWith: Float = 20f,
     animationDuration: Int = 1000,
     animationDelay: Int = 0,
@@ -680,16 +680,33 @@ fun ListItemListSidesroller (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
             contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
         ){
-            items (listOfShows.size) {i ->
-                ProductionImage(
-                    imageID = listOfShows[i].production.posterUrl,
-                    imageDescription = listOfShows[i].production.title + " Poster",
-                    modifier = Modifier
-                        .clickable {
-                            handleImageClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
-                        }
-                )
+            if(listOfShows.isNotEmpty()){
+                items (listOfShows.size) {i ->
+                    ProductionImage(
+                        imageID = listOfShows[i].production.posterUrl,
+                        imageDescription = listOfShows[i].production.title + " Poster",
+                        modifier = Modifier
+                            .clickable {
+                                handleImageClick(listOfShows[i].production.imdbID, listOfShows[i].production.type)
+                            }
+                    )
+                }
+            } else {
+                item {
+                    Text(
+                        text = "There doesn't seem to be anything here :(",
+                        fontFamily = fontFamily,
+                        fontSize = headerSize,
+                        fontWeight = weightRegular,
+                        textAlign = TextAlign.Center,
+                        color = LocalColor.current.quaternary,
+                        modifier = textModifier
+                            .fillMaxWidth()
+                    )
+                }
+
             }
+
         }
 
     }

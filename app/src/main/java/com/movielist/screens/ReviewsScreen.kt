@@ -172,7 +172,6 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
     val handleProfilePictureClick: (userID: String) -> Unit =  {userID ->
-        Log.d("Profile", "argument sent: " + userID)
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
 
@@ -639,7 +638,10 @@ fun ReviewSummary (
                         //profile picture
                         ProfileImage(
                             imageID = review.reviewerProfileImage,
-                            userName = review.reviewerUserName
+                            userName = review.reviewerUserName,
+                            handleProfileImageClick = {
+                                handleProfilePictureClick(review.reviewerID)
+                            }
                         )
                     }
 

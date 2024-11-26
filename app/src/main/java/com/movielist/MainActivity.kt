@@ -18,7 +18,7 @@ import com.movielist.viewmodel.UserViewModel
 import com.google.firebase.FirebaseApp
 import com.movielist.composables.*
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.createDataStore
+import com.movielist.data.createDataStore
 import com.movielist.ui.theme.ApplicationTheme
 import com.movielist.viewmodel.ApiViewModel
 import com.movielist.viewmodel.ReviewViewModel
@@ -69,7 +69,7 @@ class MainActivity : ComponentActivity() {
                 //FirebaseTesting(controllerViewModel)
                 Navigation(
                     controllerViewModel = controllerViewModel,
-                    localStorage = remember {createDataStore(applicationContext)}
+                    localStorage = remember { createDataStore(applicationContext) }
                     )
             }
 

@@ -382,7 +382,7 @@ fun ListPageList (
                             handleCompareUserClick()
                         }
                         .background(
-                            color = LocalColor.current.backgroundLight,
+                            color = LocalColor.current.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .width(150.dp)
@@ -700,7 +700,7 @@ fun ListPageListItem (
                             is Movie -> 1
                             else -> 0
                         },
-                        foregroundColor = if(loggedInUsersList){LocalColor.current.primary}else{LocalColor.current.backgroundLight},
+                        foregroundColor = if(loggedInUsersList){LocalColor.current.primary}else{LocalColor.current.quaternary},
                         backgroundColor = if(loggedInUsersList){LocalColor.current.tertiary}else{LocalColor.current.backgroundLight},
                     )
                 }

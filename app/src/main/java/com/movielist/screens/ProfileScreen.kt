@@ -306,7 +306,12 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                         followStatus = followStatus ,
                         loggedInUsersProfile = profileBelongsToLoggedInUser,
                         handleSettingsButtonClick = handleSettingsButtonClick,
-                        handleFollowUnfollowClick = handleFollowUnfollowClick
+                        handleFollowUnfollowClick = handleFollowUnfollowClick,
+                        followingCount = userFollowerCount,
+                        followersCount = userFollowingMeCount,
+                        tvShowCount = userTvShowCount,
+                        userMovieCont = userMovieCount
+
                     )
                 }
 
@@ -607,8 +612,7 @@ fun ProfileInfoSection (
 
 
     val primaryColor = LocalColor.current.primary
-    val backgroundColor = LocalColor.current.backgroundLight
-    val backgroundLightColor = LocalColor.current.backgroundLight
+    val backgroundColor = LocalColor.current.quaternary
 
     var followButtonColor by remember { mutableStateOf(
         if (followStatus == FollowStatus.NOTFOLLOWING){
@@ -653,7 +657,7 @@ fun ProfileInfoSection (
                         .clickable {
                             if (newFollowStatus == FollowStatus.NOTFOLLOWING){
                                 newFollowStatus = FollowStatus.FOLLOWING
-                                followButtonColor = backgroundLightColor
+                                followButtonColor = backgroundColor
                                 handleFollowUnfollowClick(newFollowStatus)
                             } else {
                                 newFollowStatus = FollowStatus.NOTFOLLOWING
@@ -1169,7 +1173,7 @@ fun StatisticsList (
     )
     {
         Column(
-            verticalArrangement = Arrangement.spacedBy(7.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp),
         ){
             for(percentage in  sortedMap.values)
             {
@@ -1197,7 +1201,7 @@ fun StatisticsList (
         }
 
         Column (
-            verticalArrangement = Arrangement.spacedBy(7.dp)
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         )
         {
             for(genre in  sortedMap.keys)
@@ -1229,7 +1233,7 @@ fun StatisticsList (
         }
 
         Column(
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+            verticalArrangement = Arrangement.spacedBy(4.5.dp)
         ) {
 
             for(percentage in  sortedMap.values)

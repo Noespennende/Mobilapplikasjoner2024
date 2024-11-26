@@ -8,8 +8,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import com.movielist.model.ColorThemes
-import com.movielist.model.LocalStorageKeys
-import com.movielist.model.createDataStore
+import com.movielist.data.LocalStorageKeys
+import com.movielist.data.createDataStore
 import kotlinx.coroutines.flow.map
 
 

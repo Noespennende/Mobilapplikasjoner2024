@@ -4,8 +4,18 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +23,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirestoreRepository
+import com.movielist.data.LocalStorageKeys
+import com.movielist.data.createDataStore
 import com.movielist.model.AllMedia
 import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
@@ -20,9 +32,9 @@ import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
-import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
+import com.movielist.model.PostNotification
 import com.movielist.model.Production
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
@@ -36,9 +48,11 @@ import com.movielist.viewmodel.UserViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -47,7 +61,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -1836,6 +1849,53 @@ class ControllerViewModel(
         authViewModel.createUserWithEmailAndPassword(username, email, password, onSuccess, onFailure)
     }
 
+    @Composable
+    fun checkForNewFollowers () {
+        val context = LocalContext.current
+        val dataStore = createDataStore(context)
+        var outdatedLocalData by remember { mutableStateOf(false) }
 
+        //Read follower count from local storage
+        val localStorageFollowerCount by dataStore.data
+            .map { preferences ->
+                preferences[LocalStorageKeys().followerCount] ?: 0
+            }
+            .collectAsState(initial = 0)
 
+        LaunchedEffect(Unit) {
+            while(true){
+                val currentLocalFollowerCount = localStorageFollowerCount
+                val firebaseFollowerCount = 0 /* <- Firebase viewmodel funksjon her*/
+
+                //Check to see if the follower count has changed since last loop
+                if (currentLocalFollowerCount < firebaseFollowerCount) {
+                    val amountOfFollowers = firebaseFollowerCount - localStorageFollowerCount
+
+                    //Post notofication
+                    PostNotification(
+                        context = context,
+                        contentTitle = "New follower" + if (amountOfFollowers > 1) "s" else "",
+                        contentText = "You have ${amountOfFollowers} new follower" + if (amountOfFollowers > 1) "s" else ""
+                    )
+                    outdatedLocalData = true
+                } else if (
+                    currentLocalFollowerCount > firebaseFollowerCount
+                ) {
+                    outdatedLocalData = true
+                }
+
+                //Write updated follower count to local storage
+                if (outdatedLocalData) {
+                    //Store updated follower count locally
+                    dataStore.edit { preferences ->
+                        preferences[LocalStorageKeys().followerCount] = firebaseFollowerCount
+                    }
+                    outdatedLocalData = false
+                }
+
+                //Delay for 30 minutes before next check
+                delay(30 * 60 * 1000L)
+            }
+        }
+    }
 }
