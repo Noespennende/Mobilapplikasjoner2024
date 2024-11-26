@@ -106,9 +106,16 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
         if (reviewText.length < 5){
             errorMessage = "Review must be at least 5 characters long!"
         } else {
-            //Kontroller funksjon her
 
-            navController.navigate(Screen.ProductionScreen.withArguments(updatedProductionID, productionType.toString()))
+            production?.let {
+                controllerViewModel.publishReview(
+                    it, reviewText, reviewScore,
+                    onSuccess = {
+                        navController.navigate(Screen.ProductionScreen.withArguments(updatedProductionID, productionType.toString()))
+                    })
+            }
+
+
         }
 
     }

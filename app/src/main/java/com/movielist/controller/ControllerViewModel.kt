@@ -24,6 +24,7 @@ import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.Production
+import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
 import com.movielist.model.SearchSortOptions
@@ -38,6 +39,9 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -47,6 +51,9 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import java.util.UUID
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.log
 
 
@@ -1560,6 +1567,8 @@ class ControllerViewModel(
 
         val userReviews = user.myReviews
 
+        Log.d("tester", "Controller-UserReviews $userReviews")
+
         return getReviewsByUser(userReviews, user.id)
     }
 
@@ -1580,66 +1589,79 @@ class ControllerViewModel(
 
 
     private suspend fun getReviewsByUser(reviewIDs: List<String>, userID: String): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 
-        for (reviewID in reviewIDs) {
+        return suspendCoroutine { continuation ->
+            viewModelScope.launch {
 
-            val (collectionType, productionID, uuid) = reviewViewModel.splitReviewID(reviewID)
+                val deferredReviews = reviewIDs.map { reviewID ->
+                    async {
+                        Log.d("tester", "reviewID: $reviewID")
+                        val (collectionType, productionID, uuid) = reviewViewModel.splitReviewID(reviewID)
+                        Log.d("tester", "collectionType $reviewID : $collectionType")
 
-            val collectionID = try {
-                when (collectionType) {
-                    "RMOV" -> "movieReviews"
-                    "RTV" -> "tvShowReviews"
-                    else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
+                        val collectionID = try {
+                            when (collectionType) {
+                                "RMOV" -> "movieReviews"
+                                "RTV" -> "tvShowReviews"
+                                else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
+                            }
+                        } catch (e: IllegalArgumentException) {
+                            Log.e("Firestore", "Invalid collection type for reviewID: $reviewID")
+                            return@async null
+                        }
+
+                        val user = userViewModel.getUser(userID)
+
+                        val reviewObjects = reviewViewModel.getReviewsByUser(collectionID, productionID, userID)
+
+                        reviewObjects.mapNotNull { reviewObject ->
+                            var reviewDTO: ReviewDTO? = null
+
+                            val production = when (collectionType) {
+                                "RMOV" -> async { getMovieByIdAsync(productionID) }
+                                "RTV" -> async { getTVShowByIdAsync(productionID) }
+                                else -> null
+                            }
+
+                            production?.let { deferredProduction ->
+
+                                Log.d("tester", "Calling await for productionID: $productionID")
+                                val prod = deferredProduction.await()
+                                Log.d("tester", "Completed await for productionID: $productionID")
+
+                                Log.d("tester", "prod: " + prod.toString())
+
+                                if (prod != null) {
+                                    reviewDTO = user?.let {
+                                        reviewViewModel.createReviewDTO(reviewObject, it, prod)
+                                    }
+                                } else {
+                                    Log.e("tester", "Prod is null for productionID: $productionID")
+                                }
+                            }
+                            reviewDTO
+                        }
+                    }
                 }
-            } catch (e: IllegalArgumentException) {
-                return emptyList()
-                // Hvis collectionType ikke matcher, fang error og returner tom.
-                // Uten en av de gjeldende collectionTypene, vil koden som følger under feile,
-                // pga avhengig av collectionType
-            }
 
-            val user = userViewModel.getUser(userID)
+                // Vent på at alle asynkrone operasjoner skal være ferdige og samle resultatene
+                val results = deferredReviews.awaitAll()
 
-            val reviewObjects = reviewViewModel.getReviewsByUser(collectionID, productionID, userID)
+                Log.d("tester", "Results received: ${results.size}")
+                results.forEach {
 
-            val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
-
-            if (user != null) {
-
-                Log.d("Firestore_User", user.id)
-                for (reviewObject in reviewObjects) {
-
-                    var reviewDTO: ReviewDTO? = null;
-
-                    if (collectionType == "RMOV") {
-                        val production = getMovieByIdAsync(productionID)
-                        Log.d("Firestore_RMOV", productionID)
-                        Log.d("Firestore_RMOV", singleProductionData.value.toString())
-
-                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
-                    }
-                    if (collectionType == "RTV") {
-                        val production = getTVShowByIdAsync(productionID)
-                        Log.d("Firestore_RTV", singleProductionData.value.toString())
-                        reviewDTO = production?.let { reviewViewModel.createReviewDTO(reviewObject, user, it) }
-
-                        Log.d("Firestore_dto", reviewDTO.toString())
-                    }
-
-                    if (reviewDTO != null) {
-                        reviewDTOList.add(reviewDTO)
+                    Log.d("tester", "Result: $it")
+                    if (it != null) {
+                        reviewDTOList.addAll(it)
                     }
                 }
+                
+                continuation.resume(reviewDTOList)
             }
-
-            Log.d("Firestore_controller", reviewDTOList.toString())
-
-            return reviewDTOList
-
         }
-
-        return emptyList()
     }
+
 
     private suspend fun getMovieByIdAsync(id: String): Production? {
         Log.d("ViewModel", "getMovieById called with id: $id")
@@ -1669,21 +1691,65 @@ class ControllerViewModel(
 
     private suspend fun getTVShowByIdAsync(id: String): Production? {
         Log.d("Controller", "getTVShowByIdAsync called with id: $id")
-        apiViewModel.getShowDetails(id)
+
+        val result = apiViewModel.getShowDetailsTry(id)
 
         return try {
-            val showResponse = withContext(Dispatchers.IO) {
-                apiViewModel.showDataTest.firstOrNull { it != null }
-            }
+
+            val showResponse = result.getOrNull()
 
             val production = showResponse?.let { convertResponseToProduction(it) }
-            _singleProductionData.update { production }
 
             production
+
         } catch (e: Exception) {
             Log.e("Controller_getTVShowByIdAsync", "Error fetching show data", e)
             null
         }
+    }
+
+    fun publishReview(
+        production: Production,
+        reviewText: String,
+        reviewScore: Int,
+        onSuccess: () -> Unit
+    ) {
+
+        val userID = loggedInUser.value?.id
+        if (userID != null) {
+
+            val collection = when (production.type) {
+                "Movie" -> "movieReviews"
+                "TVShow" -> "tvShowReviews"
+                else -> { "" }
+            }
+
+            val reviewID = generateReviewID(production.type, production.imdbID)
+
+            val review = reviewID?.let {
+                Review(it, score = reviewScore, userID, production.imdbID, reviewBody = reviewText)
+            }
+
+           if (review != null) {
+               val reviewMap = review.toMap()
+
+               userViewModel.publishReview(collection, production.imdbID, reviewID, reviewMap,
+                   onSuccess = {
+                       onSuccess()
+                   } )
+           }
+        }
+    }
+
+    private fun generateReviewID(collectionType: String, productionID: String): String? {
+
+        val collectionID = when (collectionType) {
+            "Movie" -> "RMOV"
+            "TVShow" -> "RTV"
+            else -> { "" }
+        }
+
+       return "${collectionID}_${productionID}_${UUID.randomUUID()}"
     }
 
     private val _snackBarStatus = MutableStateFlow<Status?>(null)
@@ -1750,6 +1816,7 @@ class ControllerViewModel(
             }
         }
     }
+
 
 
 

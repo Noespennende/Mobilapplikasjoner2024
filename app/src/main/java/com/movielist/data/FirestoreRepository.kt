@@ -868,6 +868,67 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
     }
 
 
+    suspend fun publishReview(
+        collectionID: String,
+        productionID: String,
+        reviewID: String,
+        reviewData: Map<String, Any>,
+        onSuccess: () -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+            db.collection("reviews")
+                .document(collectionID)
+                .collection(productionID)
+                .document(reviewID)
+                .set(reviewData)
+                .await()
+
+            val collectionDoc = db.collection("reviews").document(collectionID).get().await()
+
+            if (collectionDoc.exists()) {
+                val productions = collectionDoc.get("productionIDs") as? List<String> ?: emptyList()
+
+                if (!productions.contains(productionID)) {
+                    val updatedProductions = productions.toMutableList().apply { add(productionID) }
+
+                    db.collection("reviews")
+                        .document(collectionID)
+                        .update("productionIDs", updatedProductions)
+                        .await()
+
+                    Log.d("Firestore-Review", "ProductionID $productionID lagt til i productions.")
+                }
+            }
+
+            onSuccess()
+
+            Log.d("Firestore-Review", "Anmeldelse med ID $reviewID opprettet/oppdatert.")
+        } catch (e: Exception) {
+
+            Log.e("Firestore-Review", "Feil ved opprettelse av anmeldelse: $e")
+        }
+    }
+
+    suspend fun addReviewToUser(userID: String, reviewID: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+
+            db.collection("users")
+                .document(userID)
+                .update("myReviews", FieldValue.arrayUnion(reviewID))
+                .await()
+
+            Log.d("Firestore-User", "ReviewID $reviewID lagt til i myReviews for bruker $userID.")
+        } catch (e: Exception) {
+
+            Log.e("Firestore-User", "Feil ved oppdatering av myReviews: $e")
+        }
+    }
+
+
     suspend fun uploadProfileImage(imageUri: Uri?): String {
         if (imageUri == null) throw IllegalArgumentException("Ingen bilde valgt")
 
