@@ -8,6 +8,7 @@ import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.FirestoreRepository
 import com.movielist.data.UUIDAdapter
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.User
@@ -72,6 +73,8 @@ class ReviewViewModel(
             val reviewsRaw = firestoreRepository.getReviewByProduction(productionID, productionType)
             val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
 
+            Log.d("DEBUG", "GetReviewsByProduction returning $reviewsObjects")
+
             // Returner listen med Review-objekter
             reviewsObjects
         } catch (exception: Exception) {
@@ -80,9 +83,10 @@ class ReviewViewModel(
         }
     }
 
-    suspend fun getReviewByID(reviewID: String, productionType: String, productionID: String): Review? {
+    suspend fun getReviewByID(reviewID: String, productionType: ProductionType, productionID: String): Review? {
         return try {
             // Hent anmeldelser fra Firestore
+            Log.d("problem", "RVM - $productionType")
             val reviewRaw = firestoreRepository.getReviewById(reviewID, productionType, productionID)
             val reviewObject = requireNotNull(convertReviewJsonToReviewObject(reviewRaw)) {
                 return null

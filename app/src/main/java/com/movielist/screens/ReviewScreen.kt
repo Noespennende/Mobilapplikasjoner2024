@@ -26,6 +26,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.ProductionType
 import com.movielist.model.ReviewDTO
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
@@ -58,8 +59,8 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
     val HandleUserClick: (userID: String) -> (Unit) = { userID ->
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
-    val HandleProductionClick: (showID: String) -> (Unit) = { showID ->
-        navController.navigate((Screen.ProductionScreen.withArguments(showID)))
+    val HandleProductionClick: (showID: String, productionType: ProductionType) -> (Unit) = { showID, productionType ->
+        navController.navigate((Screen.ProductionScreen.withArguments(showID, productionType.name)))
     }
 
     LazyColumn(
@@ -88,7 +89,7 @@ fun Review(
     reviewDTO: ReviewDTO?,
     handleLikeClick: () -> Unit,
     handleUserClick: (String) -> Unit,
-    handleProductionClick: (String) -> Unit
+    handleProductionClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
     //Main container
     Column {
@@ -99,7 +100,7 @@ fun Review(
                     .align(Alignment.CenterHorizontally)
                     .padding(bottom = 20.dp)
                     .clickable {
-                        handleProductionClick(reviewDTO.productionID)
+                        handleProductionClick(reviewDTO.productionID, reviewDTO.productionType)
                     }
             )
 

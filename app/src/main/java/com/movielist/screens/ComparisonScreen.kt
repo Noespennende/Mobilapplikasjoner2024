@@ -44,6 +44,7 @@ import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.ProductionType
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -147,8 +148,8 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
 
-    val handleProductionImageClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    val handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
 
     LaunchedEffect(comparisonUser) {
@@ -364,7 +365,7 @@ fun ComparisonCard (
     listItemForLoggedInUser: ListItem,
     listItemForComparisonUser: ListItem,
     modifier: Modifier = Modifier,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleListItemRatingsChange: (listItem: ListItem, rating: Int) -> Unit
 ){
 

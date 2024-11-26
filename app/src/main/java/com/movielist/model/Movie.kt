@@ -20,7 +20,7 @@ data class Movie(
 ) : Production() {
 
     // Type skal ikke kunne forandres i konstruktør
-    override val type: String = "Movie"
+    override val type: ProductionType = ProductionType.MOVIE
 
 
     override fun toMap(): Map<String, Any> {

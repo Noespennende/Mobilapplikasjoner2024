@@ -48,7 +48,7 @@ data class ReviewDTO(
     val productionPosterUrl: String?,
     val productionTitle: String,
     val productionReleaseDate: Calendar,
-    val productionType: String,
+    val productionType: ProductionType,
 )
 
 

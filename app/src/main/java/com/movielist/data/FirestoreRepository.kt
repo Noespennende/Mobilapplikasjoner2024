@@ -12,6 +12,7 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.ProductionType
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import kotlinx.coroutines.tasks.await
@@ -622,8 +623,8 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         val db = FirebaseFirestore.getInstance()
 
         val collection = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            "MOVIE" -> "movieReviews"
+            "TVSHOW" -> "tvShowReviews"
             else -> null
         }
 
@@ -649,15 +650,15 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
     suspend fun getReviewById(
         reviewID: String,        // ID for den spesifikke review-en
-        productionType: String,  // Type produksjon (Movie eller TVShow)
+        productionType: ProductionType,  // Type produksjon (Movie eller TVShow)
         productionID: String    // ID for produksjonen (f.eks. 533535 for en film)
     ): Map<String, Any>? {
         val db = FirebaseFirestore.getInstance()
 
         // Bestem hvilken samling som skal brukes basert på productionType
         val collectionType = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            ProductionType.MOVIE -> "movieReviews"
+            ProductionType.TVSHOW -> "tvShowReviews"
             else -> {
                 throw IllegalArgumentException("Invalid production type: $productionType")
             }

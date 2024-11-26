@@ -41,6 +41,7 @@ import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ReviewsScreenTabs
@@ -172,9 +173,9 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         //Kontroller håndtering av liking av en review her
     }
 
-    val handleProductionClick: (productionID: String, productionType: String)
+    val handleProductionClick: (productionID: String, productionType: ProductionType)
         -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
     val handleProfilePictureClick: (userID: String) -> Unit =  {userID ->
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
@@ -248,7 +249,7 @@ fun SummarySection (
     friendsReviewsList: List<ReviewDTO>,
     topThisMonthList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
@@ -282,7 +283,7 @@ fun SummarySection (
 fun TopThisMonthSection (
     topThisMonthList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
@@ -305,7 +306,7 @@ fun TopThisMonthSection (
 fun TopAllTimeSection (
     topAllTimeList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
@@ -471,7 +472,7 @@ fun ReviewsSection(
     reviewList: List<ReviewDTO>,
     header: String,
     handleLikeClick: (reviewID: String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ) {
@@ -548,7 +549,7 @@ fun ReviewsSection(
 fun ReviewSummary (
     review: ReviewDTO,
     handleLikeClick: (String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ) {

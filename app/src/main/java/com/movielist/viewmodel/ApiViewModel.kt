@@ -586,6 +586,30 @@ class ApiViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getMovieDetailsTry(movieID: String): Result<MovieResponse> {
+
+        return try {
+
+            val movieDeferred = viewModelScope.async { getMovieData(movieID) }
+            val videoDeferred = viewModelScope.async { getMovieVideoData(movieID) }
+            val creditDeferred = viewModelScope.async { getMovieCreditData(movieID) }
+
+            // Vent på at kallene blir ferdig
+            val movieData = movieDeferred.await()
+            val movieVideoData = videoDeferred.await()
+            val movieCreditData = creditDeferred.await()
+
+            // Kombinerer resultatene i MovieResponse-typen
+            val movieResponse = MovieResponse(movieData, movieVideoData, movieCreditData)
+
+            Result.success(movieResponse)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    }
+
     suspend fun getShowDetailsTry(showID: String): Result<ShowResponse> {
 
         return try {

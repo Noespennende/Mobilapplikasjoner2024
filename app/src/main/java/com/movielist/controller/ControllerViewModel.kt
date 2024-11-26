@@ -36,6 +36,7 @@ import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.PostNotification
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
@@ -119,8 +120,8 @@ class ControllerViewModel(
 
         _displayedList.value = when (activeSortOption) {
             ShowSortOptions.MOVIESANDSHOWS -> list
-            ShowSortOptions.MOVIES -> list.filter { it.production.type == "Movie" }
-            ShowSortOptions.SHOWS -> list.filter { it.production.type == "TVShow" }
+            ShowSortOptions.MOVIES -> list.filter { it.production.type == ProductionType.MOVIE }
+            ShowSortOptions.SHOWS -> list.filter { it.production.type == ProductionType.TVSHOW }
         }
     }
 
@@ -219,15 +220,15 @@ class ControllerViewModel(
         }
         val uniqueMovieTitles = mutableSetOf<String>()
 
-        user.completedCollection.filter { it.production.type == "Movie" }
+        user.completedCollection.filter { it.production.type == ProductionType.MOVIE }
             .forEach { uniqueMovieTitles.add(it.production.title) }
-        user.favoriteCollection.filter { it.production.type == "Movie" }
+        user.favoriteCollection.filter { it.production.type == ProductionType.MOVIE }
             .forEach { uniqueMovieTitles.add(it.production.title) }
-        user.currentlyWatchingCollection.filter { it.production.type == "Movie" }
+        user.currentlyWatchingCollection.filter { it.production.type == ProductionType.MOVIE }
             .forEach { uniqueMovieTitles.add(it.production.title) }
-        user.wantToWatchCollection.filter { it.production.type == "Movie" }
+        user.wantToWatchCollection.filter { it.production.type == ProductionType.MOVIE }
             .forEach { uniqueMovieTitles.add(it.production.title) }
-        user.droppedCollection.filter { it.production.type == "Movie" }
+        user.droppedCollection.filter { it.production.type == ProductionType.MOVIE }
             .forEach { uniqueMovieTitles.add(it.production.title) }
 
         return uniqueMovieTitles.size
@@ -251,8 +252,8 @@ class ControllerViewModel(
 
         return when (showSortOption) {
             ShowSortOptions.MOVIESANDSHOWS -> allProductions
-            ShowSortOptions.MOVIES -> allProductions.filter { it.production.type == "Movie" }
-            ShowSortOptions.SHOWS -> allProductions.filter { it.production.type == "TVShow" }
+            ShowSortOptions.MOVIES -> allProductions.filter { it.production.type == ProductionType.MOVIE }
+            ShowSortOptions.SHOWS -> allProductions.filter { it.production.type == ProductionType.TVSHOW }
         }
     }
 
@@ -264,15 +265,15 @@ class ControllerViewModel(
         }
         val uniqueShowTitles = mutableSetOf<String>()
 
-        user.completedCollection.filter { it.production.type == "TVShow" }
+        user.completedCollection.filter { it.production.type == ProductionType.TVSHOW }
             .forEach { uniqueShowTitles.add(it.production.title) }
-        user.favoriteCollection.filter { it.production.type == "TVShow" }
+        user.favoriteCollection.filter { it.production.type == ProductionType.TVSHOW }
             .forEach { uniqueShowTitles.add(it.production.title) }
-        user.currentlyWatchingCollection.filter { it.production.type == "TVShow" }
+        user.currentlyWatchingCollection.filter { it.production.type == ProductionType.TVSHOW }
             .forEach { uniqueShowTitles.add(it.production.title) }
-        user.wantToWatchCollection.filter { it.production.type == "TVShow" }
+        user.wantToWatchCollection.filter { it.production.type == ProductionType.TVSHOW }
             .forEach { uniqueShowTitles.add(it.production.title) }
-        user.droppedCollection.filter { it.production.type == "TVShow" }
+        user.droppedCollection.filter { it.production.type == ProductionType.TVSHOW }
             .forEach { uniqueShowTitles.add(it.production.title) }
 
 
@@ -874,7 +875,7 @@ class ControllerViewModel(
         var totalGenres = 0
 
         for (movie in moviesWatched){
-            if(movie.production.type == "Movie"){
+            if(movie.production.type == ProductionType.MOVIE){
                 movie.production.genre.forEach { genre->
                     mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
                     totalGenres++
@@ -907,7 +908,7 @@ class ControllerViewModel(
         var totalShows = 0
 
         for (show in showsWatched){
-            if(show.production.type != "movie"){
+            if(show.production.type != ProductionType.MOVIE){
                 show.production.genre.forEach { genre->
                     mapOfGenres[genre] = mapOfGenres.getOrDefault(genre, 0) +1
                     totalShows++
@@ -958,8 +959,8 @@ class ControllerViewModel(
     fun getCommonMoviesInWantToWatchList(): MutableList<ListItem> {
         val commonMoviesInWatchList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getWantToWatchList()?.filter { it.production.type == "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.wantToWatchCollection?.filter { it.production.type == "movie" } ?: emptyList()
+        val loggedInUserCollection = getWantToWatchList()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.wantToWatchCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
 
         val otherUserIds = otherUserCollection.map { it.id }.toSet()
 
@@ -976,8 +977,8 @@ class ControllerViewModel(
     fun getCommonMoviesInCompletedList(): MutableList<ListItem> {
         val commonMoviesInCompletedList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getCompletedShows()?.filter { it.production.type == "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.completedCollection?.filter { it.production.type == "movie" } ?: emptyList()
+        val loggedInUserCollection = getCompletedShows()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.completedCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
 
         for (show in loggedInUserCollection) {
             for (otherShow in otherUserCollection) {
@@ -993,8 +994,8 @@ class ControllerViewModel(
     fun getCommonFavoritesList(): MutableList<ListItem>{
         val commonMoviesInFavoritesList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type == "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type == "movie" } ?: emptyList()
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
 
         for (show in loggedInUserCollection){
             for(otherShow in otherUserCollection){
@@ -1009,8 +1010,8 @@ class ControllerViewModel(
     fun getCommonCompletedShowsList() : MutableList<ListItem>{
         val commonShowsInCompletedList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
 
         for (show in loggedInUserCollection){
             for(otherShow in otherUserCollection){
@@ -1025,8 +1026,8 @@ class ControllerViewModel(
     fun getCommonWantToWatchShowsList() : MutableList<ListItem>{
         val commonShowsInWantToWatchList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
 
         for (show in loggedInUserCollection){
             for(otherShow in otherUserCollection){
@@ -1042,8 +1043,8 @@ class ControllerViewModel(
     fun getCommonFavoriteShowsList() : MutableList<ListItem>{
         val commonShowsInFavoritesList = mutableListOf<ListItem>()
 
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != "movie" } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != "movie" } ?: emptyList()
+        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
+        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
 
         for (show in loggedInUserCollection){
             for(otherShow in otherUserCollection){
@@ -1623,17 +1624,22 @@ class ControllerViewModel(
             .take(10)
     }
 
-    fun getReviewById(reviewID: String, productionType: String, productionID: String) {
+    fun getReviewById(reviewID: String, productionType: ProductionType, productionID: String) {
         viewModelScope.launch {
             try {
 
+                Log.d("problem", "CVM " + productionType.name)
                 val reviewObject = requireNotNull(reviewViewModel.getReviewByID(reviewID, productionType, productionID)) {
 
                     _singleReviewDTOData.value = null
                     return@launch
                 }
 
-                val production = singleProductionData.value
+
+                val production = when (productionType) {
+                    ProductionType.MOVIE -> getMovieByIdAsync(productionID)
+                    ProductionType.TVSHOW -> getTVShowByIdAsync(productionID)
+                }
                 if (production == null) {
                     Log.d("GetReviews", "Production data is null, aborting.")
                     return@launch
@@ -1662,23 +1668,37 @@ class ControllerViewModel(
 
         viewModelScope.launch {
             try {
-                // Hent anmeldelser fra Firestore
-                val reviewObjects = reviewViewModel.getReviewsByProduction(productionID, productionType)
+                Log.d("DEBUG", "Fetching reviews for ProductionID: $productionID, Type: $productionType")
 
-                val production = singleProductionData.value
+                // Hent anmeldelser fra Firestore
+                val reviewObjects = withContext(Dispatchers.IO) {
+                    reviewViewModel.getReviewsByProduction(productionID, productionType)
+                }
+
+                Log.d("DEBUG", "Fetched ${reviewObjects.size} reviews for ProductionType: $productionType")
+
+                // Hent produksjonsdata asynkront
+                val production = withContext(Dispatchers.IO) {
+                    when (productionType) {
+                        "MOVIE" -> getMovieByIdAsync(productionID)
+                        "TVSHOW" -> getTVShowByIdAsync(productionID)
+                        else -> null
+                    }
+                }
+
                 if (production == null) {
-                    Log.d("GetReviews", "Production data is null, aborting.")
+                    Log.d("DEBUG", "Production data is null, aborting.")
                     _reviewDTOs.value = emptyList()
                     return@launch
                 }
 
-                // Lager map for enklere oversikt over reviewerID mot User-objekt
+                // Hent brukere for hver reviewerID parallelt
                 val reviewers = reviewObjects.map { review ->
-                    async {
+                    async(Dispatchers.IO) {
                         review.reviewerID to (userViewModel.getUser(review.reviewerID)
                             ?: User(id = "fallbackReviewer", email = "default@email.com", userName = "Anonymous"))
                     }
-                }.awaitAll().toMap() // Konverter til en Map for enkel matching
+                }.awaitAll().toMap() // Vent på alle oppgaver og konverter til Map
 
                 // Opprett ReviewDTO-er ved å matche reviewerID med brukere fra "reviewers"
                 val reviewDTOs = reviewObjects.mapNotNull { review ->
@@ -1687,10 +1707,9 @@ class ControllerViewModel(
                 }
 
                 _reviewDTOs.value = reviewDTOs
-                Log.d("GetReviews", "Updated StateFlow with ${reviewDTOs.size} reviews")
+                Log.d("DEBUG", "Updated StateFlow with ${reviewDTOs.size} reviews")
             } catch (exception: Exception) {
-
-                Log.d("GetReviews", "Failed to fetch reviews: $exception")
+                Log.e("DEBUG", "Failed to fetch reviews: $exception", exception)
                 _reviewDTOs.value = emptyList()
             }
         }
@@ -1711,6 +1730,7 @@ class ControllerViewModel(
             when (collectionType) {
                 "RMOV" -> productionID?.let { production = getMovieByIdAsync(it) }
                 "RTV" -> productionID?.let { production = getTVShowByIdAsync(it) }
+                else -> Log.d("problem", "feil")
             }
 
             if (!reviewID.isNullOrEmpty()) {
@@ -1824,33 +1844,30 @@ class ControllerViewModel(
     }
 
 
-    private suspend fun getMovieByIdAsync(id: String): Production? {
+    suspend fun getMovieByIdAsync(id: String): Production? {
         Log.d("ViewModel", "getMovieById called with id: $id")
 
         // Start API-kallet for å hente filmen
-        apiViewModel.getMovieDetails(id)
+        val result = apiViewModel.getMovieDetailsTry(id)
 
         // Vent på at movieData skal oppdateres
         return try {
             // Vent på at movieData skal inneholde et resultat
-            val movieResponse = withContext(Dispatchers.IO) {
-                // Bruk collect for å vente på at movieData er oppdatert
-                apiViewModel.movieDataTest.firstOrNull { it != null }
-            }
+            val movieResponse = result.getOrNull()
 
             // Hvis movieResponse er null, returner null
             val production = movieResponse?.let { convertResponseToProduction(it) }
-            _singleProductionData.update { production }
 
             Log.d("Controller", "Returning production: $production")
             production
+
         } catch (e: Exception) {
             Log.e("Controller", "Error fetching movie data", e)
             null
         }
     }
 
-    private suspend fun getTVShowByIdAsync(id: String): Production? {
+    suspend fun getTVShowByIdAsync(id: String): Production? {
         Log.d("Controller", "getTVShowByIdAsync called with id: $id")
 
         val result = apiViewModel.getShowDetailsTry(id)
@@ -1860,6 +1877,7 @@ class ControllerViewModel(
             val showResponse = result.getOrNull()
 
             val production = showResponse?.let { convertResponseToProduction(it) }
+            Log.d("DEBUG", "Converted response to production: $production")
 
             production
 
@@ -1880,8 +1898,8 @@ class ControllerViewModel(
         if (userID != null) {
 
             val collection = when (production.type) {
-                "Movie" -> "movieReviews"
-                "TVShow" -> "tvShowReviews"
+                ProductionType.MOVIE -> "movieReviews"
+                ProductionType.TVSHOW -> "tvShowReviews"
                 else -> { "" }
             }
 
@@ -1902,11 +1920,11 @@ class ControllerViewModel(
         }
     }
 
-    private fun generateReviewID(collectionType: String, productionID: String): String? {
+    private fun generateReviewID(collectionType: ProductionType, productionID: String): String? {
 
         val collectionID = when (collectionType) {
-            "Movie" -> "RMOV"
-            "TVShow" -> "RTV"
+            ProductionType.MOVIE -> "RMOV"
+            ProductionType.TVSHOW -> "RTV"
             else -> { "" }
         }
 

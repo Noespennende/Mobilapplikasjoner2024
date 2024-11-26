@@ -54,6 +54,7 @@ import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
@@ -190,10 +191,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
-    val handleProductionButtonClick: (showID: String, productionType: String)
+    val handleProductionButtonClick: (showID: String, productionType: ProductionType)
     -> Unit = { showID, productionType ->
         Log.d("Test", "$showID $productionType")
-        navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType.name))
     }
 
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = { reviewID ->
@@ -273,7 +274,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                 // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
 
                 //denne må stå her for å gjøre kallet til getAllMedia
-                //var apiMovies = controllerViewModel.getAllMedia().toString()
+                var apiMovies = controllerViewModel.getAllMedia().toString()
 
                 var test = controllerViewModel.filteredMediaData.value
 
@@ -353,7 +354,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 @Composable
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
-    onImageClick: (showID: String, productionType: String) -> Unit,
+    onImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int)  -> Unit
 ) {
@@ -463,7 +464,7 @@ fun CurrentlyWatchingCard(
     showLength: Int?,
     modifier: Modifier = Modifier,
     onMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int) -> Unit,
-    onImageClick: (showID: String, productionType: String) -> Unit,
+    onImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleRatingChange: (listItem: ListItem, score: Int) -> Unit
 ) {
     
@@ -608,9 +609,9 @@ fun CurrentlyWatchingCard(
 @Composable
 fun TheUsersYouFollowJustWatched (
     listOfShows: MutableList<ListItem>,
-    handleShowButtonClick: (showID: String, productionType: String) -> Unit
+    handleShowButtonClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
-    val handleShowClick: (showID: String, productionType: String)
+    val handleShowClick: (showID: String, productionType: ProductionType)
     -> Unit = { showID, productionType ->
         handleShowButtonClick(showID, productionType)
     }

@@ -71,6 +71,7 @@ import com.movielist.R
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.ShowSortOptions
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.fontFamily
@@ -623,7 +624,7 @@ fun ProductionListSidesroller (
     listOfShows: List<Production>,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    handleImageClick: (showID: String, productionType: String) -> Unit
+    handleImageClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
 
     Column (
@@ -665,7 +666,7 @@ fun ListItemListSidesroller (
     listOfShows: List<ListItem>,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    handleImageClick: (productionID: String, productionType: String) -> Unit
+    handleImageClick: (productionID: String, productionType: ProductionType) -> Unit
 ) {
     Column (
         modifier = modifier

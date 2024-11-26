@@ -32,6 +32,7 @@ import com.movielist.composables.ProfileImage
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.SearchSortOptions
 import com.movielist.model.User
 import com.movielist.ui.theme.*
@@ -73,8 +74,8 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
 
-    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    val handleProductionClick: (productionID: String, productionType: ProductionType) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
 
 
@@ -100,7 +101,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
 
             val filtered = searchResultsList.filter {
 
-                it.type == "Movie" || it.type != "Movie"}
+                it.type == ProductionType.MOVIE || it.type != ProductionType.MOVIE}
             items(filtered) { prod ->
 
                 ProductionCardSearchPage(
@@ -323,7 +324,7 @@ fun TopNavBarSearchPage (
 @Composable
 fun ProductionCardSearchPage(
     production: Production,
-    handleProductionClick: (productionID: String, productionType: String) -> Unit
+    handleProductionClick: (productionID: String, productionType: ProductionType) -> Unit
 ){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
