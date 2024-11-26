@@ -127,6 +127,7 @@ class ControllerViewModel(
 
 
     init {
+        apiViewModel.getAllMedia()
 
         apiViewModel.mediaData.observeForever { mediaList ->
 
@@ -141,6 +142,7 @@ class ControllerViewModel(
             _filteredMediaData.postValue(convertedResults)
         }
     }
+
     private val _userSearchResults = MutableStateFlow<List<User>>(emptyList())
     val userSearchResults: StateFlow<List<User>> = _userSearchResults
 
