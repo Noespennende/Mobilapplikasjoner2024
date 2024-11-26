@@ -136,16 +136,17 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         //Kontroller funksjon for å håndtere sorterings endring
     }
 
-    val handleListItemRatingChange: (listItemID: String, newRating: Int) -> Unit  ={listItemID, newRating ->
-        //Kontroller funksjon for å oppdatere rating her
+    val handleListItemRatingChange: (listItem: ListItem, score: Int) -> Unit  = { listItem, score ->
+
+        controllerViewModel.handleListItemScoreChange(listItem, score)
     }
 
     val handleProfileImageClick: (userID: String) -> Unit = {userID ->
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
     }
 
-    val handleProductionImageClick: (productionID: String) -> Unit = {productionID ->
-        navController.navigate(Screen.ComparisonScreen.withArguments(productionID))
+    val handleProductionImageClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
 
     LaunchedEffect(comparisonUser) {
@@ -361,8 +362,8 @@ fun ComparisonCard (
     listItemForLoggedInUser: ListItem,
     listItemForComparisonUser: ListItem,
     modifier: Modifier = Modifier,
-    handleProductionImageClick: (productionID: String) -> Unit,
-    handleListItemRatingsChange: (listItemID: String, rating: Int) -> Unit
+    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleListItemRatingsChange: (listItem: ListItem, rating: Int) -> Unit
 ){
 
     var productionLenght: Int = 1
@@ -389,10 +390,11 @@ fun ComparisonCard (
 
     var ratingsSliderVisible by remember { mutableStateOf(false) }
 
-    val handleRatingsChange: (newRating: Int) -> Unit = {newRating ->
+    val handleRatingsChange: (newRating: Int) -> Unit = { newRating ->
         ratingsSliderVisible = false
         loggedInUserRating = newRating
-        handleListItemRatingsChange(listItemForLoggedInUser.id, newRating)
+
+        handleListItemRatingsChange(listItemForLoggedInUser, newRating)
     }
 
     if(listItemForComparisonUser.production is TVShow){
@@ -479,7 +481,7 @@ fun ComparisonCard (
                 sizeMultiplier = .7f,
                 modifier = Modifier
                     .clickable {
-                        handleProductionImageClick(listItemForLoggedInUser.production.imdbID)
+                        handleProductionImageClick(listItemForLoggedInUser.production.imdbID, listItemForLoggedInUser.production.type)
                     }
             )
 
@@ -518,6 +520,7 @@ fun ComparisonCard (
         }
     }
     RatingSlider(
+        listItem = listItemForLoggedInUser,
         rating = loggedInUserRating,
         visible = ratingsSliderVisible,
         onValueChangeFinished = handleRatingsChange

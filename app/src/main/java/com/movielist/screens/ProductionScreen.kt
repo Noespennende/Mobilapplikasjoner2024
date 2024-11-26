@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -37,13 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.movielist.Screen
-import com.movielist.composables.GenerateListOptionName
+import com.movielist.composables.generateListOptionName
 import com.movielist.composables.LineDevider
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.YouTubeVideoEmbed
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -78,6 +80,9 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     /* Lytter etter endring i movieData fra ControllerViewModel */
     val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
+    var usersListItem by remember { mutableStateOf<ListItem?>(null) }
+
+
     // Trengs for å laste inn
 
     LaunchedEffect(productionID) {
@@ -109,21 +114,41 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             }
 
             Log.d("GetReviews", "listOfReviews has now ${listOfReviews?.size} reviews")
+
+            usersListItem = controllerViewModel.findProductionInUsersCollection(productionID)
+
+            userScore = usersListItem?.score ?: 0
+
+            val collection = usersListItem?.let { controllerViewModel.findListItemCollection(it) }
+
+            memberOfUserList = when (collection) {
+                "currentlyWatchingCollection" -> ListOptions.WATCHING
+                "completedCollection" -> ListOptions.COMPLETED
+                "wantToWatchCollection" -> ListOptions.WANTTOWATCH
+                "droppedCollection" -> ListOptions.DROPPED
+                else -> null
+            }
+
         }
     }
 
     LaunchedEffect(production) {
-        // Venter med å hente reviews til production er oppdatert
 
-        if (productionType != null) {
-            controllerViewModel.getReviewByProduction(productionID, productionType)
-        }
+            if (productionType != null) {
+                controllerViewModel.getReviewByProduction(productionID, productionType)
+            }
+
     }
 
 
     val handleScoreChange: (score: Int) -> Unit = { score ->
         userScore = score
-        //Kontroller kall her:
+
+        if (usersListItem != null) {
+
+            controllerViewModel.handleListItemScoreChange(usersListItem!!, score)
+        }
+
     }
 
     val handleUserListCategoryChange: (userListCategory: ListOptions?) -> Unit = {userListCategory ->
@@ -192,11 +217,10 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             //User score and list option
             item {
                 ListInfo(
+                    listItem = usersListItem,
                     memberOfUserList = memberOfUserList,
                     userScore = userScore,
-                    handleScoreChange = { score ->
-                        handleScoreChange(score)
-                    },
+                    handleScoreChange = handleScoreChange,
                     handleUserListChange = {listOption ->
                         handleUserListCategoryChange(listOption)
                     }
@@ -488,20 +512,27 @@ fun StatsSection(
 
 @Composable
 fun ListInfo (
+    listItem: ListItem?,
     memberOfUserList: ListOptions?,
     userScore: Int?,
-    handleScoreChange: (Int) -> (Unit),
+    handleScoreChange: (score: Int) -> (Unit),
     handleUserListChange: (ListOptions) -> (Unit)
 ){
 
     var dropDownExpanded by remember { mutableStateOf(false) }
-    var dropDownButtonText by remember { mutableStateOf(GenerateListOptionName(memberOfUserList))}
-    var userScoreFormatted by remember { if (userScore != null) {mutableIntStateOf(userScore)} else {mutableIntStateOf(0) }}
+    val dropDownButtonText by remember(memberOfUserList) {
+        derivedStateOf { generateListOptionName(memberOfUserList) }
+    }
+
+    val userScoreFormatted by remember(userScore) {
+        derivedStateOf { userScore ?: 0 }
+    }
+
     var ratingsSliderIsVisible by remember { mutableStateOf(false) }
 
-    var handleListCategoryChange: (listOption: ListOptions) -> Unit = {
+    val handleListCategoryChange: (listOption: ListOptions) -> Unit = {
         dropDownExpanded = false
-        dropDownButtonText = GenerateListOptionName(it)
+
         handleUserListChange(it)
     }
 
@@ -510,9 +541,11 @@ fun ListInfo (
     }
 
     val handleScoreSliderChange: (score: Int) -> Unit = { score ->
-        userScoreFormatted = score
+        //userScoreFormatted = score
         ratingsSliderIsVisible = false
+
         handleScoreChange(score)
+
     }
 
     Row (
@@ -527,11 +560,10 @@ fun ListInfo (
             //User rating
 
             RatingSlider(
+                listItem = listItem,
                 visible = ratingsSliderIsVisible,
                 rating = userScoreFormatted,
-                onValueChangeFinished = { score ->
-                    handleScoreSliderChange(score)
-                }
+                onValueChangeFinished = handleScoreSliderChange
             )
 
             Column (
@@ -607,7 +639,7 @@ fun ListInfo (
                                     .fillMaxWidth()
                             ) {
                                 Text(
-                                    text = GenerateListOptionName(option),
+                                    text = generateListOptionName(option),
                                     fontSize = headerSize,
                                     fontWeight = weightBold,
                                     fontFamily = fontFamily,
