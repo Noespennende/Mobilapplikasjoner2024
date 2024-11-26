@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
@@ -371,6 +372,8 @@ fun ComparisonCard (
     var productionImage = listItemForLoggedInUser.production.posterUrl
     var productionTitle = listItemForLoggedInUser.production.title
     var productionYear = listItemForLoggedInUser.production.releaseDate.get(Calendar.YEAR)
+    var watchedEpisodesLoggedInUser = listItemForLoggedInUser.currentEpisode
+    var watchedEpisodesComparisonUser = listItemForComparisonUser.currentEpisode
 
     if(productionImage == null){
         productionImage = listItemForComparisonUser.production.posterUrl
@@ -387,6 +390,8 @@ fun ComparisonCard (
     }
 
 
+
+
     var loggedInUserRating by remember { mutableStateOf(listItemForLoggedInUser.score) }
 
     var ratingsSliderVisible by remember { mutableStateOf(false) }
@@ -396,10 +401,6 @@ fun ComparisonCard (
         loggedInUserRating = newRating
 
         handleListItemRatingsChange(listItemForLoggedInUser, newRating)
-    }
-
-    if(listItemForComparisonUser.production is TVShow){
-        productionLenght = listItemForComparisonUser.production.episodes.size
     }
 
     Column (
@@ -458,7 +459,7 @@ fun ComparisonCard (
                 )
 
                 Text(
-                    text = "Ep " + listItemForLoggedInUser.currentEpisode + " of " + productionLenght,
+                    text = "Ep " + watchedEpisodesLoggedInUser + " of " + productionLenght,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
@@ -468,7 +469,7 @@ fun ComparisonCard (
                         .padding(top = 6.dp, bottom = 6.dp )
                 )
                 ProgressBar(
-                    currentNumber = listItemForComparisonUser.currentEpisode,
+                    currentNumber = watchedEpisodesLoggedInUser,
                     endNumber = productionLenght,
                     flip = true
                 )
@@ -501,7 +502,7 @@ fun ComparisonCard (
                 )
 
                 Text(
-                    text = "Ep " + listItemForLoggedInUser.currentEpisode + " of " + productionLenght,
+                    text = "Ep " + listItemForComparisonUser.score + " of " + productionLenght,
                     fontFamily = fontFamily,
                     fontWeight = weightRegular,
                     fontSize = paragraphSize,
@@ -510,15 +511,19 @@ fun ComparisonCard (
                     modifier = Modifier
                         .padding(top = 6.dp, bottom = 6.dp)
                 )
+
+
                 ProgressBar(
-                    currentNumber = listItemForComparisonUser.currentEpisode,
+                    currentNumber = watchedEpisodesComparisonUser,
                     endNumber = productionLenght,
                     foregroundColor =  if(isAppInDarkTheme()) LocalColor.current.quaternary else LocalColor.current.quaternary,
                     backgroundColor = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.backgroundLight
                 )
+
             }
         }
     }
+
     RatingSlider(
         rating = loggedInUserRating,
         visible = ratingsSliderVisible,
