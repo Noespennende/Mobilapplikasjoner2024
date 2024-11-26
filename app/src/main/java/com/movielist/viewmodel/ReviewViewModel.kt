@@ -2,6 +2,7 @@ package com.movielist.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.FirestoreRepository
@@ -18,6 +19,24 @@ class ReviewViewModel(
 ) : ViewModel() {
 
     private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
+
+
+    suspend fun getReviewsAllTime(pageSize: Long = 10, lastVisible: Any? = null): Pair<List<Review>, Boolean> {
+        return try {
+            // Hent anmeldelser fra firestoreRepository
+            val (reviewsRaw, hasMoreData) = firestoreRepository.getReviewsAllTime(pageSize, lastVisible)
+
+            // Konverter den rå JSON-en til Review-objekter
+            val reviewsObjects = reviewsRaw.mapNotNull { convertReviewJsonToReviewObject(it) }
+
+            // Returner listen med Review-objekter og om det er flere anmeldelser
+            Pair(reviewsObjects, hasMoreData)
+
+        } catch (exception: Exception) {
+            Log.d("ReviewViewModel", "Failed to fetch reviews: $exception")
+            Pair(emptyList(), false)  // Returner en tom liste og false for flere data
+        }
+    }
 
     suspend fun getReviewsFromPastWeek(): List<Review> {
         return try {

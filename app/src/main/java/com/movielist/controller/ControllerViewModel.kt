@@ -1480,6 +1480,42 @@ class ControllerViewModel(
         _singleReviewDTOData.value = null
     }
 
+    // Prøver paginering
+    suspend fun getTop10ReviewsAllTime(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+        var lastVisible: Any? = null
+        var hasMoreData = true
+
+
+        while (hasMoreData) {
+
+            val (reviews, hasMore) = reviewViewModel.getReviewsAllTime(pageSize = 10, lastVisible = lastVisible)
+
+            for (review in reviews) {
+                val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+                val user = userViewModel.getUser(review.reviewerID)
+                if (user != null) {
+                    val production = when (collectionType) {
+                        "RMOV" -> getMovieByIdAsync(review.productionID)
+                        "RTV" -> getTVShowByIdAsync(review.productionID)
+                        else -> null
+                    }
+                    val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                    reviewDTO?.let { reviewDTOList.add(it) }
+                }
+            }
+
+            hasMoreData = hasMore
+            lastVisible = reviews.lastOrNull()?.postDate
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.likes }
+            .take(10)
+    }
+
+    
     suspend fun getTop10ReviewsPastWeek(): List<ReviewDTO> {
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 
