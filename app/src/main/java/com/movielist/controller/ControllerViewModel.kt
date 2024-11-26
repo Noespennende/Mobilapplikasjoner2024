@@ -148,6 +148,16 @@ class ControllerViewModel(
         }
     }
 
+    fun getUserFollowingCount(): Int {
+        val user = loggedInUser.value
+        return user?.followingList?.size ?: 0
+    }
+
+    fun getUsersFollowingMeCount(): Int {
+        val user = loggedInUser.value
+        return user?.followingMeList?.size ?: 0
+    }
+
     fun addUserToFollowerList(otherUser: User){
         val user = loggedInUser.value
 
@@ -1777,5 +1787,7 @@ class ControllerViewModel(
     ) {
         authViewModel.createUserWithEmailAndPassword(username, email, password, onSuccess, onFailure)
     }
+
+
 
 }
