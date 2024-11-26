@@ -197,59 +197,14 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         LazyColumn(
             contentPadding = PaddingValues(
                 top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
-                bottom = bottomNavBarHeight +20.dp,
+                bottom = bottomNavBarHeight + 20.dp,
             ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             //Top info
             if (production == null) {
-            item {
-                LineDevider()
-            }
-
-            //User score and list option
-            item {
-                ListInfo(
-                    listItem = usersListItem,
-                    memberOfUserList = memberOfUserList,
-                    userScore = userScore,
-                    handleScoreChange = handleScoreChange,
-                    handleUserListChange = {listOption ->
-                        handleUserListCategoryChange(listOption)
-                    }
-
-                )
-            }
-
-            item {
-                LineDevider()
-            }
-
-
-            //Stat stection
-            item {
-                production?.let { production ->
-                    StatsSection(
-                        production = production,
-                    )
-                }
-            }
-
-            item {
-                LineDevider()
-            }
-
-            item{
-                production?.let { production ->
-                    GenreSection(
-                        production = production
-                    )
-                }
-            }
-
-            production?.let { production ->
-                //Youtube trailer embed
                 item {
+                    Text(text = "Loading...")
                 }
             } else {
                 item {
@@ -389,8 +344,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                     }
                 }
             }
-        }
 
+        }
     }
 
 }
@@ -565,7 +520,6 @@ fun StatsSection(
 
 @Composable
 fun ListInfo (
-    listItem: ListItem?,
     memberOfUserList: ListOptions?,
     userScore: Int?,
     handleScoreChange: (score: Int) -> (Unit),
