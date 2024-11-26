@@ -657,7 +657,6 @@ fun ListPageListItem (
                             )
                             {
                                 RatingSlider(
-                                    listItem = listItem,
                                     onValueChangeFinished = handleListItemScoreChange,
                                     visible = ratingsSliderIsVisible,
                                     rating = listItemRating

@@ -585,7 +585,6 @@ fun CurrentlyWatchingCard(
     }
 
     RatingSlider(
-        listItem = listItem,
         rating = listItem.score,
         visible = ratingSliderVisible,
         onValueChangeFinished = handleRatingChanged

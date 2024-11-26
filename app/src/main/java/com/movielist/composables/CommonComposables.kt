@@ -773,7 +773,6 @@ fun YouTubeVideoEmbed(
 
 @Composable
 fun RatingSlider (
-    listItem: ListItem?,
     rating: Int = 0,
     visible: Boolean,
     modifier: Modifier = Modifier,

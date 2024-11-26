@@ -353,7 +353,6 @@ fun ReviewRating(
     }
 
     RatingSlider(
-        null,
         rating = score,
         visible = scoreSliderVisible,
         onValueChangeFinished = { score ->

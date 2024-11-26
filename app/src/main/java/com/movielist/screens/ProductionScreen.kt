@@ -560,7 +560,6 @@ fun ListInfo (
             //User rating
 
             RatingSlider(
-                listItem = listItem,
                 visible = ratingsSliderIsVisible,
                 rating = userScoreFormatted,
                 onValueChangeFinished = handleScoreSliderChange

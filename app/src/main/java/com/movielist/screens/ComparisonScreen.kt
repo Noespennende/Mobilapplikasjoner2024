@@ -520,7 +520,6 @@ fun ComparisonCard (
         }
     }
     RatingSlider(
-        listItem = listItemForLoggedInUser,
         rating = loggedInUserRating,
         visible = ratingsSliderVisible,
         onValueChangeFinished = handleRatingsChange
