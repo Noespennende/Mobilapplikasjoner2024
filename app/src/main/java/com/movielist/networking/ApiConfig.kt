@@ -16,17 +16,14 @@ class ApiConfig {
                 chain.proceed(request)
             }
 
-            // Api resposne interceptor
             val loggingInterceptor = HttpLoggingInterceptor()
                 .setLevel(HttpLoggingInterceptor.Level.BODY)
 
-            // Client
             val client = OkHttpClient.Builder()
                 .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                 .addInterceptor(authInterceptor)
                 .build()
 
-            // Retrofit
             val retrofit = Retrofit.Builder()
                 .baseUrl("https://api.themoviedb.org/3/")
                 .addConverterFactory(GsonConverterFactory.create())

@@ -164,7 +164,7 @@ data class ApiMovieResponse(
 	val backdropPath: String? = null,
 
 	@field:SerializedName("belongs_to_collection")
-	val belongsToCollection: Any? = null, // Could be null or another data class for collection
+	val belongsToCollection: Any? = null,
 
 	@field:SerializedName("budget")
 	val budget: Long? = null,

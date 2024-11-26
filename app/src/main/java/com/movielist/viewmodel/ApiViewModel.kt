@@ -84,11 +84,8 @@ class ApiViewModel() : ViewModel() {
                 call: Call<ApiAllMediaResponse>,
                 response: Response<ApiAllMediaResponse>
             ) {
-                Log.d("ApiViewModel", "Raw searchMulti response: $response")
 
                 val responseBody = response.body()
-
-                Log.d("ApiViewModel", "Response received for searchMulti: $responseBody")
 
                 if (!response.isSuccessful || responseBody == null) {
                     onError("Data Processing Error")
@@ -103,13 +100,11 @@ class ApiViewModel() : ViewModel() {
 
                 _isLoading.value = false
                 _searchResults.value = filteredResults ?: emptyList()
-                Log.d("ApiViewModel", "Filtered search results: $filteredResults")
             }
 
             override fun onFailure(call: Call<ApiAllMediaResponse>, t: Throwable) {
                 onError(t.message)
                 t.printStackTrace()
-                Log.e("ApiViewModel", "API searchMulti call failed", t)
             }
         })
     }
@@ -138,7 +133,6 @@ class ApiViewModel() : ViewModel() {
                 }?.filterNotNull()
 
                 _mediaData.postValue(mediaList ?: emptyList())
-                //_mediaData.value = mediaList
             }
             override fun onFailure(call: Call<ApiAllMediaResponse>, t: Throwable) {
                 onError(t.message)
@@ -152,7 +146,6 @@ class ApiViewModel() : ViewModel() {
             _isLoading.value = true
             _isError.value = false
 
-            Log.d("ApiVIEWMODel", "getMovie Called")
             val client = ApiConfig.getApiService().getMovie(movieId)
 
             client.enqueue(object : Callback<ApiMovieResponse> {
@@ -161,11 +154,9 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiMovieResponse?>,
                     response: Response<ApiMovieResponse?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getMovie response: $response")
 
                     val responseBody = response.body()
 
-                    Log.d("ApiViewModel", "Response getMovie received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -192,7 +183,6 @@ class ApiViewModel() : ViewModel() {
         _isLoading.value = true
         _isError.value = false
 
-        Log.d("ApiVIEWMODel", "getShow Called")
         val client = ApiConfig.getApiService().getShow(seriesId)
 
         client.enqueue(object : Callback<ApiShowResponse> {
@@ -201,11 +191,9 @@ class ApiViewModel() : ViewModel() {
                 call: Call<ApiShowResponse?>,
                 response: Response<ApiShowResponse?>
             ) {
-                Log.d("ApiViewModel", "Raw getShow response: $response")
 
                 val responseBody = response.body()
 
-                Log.d("ApiViewModel", "Response getShow received: $responseBody")
 
                 if (!response.isSuccessful || responseBody == null) {
                     onError("Data Processing Error")
@@ -221,8 +209,6 @@ class ApiViewModel() : ViewModel() {
             ) {
                 onError(t.message)
                 t.printStackTrace()
-
-                Log.e("ApiViewModel", "API getShow call failed", t)
             }
         })
     }
@@ -240,11 +226,7 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiShowSeason?>,
                     response: Response<ApiShowSeason?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getShowSeason response: $response")
-
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getShowSeason received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -261,7 +243,6 @@ class ApiViewModel() : ViewModel() {
                     onError(t.message)
                     t.printStackTrace()
 
-                    Log.e("ApiViewModel", "API getShowSeason call failed", t)
                 }
             })
         }
@@ -280,11 +261,8 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiShowSeasonEpisode?>,
                     response: Response<ApiShowSeasonEpisode?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getShowEpisode response: $response")
 
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getShowEpisode received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -300,8 +278,6 @@ class ApiViewModel() : ViewModel() {
                 ) {
                     onError(t.message)
                     t.printStackTrace()
-
-                    Log.e("ApiViewModel", "API getShowEpisode call failed", t)
                 }
             })
         }
@@ -311,7 +287,6 @@ class ApiViewModel() : ViewModel() {
             _isLoading.value = true
             _isError.value = false
 
-            Log.d("ApiVIEWMODel", "getMovieCredits Called")
             val client = ApiConfig.getApiService().getMovieCredits(movieId)
 
             client.enqueue(object : Callback<ApiMovieCreditResponse> {
@@ -320,11 +295,8 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiMovieCreditResponse?>,
                     response: Response<ApiMovieCreditResponse?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getMovieCredits response: $response")
 
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getMovieCredits received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -340,8 +312,6 @@ class ApiViewModel() : ViewModel() {
                 ) {
                     onError(t.message)
                     t.printStackTrace()
-
-                    Log.e("ApiViewModel", "API getMovieCredits call failed", t)
                 }
             })
         }
@@ -351,7 +321,6 @@ class ApiViewModel() : ViewModel() {
             _isLoading.value = true
             _isError.value = false
 
-            Log.d("ApiVIEWMODel", "getShowCredits Called")
             val client = ApiConfig.getApiService().getShowCredits(seriesId)
 
             client.enqueue(object : Callback<ApiShowCreditResponse> {
@@ -360,11 +329,7 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiShowCreditResponse?>,
                     response: Response<ApiShowCreditResponse?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getShowCredits response: $response")
-
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getShowCredits received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -380,8 +345,6 @@ class ApiViewModel() : ViewModel() {
                 ) {
                     onError(t.message)
                     t.printStackTrace()
-
-                    Log.e("ApiViewModel", "API getShowCredits call failed", t)
                 }
             })
         }
@@ -391,8 +354,7 @@ class ApiViewModel() : ViewModel() {
             _isLoading.value = true
             _isError.value = false
 
-            Log.d("ApiVIEWMODel", "getMovieVideo Called")
-            val client = ApiConfig.getApiService().getMovieVideo(movieId)
+        val client = ApiConfig.getApiService().getMovieVideo(movieId)
 
             client.enqueue(object : Callback<ApiMediaVideoResponse> {
 
@@ -400,11 +362,8 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiMediaVideoResponse?>,
                     response: Response<ApiMediaVideoResponse?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getMovieVideo response: $response")
 
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getMovieVideo received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -419,7 +378,6 @@ class ApiViewModel() : ViewModel() {
 
                     _isLoading.value = false
                     _movieVideoData.value = filteredResults
-                    Log.d("ApiViewModel", "Video please be right: $filteredResults")
 
                 }
 
@@ -429,8 +387,6 @@ class ApiViewModel() : ViewModel() {
                 ) {
                     onError(t.message)
                     t.printStackTrace()
-
-                    Log.e("ApiViewModel", "API getMovieVideo call failed", t)
                 }
             })
         }
@@ -440,7 +396,6 @@ class ApiViewModel() : ViewModel() {
             _isLoading.value = true
             _isError.value = false
 
-            Log.d("ApiVIEWMODel", "getShowVideo Called")
             val client = ApiConfig.getApiService().getShowVideo(seriesId)
 
             client.enqueue(object : Callback<ApiMediaVideoResponse> {
@@ -449,11 +404,7 @@ class ApiViewModel() : ViewModel() {
                     call: Call<ApiMediaVideoResponse?>,
                     response: Response<ApiMediaVideoResponse?>
                 ) {
-                    Log.d("ApiViewModel", "Raw getShowVideo response: $response")
-
                     val responseBody = response.body()
-
-                    Log.d("ApiViewModel", "Response getShowVideo received: $responseBody")
 
                     if (!response.isSuccessful || responseBody == null) {
                         onError("Data Processing Error")
@@ -476,7 +427,6 @@ class ApiViewModel() : ViewModel() {
                     onError(t.message)
                     t.printStackTrace()
 
-                    Log.e("ApiViewModel", "API getShowVideo call failed", t)
                 }
             })
         }

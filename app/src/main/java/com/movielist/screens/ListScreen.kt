@@ -444,9 +444,10 @@ fun ListPageListItem (
     }
 
     val handleListItemScoreChange: (rating: Int) -> Unit = {rating ->
-        handleListItemRatingChange(listItem, rating)
         listItemRating = rating
         ratingsSliderIsVisible = false
+
+        handleListItemRatingChange(listItem, rating)
     }
 
     val handleEpisodeCount = { isPlus: Boolean ->

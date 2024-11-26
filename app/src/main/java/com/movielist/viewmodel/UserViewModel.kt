@@ -49,7 +49,6 @@ class UserViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 _loggedInUser.value = updatedUser
-
                 firestoreRepository.updateUser(updatedUser)
 
             } catch (e: Exception) {
@@ -57,6 +56,23 @@ class UserViewModel : ViewModel() {
             }
         }
     }
+
+
+
+    fun updateFollowingForUser(updatedUser: User, otherUpdatedUser: User) {
+        viewModelScope.launch {
+            try {
+                _loggedInUser.value = updatedUser
+                _otherUser.value = otherUpdatedUser
+
+                firestoreRepository.updateFollowUser(updatedUser,otherUpdatedUser )
+
+            } catch (e: Exception) {
+                Log.e("UserViewModel", "Error updating logged-in user: ${e.message}")
+            }
+        }
+    }
+
 
     // Funksjon for å sette User-objekt for innloggede bruker
     fun setLoggedInUser(uid: String) {

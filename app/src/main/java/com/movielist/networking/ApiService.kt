@@ -16,9 +16,7 @@ import retrofit2.http.Query
 
 interface ApiService {
 
-    // Hvilket endpoint vi vil hente data fra (det etter BASE_URL/)
     @GET("trending/all/week?language=en-US")
-    //fun getMovies(@Query("api_key") key: String = ApiConfig.API_KEY): Call<ApiResponse>
     fun getAllMedia(@Header("Authorization") authHeader: String = "Bearer ${ApiConfig.ACCESS_TOKEN}"): Call<ApiAllMediaResponse>
 
     @GET("movie/{movie_id}?language=en-US")
