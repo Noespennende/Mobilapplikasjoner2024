@@ -21,6 +21,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 // ViewModel for å håndtere bruker-logikk
 class UserViewModel : ViewModel() {
@@ -371,6 +372,35 @@ class UserViewModel : ViewModel() {
             }
 
         }
+    }
+
+
+    fun publishReview(
+        collectionID: String,
+        productionID: String,
+        reviewID: String,
+        reviewData: Map<String, Any>,
+        onSuccess: () -> Unit?) {
+
+        viewModelScope.launch {
+
+            val user = loggedInUser.value
+            val userID = user?.id
+
+            if (userID != null) {
+                firestoreRepository.publishReview(collectionID, productionID, reviewID, reviewData,
+                    onSuccess = {
+                        viewModelScope.launch {
+                            firestoreRepository.addReviewToUser(userID, reviewID)
+
+                            user.myReviews.add(reviewID)
+                            Log.d("tester", user.myReviews.toString())
+                            onSuccess()
+                        }
+                    })
+            }
+        }
+
     }
 
 

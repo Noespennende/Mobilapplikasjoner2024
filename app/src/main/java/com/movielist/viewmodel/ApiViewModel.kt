@@ -586,6 +586,28 @@ class ApiViewModel() : ViewModel() {
         }
     }
 
+    suspend fun getShowDetailsTry(showID: String): Result<ShowResponse> {
+
+        return try {
+
+            val showDeferred = viewModelScope.async { getShowData(showID) }
+            val videoDeferred = viewModelScope.async { getShowVideoData(showID) }
+            val creditDeferred = viewModelScope.async { getShowCreditData(showID) }
+
+            val showData = showDeferred.await()
+            val showVideoData = videoDeferred.await()
+            val showCreditData = creditDeferred.await()
+
+            val showResponse = ShowResponse(showData, showVideoData, showCreditData)
+
+            Result.success(showResponse)
+        } catch (e: Exception) {
+
+            Result.failure(e)
+        }
+    }
+
+
     private suspend fun getShowData(showID: String): ApiShowResponse {
 
         return suspendCoroutine { cont ->

@@ -120,73 +120,19 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     )
 
 
-
-    val exampleReviews: MutableList<ReviewDTO> = mutableListOf()
-    val exampleShows: MutableList<ListItem> = mutableListOf()
-    val exampleFavShows: MutableList<ListItem> = mutableListOf()
-
     val handleProductionClick: (productionID: String, productionType: String)
     -> Unit = { productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
     }
-
-    for (i in 0 .. 10){
-        exampleShows.add(
-            ListItem(
-                production = TVShow(
-                    imdbID = "123",
-                    title = "Silo",
-                    description = "TvShow Silo description here",
-                    genre = listOf("Action"),
-                    releaseDate = Calendar.getInstance(),
-                    actors = emptyList(),
-                    rating = 4,
-                    reviews = ArrayList(),
-                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                    episodes = listOf("01", "02", "03", "04", "05", "06",
-                        "07", "08", "09", "10", "11", "12"),
-                    seasons = listOf("1", "2", "3")
-                ),
-                currentEpisode = i,
-                score = Random.nextInt(0, 10)
-
-            )
-        )
-        exampleReviews.add(
-            ReviewDTO(
-                reviewID = reviewUser.id,
-                score = reviewReview.score,
-                productionID = reviewReview.productionID,
-                reviewerID = reviewReview.reviewerID,
-                reviewBody = reviewReview.reviewBody,
-                postDate = reviewReview.postDate,
-                likes = reviewReview.likes,
-                reviewerUserName = reviewUser.userName,
-                reviewerProfileImage = reviewUser.profileImageID,
-                productionPosterUrl = reviewProduction.posterUrl,
-                productionTitle = reviewProduction.title,
-                productionReleaseDate = reviewProduction.releaseDate,
-                productionType = reviewProduction.type
-            )
-        )
-    }
-
-    exampleUser.myReviews.addAll(exampleReviews.map { it.reviewID })
-    exampleUser.currentlyWatchingCollection.addAll(exampleShows)
-    exampleUser.completedCollection.addAll(exampleShows)
-    exampleUser.wantToWatchCollection.addAll(exampleShows)
-    exampleUser.droppedCollection.addAll(exampleShows)
-
-    exampleFavShows.addAll(exampleShows)
 
 
     // TEMP CODE DELETE ABOVE
 
     val profileOwnerID by remember { mutableStateOf(userID) } /* <- ID of the user that owns the profile we are looking at*/
 
-    val profileOwner = controllerViewModel.profileOwner.collectAsState().value
-
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
+
+    val profileOwner = controllerViewModel.profileOwner.collectAsState().value
 
     var profileBelongsToLoggedInUser by remember { mutableStateOf(true) } /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
@@ -261,24 +207,47 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
 
     LaunchedEffect(userID) {
+
+        profileOwnersReviews.value = emptyList()
         if (userID != null) {
-            Log.d("Profile", "UserID: " + userID)
+            Log.d("tester", "UserID: " + userID)
+
+
             controllerViewModel.loadProfileOwner(userID)
         }
     }
 
     LaunchedEffect(profileOwner) {
-        val owner = profileOwner
+        // Denne koden vil kun kjøres når profileOwner har en ikke-null verdi
+        profileOwner?.let { owner ->
 
-        owner?.let {
-            profileBelongsToLoggedInUser = it.id == loggedInUser?.id
-            profileOwnersReviews.value = controllerViewModel.getUsersReviews(it).toMutableList()
+            Log.d("tester", "kjører jeg?")
+            // Sørg for at korutinen ikke blir kansellert før den er ferdig
+            val reviewIds = owner.myReviews.joinToString(", ") { it }
+            profileBelongsToLoggedInUser = owner.id == loggedInUser?.id
 
-            Log.d("Profile", "Profile belongs to logged-in user: $profileBelongsToLoggedInUser - ${profileOwner.userName}")
+            Log.d("tester", "owner.myReviews: ${owner.myReviews}")
+
+            // Kall den suspend-funksjonen på en korrekt måte
+            val reviews = controllerViewModel.getUsersReviews(owner)
+
+            Log.d("tester", "Reviews size: ${reviews.size}")
+            Log.d("tester", "Reviews: ${reviews.joinToString { it.reviewID }}")
+
+            if (reviews.isEmpty()) {
+                Log.d("tester", "No reviews found")
+            } else {
+                Log.d("tester", "Fetched Reviews: ${reviews.joinToString { it.reviewID }}")
+            }
+
+            profileOwnersReviews.value = reviews
+
+            Log.d("tester", "profileOwnerReviews: " + profileOwnersReviews)
         } ?: run {
-            Log.d("Profile", "ProfileOwner is null")
+            Log.d("ProfileOwner", "ProfileOwner is null")
         }
     }
+
 
     //Graphics
     //Main Content

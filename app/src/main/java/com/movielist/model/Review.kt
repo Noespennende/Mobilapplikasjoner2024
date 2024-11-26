@@ -1,5 +1,13 @@
 package com.movielist.model
 
+import android.util.Log
+import com.google.firebase.Timestamp
+import com.movielist.data.FirebaseTimestampAdapter
+import com.movielist.data.UUIDAdapter
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.adapters.PolymorphicJsonAdapterFactory
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import java.util.Calendar
 import java.util.UUID
 
@@ -11,7 +19,20 @@ data class Review(
     val reviewBody: String,
     val postDate: Calendar = Calendar.getInstance(),
     var likes: Int = 0
-)
+) {
+
+    fun toMap(): Map<String, Any> {
+        return mapOf(
+            "reviewID" to reviewID,
+            "score" to score,
+            "reviewerID" to reviewerID,
+            "productionID" to productionID,
+            "reviewBody" to reviewBody,
+            "postDate" to Timestamp(postDate.time),
+            "likes" to likes
+        )
+    }
+}
 
 
 data class ReviewDTO(
@@ -29,3 +50,5 @@ data class ReviewDTO(
     val productionReleaseDate: Calendar,
     val productionType: String,
 )
+
+
