@@ -198,6 +198,10 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val usersFavoriteTVShows = controllerViewModel.getUsersFavoriteTVShows(profileOwner)
 
+    val userFollowerCount = controllerViewModel.getUserFollowingCount()
+
+    val userFollowingMeCount = controllerViewModel.getUsersFollowingMeCount()
+
     var activeTab by remember { mutableStateOf(com.movielist.model.ProfileCategoryOptions.SUMMARY) }
 
     var followStatus: FollowStatus by remember { mutableStateOf(FollowStatus.NOTFOLLOWING) }
@@ -300,7 +304,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                         followStatus = followStatus ,
                         loggedInUsersProfile = profileBelongsToLoggedInUser,
                         handleSettingsButtonClick = handleSettingsButtonClick,
-                        handleFollowUnfollowClick = handleFollowUnfollowClick
+                        handleFollowUnfollowClick = handleFollowUnfollowClick,
+                        followingCount = userFollowerCount,
+                        followersCount = userFollowingMeCount
                     )
                 }
 
@@ -592,7 +598,9 @@ fun ProfileInfoSection (
     loggedInUsersProfile: Boolean,
     followStatus: FollowStatus,
     handleSettingsButtonClick: () -> Unit,
-    handleFollowUnfollowClick: (followStatus: FollowStatus) -> Unit
+    handleFollowUnfollowClick: (followStatus: FollowStatus) -> Unit,
+    followingCount: Int,
+    followersCount: Int
 ){
 
 
@@ -695,8 +703,8 @@ fun ProfileInfoSection (
             SummarySection(
                 filmCount = 1530, //TEMP CODE DELETE THIS
                 showCount = 500, //TEMP CODE DELETE THIS
-                followingCount = 200, //TEMP CODE DELETE THIS
-                followersCount = 2453, //TEMP CODE DELETE THIS
+                followingCount = followingCount ,
+                followersCount = followersCount,
             )
         }
 
