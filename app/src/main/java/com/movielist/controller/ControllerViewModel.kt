@@ -30,7 +30,6 @@ import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
@@ -1309,8 +1308,6 @@ class ControllerViewModel(
 
                         }
                     }
-
-                    is Episode -> TODO()
                 }
             }
         }

@@ -46,7 +46,6 @@ import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
@@ -598,8 +597,6 @@ fun ListPageListItem (
                                             }
 
                                         }
-
-                                        is Episode -> TODO()
                                     }
                                 }
                         ){
