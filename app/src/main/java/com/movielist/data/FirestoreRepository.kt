@@ -168,10 +168,11 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    suspend fun fetchUsersFromFirebase(query: String): List<User>? {
+    suspend fun fetchUsersFromFirebase(query: String): List<Map<String, Any>>? {
         val db = Firebase.firestore
 
         return try {
+            // Hent brukere fra Firebase som matcher søket
             val querySnapshot = db.collection("users")
                 .whereGreaterThanOrEqualTo("userName", query)
                 .whereLessThanOrEqualTo("userName", query)
@@ -179,26 +180,14 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 .await()
 
             querySnapshot.documents.map { document ->
-                val email = document.getString("email") ?: ""
-                val userName = document.getString("userName") ?: ""
-
-                val profileImageID = document.get("profileImageID")
-                val profileImageIDString = when (profileImageID) {
-                    is String -> profileImageID
-                    else -> ""
-                }
-
-                User(
-                    email = email,
-                    userName = userName,
-                    profileImageID = profileImageIDString
-                )
+                document.data ?: emptyMap()
             }
         } catch (exception: Exception) {
             Log.w("FirebaseFailure", "Error fetching users", exception)
             null
         }
     }
+
 
     suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
         val db = Firebase.firestore

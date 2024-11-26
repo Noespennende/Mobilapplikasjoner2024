@@ -120,8 +120,8 @@ class ControllerViewModel(
     fun searchUsers(query: String) {
         viewModelScope.launch {
             try {
-                val users = firestoreRepository.fetchUsersFromFirebase(query)
-                _userSearchResults.value = users ?: emptyList()
+                val users = userViewModel.fetchUsersFromFirebase(query)
+                _userSearchResults.value = users
             } catch (e: Exception) {
                 _userSearchResults.value = emptyList()
             }
@@ -131,17 +131,19 @@ class ControllerViewModel(
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
 
-    private val _profileBelongsToLoggedInUser = MutableStateFlow<Boolean>(true)
+    private val _profileBelongsToLoggedInUser = MutableStateFlow(false)
     val profileBelongsToLoggedInUser: StateFlow<Boolean> get() = _profileBelongsToLoggedInUser
 
     suspend fun loadProfileOwner(userID: String) {
         Log.d("Profile", "Loading profile for userID: $userID")
-
         _profileOwner.value = if (userID == loggedInUser.value?.id) {
 
             _profileBelongsToLoggedInUser.value = true
             Log.d("Profile", "Profile owner is the logged-in user.")
+
+
             loggedInUser.value
+
         } else {
 
             _profileBelongsToLoggedInUser.value = false
@@ -150,6 +152,7 @@ class ControllerViewModel(
             Log.d("Profile", "Found other user: ${other?.userName}")
             other
         }
+
     }
 
     fun determineFollowStatus(): FollowStatus {
@@ -365,7 +368,7 @@ class ControllerViewModel(
 
         if (sortOptions == SearchSortOptions.USER) {
             viewModelScope.launch {
-                userViewModel.searchUsers(query)
+                userViewModel.fetchUsersFromFirebase(query)
             }
         }
 
