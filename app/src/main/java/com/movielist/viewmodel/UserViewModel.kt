@@ -41,10 +41,24 @@ class UserViewModel : ViewModel() {
 
 
 
-    suspend fun searchUsers(query: String) {
-        val users = firestoreRepository.fetchUsersFromFirebase(query)
-        _searchResults.value = users ?: emptyList()
+    suspend fun fetchUsersFromFirebase(query: String): List<User> {
+
+        val usersMaps = firestoreRepository.fetchUsersFromFirebase(query)
+
+        var listOfUsers = mutableListOf<User>()
+        if (usersMaps != null) {
+            for (userMap in usersMaps) {
+                val userObject = convertUserJsonToUserObject(userMap)
+
+                if (userObject != null) {
+                    listOfUsers.add(userObject)
+                }
+            }
+        }
+
+        return  listOfUsers.toList()
     }
+
 
     fun updateLoggedInUser(updatedUser: User) {
         viewModelScope.launch {
