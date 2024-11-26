@@ -158,6 +158,54 @@ class ControllerViewModel(
         return user?.followingMeList?.size ?: 0
     }
 
+    fun getMovieInListsCount(): Int {
+        val user = loggedInUser.value
+
+        if (user == null) {
+            Log.d("MovieLists", "User is null, returning count as 0")
+            return 0
+        }
+        val uniqueMovieTitles = mutableSetOf<String>()
+
+        user.completedCollection.filter { it.production.type == "Movie" }
+            .forEach { uniqueMovieTitles.add(it.production.title) }
+        user.favoriteCollection.filter { it.production.type == "Movie" }
+            .forEach { uniqueMovieTitles.add(it.production.title) }
+        user.currentlyWatchingCollection.filter { it.production.type == "Movie" }
+            .forEach { uniqueMovieTitles.add(it.production.title) }
+        user.wantToWatchCollection.filter { it.production.type == "Movie" }
+            .forEach { uniqueMovieTitles.add(it.production.title) }
+        user.droppedCollection.filter { it.production.type == "Movie" }
+            .forEach { uniqueMovieTitles.add(it.production.title) }
+
+        return uniqueMovieTitles.size
+
+    }
+
+    fun getShowsInListsCount(): Int {
+        val user = loggedInUser.value
+        if (user == null) {
+            Log.d("MovieLists", "User is null, returning count as 0")
+            return 0
+        }
+        val uniqueShowTitles = mutableSetOf<String>()
+
+        user.completedCollection.filter { it.production.type == "TVShow" }
+            .forEach { uniqueShowTitles.add(it.production.title) }
+        user.favoriteCollection.filter { it.production.type == "TVShow" }
+            .forEach { uniqueShowTitles.add(it.production.title) }
+        user.currentlyWatchingCollection.filter { it.production.type == "TVShow" }
+            .forEach { uniqueShowTitles.add(it.production.title) }
+        user.wantToWatchCollection.filter { it.production.type == "TVShow" }
+            .forEach { uniqueShowTitles.add(it.production.title) }
+        user.droppedCollection.filter { it.production.type == "TVShow" }
+            .forEach { uniqueShowTitles.add(it.production.title) }
+
+
+        return uniqueShowTitles.size
+        }
+
+
     fun addUserToFollowerList(otherUser: User){
         val user = loggedInUser.value
 
