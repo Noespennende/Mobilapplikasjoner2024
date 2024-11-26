@@ -1,5 +1,6 @@
 package com.movielist.composables
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Ease
 import androidx.compose.animation.core.EaseIn
@@ -110,7 +111,11 @@ fun ProgressBar (
     flip: Boolean = false
 )
 {
-    val percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
+    var percentage: Float = currentNumber.toFloat()/endNumber.toFloat()
+
+    if (percentage > 1f) {
+        percentage = 1f
+    }
 
     var animationPlayed by remember {
         mutableStateOf(false)
