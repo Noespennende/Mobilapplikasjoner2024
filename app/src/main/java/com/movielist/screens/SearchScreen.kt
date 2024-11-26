@@ -50,7 +50,6 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     val handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery:String) -> Unit = {sortingOption, searchQuery ->
         activeSortOption = sortingOption
         currentSearchQuery = searchQuery
-        //Kontroller logikk for å håndtere søk her
         when (activeSortOption) {
             SearchSortOptions.USER -> {
                 controllerViewModel.searchUsers(searchQuery)
