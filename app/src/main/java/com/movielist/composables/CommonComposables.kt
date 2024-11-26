@@ -1,7 +1,11 @@
 package com.movielist.composables
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Ease
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.Easing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -1044,5 +1048,102 @@ fun SettingsButton(
                 handleSettingsButtonClick()
             }
     )
+}
+
+
+@Composable
+fun LoadingCircle(
+    color: Color = LocalColor.current.primary,
+    strokeWidth: Dp = 6.dp,
+    radius: Dp = 100.dp,
+    animationDuration: Int = 1000,
+) {
+    val circleOneSweepAngle = remember { Animatable(0f) }
+    val circleOneStartAngle = remember { Animatable(270f) }
+    val circleTwoSweepAngle = remember { Animatable(-360f) }
+    val circleTwoStartAngle = remember { Animatable(-90f) }
+    var animationPhase by remember { mutableStateOf(true) }
+
+
+    LaunchedEffect(animationPhase) {
+        when (animationPhase) {
+            true -> {
+                circleOneSweepAngle.animateTo(
+                    targetValue = 360f,
+                    animationSpec = tween(
+                        durationMillis = animationDuration,
+                        easing = EaseIn
+                    )
+                )
+                // Transition to retract phase
+                animationPhase = false
+            }
+
+            false -> {
+                circleTwoSweepAngle.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = animationDuration,
+                        easing = EaseOut
+                    )
+                )
+                // Reset for next cycle
+                circleOneSweepAngle.snapTo(0f)
+                circleTwoSweepAngle.snapTo(-360f)
+                animationPhase = true // Start filling again
+            }
+        }
+    }
+
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Image(
+            painter = painterResource(R.drawable.logo_m),
+            contentDescription = "MovieList",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .clip(RoundedCornerShape(5.dp))
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .size(radius)
+        ) {
+            Canvas(
+                modifier = Modifier
+                    .size(radius)
+            ) {
+                if (animationPhase){
+                    drawArc(
+                        color = color,
+                        startAngle = circleOneStartAngle.value,
+                        sweepAngle = circleOneSweepAngle.value,
+                        useCenter = false,
+                        style = Stroke(
+                            strokeWidth.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+                } else {
+                    drawArc(
+                        color = color,
+                        startAngle = circleTwoStartAngle.value,
+                        sweepAngle = circleTwoSweepAngle.value,
+                        useCenter = false,
+                        style = Stroke(
+                            strokeWidth.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
+
+            }
+        }
+    }
 }
 

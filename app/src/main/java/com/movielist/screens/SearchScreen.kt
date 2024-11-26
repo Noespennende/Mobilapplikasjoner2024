@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.TopScreensNavbarBackground
@@ -44,9 +45,11 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     val userList by controllerViewModel.userSearchResults.collectAsState()
 
     var activeSortOption by remember { mutableStateOf(SearchSortOptions.MOVIESANDSHOWS) }
+    var currentSearchQuery by remember { mutableStateOf("") }
 
     val handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery:String) -> Unit = {sortingOption, searchQuery ->
         activeSortOption = sortingOption
+        currentSearchQuery = searchQuery
         //Kontroller logikk for å håndtere søk her
         when (activeSortOption) {
             SearchSortOptions.USER -> {

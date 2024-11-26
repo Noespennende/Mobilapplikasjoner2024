@@ -7,7 +7,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,6 +45,7 @@ import com.movielist.R
 import com.movielist.Screen
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ListItemListSidesroller
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RoundProgressBar
@@ -283,24 +283,52 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     }
 
     //Graphics
-    //Main Content
-    LazyColumn(
-        contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
-            bottom = bottomNavBarHeight +20.dp
-        ),
-        verticalArrangement = Arrangement.spacedBy(15.dp)
-    )
-    {
-        if(activeTab == com.movielist.model.ProfileCategoryOptions.SUMMARY){
-            //Biosection
-            item{
-                //Wrapper for horisontal padding
-                Box(
-                    modifier = Modifier
-                        .padding(
-                            horizontal = horizontalPadding
+    if (profileOwner == null) {
+        LoadingCircle()
+    } else {
+
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
+                bottom = bottomNavBarHeight + 20.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        )
+        {
+            if (activeTab == com.movielist.model.ProfileCategoryOptions.SUMMARY) {
+                //Biosection
+                item {
+                    //Wrapper for horisontal padding
+                    Box(
+                        modifier = Modifier
+                            .padding(
+                                horizontal = horizontalPadding
+                            )
+                    )
+                    {
+                        ProfileInfoSection(
+                            user = user,
+                            followStatus = followStatus,
+                            loggedInUsersProfile = profileBelongsToLoggedInUser,
+                            handleSettingsButtonClick = handleSettingsButtonClick,
+                            handleFollowUnfollowClick = handleFollowUnfollowClick
                         )
+                    }
+
+                }
+
+                //Favorite Series
+                item {
+                    ListItemListSidesroller(
+                        header = "Favorite series",
+                        listOfShows = usersFavoriteTVShows,
+                        handleImageClick = handleProductionClick,
+                        textModifier = Modifier
+                            .padding(
+                                start = verticalPadding,
+                                bottom = 15.dp
+                            )
+
                 )
                 {
                     ProfileInfoSection(
@@ -316,119 +344,102 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     )
                 }
 
-            }
+                //Line devider
+                item {
+                    //Wrapper for the line devider
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                    ) {
+                        LineDevider()
+                    }
 
-            //Favorite Series
-            item {
-                ListItemListSidesroller(
-                    header = "Favorite series",
-                    listOfShows = usersFavoriteTVShows,
-                    handleImageClick = handleProductionClick,
-                    textModifier = Modifier
-                        .padding(
-                            start = verticalPadding,
-                            bottom = 15.dp
-                        )
-
-                )
-            }
-
-            //Line devider
-            item {
-                //Wrapper for the line devider
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
-                ){
-                    LineDevider()
                 }
 
-            }
-
-            //Favorite Movies
-            item {
-                ListItemListSidesroller(
-                    header = "Favorite movies",
-                    listOfShows = usersFavoriteMovies,
-                    handleImageClick = handleProductionClick,
-                    textModifier = Modifier
-                        .padding(
-                            start = horizontalPadding,
-                            bottom = 15.dp
-                        )
-                )
-            }
-
-            //Line devider
-            item {
-                //Wrapper for the line devider
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
-                ){
-                    LineDevider()
+                //Favorite Movies
+                item {
+                    ListItemListSidesroller(
+                        header = "Favorite movies",
+                        listOfShows = usersFavoriteMovies,
+                        handleImageClick = handleProductionClick,
+                        textModifier = Modifier
+                            .padding(
+                                start = horizontalPadding,
+                                bottom = 15.dp
+                            )
+                    )
                 }
 
-            }
+                //Line devider
+                item {
+                    //Wrapper for the line devider
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                    ) {
+                        LineDevider()
+                    }
 
-            //Statistics section
-            item {
-                StatisticsSection(
-
-                    showGenreToPercentageMap = controllerViewModel.genrePercentageShows(),
-                    movieGenreToPercentageMap = controllerViewModel.genrePercentageMovie()
-                )
-            }
-
-            //Line devider
-            item {
-                //Wrapper for the line devider
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
-                ){
-                    LineDevider()
                 }
 
-            }
+                //Statistics section
+                item {
+                    StatisticsSection(
 
-            //Review section
-            item {
-                ReviewsSection(
-                    reviewList = profileOwnersReviews.value,
-                    header = "Reviews",
-                    handleLikeClick = handleReviewButtonLikeClick,
-                    handleProductionImageClick = handleProductionClick,
-                    handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                        showGenreToPercentageMap = controllerViewModel.genrePercentageShows(),
+                        movieGenreToPercentageMap = controllerViewModel.genrePercentageMovie()
+                    )
+                }
 
-                )
+                //Line devider
+                item {
+                    //Wrapper for the line devider
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = horizontalPadding)
+                    ) {
+                        LineDevider()
+                    }
+
+                }
+
+                //Review section
+                item {
+                    ReviewsSection(
+                        reviewList = profileOwnersReviews.value,
+                        header = "Reviews",
+                        handleLikeClick = handleReviewButtonLikeClick,
+                        handleProductionImageClick = handleProductionClick,
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
+
+                    )
+                }
+            } else if (activeTab == com.movielist.model.ProfileCategoryOptions.REVIEWS) {
+                item {
+                    ReviewsSection(
+                        reviewList = profileOwnersReviews.value,
+                        header = "Reviews by " + user.userName,
+                        handleLikeClick = handleReviewButtonLikeClick,
+                        handleReviewClick = handleReviewClick,
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleProductionImageClick = handleProductionClick
+                    )
+                }
             }
         }
-        else if (activeTab == com.movielist.model.ProfileCategoryOptions.REVIEWS) {
-            item {
-                ReviewsSection(
-                    reviewList = profileOwnersReviews.value,
-                    header = "Reviews by " + user.userName,
-                    handleLikeClick = handleReviewButtonLikeClick,
-                    handleReviewClick = handleReviewClick,
-                    handleProfilePictureClick = handleProfilePictureClick,
-                    handleProductionImageClick = handleProductionClick
-                )
-            }
-        }
+
+        //Navigation
+        TopNavBarProfilePage(
+            user = user,
+            handleSummaryClick = handleSummaryClick,
+            handleLibraryClick = handleLibraryClick,
+            handleReviewsClick = handleReviewsClick
+        )
     }
-
-    //Navigation
-    TopNavBarProfilePage(
-        user = user,
-        handleSummaryClick = handleSummaryClick,
-        handleLibraryClick = handleLibraryClick,
-        handleReviewsClick = handleReviewsClick
-    )
 }
 
 @Composable

@@ -38,6 +38,7 @@ import androidx.navigation.NavHostController
 import com.movielist.Screen
 import com.movielist.composables.FavoriteButton
 import com.movielist.composables.LineDevider
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProgressBar
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
@@ -180,39 +181,44 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         }
     }
 
-    //List
-    LazyColumn(
-        contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight,
-            start = horizontalPadding,
-            end = horizontalPadding,
-            bottom = bottomNavBarHeight+20.dp
-        ),
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        item {
-            ListPageList(
-                loggedInUsersList = profileBelongsToLoggedInUser,
-                listItemList = displayedList,
-                handleProductionImageClick = handleProductionClick,
-                handleListItemRatingChange = handleListItemRatingsChange,
-                handleListItemFavoriteClick = handleListItemFavoriteClick,
-                handleCompareUserClick = handleCompareUserListsClick,
-                handleEpisodeCountChange = handleEpisodeCountChange,
-            )
-        }
-    }
+    //Graphics
 
-    TopNavBarListPage(
-        activeCategory = activeCategory,
-        onCategoryChange = { newCategory -> activeCategory = newCategory },
-        watchedListCount = currentlyWatchingCollection.size,
-        completedListCount = completedCollection.size,
-        wantToWatchListCount = wantToWatchCollection.size,
-        droppedListCount = droppedCollection.size,
-        handleSortChange = handleSortingChange
-    )
+    if (loggedInUser == null){
+        LoadingCircle()
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight,
+                start = horizontalPadding,
+                end = horizontalPadding,
+                bottom = bottomNavBarHeight + 20.dp
+            ),
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            item {
+                ListPageList(
+                    loggedInUsersList = profileBelongsToLoggedInUser,
+                    listItemList = displayedList,
+                    handleProductionImageClick = handleProductionClick,
+                    handleListItemRatingChange = handleListItemRatingsChange,
+                    handleListItemFavoriteClick = handleListItemFavoriteClick,
+                    handleCompareUserClick = handleCompareUserListsClick,
+                    handleEpisodeCountChange = handleEpisodeCountChange,
+                )
+            }
+        }
+
+        TopNavBarListPage(
+            activeCategory = activeCategory,
+            onCategoryChange = { newCategory -> activeCategory = newCategory },
+            watchedListCount = currentlyWatchingCollection.size,
+            completedListCount = completedCollection.size,
+            wantToWatchListCount = wantToWatchCollection.size,
+            droppedListCount = droppedCollection.size,
+            handleSortChange = handleSortingChange
+        )
+    }
 }
 
 @Composable

@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 class ApiTest {
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://api.themoviedb.org/3/") // Replace with your actual base URL
+        .baseUrl("https://api.themoviedb.org/3/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
 

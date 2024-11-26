@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.composables.generateListOptionName
 import com.movielist.composables.LineDevider
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
@@ -188,28 +189,20 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     }
 
 
-    //Graphics:
-    LazyColumn(
-        contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
-            bottom = bottomNavBarHeight +20.dp,
-        ),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ){
-        //Top info
-        if (production == null) {
-            item {
-                Text(text = "Loading...")
-            }
-        } else {
-            item {
-                production?.let { production ->
-                    ProductionScreenImageAndName(
-                        production = production,
-                    )
-                }
-            }
 
+    if (production == null){
+        LoadingCircle()
+    } else {
+        //Graphics:
+        LazyColumn(
+            contentPadding = PaddingValues(
+                top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
+                bottom = bottomNavBarHeight +20.dp,
+            ),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            //Top info
+            if (production == null) {
             item {
                 LineDevider()
             }
@@ -257,89 +250,149 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             production?.let { production ->
                 //Youtube trailer embed
                 item {
-                    val trailerUrl = production.trailerUrl
-                    if (trailerUrl != null && trailerUrl.lowercase().contains("youtube")) {
-                        YouTubeVideoEmbed(
-                            videoUrl = ExtractYoutubeVideoIDFromUrl(trailerUrl),
-                            lifeCycleOwner = LocalLifecycleOwner.current
+                }
+            } else {
+                item {
+                    production?.let { production ->
+                        ProductionScreenImageAndName(
+                            production = production,
                         )
                     }
                 }
-            }
 
-            //Project desciption
-            item {
-                production?.let { production ->
-                    productionDescription(
-                        description = production.description
+                item {
+                    LineDevider()
+                }
+
+                //User score and list option
+                item {
+                    ListInfo(
+                        memberOfUserList = memberOfUserList,
+                        userScore = userScore,
+                        handleScoreChange = { score ->
+                            handleScoreChange(score)
+                        },
+                        handleUserListChange = { listOption ->
+                            handleUserListCategoryChange(listOption)
+                        }
+
                     )
                 }
-            }
 
-            //Project desciption
-            item {
-                production?.let { production ->
-                    ActorsSection(
-                        production = production
-                    )
+                item {
+                    LineDevider()
                 }
-            }
 
-            item {
-                //Write a review button
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp)
-                ){
+
+                //Stat stection
+                item {
+                    production?.let { production ->
+                        StatsSection(
+                            production = production,
+                        )
+                    }
+                }
+
+                item {
+                    LineDevider()
+                }
+
+                item {
+                    production?.let { production ->
+                        GenreSection(
+                            production = production
+                        )
+                    }
+                }
+
+                production?.let { production ->
+                    //Youtube trailer embed
+                    item {
+                        val trailerUrl = production.trailerUrl
+                        if (trailerUrl != null && trailerUrl.lowercase().contains("youtube")) {
+                            YouTubeVideoEmbed(
+                                videoUrl = ExtractYoutubeVideoIDFromUrl(trailerUrl),
+                                lifeCycleOwner = LocalLifecycleOwner.current
+                            )
+                        }
+                    }
+                }
+
+                //Project desciption
+                item {
+                    production?.let { production ->
+                        productionDescription(
+                            description = production.description
+                        )
+                    }
+                }
+
+                //Project desciption
+                item {
+                    production?.let { production ->
+                        ActorsSection(
+                            production = production
+                        )
+                    }
+                }
+
+                item {
                     //Write a review button
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .height(50.dp)
-                            .width(150.dp)
-                            .padding(vertical = 5.dp)
-                            .background(
-                                color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .clickable {
-                                handleWriteAReviewClick()
-                            }
+                            .fillMaxWidth()
+                            .padding(top = 10.dp)
                     ) {
-                        //BUTTON TEXT
-                        Text(
-                            text = "Write a review",
-                            fontSize = headerSize,
-                            fontWeight = weightBold,
-                            fontFamily = fontFamily,
-                            color = if (isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
-                            textAlign = TextAlign.Center
-                        )
+                        //Write a review button
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .height(50.dp)
+                                .width(150.dp)
+                                .padding(vertical = 5.dp)
+                                .background(
+                                    color = if (isAppInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.primary,
+                                    shape = RoundedCornerShape(5.dp)
+                                )
+                                .clickable {
+                                    handleWriteAReviewClick()
+                                }
+                        ) {
+                            //BUTTON TEXT
+                            Text(
+                                text = "Write a review",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if (isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
+
                 }
 
-            }
-
-            //Project reviews
-            item {
-                production?.let { production ->
-                    ReviewsSection(
-                        reviewList = listOfReviews,
-                        header = "Reviews for " + production.title,
-                        handleProductionImageClick = handleProductionClick,
-                        handleLikeClick =  { reviewID ->
-                            handleLikeClick(reviewID)
-                        },
-                        handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
-                    )
+                //Project reviews
+                item {
+                    production?.let { production ->
+                        ReviewsSection(
+                            reviewList = listOfReviews,
+                            header = "Reviews for " + production.title,
+                            handleProductionImageClick = handleProductionClick,
+                            handleLikeClick = { reviewID ->
+                                handleLikeClick(reviewID)
+                            },
+                            handleProfilePictureClick = handleProfilePictureClick,
+                            handleReviewClick = handleReviewClick
+                        )
+                    }
                 }
             }
         }
 
     }
+
 }
 
 @Composable
