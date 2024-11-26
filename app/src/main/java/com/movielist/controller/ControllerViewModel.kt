@@ -153,21 +153,25 @@ class ControllerViewModel(
 
         if (user != null) {
             Log.d("FollowerList", "Attempting to add user ${otherUser.id} to ${user.id}'s following list.")
-
+            val updatedOtherUserFollowerList = otherUser.followingMeList.toMutableList()
             val updatedFollowerList = user.followingList.toMutableList().apply {
+
                 if (!contains(otherUser.id)) {
                     add(otherUser.id)
+                    updatedOtherUserFollowerList.add(user.id)
                     Log.d("FollowerList", "User ${otherUser.id} successfully added to ${user.id}'s following list.")
                 } else {
                     Log.d("FollowerList", "User ${otherUser.id} is already in the following list.")
                 }
             }
-
+            val updatedOtherUser = otherUser.copy(followingMeList = updatedOtherUserFollowerList)
             val updatedUser = user.copy(followingList = updatedFollowerList)
 
-            userViewModel.updateLoggedInUser(updatedUser)
+            userViewModel.updateFollowingForUser(updatedUser, updatedOtherUser)
+
 
             Log.d("FollowerList", "Updated USER following list after addition: ${updatedFollowerList}")
+            Log.d("FollowerList", "\nUpdated OTHERUSER followingList after addition: ${updatedOtherUserFollowerList}")
         }
     }
 
