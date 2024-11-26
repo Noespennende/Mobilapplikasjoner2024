@@ -32,6 +32,7 @@ import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
+import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.PostNotification
@@ -40,6 +41,7 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
 import com.movielist.model.SearchSortOptions
+import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
@@ -97,6 +99,31 @@ class ControllerViewModel(
 
     private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
     val searchResults: StateFlow<List<Production>> get() = _searchResult
+
+    private val _displayedList = MutableStateFlow<List<ListItem>>(emptyList())
+    val displayedList: StateFlow<List<ListItem>> = _displayedList
+
+    fun updateDisplayedList(activeCategory: ListOptions, activeSortOption: ShowSortOptions) {
+        val user = loggedInUser.value
+        if (user == null) {
+            _displayedList.value = emptyList()
+            return
+        }
+
+        val list = when (activeCategory) {
+            ListOptions.WATCHING -> user.currentlyWatchingCollection
+            ListOptions.COMPLETED -> user.completedCollection
+            ListOptions.WANTTOWATCH -> user.wantToWatchCollection
+            ListOptions.DROPPED -> user.droppedCollection
+            else -> emptyList()
+        }
+
+        _displayedList.value = when (activeSortOption) {
+            ShowSortOptions.MOVIESANDSHOWS -> list
+            ShowSortOptions.MOVIES -> list.filter { it.production.type == "Movie" }
+            ShowSortOptions.SHOWS -> list.filter { it.production.type == "TVShow" }
+        }
+    }
 
 
     init {
@@ -204,6 +231,28 @@ class ControllerViewModel(
 
         return uniqueMovieTitles.size
 
+    }
+
+    fun getFilteredUserProductions(showSortOption: ShowSortOptions): List<ListItem> {
+        val user = loggedInUser.value
+
+        if (user == null) {
+            Log.d("Controller", "User data is not loaded yet.")
+            return emptyList()
+        }
+
+        val allProductions = (user.completedCollection +
+                user.wantToWatchCollection +
+                user.currentlyWatchingCollection +
+                user.favoriteCollection +
+                user.droppedCollection)
+
+
+        return when (showSortOption) {
+            ShowSortOptions.MOVIESANDSHOWS -> allProductions
+            ShowSortOptions.MOVIES -> allProductions.filter { it.production.type == "Movie" }
+            ShowSortOptions.SHOWS -> allProductions.filter { it.production.type == "TVShow" }
+        }
     }
 
     fun getShowsInListsCount(): Int {
