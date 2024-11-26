@@ -99,8 +99,8 @@ fun Navigation (controllerViewModel: ControllerViewModel, localStorage: DataStor
     val startScreen =
         if (!isLoggedIn) {
             Screen.LoginScreen.route
-        } else {
-            //Screen.LoginScreen.route
+        }
+        else {
             Screen.HomeScreen.route
         }
 

@@ -43,6 +43,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.ProgressBar
@@ -82,8 +83,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     rating = 4,
                     reviews = ArrayList(),
                     posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                    episodes = listOf("01", "02", "03", "04", "05", "06",
-                        "07", "08", "09", "10", "11", "12"),
+                    episodes = listOf(
+                        "01", "02", "03", "04", "05", "06",
+                        "07", "08", "09", "10", "11", "12"
+                    ),
                     seasons = listOf("1", "2", "3")
                 ),
             )
@@ -91,7 +94,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     }
 
     val showList = mutableListOf<Production>()
-/*
+    /*
     for (i in 0..12) {
         showList.add(
             TVShow(
@@ -130,8 +133,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         rating = 4,
         reviews = ArrayList(),
         posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf("01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"),
+        episodes = listOf(
+            "01", "02", "03", "04", "05", "06",
+            "07", "08", "09", "10", "11", "12"
+        ),
         seasons = listOf("1", "2", "3")
     )
 
@@ -181,9 +186,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
 
-
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
-    val currentlyWatchingCollection: List<ListItem> = loggedInUser?.currentlyWatchingCollection ?: emptyList()
+    val currentlyWatchingCollection: List<ListItem> =
+        loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
     val handleProductionButtonClick: (showID: String, productionType: String)
@@ -192,21 +197,22 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType))
     }
 
-    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
+    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = { reviewID ->
         //Kontroller funksjon for å håndtere en review like hær
     }
 
-    val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
+    val handleProfilePictureClick: (profileID: String) -> Unit = { profileID ->
         navController.navigate(Screen.ProfileScreen.withArguments(profileID))
     }
 
-    val handleReviewClick: (reviewID: String) -> Unit = {reviewID ->
+    val handleReviewClick: (reviewID: String) -> Unit = { reviewID ->
         navController.navigate(Screen.ReviewScreen.withArguments(reviewID))
     }
 
-    val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit = {newRating, listItemID ->
-        //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
-    }
+    val handleUserRatingChange: (newRating: Int, listItemID: String) -> Unit =
+        { newRating, listItemID ->
+            //Kontroller funksjon for å oppdatere ratingen for det gitte list itemet
+        }
 
     val handleMarkAsWatched: (listItem: ListItem) -> Unit = { listItem ->
 
@@ -214,11 +220,15 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
         val newCurrentEpisode = ++listItem.currentEpisode
         Log.d("ControllerViewModel", newCurrentEpisode.toString())
-        controllerViewModel.handleEpisodeCountChange(listItem, newCurrentEpisode, true, onMoveToCollection = {})
+        controllerViewModel.handleEpisodeCountChange(
+            listItem,
+            newCurrentEpisode,
+            true,
+            onMoveToCollection = {})
 
     }
-    
-    var top10ReviewsListPastWeek = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+
+    var top10ReviewsListPastWeek = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
 
     // Oppdateres/hentes hver gang Homescreen laster
@@ -230,105 +240,109 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     }
 
 
-
     // Front page graphics
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        // Front page content
-        item {
-            CurrentlyWatchingScroller(
-                listOfShows = currentlyWatchingCollection,
-                onImageClick = handleProductionButtonClick,
-                handleRatingChange = handleUserRatingChange,
-                handleMarkAsWatched = handleMarkAsWatched
-            )
-        }
 
-
-        item {
-            // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
-            // Funksjonen returnerer en liste med Show objekter.
-
-            // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
-            // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
-
-            //denne må stå her for å gjøre kallet til getAllMedia
-            //var apiMovies = controllerViewModel.getAllMedia().toString()
-
-            var test = controllerViewModel.filteredMediaData.value
-
-            println("APIMOVIES 2: " + controllerViewModel.filteredMediaData.value)
-            test?.forEach { item-> showList.add(item)}
-
-            // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
-            var top10Shows = showList
-                .sortedByDescending { it.rating }
-                .take(10)
-
-            ProductionListSidesroller(
-                header = "Popular shows and movies",
-                listOfShows = top10Shows,
-                handleImageClick = handleProductionButtonClick,
-                textModifier = Modifier
-                    .padding(vertical = 10.dp, horizontal = horizontalPadding),
-                modifier = Modifier
-                    .padding(top = verticalPadding)
-
-            )
-        }
-
-        item {
-
-            TheUsersYouFollowJustWatched(
-                listOfShows = friendsWatchedList.toMutableList(),
-                handleShowButtonClick = handleProductionButtonClick
-            )
-
-
-        }
-
-        item {
-
-            //TEMP KODE FLYTT UT
-            // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
-            // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
-
-            var reviewsList  = mutableListOf<ReviewDTO>()
-            var reviewsListPastWeek = mutableListOf<ReviewDTO>()
-            val currentDate = Calendar.getInstance()
-            val pastWeek = currentDate.apply {
-                add(Calendar.DATE, -7)
+    if (loggedInUser == null) {
+        LoadingCircle()
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Front page content
+            item {
+                CurrentlyWatchingScroller(
+                    listOfShows = currentlyWatchingCollection,
+                    onImageClick = handleProductionButtonClick,
+                    handleRatingChange = handleUserRatingChange,
+                    handleMarkAsWatched = handleMarkAsWatched
+                )
             }
 
-            for (review in reviewList) {
-                if (review.postDate >= pastWeek) {
-                    reviewsListPastWeek.add(review)
-                } else {
-                    print("Review not posted within the past 7 days")
+
+            item {
+                // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
+                // Funksjonen returnerer en liste med Show objekter.
+
+                // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
+                // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
+
+                //denne må stå her for å gjøre kallet til getAllMedia
+                //var apiMovies = controllerViewModel.getAllMedia().toString()
+
+                var test = controllerViewModel.filteredMediaData.value
+
+                println("APIMOVIES 2: " + controllerViewModel.filteredMediaData.value)
+                test?.forEach { item -> showList.add(item) }
+
+                // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
+                var top10Shows = showList
+                    .sortedByDescending { it.rating }
+                    .take(10)
+
+                ProductionListSidesroller(
+                    header = "Popular shows and movies",
+                    listOfShows = top10Shows,
+                    handleImageClick = handleProductionButtonClick,
+                    textModifier = Modifier
+                        .padding(vertical = 10.dp, horizontal = horizontalPadding),
+                    modifier = Modifier
+                        .padding(top = verticalPadding)
+
+                )
+            }
+
+            item {
+
+                TheUsersYouFollowJustWatched(
+                    listOfShows = friendsWatchedList.toMutableList(),
+                    handleShowButtonClick = handleProductionButtonClick
+                )
+
+
+            }
+
+            item {
+
+                //TEMP KODE FLYTT UT
+                // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
+                // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
+
+                var reviewsList = mutableListOf<ReviewDTO>()
+                var reviewsListPastWeek = mutableListOf<ReviewDTO>()
+                val currentDate = Calendar.getInstance()
+                val pastWeek = currentDate.apply {
+                    add(Calendar.DATE, -7)
                 }
+
+                for (review in reviewList) {
+                    if (review.postDate >= pastWeek) {
+                        reviewsListPastWeek.add(review)
+                    } else {
+                        print("Review not posted within the past 7 days")
+                    }
+                }
+
+                //Top reviews this week:
+                ReviewsSection(
+                    reviewList = top10ReviewsListPastWeek.value,
+                    header = "Top reviews this week",
+                    handleLikeClick = handleReviewLikeButtonClick,
+                    handleProductionImageClick = handleProductionButtonClick,
+                    handleProfilePictureClick = handleProfilePictureClick,
+                    handleReviewClick = handleReviewClick
+                )
             }
 
-            //Top reviews this week:
-            ReviewsSection(
-                reviewList = top10ReviewsListPastWeek.value,
-                header = "Top reviews this week",
-                handleLikeClick = handleReviewLikeButtonClick,
-                handleProductionImageClick = handleProductionButtonClick,
-                handleProfilePictureClick = handleProfilePictureClick,
-                handleReviewClick = handleReviewClick
-            )
-        }
+            item {
+                /*Adds empty space the size of the bottom nav bar to ensure content don't dissapear
+                behind it*/
+                Spacer(modifier = Modifier.height(bottomNavBarHeight))
+            }
 
-        item {
-            /*Adds empty space the size of the bottom nav bar to ensure content don't dissapear
-            behind it*/
-            Spacer(modifier = Modifier.height(bottomNavBarHeight))
         }
-
     }
-
 }
+
 
 @Composable
 fun CurrentlyWatchingScroller (

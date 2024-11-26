@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.composables.LineDevider
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
@@ -133,16 +134,7 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
                     )
                 }
             } else {
-                Text(
-                    text = "Loading...",
-                    fontFamily = fontFamily,
-                    fontSize = headerSize,
-                    fontWeight = weightRegular,
-                    textAlign = TextAlign.Center,
-                    color = LocalColor.current.secondary,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
+                LoadingCircle()
             }
         }
 

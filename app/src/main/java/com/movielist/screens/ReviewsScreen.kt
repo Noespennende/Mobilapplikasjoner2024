@@ -34,6 +34,7 @@ import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
+import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
@@ -189,47 +190,53 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     }
 
     //Graphics:
-    LazyColumn (
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = topNavBaHeight + 40.dp)
-    )
-    {
-        item {
-            if(activeTab == ReviewsScreenTabs.SUMMARY){
-                SummarySection(
-                    friendsReviewsList = friendsReviewsList.value,
-                    topThisMonthList = popularReviewsThisMonthList.value,
-                    handleReviewLikeClick = handleReviewLikeButtonClick,
-                    handleProductionImageClick = handleProductionClick,
-                    handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
-                )
-            } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
-                TopThisMonthSection(
-                    topThisMonthList = popularReviewsThisMonthList.value,
-                    handleReviewLikeClick = handleReviewLikeButtonClick,
-                    handleProductionImageClick = handleProductionClick,
-                    handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
-                )
-            } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
-                TopAllTimeSection (
-                    topAllTimeList = popularReviewsAllTimeList,
-                    handleReviewLikeClick = handleReviewLikeButtonClick,
-                    handleProductionImageClick = handleProductionClick,
-                    handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
-                )
+
+    if (popularReviewsThisMonthList.value.isEmpty()){
+        LoadingCircle()
+    }
+    else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = topNavBaHeight + 40.dp)
+        )
+        {
+            item {
+                if (activeTab == ReviewsScreenTabs.SUMMARY) {
+                    SummarySection(
+                        friendsReviewsList = friendsReviewsList.value,
+                        topThisMonthList = popularReviewsThisMonthList.value,
+                        handleReviewLikeClick = handleReviewLikeButtonClick,
+                        handleProductionImageClick = handleProductionClick,
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
+                    )
+                } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
+                    TopThisMonthSection(
+                        topThisMonthList = popularReviewsThisMonthList.value,
+                        handleReviewLikeClick = handleReviewLikeButtonClick,
+                        handleProductionImageClick = handleProductionClick,
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
+                    )
+                } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
+                    TopAllTimeSection(
+                        topAllTimeList = popularReviewsAllTimeList,
+                        handleReviewLikeClick = handleReviewLikeButtonClick,
+                        handleProductionImageClick = handleProductionClick,
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
+                    )
+                }
+
             }
 
         }
-
+        TopNavBarReviewPage(
+            handleSortChange = handleSortChange,
+            handleTabChange = handleTabChange
+        )
     }
-    TopNavBarReviewPage(
-        handleSortChange = handleSortChange,
-        handleTabChange = handleTabChange
-    )
 }
 
 @Composable
