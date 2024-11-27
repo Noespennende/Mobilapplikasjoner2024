@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,16 +31,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.Screen
+import com.movielist.composables.HamburgerButton
 import com.movielist.composables.LikeButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
-import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Review
@@ -48,10 +52,12 @@ import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
 import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
+import com.movielist.ui.theme.isAppInPortraitMode
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
@@ -64,6 +70,64 @@ import kotlin.random.Random
 
 @Composable
 fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavController) {
+
+    //TEMP CODE DELETE THIS:
+    var reviewsList  = mutableListOf<ReviewDTO>()
+
+    val reviewUser = User(
+        id = "IDfromFirebase",
+        userName = "UserN",
+        email = "user@email.com",
+        followingList = mutableListOf(),
+    )
+
+    val reviewProduction = TVShow(
+        imdbID = "123",
+        title = "Silo",
+        description = "TvShow Silo description here",
+        genre = listOf("Action"),
+        releaseDate = Calendar.getInstance(),
+        actors = emptyList(),
+        rating = 4,
+        reviews = ArrayList(),
+        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
+        episodes = listOf("01", "02", "03", "04", "05", "06",
+            "07", "08", "09", "10", "11", "12"),
+        seasons = listOf("1", "2", "3")
+    )
+
+    val reviewReview = Review(
+        score = Random.nextInt(0, 10),
+        reviewerID = reviewUser.id,
+        likes = Random.nextInt(0, 200),
+        productionID = reviewProduction.imdbID,
+        postDate = Calendar.getInstance(),
+        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
+    )
+
+    // Populate reviewsList
+    for (i in 0..10) {
+        reviewsList.add(
+            ReviewDTO(
+                reviewID = reviewUser.id,
+                score = reviewReview.score,
+                productionID = reviewReview.productionID,
+                reviewerID = reviewReview.reviewerID,
+                reviewBody = reviewReview.reviewBody,
+                postDate = reviewReview.postDate,
+                likes = reviewReview.likes,
+                reviewerUserName = reviewUser.userName,
+                reviewerProfileImage = reviewUser.profileImageID,
+                productionPosterUrl = reviewProduction.posterUrl,
+                productionTitle = reviewProduction.title,
+                productionReleaseDate = reviewProduction.releaseDate,
+                productionType = reviewProduction.type
+            )
+
+        )
+    }
+
+    //Temp code delete the code above
 
     //function variables:
 
@@ -118,7 +182,6 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
          controllerViewModel.updateReviewLikes(reviewID, productionType)
     }
 
-
     val handleProductionClick: (productionID: String, productionType: String)
         -> Unit = {productionID, productionType ->
         navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
@@ -149,7 +212,10 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = topNavBaHeight + 40.dp)
+                .padding(
+                    top = LocalConstraints.current.mainContentStart,
+                    bottom = LocalConstraints.current.bottomUniversalNavbarHeight
+                )
         )
         {
             item {
@@ -160,7 +226,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
+                        handleReviewClick = handleReviewClick,
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
                     TopThisMonthSection(
@@ -183,10 +249,17 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
             }
 
         }
-        TopNavBarReviewPage(
-            handleSortChange = handleSortChange,
-            handleTabChange = handleTabChange
-        )
+
+        if (isAppInPortraitMode()){
+            TopNavBarReviewPage(
+                handleTabChange = handleTabChange
+            )
+        } else {
+            topNavigationReviewsScreenLandscape(
+                handleTabChange = handleTabChange
+            )
+        }
+
     }
 }
 
@@ -203,15 +276,18 @@ fun SummarySection (
         handleReviewLikeClick(reviewID, productionType )
     }
 
-    Column () {
+    Column (
+
+    ) {
         //Latest reviews from your friends section
         ReviewsSection(
             reviewList = friendsReviewsList,
-            header = "Latest reviews from your friends",
+            header = "Latest reviews from the users you follow",
             handleLikeClick = handleReviewLikeButtonClick,
             handleProductionImageClick = handleProductionImageClick,
             handleProfilePictureClick = handleProfilePictureClick,
-            handleReviewClick = handleReviewClick
+            handleReviewClick = handleReviewClick,
+            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
         )
         //Popular reviews this month section
         ReviewsSection(
@@ -220,7 +296,8 @@ fun SummarySection (
             handleLikeClick = handleReviewLikeButtonClick,
             handleProductionImageClick = handleProductionImageClick,
             handleProfilePictureClick = handleProfilePictureClick,
-            handleReviewClick = handleReviewClick
+            handleReviewClick = handleReviewClick,
+            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
         )
     }
 }
@@ -282,7 +359,9 @@ fun TopNavBarReviewPage(
         modifier = Modifier
             .wrapContentSize()
     ){
-        TopScreensNavbarBackground()
+        TopScreensNavbarBackground(
+            sizeMultiplier = .8f
+        )
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier
@@ -320,7 +399,7 @@ fun ReviewCategoryOptions (
     //Graphics
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(horizontal = horizontalPadding)
+        contentPadding = PaddingValues(horizontal = LocalConstraints.current.mainContentHorizontalPadding)
     ){
         item {
             //Summary button
@@ -420,7 +499,10 @@ fun ReviewsSection(
     handleLikeClick: (reviewID: String, productionType: String) -> Unit,
     handleProductionImageClick: (showID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
-    handleReviewClick: (reviewID: String) -> Unit
+    handleReviewClick: (reviewID: String) -> Unit,
+    paddingStart: Dp = LocalConstraints.current.mainContentHorizontalPadding,
+    paddingEnd: Dp = LocalConstraints.current.mainContentHorizontalPadding,
+    loadingIfListEmpty: Boolean = false
 ) {
 
     val handleLikeButtonClick: (String, String) -> Unit = {reviewID, productionType ->
@@ -437,7 +519,7 @@ fun ReviewsSection(
         modifier = Modifier
             .padding(
                 top = verticalPadding,
-                start = horizontalPadding)
+                start = paddingStart)
     )
 
     //Reviews container
@@ -446,7 +528,8 @@ fun ReviewsSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                horizontal = horizontalPadding,
+                start = paddingStart,
+                end = paddingEnd
             )
     ) {
         LineDevider()
@@ -463,7 +546,19 @@ fun ReviewsSection(
                 )
                 LineDevider()
             }
-        } else {
+        } else if (loadingIfListEmpty){
+            Box(
+                modifier = Modifier
+                    .padding(
+                        top = 20.dp,
+                        bottom = 20.dp
+                    )
+            ){
+                LoadingCircle()
+            }
+
+        }
+        else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -480,7 +575,7 @@ fun ReviewsSection(
                         .align(Alignment.CenterHorizontally)
                         .padding(
                             top = verticalPadding,
-                            start = horizontalPadding,
+                            start = LocalConstraints.current.mainContentHorizontalPadding,
                             bottom = 20.dp)
                 )
             }
@@ -504,113 +599,114 @@ fun ReviewSummary (
     }
 
     //Main container
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    Column (
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        ProductionImage(
-            imageID = review.productionPosterUrl,
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
             modifier = Modifier
-                .clickable {
-                    handleProductionImageClick(review.productionID, review.productionType)
-                }
-        )
-        //Review header, score and body
-        Column (
-            verticalArrangement = Arrangement.spacedBy(0.dp),
-            modifier = Modifier
-                .padding(
-                    start = 5.dp
-                )
+                .fillMaxWidth()
         ) {
-            Row (
-            ){
-                //Review Header and user section
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-                {
-                    //Review header and score
-                    Column (
-                        verticalArrangement = Arrangement.spacedBy(5.dp),
+            ProductionImage(
+                imageID = review.productionPosterUrl,
+                modifier = Modifier
+                    .clickable {
+                        handleProductionImageClick(review.productionID, review.productionType)
+                    }
+            )
+            //Review header, score and body
+            Column (
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+                modifier = Modifier
+                    .padding(
+                        start = 5.dp
+                    )
+            ) {
+                Row (
+                ){
+                    //Review Header and user section
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
-                            .fillMaxWidth(.5f)
+                            .fillMaxWidth()
                     )
                     {
-                        //Header
-                        Text(
-                            text = "${review.productionTitle} (${review.productionReleaseDate.get(Calendar.YEAR)})",
-                            fontSize = paragraphSize,
-                            fontFamily = fontFamily,
-                            fontWeight = weightBold,
-                            color = LocalColor.current.secondary
-                        )
-                        //Score
-                        RatingsGraphics(
-                            review.score,
-                        )
-                    }
-
-                    //Userinfo and review date
-                    Row (
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier
-                            .clickable {
-                                handleProfilePictureClick(review.reviewerID)
-                            }
-                    ){
-                        //Username and review date
+                        //Review header and score
                         Column (
-                            verticalArrangement = Arrangement.spacedBy(3.dp),
-                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(5.dp),
                             modifier = Modifier
-                                .fillMaxWidth(.6f)
-                        ){
-                            //Username
+                                .fillMaxWidth(.5f)
+                        )
+                        {
+                            //Header
                             Text(
-                                text = review.reviewerUserName,
+                                text = "${review.productionTitle} (${review.productionReleaseDate.get(Calendar.YEAR)})",
                                 fontSize = paragraphSize,
                                 fontFamily = fontFamily,
                                 fontWeight = weightBold,
-                                textAlign = TextAlign.End,
                                 color = LocalColor.current.secondary
                             )
-                            //review date
-                            Text(
-                                text = "${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}/${review.postDate.get(Calendar.YEAR)}",
-                                fontSize = paragraphSize,
-                                fontFamily = fontFamily,
-                                fontWeight = weightRegular,
-                                color = LocalColor.current.quinary
+                        }
+
+                        //Userinfo and review date
+                        Row (
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier
+                                .clickable {
+                                    handleProfilePictureClick(review.reviewerID)
+                                }
+                        ){
+                            //Username and review
+                            Column (
+                                verticalArrangement = Arrangement.spacedBy(3.dp),
+                                horizontalAlignment = Alignment.End,
+                                modifier = Modifier
+                                    .fillMaxWidth(.6f)
+                            ){
+                                //Username
+                                Text(
+                                    text = review.reviewerUserName,
+                                    fontSize = paragraphSize,
+                                    fontFamily = fontFamily,
+                                    fontWeight = weightBold,
+                                    textAlign = TextAlign.End,
+                                    color = LocalColor.current.secondary
+                                )
+                            }
+                            //profile picture
+                            ProfileImage(
+                                imageID = review.reviewerProfileImage,
+                                userName = review.reviewerUserName,
+                                handleProfileImageClick = {
+                                    handleProfilePictureClick(review.reviewerID)
+                                }
                             )
                         }
-                        //profile picture
-                        ProfileImage(
-                            imageID = review.reviewerProfileImage,
-                            userName = review.reviewerUserName,
-                            handleProfileImageClick = {
-                                handleProfilePictureClick(review.reviewerID)
-                            }
-                        )
                     }
-
                 }
-            }
 
-            //Body
-            Row (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            )
-            {
-                Column(
+                //Review date and score
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .fillMaxWidth(.8f)
-                ) {
+                        .fillMaxWidth()
+                ){
+                    //Score
+                    RatingsGraphics(
+                        review.score,
+                    )
+                }
+
+                //Body
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                )
+                {
+
                     Text(
                         text = TruncateReviewSummaryText(review.reviewBody),
                         fontSize = paragraphSize,
@@ -632,33 +728,169 @@ fun ReviewSummary (
                             }
                     )
                 }
+            }
+        }
+        Box(
+            Modifier.fillMaxWidth()
+                .padding(
+                    top = 5.dp
+                )
+        ){
+            //review date
+            Text(
+                text = "Posted: ${review.postDate.get(Calendar.DATE)}/${review.postDate.get(Calendar.MONTH)+1}/${review.postDate.get(Calendar.YEAR)}",
+                fontSize = paragraphSize,
+                fontFamily = fontFamily,
+                fontWeight = weightRegular,
+                color = LocalColor.current.quinary,
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+            )
+            Text(
+                text = "${review.likes} likes",
+                fontSize = paragraphSize,
+                fontFamily = fontFamily,
+                fontWeight = weightBold,
+                color = LocalColor.current.secondary,
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+            )
+        }
+        LineDevider()
 
 
-                Text(
-                    text = "${review.likes}",
-                    fontSize = paragraphSize,
-                    fontFamily = fontFamily,
-                    fontWeight = weightBold,
-                    color = LocalColor.current.secondary,
-                    modifier = Modifier
-                        .align(Alignment.Bottom)
+        Box (
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ){
+            LikeButton(
+                handleLikeClick = handleLikeButtonClick
+            )
+        }
+    }
+
+}
+
+@Composable
+fun topNavigationReviewsScreenLandscape(
+    handleTabChange: (ReviewsScreenTabs) -> Unit,
+){
+
+    var categoryDropDownExpanded by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp,
+                end = 80.dp
+            )
+    ) {
+
+        HamburgerButton(
+            sizeMultiplier = 2.3f,
+            handleHamburgerButtonClick = {
+                categoryDropDownExpanded = !categoryDropDownExpanded
+            }
+        )
+
+
+        Box(){
+            //CategoryDropdown
+            DropdownMenu(
+                expanded = categoryDropDownExpanded,
+                onDismissRequest = {categoryDropDownExpanded = false},
+                offset = DpOffset(x = (-230).dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
+                    .width(180.dp)
+            ) {
+
+                //Sorting Options
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Summary",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleTabChange(ReviewsScreenTabs.SUMMARY)
+                        categoryDropDownExpanded = false
+                    }
                 )
 
-            }
-            LineDevider()
+                //Watching
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Top this month",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleTabChange(ReviewsScreenTabs.TOPTHISMONTH)
+                        categoryDropDownExpanded = false
+                    }
+                )
 
 
-            Box (
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-                LikeButton(
-                    handleLikeClick = handleLikeButtonClick
+                //Completed
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Top all time",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleTabChange(ReviewsScreenTabs.TOPALLTIME)
+                        categoryDropDownExpanded = false
+                    }
                 )
             }
+
 
         }
     }
+
 }
 
 fun TruncateReviewSummaryText (reviewBody: String): String {
@@ -674,10 +906,3 @@ fun TruncateReviewSummaryText (reviewBody: String): String {
     return truncatedReviewBody
 }
 
-fun ReviewBodyIsTruncated (reviewBody: String): Boolean {
-    val words = reviewBody.split(" ")
-    if (words.size > 15) {
-        return true
-    }
-    return false
-}

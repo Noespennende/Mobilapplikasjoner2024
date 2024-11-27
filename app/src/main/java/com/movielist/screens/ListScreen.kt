@@ -3,7 +3,6 @@ package com.movielist.screens
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,11 +18,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,11 +32,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.movielist.Screen
 import com.movielist.composables.FavoriteButton
+import com.movielist.composables.HamburgerButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProgressBar
@@ -46,22 +49,20 @@ import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
+import com.movielist.ui.theme.isAppInPortraitMode
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topNavBaHeight
-import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
@@ -186,9 +187,9 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
     } else {
         LazyColumn(
             contentPadding = PaddingValues(
-                top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight,
-                start = horizontalPadding,
-                end = horizontalPadding,
+                top = LocalConstraints.current.mainContentStart,
+                start = LocalConstraints.current.mainContentHorizontalPadding,
+                end = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
                 bottom = bottomNavBarHeight + 20.dp
             ),
             modifier = Modifier
@@ -207,15 +208,27 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
             }
         }
 
-        TopNavBarListPage(
-            activeCategory = activeCategory,
-            onCategoryChange = { newCategory -> activeCategory = newCategory },
-            watchedListCount = currentlyWatchingCollection.size,
-            completedListCount = completedCollection.size,
-            wantToWatchListCount = wantToWatchCollection.size,
-            droppedListCount = droppedCollection.size,
-            handleSortChange = handleSortingChange
-        )
+        if(isAppInPortraitMode()){
+            TopNavBarListPage(
+                activeCategory = activeCategory,
+                onCategoryChange = { newCategory -> activeCategory = newCategory },
+                watchedListCount = currentlyWatchingCollection.size,
+                completedListCount = completedCollection.size,
+                wantToWatchListCount = wantToWatchCollection.size,
+                droppedListCount = droppedCollection.size,
+                handleSortChange = handleSortingChange
+            )
+        } else {
+            topNavigationListScreenLandscape(
+                onCategoryChange = { newCategory -> activeCategory = newCategory },
+                watchedListCount = currentlyWatchingCollection.size,
+                completedListCount = completedCollection.size,
+                wantToWatchListCount = wantToWatchCollection.size,
+                droppedListCount = droppedCollection.size,
+                handleSortChange = handleSortingChange
+            )
+        }
+
     }
 }
 
@@ -278,7 +291,7 @@ fun ListCategoryOptions (
     //Graphics
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(horizontal = horizontalPadding)
+        contentPadding = PaddingValues(horizontal = LocalConstraints.current.mainContentHorizontalPadding)
     ){
         item {
             //Watching
@@ -598,8 +611,6 @@ fun ListPageListItem (
                                             }
 
                                         }
-
-                                        is Episode -> TODO()
                                     }
                                 }
                         ){
@@ -705,5 +716,276 @@ fun ListPageListItem (
             }
         }
     }
+}
+
+@Composable
+fun topNavigationListScreenLandscape(
+    onCategoryChange: (ListOptions) -> Unit,
+    handleSortChange: (ShowSortOptions) -> Unit,
+    watchedListCount: Int,
+    completedListCount: Int,
+    wantToWatchListCount: Int,
+    droppedListCount: Int
+){
+
+    var categoryDropDownExpanded by remember { mutableStateOf(false) }
+    var sortingDropDownExpanded by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+           .fillMaxSize()
+            .padding(
+                bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp,
+                end = 80.dp
+            )
+    ) {
+
+        HamburgerButton(
+            sizeMultiplier = 2.3f,
+            handleHamburgerButtonClick = {
+                categoryDropDownExpanded = !categoryDropDownExpanded
+            }
+        )
+
+
+        Box(){
+            //CategoryDropdown
+            DropdownMenu(
+                expanded = categoryDropDownExpanded,
+                onDismissRequest = {categoryDropDownExpanded = false},
+                offset = DpOffset(x = (-230).dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
+                    .width(180.dp)
+            ) {
+
+                //Sorting Options
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Sorting options",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        categoryDropDownExpanded = false
+                        sortingDropDownExpanded = true
+                    }
+                )
+
+                //Watching
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Watching ($watchedListCount)",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        onCategoryChange(ListOptions.WATCHING)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+
+                //Completed
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Completed ($completedListCount)",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        onCategoryChange(ListOptions.COMPLETED)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+                //Want to watch
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Want to watch ($wantToWatchListCount)",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        onCategoryChange(ListOptions.WANTTOWATCH)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+                //Dropped
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Dropped ($droppedListCount)",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        onCategoryChange(ListOptions.DROPPED)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+
+            }
+
+            //Sorting dropdown
+            DropdownMenu(
+                expanded = sortingDropDownExpanded,
+                onDismissRequest = {sortingDropDownExpanded = false},
+                offset = DpOffset(x = (-230).dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
+                    .width(180.dp)
+            ) {
+
+                //Sorting Options
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Movies and Shows",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        sortingDropDownExpanded = false
+                        handleSortChange(ShowSortOptions.MOVIESANDSHOWS)
+                    }
+                )
+
+                //Watching
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Movies",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        sortingDropDownExpanded = false
+                        handleSortChange(ShowSortOptions.MOVIES)
+                    }
+                )
+
+
+                //Completed
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Shows",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        sortingDropDownExpanded = false
+                        handleSortChange(ShowSortOptions.MOVIES)
+                    }
+                )
+
+            }
+        }
+    }
+
 }
 

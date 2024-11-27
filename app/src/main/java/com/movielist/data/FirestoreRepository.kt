@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.ReviewDTO
@@ -613,21 +612,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "posterUrl" to production.posterUrl,
                 "lengthMinutes" to production.lengthMinutes,
                 "trailerUrl" to production.trailerUrl
-            )
-            is Episode -> mapOf(
-                "type" to production.type,
-                "imdbID" to production.imdbID,
-                "title" to production.title,
-                "description" to production.description,
-                "genre" to production.genre,
-                "releaseDate" to production.releaseDate.time, // Konverter til long
-                "actors" to production.actors,
-                "rating" to production.rating,
-                "reviews" to production.reviews,
-                "posterUrl" to production.posterUrl,
-                "lengthMinutes" to production.lengthMinutes,
-                "seasonNr" to production.seasonNr,
-                "episodeNr" to production.episodeNr
             )
             is TVShow -> mapOf(
                 "type" to production.type,

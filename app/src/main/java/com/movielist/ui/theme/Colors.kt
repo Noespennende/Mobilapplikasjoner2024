@@ -60,14 +60,14 @@ val Red = Color(0xFFbf5656)
 val Green = Color(0xFF74c276)
 
 fun textFieldColors(): TextFieldColors = TextFieldColors(
-    focusedTextColor = BlueWhite,
+    focusedTextColor = White,
     unfocusedTextColor = White,
     disabledTextColor = Gray,
     errorTextColor = Color.Red,
     focusedContainerColor = DarkGray,
     unfocusedContainerColor = DarkGray,
     disabledPrefixColor = DarkGray,
-    unfocusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Purple,
     focusedIndicatorColor = Purple,
     textSelectionColors = TextSelectionColors(handleColor = White, backgroundColor = Gray),
     cursorColor = White,
@@ -102,7 +102,7 @@ fun textFieldColors(): TextFieldColors = TextFieldColors(
     unfocusedPlaceholderColor = White,
     unfocusedLeadingIconColor = White,
     unfocusedTrailingIconColor = White,
-    unfocusedSupportingTextColor = White
+    unfocusedSupportingTextColor = White,
 )
 
 fun textFieldColorsLightTheme(): TextFieldColors = TextFieldColors(
@@ -113,7 +113,7 @@ fun textFieldColorsLightTheme(): TextFieldColors = TextFieldColors(
     focusedContainerColor = BlueWhite,
     unfocusedContainerColor = BlueWhite,
     disabledPrefixColor = BlueWhite,
-    unfocusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Purple,
     focusedIndicatorColor = Purple,
     textSelectionColors = TextSelectionColors(handleColor = DarkGray, backgroundColor = Gray),
     cursorColor = DarkGray,

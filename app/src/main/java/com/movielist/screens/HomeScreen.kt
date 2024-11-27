@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -43,6 +45,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.LineDevider
 import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
@@ -51,7 +54,6 @@ import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -175,7 +177,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     listOfShows = top10Shows,
                     handleImageClick = handleProductionButtonClick,
                     textModifier = Modifier
-                        .padding(vertical = 10.dp, horizontal = horizontalPadding),
+                        .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding),
                     modifier = Modifier
                         .padding(top = verticalPadding)
 
@@ -213,15 +215,17 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     }
                 }
 
-                //Top reviews this week:
+
                 ReviewsSection(
                     reviewList = top10ReviewsListPastWeek.value,
                     header = "Top reviews this week",
                     handleLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionButtonClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                    handleReviewClick = handleReviewClick,
+                    loadingIfListEmpty = true
                 )
+
             }
 
             item {
@@ -272,7 +276,7 @@ fun CurrentlyWatchingScroller (
     //Graphics
     LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
     ) {
         if (listOfShows.isEmpty()) {
             items (3) {
@@ -286,7 +290,6 @@ fun CurrentlyWatchingScroller (
                     showLength = when (listOfShows[i].production) {
                         is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                         is Movie -> 1 // Returnerer lengden i minutter som Int
-                        is Episode -> 1
                         else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                     },
                     onMarkAsWatched = mostRecentButtonClick,// Registrerer når "Mark as Watched" er trykket
@@ -516,20 +519,34 @@ fun TheUsersYouFollowJustWatched (
             fontWeight = weightBold,
             color = LocalColor.current.secondary,
             modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = horizontalPadding)
+                .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding)
         )
         //Content
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp),
+            modifier = Modifier
+                .fillMaxWidth()
         ){
             if (listOfShows.isEmpty()) {
-                items (3) {
-                    Column (
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        LoadingCard()
+                item () {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ){
+                        Text(
+                            "There doesn't seem to be anything here :(",
+                            fontFamily = fontFamily,
+                            fontSize = paragraphSize,
+                            fontWeight = weightRegular,
+                            color = LocalColor.current.quaternary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 10.dp)
+                                .fillMaxWidth()
+                        )
                     }
+
                 }
             } else {
                 items (listOfShows.size) {i ->
@@ -553,7 +570,6 @@ fun TheUsersYouFollowJustWatched (
                             showLenght = when (listOfShows[i].production) {
                                 is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                                 is Movie -> 1
-                                is Episode -> 1
                                 else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                             },
                             score = listOfShows[i].score

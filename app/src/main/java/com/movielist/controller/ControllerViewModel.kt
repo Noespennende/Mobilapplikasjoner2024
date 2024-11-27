@@ -1,5 +1,6 @@
 package com.movielist.controller
 
+import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -29,7 +30,6 @@ import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
@@ -1343,8 +1343,6 @@ class ControllerViewModel(
 
                         }
                     }
-
-                    is Episode -> TODO()
                 }
             }
         }
@@ -2052,7 +2050,7 @@ class ControllerViewModel(
         LaunchedEffect(Unit) {
             while(true){
                 val currentLocalFollowerCount = localStorageFollowerCount
-                val firebaseFollowerCount = 0 /* <- Firebase viewmodel funksjon her*/
+                val firebaseFollowerCount = getUserFollowingCount()
 
                 //Check to see if the follower count has changed since last loop
                 if (currentLocalFollowerCount < firebaseFollowerCount) {
@@ -2062,7 +2060,8 @@ class ControllerViewModel(
                     PostNotification(
                         context = context,
                         contentTitle = "New follower" + if (amountOfFollowers > 1) "s" else "",
-                        contentText = "You have ${amountOfFollowers} new follower" + if (amountOfFollowers > 1) "s" else ""
+                        contentText = "You have ${amountOfFollowers} new follower" + if (amountOfFollowers > 1) "s" else "",
+                        importance = NotificationManager.IMPORTANCE_LOW
                     )
                     outdatedLocalData = true
                 } else if (
@@ -2081,7 +2080,8 @@ class ControllerViewModel(
                 }
 
                 //Delay for 30 minutes before next check
-                delay(30 * 60 * 1000L)
+
+                delay(5 * 60 * 1000L)
             }
         }
     }

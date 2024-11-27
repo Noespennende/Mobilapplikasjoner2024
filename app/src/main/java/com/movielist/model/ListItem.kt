@@ -27,7 +27,6 @@ data class ListItem (
                 PolymorphicJsonAdapterFactory.of(Production::class.java, "type")
                     .withSubtype(Movie::class.java, "Movie")
                     .withSubtype(TVShow::class.java, "TVShow")
-                    .withSubtype(Episode::class.java, "Episode")
             )
             .add(FirebaseTimestampAdapter())  // Adapter for Firestore Timestamps
             .add(UUIDAdapter())  // Adapter for UUID

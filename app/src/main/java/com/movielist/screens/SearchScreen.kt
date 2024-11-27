@@ -3,7 +3,6 @@ package com.movielist.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -26,9 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
-import com.movielist.composables.LoadingCircle
+import com.movielist.composables.HamburgerButton
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProfileImage
+import com.movielist.composables.SearchButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
@@ -83,9 +83,9 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = showImageWith),
         contentPadding = PaddingValues(
-            top = topNavBaHeight + 100.dp,
-            start = horizontalPadding,
-            end = horizontalPadding,
+            top = LocalConstraints.current.mainContentStart + if(isAppInPortraitMode()){ 180.dp} else{0.dp},
+            start = LocalConstraints.current.mainContentHorizontalPadding,
+            end = LocalConstraints.current.mainContentHorizontalPadding,
             bottom = bottomNavBarHeight + 20.dp
         ),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -93,6 +93,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
         modifier = Modifier
             .fillMaxSize()
     ) {
+
         if (activeSortOption == SearchSortOptions.MOVIESANDSHOWS ||
             activeSortOption == SearchSortOptions.MOVIE ||
             activeSortOption == SearchSortOptions.SHOW ){
@@ -121,11 +122,20 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
 
     }
 
-    TopNavBarSearchPage(
-        handleSearchQuery = handleSearchQuery,
-        handleSortOptionsChange = handleSortOptionsChange,
-        activeSortOption = activeSortOption
-    )
+    if(isAppInPortraitMode()){
+        TopNavBarSearchPage(
+            handleSearchQuery = handleSearchQuery,
+            handleSortOptionsChange = handleSortOptionsChange,
+            activeSortOption = activeSortOption
+        )
+    } else {
+        TopNavBarSearchPageLandscape(
+            handleSearchQuery = handleSearchQuery,
+            handleSortOptionsChange = handleSortOptionsChange,
+            activeSortOption = activeSortOption
+        )
+    }
+
 
 
 }
@@ -202,7 +212,7 @@ fun TopNavBarSearchPage (
                 //SearchButton
                 Box(
                     modifier = Modifier
-                        .height(60.dp)
+                        .height(63.dp)
                         .width(80.dp)
                         .padding(top = 8.dp)
                         .background(
@@ -388,6 +398,233 @@ fun UserCardSearchPage(
         )
 
     }
+}
+
+@Composable
+fun TopNavBarSearchPageLandscape (
+    handleSearchQuery: (sortingOption: SearchSortOptions, searchQuery: String) -> Unit,
+    handleSortOptionsChange: (sortOption: SearchSortOptions) -> Unit,
+    activeSortOption: SearchSortOptions
+){
+
+    var searchBoxIsVisible by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var dropDownExpanded by remember { mutableStateOf(false) }
+    val sortOptions = listOf(
+        SearchSortOptions.MOVIESANDSHOWS, SearchSortOptions.MOVIE, SearchSortOptions.SHOW,
+        SearchSortOptions.USER
+    )
+
+
+
+    var dropDownButtonText by remember {
+        mutableStateOf(GenerateSearchOptionName(activeSortOption))
+    }
+
+
+    //Graphics
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp,
+                end = 80.dp
+            )
+    ) {
+
+        SearchButton(
+            sizeMultiplier = 2.3f,
+            handleHamburgerButtonClick = {
+                searchBoxIsVisible = !searchBoxIsVisible
+            }
+        )
+    }
+
+    if(searchBoxIsVisible){
+        Box(
+            contentAlignment = Alignment.BottomEnd,
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+                .padding(
+                    horizontal = LocalConstraints.current.mainContentHorizontalPadding,
+                    vertical = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp
+                )
+        ){
+            //Search bar and submit button button
+            Row (
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = LocalConstraints.current.mainContentStart)
+            ) {
+                //Search bar and button
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                ){
+                    //Search bar
+
+                    Box(
+
+                    ){
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it},
+                            singleLine = true,
+                            colors = LocalTextFieldColors.current.textFieldColors,
+                            shape = RoundedCornerShape(topStart = 10.dp, bottomStart = 10.dp),
+                            modifier = Modifier
+                                .fillMaxWidth(.4f)
+                                .wrapContentHeight(),
+                            textStyle = TextStyle(
+                                fontSize = headerSize,
+                                fontFamily = fontFamily,
+                                fontWeight = weightRegular,
+                                color = LocalColor.current.secondary,
+                            ),
+                            label = {
+                                //Searchbar label
+                                Row(){
+                                    Text(
+                                        "Search...",
+                                        fontSize = headerSize,
+                                        fontFamily = fontFamily,
+                                        fontWeight = weightBold,
+                                        color = LocalColor.current.secondary,
+                                        modifier = Modifier
+                                            .padding()
+                                            .background(color = LocalColor.current.background, shape = RoundedCornerShape(3.dp))
+                                    )
+                                }
+                            },
+                        )
+                    }
+
+                    //SearchButton
+                    Box(
+                        modifier = Modifier
+                            .height(63.dp)
+                            .width(80.dp)
+                            .padding(top = 8.dp)
+                            .background(
+                                color = LocalColor.current.primary,
+                                shape = RoundedCornerShape(topEnd = 5.dp, bottomEnd = 5.dp
+                                ))
+                            .clickable {
+                                //SEARCH BUTTON LOGIC
+                                handleSearchQuery(activeSortOption, searchQuery)
+
+                            }
+                    ){
+                        Image(
+                            painter = painterResource(id = R.drawable.search),
+                            contentDescription = "Search",
+                            contentScale = ContentScale.Crop,
+                            colorFilter = ColorFilter.tint(LocalColor.current.background),
+                            modifier = Modifier
+                                .size(26.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+
+                }
+
+                //Category select
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ){
+                    //Category button
+                    Box(
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(200.dp)
+                            .padding(top = 15.dp)
+                            .background(
+                                color = if(isAppInDarkTheme())LocalColor.current.backgroundLight else LocalColor.current.primary,
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                            .clickable {
+                                //dropdown menu button logic
+                                dropDownExpanded = true
+                            }
+                    ){
+                        //BUTTON TEXT
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .align(Alignment.Center)
+
+                        )
+
+                        {
+                            Text(
+                                text = "$dropDownButtonText",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
+                                textAlign = TextAlign.Center
+                            )
+                            Text(
+                                text = "V",
+                                fontSize = paragraphSize,
+                                fontWeight = weightLight,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme())LocalColor.current.primary else LocalColor.current.backgroundLight,
+                            )
+
+                        }
+
+
+                        DropdownMenu(
+                            expanded = dropDownExpanded,
+                            onDismissRequest = {dropDownExpanded = false},
+                            offset = DpOffset(x = 25.dp, y= 0.dp),
+                            modifier = Modifier
+                                .background(color = if(isAppInDarkTheme())LocalColor.current.tertiary else LocalColor.current.primary)
+                                .width(150.dp)
+                        ) {
+                            sortOptions.forEach{
+                                    option -> DropdownMenuItem(
+                                text = {
+                                    Box(modifier = Modifier
+                                        .fillMaxWidth()
+                                    ){
+
+                                        Text(
+                                            text = GenerateSearchOptionName(option),
+                                            fontSize = headerSize,
+                                            fontWeight = weightBold,
+                                            fontFamily = fontFamily,
+                                            color = if(isAppInDarkTheme())LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                                            textAlign = TextAlign.Center,
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    //On click logic for dropdown menu
+                                    dropDownExpanded = false
+                                    dropDownButtonText = GenerateSearchOptionName(option)
+                                    handleSortOptionsChange(option)
+                                })
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
 }
 
 fun GenerateSearchOptionName (
