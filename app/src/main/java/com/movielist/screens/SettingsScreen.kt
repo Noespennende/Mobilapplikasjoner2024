@@ -154,7 +154,7 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     }
 
     val handleLogoutClick: () -> Unit = {
-        //Kontroller funksjon her
+        controllerViewModel.logOutUser()
     }
 
     val handleColorModeChange: (theme: ColorThemes) -> Unit = { theme ->

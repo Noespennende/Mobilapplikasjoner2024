@@ -95,6 +95,10 @@ class ControllerViewModel(
         userViewModel.setLoggedInUser(uid)
     }
 
+    fun logOutUser() {
+        authViewModel.logOut()
+    }
+
     private val _filteredMediaData = MutableLiveData<List<Production>>()
     val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
 
