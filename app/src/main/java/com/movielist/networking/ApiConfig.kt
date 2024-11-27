@@ -20,7 +20,7 @@ class ApiConfig {
                 .setLevel(HttpLoggingInterceptor.Level.BODY)
 
             val client = OkHttpClient.Builder()
-                .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                //.addInterceptor(loggingInterceptor)
                 .addInterceptor(authInterceptor)
                 .build()
 
