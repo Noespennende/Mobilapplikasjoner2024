@@ -65,64 +65,6 @@ import kotlin.random.Random
 @Composable
 fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavController) {
 
-    //TEMP CODE DELETE THIS:
-    var reviewsList  = mutableListOf<ReviewDTO>()
-
-    val reviewUser = User(
-        id = "IDfromFirebase",
-        userName = "UserN",
-        email = "user@email.com",
-        followingList = mutableListOf(),
-    )
-
-    val reviewProduction = TVShow(
-        imdbID = "123",
-        title = "Silo",
-        description = "TvShow Silo description here",
-        genre = listOf("Action"),
-        releaseDate = Calendar.getInstance(),
-        actors = emptyList(),
-        rating = 4,
-        reviews = ArrayList(),
-        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf("01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"),
-        seasons = listOf("1", "2", "3")
-    )
-
-    val reviewReview = Review(
-        score = Random.nextInt(0, 10),
-        reviewerID = reviewUser.id,
-        likes = Random.nextInt(0, 200),
-        productionID = reviewProduction.imdbID,
-        postDate = Calendar.getInstance(),
-        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-    )
-
-    // Populate reviewsList
-    for (i in 0..10) {
-        reviewsList.add(
-            ReviewDTO(
-                reviewID = reviewUser.id,
-                score = reviewReview.score,
-                productionID = reviewReview.productionID,
-                reviewerID = reviewReview.reviewerID,
-                reviewBody = reviewReview.reviewBody,
-                postDate = reviewReview.postDate,
-                likes = reviewReview.likes,
-                reviewerUserName = reviewUser.userName,
-                reviewerProfileImage = reviewUser.profileImageID,
-                productionPosterUrl = reviewProduction.posterUrl,
-                productionTitle = reviewProduction.title,
-                productionReleaseDate = reviewProduction.releaseDate,
-                productionType = reviewProduction.type
-            )
-
-        )
-    }
-
-    //Temp code delete the code above
-
     //function variables:
 
     var friendsReviewsList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
@@ -159,7 +101,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
     }
 
-    val productionType by remember { mutableStateOf("Movie") }
+    //val productionType by remember { mutableStateOf("Movies") }
     val productionID by remember { mutableStateOf("") }
 
     val review by controllerViewModel.singleReviewDTOData.collectAsState()
@@ -168,9 +110,14 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current sort option*/
     var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
 
-    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
-        //Kontroller håndtering av liking av en review her
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+
+        Log.d("ReviewID", "Review ID: $review")
+
+
+         controllerViewModel.updateReviewLikes(reviewID, productionType)
     }
+
 
     val handleProductionClick: (productionID: String, productionType: String)
         -> Unit = {productionID, productionType ->
@@ -247,13 +194,13 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 fun SummarySection (
     friendsReviewsList: List<ReviewDTO>,
     topThisMonthList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewLikeButtonClick: (String) -> Unit = {reviewID ->
-        handleReviewLikeClick(reviewID)
+    val handleReviewLikeButtonClick: (String, String) -> Unit = {reviewID, productionType ->
+        handleReviewLikeClick(reviewID, productionType )
     }
 
     Column () {
@@ -281,13 +228,13 @@ fun SummarySection (
 @Composable
 fun TopThisMonthSection (
     topThisMonthList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {reviewID ->
-        handleReviewLikeClick(reviewID)
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = {reviewID,productionType ->
+        handleReviewLikeClick(reviewID,productionType)
     }
 
     //Popular reviews this month section
@@ -304,13 +251,13 @@ fun TopThisMonthSection (
 @Composable
 fun TopAllTimeSection (
     topAllTimeList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = { reviewID ->
-        handleReviewLikeClick(reviewID)
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+        handleReviewLikeClick(reviewID,productionType)
     }
 
     //Popular reviews this month section
@@ -470,14 +417,14 @@ fun ReviewCategoryOptions (
 fun ReviewsSection(
     reviewList: List<ReviewDTO>,
     header: String,
-    handleLikeClick: (reviewID: String) -> Unit,
+    handleLikeClick: (reviewID: String, productionType: String) -> Unit,
     handleProductionImageClick: (showID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ) {
 
-    val handleLikeButtonClick: (String) -> Unit = {reviewID ->
-        handleLikeClick(reviewID)
+    val handleLikeButtonClick: (String, String) -> Unit = {reviewID, productionType ->
+        handleLikeClick(reviewID, productionType)
     }
 
     //Header text
@@ -547,13 +494,13 @@ fun ReviewsSection(
 @Composable
 fun ReviewSummary (
     review: ReviewDTO,
-    handleLikeClick: (String) -> Unit,
+    handleLikeClick: (String, String) -> Unit,
     handleProductionImageClick: (showID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ) {
     val handleLikeButtonClick: () -> Unit = {
-        handleLikeClick(review.reviewID.toString())
+        handleLikeClick(review.reviewID.toString(), review.productionType)
     }
 
     //Main container
@@ -688,7 +635,7 @@ fun ReviewSummary (
 
 
                 Text(
-                    text = "${review.likes} likes",
+                    text = "${review.likes}",
                     fontSize = paragraphSize,
                     fontFamily = fontFamily,
                     fontWeight = weightBold,

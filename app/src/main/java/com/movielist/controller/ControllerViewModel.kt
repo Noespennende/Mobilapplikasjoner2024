@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
@@ -54,9 +53,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -70,7 +66,6 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -103,6 +98,9 @@ class ControllerViewModel(
     private val _displayedList = MutableStateFlow<List<ListItem>>(emptyList())
     val displayedList: StateFlow<List<ListItem>> = _displayedList
 
+    private val _singleProductionData = MutableStateFlow<Production?>(null)
+    val singleProductionData: MutableStateFlow<Production?> get() = _singleProductionData
+
     fun updateDisplayedList(activeCategory: ListOptions, activeSortOption: ShowSortOptions) {
         val user = loggedInUser.value
         if (user == null) {
@@ -125,6 +123,43 @@ class ControllerViewModel(
         }
     }
 
+
+
+
+    fun updateReviewLikes(reviewID: String, productionType: String) {
+        viewModelScope.launch {
+            try {
+                val (collectionType, productionId, entil) = reviewViewModel.splitReviewID(reviewID)
+                val currentReviewMap = firestoreRepository.getReviewById(reviewID, collectionType, productionId )
+
+                Log.d("ControllerViewModel", "Current review map: ${currentReviewMap.toString()}")
+                val likes = currentReviewMap?.get("likes") as Long
+
+                val newLikes = likes + 1
+
+                Log.d("ReviewLikes1", "${likes}")
+
+                val productionType =  when (collectionType) {
+                   "RMOV" -> "movieReviews"
+                   "RTV" -> "tvShowReviews"
+                   else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
+               }
+                val isUpdated = firestoreRepository.updateReview(reviewID, productionType, productionId, newLikes )
+                Log.d("ReviewLikes", "${newLikes}")
+                if (isUpdated){
+                    val updatedReview = singleReviewDTOData.value?.copy(likes = newLikes)
+                    _singleReviewDTOData.value = updatedReview
+                }
+            } catch (e: Exception) {
+                Log.e("ControllerViewModel", "Error updating review: $e")
+            }
+        }
+    }
+
+
+    private suspend fun getReviewsById(reviewID: String): ReviewDTO? {
+        return firestoreRepository.getReviewsById(reviewID)
+    }
 
     init {
         apiViewModel.getAllMedia()
@@ -580,8 +615,7 @@ class ControllerViewModel(
         apiViewModel.getShowVideo(seriesId)
     }
 
-    private val _singleProductionData = MutableStateFlow<Production?>(null)
-    val singleProductionData: MutableStateFlow<Production?> get() = _singleProductionData
+
 
     fun nullifySingleProductionData() {
         _singleProductionData.value = null
@@ -1719,7 +1753,7 @@ class ControllerViewModel(
             if (!reviewID.isNullOrEmpty()) {
                 production?.let {
                         Log.d("Review", "Yuhuu" + (production?.imdbID ?: "production null"))
-
+                    _singleProductionData.value = it
                     getReviewById(reviewID, it.type, it.imdbID)
                     Log.d("Review", "loadReviewData $reviewID ${it.type} ${it.imdbID}")
 

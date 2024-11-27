@@ -89,36 +89,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val reviewList = mutableListOf<ReviewDTO>()
 
-    val reviewUser = User(
-        id = "IDfromFirebase",
-        userName = "UserN",
-        email = "user@email.com",
-        followingList = mutableListOf(),
-    )
-
-    val reviewProduction = TVShow(
-        imdbID = "123",
-        title = "Silo",
-        description = "TvShow Silo description here",
-        genre = listOf("Action"),
-        releaseDate = Calendar.getInstance(),
-        actors = emptyList(),
-        rating = 4,
-        reviews = ArrayList(),
-        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf("01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"),
-        seasons = listOf("1", "2", "3")
-    )
-
-    val reviewReview = Review(
-        score = Random.nextInt(0, 10),
-        reviewerID = reviewUser.id,
-        likes = Random.nextInt(0, 200),
-        productionID = reviewProduction.imdbID,
-        postDate = Calendar.getInstance(),
-        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-    )
 
 
     val handleProductionClick: (productionID: String, productionType: String)
@@ -170,7 +140,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         mutableStateOf(true)
     }
 
-    val handleReviewButtonLikeClick: (reviewID: String) -> Unit = {
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->  
         //Kontroller funksjon her
     }
 

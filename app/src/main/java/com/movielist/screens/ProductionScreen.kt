@@ -166,7 +166,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         }
     }
 
-    val handleLikeClick: (reviewID: String) -> Unit = { reviewID ->
+    val handleLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
         Log.d("Temp", "Temp")
         //Kontroller kall her:
     }
@@ -335,8 +335,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                             reviewList = listOfReviews,
                             header = "Reviews for " + production.title,
                             handleProductionImageClick = handleProductionClick,
-                            handleLikeClick = { reviewID ->
-                                handleLikeClick(reviewID)
+                            handleLikeClick = { reviewID, productionType ->
+                                handleLikeClick(reviewID, productionType)
                             },
                             handleProfilePictureClick = handleProfilePictureClick,
                             handleReviewClick = handleReviewClick

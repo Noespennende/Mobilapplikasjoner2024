@@ -2,10 +2,8 @@ package com.movielist.data
 
 import android.net.Uri
 import android.util.Log
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -13,6 +11,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import kotlinx.coroutines.tasks.await
@@ -58,6 +57,50 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 Log.w("FirebaseFailure", "Error getting document", exception)
             }
 
+    }
+
+
+    suspend fun updateReview(reviewID: String, productionType: String, productionID: String, newLikes: Long): Boolean {
+
+            return try {
+
+                val pathProduction = "reviews/$productionType/$productionID"
+
+                val reviewDocument = db.collection(pathProduction)
+                    .document(reviewID)
+
+                val reviewData = reviewDocument.get().await()
+
+                reviewDocument.update(
+                    "likes", newLikes,
+                    "lastUpdated", System.currentTimeMillis()
+                ).await()
+
+                Log.d("FirestoreRepository", "Review updated successfully.")
+                true
+            } catch (exception: Exception) {
+                Log.e("FirestoreRepository", "Error while updating review: $exception")
+                false
+            }
+        }
+
+
+    suspend fun getReviewsById(reviewID: String): ReviewDTO? {
+        return try {
+            val docSnapshot = db.collection("reviews").document(reviewID).get().await()
+
+
+            if (docSnapshot.exists()) {
+                docSnapshot.toObject(ReviewDTO::class.java)
+
+            } else {
+                Log.e("FirestoreRepository", "Review not found with ID: $reviewID")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("FirestoreRepository", "Error fetching review: $e")
+            null
+        }
     }
 
     fun updateUser(user: User) {
@@ -672,8 +715,8 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
         // Bestem hvilken samling som skal brukes basert på productionType
         val collectionType = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            "RMOV" -> "movieReviews"
+            "RTV" -> "tvShowReviews"
             else -> {
                 throw IllegalArgumentException("Invalid production type: $productionType")
             }
@@ -689,9 +732,11 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
             // Hent anmeldelsen fra dokumentet
             val reviewData = reviewDocument.get().await()
-
+            Log.d("ReviewData", "${reviewData}")
+            Log.d("ReviewData", "${reviewData.data}")
             if (reviewData.exists()) {
                 reviewData.data  // Returner anmeldelsesdataene som et Map<String, Any>
+
 
             } else {
                 Log.d("Firestore-Reviews", "Review not found")

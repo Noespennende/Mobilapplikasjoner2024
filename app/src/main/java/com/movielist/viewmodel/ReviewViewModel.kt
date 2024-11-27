@@ -2,7 +2,6 @@ package com.movielist.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.FirestoreRepository

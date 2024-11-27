@@ -65,125 +65,9 @@ import kotlin.random.Random
 
 @Composable
 fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavController) {
-
-    //Temporary code: DELETE THIS CODE
-    val listItemList = mutableListOf<ListItem>()
-    for (i in 0..12) {
-        listItemList.add(
-            ListItem(
-                currentEpisode = i,
-                score = Random.nextInt(0, 10),
-                production = TVShow(
-                    imdbID = "123",
-                    title = "Silo",
-                    description = "TvShow Silo description here",
-                    genre = listOf("Action"),
-                    releaseDate = Calendar.getInstance(),
-                    actors = emptyList(),
-                    rating = 4,
-                    reviews = ArrayList(),
-                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                    episodes = listOf(
-                        "01", "02", "03", "04", "05", "06",
-                        "07", "08", "09", "10", "11", "12"
-                    ),
-                    seasons = listOf("1", "2", "3")
-                ),
-            )
-        )
-    }
-
     val showList = mutableListOf<Production>()
-    /*
-    for (i in 0..12) {
-        showList.add(
-            TVShow(
-                imdbID = "123",
-                title = "Silo",
-                description = "TvShow Silo description here",
-                genre = listOf("Action"),
-                releaseDate = Calendar.getInstance(),
-                actors = emptyList(),
-                rating = 4,
-                reviews = ArrayList(),
-                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                episodes = listOf("01", "02", "03", "04", "05", "06",
-                    "07", "08", "09", "10", "11", "12"),
-                seasons = listOf("1", "2", "3")
-            )
-        )
-    }*/
-
     val reviewList = mutableListOf<ReviewDTO>()
 
-    val reviewUser = User(
-        id = "IDfromFirebase",
-        userName = "UserN",
-        email = "user@email.com",
-        followingList = mutableListOf(),
-    )
-
-    val reviewProduction = TVShow(
-        imdbID = "123",
-        title = "Silo",
-        description = "TvShow Silo description here",
-        genre = listOf("Action"),
-        releaseDate = Calendar.getInstance(),
-        actors = emptyList(),
-        rating = 4,
-        reviews = ArrayList(),
-        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf(
-            "01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"
-        ),
-        seasons = listOf("1", "2", "3")
-    )
-
-    val reviewReview = Review(
-        score = Random.nextInt(0, 10),
-        reviewerID = reviewUser.id,
-        likes = Random.nextInt(0, 200),
-        productionID = reviewProduction.imdbID,
-        postDate = Calendar.getInstance(),
-        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-    )
-
-    // Populate reviewsList
-    for (i in 0..10) {
-        reviewList.add(
-            ReviewDTO(
-                reviewID = reviewUser.id,
-                score = reviewReview.score,
-                productionID = reviewReview.productionID,
-                reviewerID = reviewReview.reviewerID,
-                reviewBody = reviewReview.reviewBody,
-                postDate = reviewReview.postDate,
-                likes = reviewReview.likes,
-                reviewerUserName = reviewUser.userName,
-                reviewerProfileImage = reviewUser.profileImageID,
-                productionPosterUrl = reviewProduction.posterUrl,
-                productionTitle = reviewProduction.title,
-                productionReleaseDate = reviewProduction.releaseDate,
-                productionType = reviewProduction.type
-            )
-
-        )
-    }
-    val user = User(
-        id = "testid",
-        userName = "User Userson",
-        email = "test@email.no",
-        followingList = mutableListOf(),
-        myReviews = mutableListOf(),
-        favoriteCollection = mutableListOf(),
-        completedCollection = listItemList,
-        wantToWatchCollection = listItemList,
-        droppedCollection = listItemList,
-        currentlyWatchingCollection = listItemList
-    )
-
-    //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
 
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
@@ -197,7 +81,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
         navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType))
     }
 
-    val handleReviewLikeButtonClick: (reviewID: String) -> Unit = { reviewID ->
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
         //Kontroller funksjon for å håndtere en review like hær
     }
 
