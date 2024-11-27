@@ -15,6 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -90,6 +93,7 @@ fun Review(
     handleUserClick: (String) -> Unit,
     handleProductionClick: (String) -> Unit
 ) {
+    var likes by remember { mutableIntStateOf(reviewDTO?.likes ?: 0) }
     //Main container
     Column {
         if (reviewDTO != null) {
@@ -228,7 +232,7 @@ fun Review(
             }
 
             Text(
-                text = "${reviewDTO.likes} likes",
+                text = "${likes} likes",
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
@@ -245,7 +249,14 @@ fun Review(
                 contentAlignment = Alignment.Center
             ) {
                 LikeButton(
-                    handleLikeClick = handleLikeClick
+                    handleLikeClick = { liked ->
+                        if (liked){
+                            likes += 1
+                        } else {
+                            likes -= 1
+                        }
+                        handleLikeClick()
+                    }
                 )
             }
             LineDevider()

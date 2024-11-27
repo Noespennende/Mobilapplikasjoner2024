@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -581,6 +582,8 @@ fun ReviewSummary (
         handleLikeClick(review.reviewID.toString())
     }
 
+    var likes by remember { mutableIntStateOf(review.likes) }
+
     //Main container
     Column (
         modifier = Modifier
@@ -730,7 +733,7 @@ fun ReviewSummary (
                     .align(Alignment.BottomStart)
             )
             Text(
-                text = "${review.likes} likes",
+                text = "${likes} likes",
                 fontSize = paragraphSize,
                 fontFamily = fontFamily,
                 fontWeight = weightBold,
@@ -747,7 +750,14 @@ fun ReviewSummary (
             contentAlignment = Alignment.Center
         ){
             LikeButton(
-                handleLikeClick = handleLikeButtonClick
+                handleLikeClick = { liked ->
+                    if (liked){
+                        likes += 1
+                    } else {
+                        likes -= 1
+                    }
+                    handleLikeButtonClick()
+                }
             )
         }
     }

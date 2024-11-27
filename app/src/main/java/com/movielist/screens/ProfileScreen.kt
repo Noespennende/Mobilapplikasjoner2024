@@ -249,6 +249,13 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     )
     {
         if(activeTab == com.movielist.model.ProfileCategoryOptions.SUMMARY){
+
+            item {
+                if(!isAppInPortraitMode()) {
+                    UsernameHeadline(user = user)
+                }
+            }
+
             //Biosection
             item{
                 //Wrapper for horisontal padding
@@ -434,7 +441,7 @@ fun UsernameHeadline (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = topNavBarContentStart)
+            .padding(top = if(isAppInPortraitMode())LocalConstraints.current.topUniversalNavbarContentStart else 8.dp )
     ){
         ProfileImage(
             imageID = user.profileImageID,

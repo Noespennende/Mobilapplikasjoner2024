@@ -447,7 +447,7 @@ fun RatingsGraphics(
 fun LikeButton (
     sizeMultiplier: Float = 1f,
     liked: Boolean = false,
-    handleLikeClick: () -> Unit
+    handleLikeClick: (likeState: Boolean) -> Unit,
 ) {
     val primaryColor = LocalColor.current.primary
     val quinaryColor = LocalColor.current.quinary
@@ -482,7 +482,7 @@ fun LikeButton (
             heartIcon = R.drawable.heart_filled
         }
 
-        handleLikeClick()
+        handleLikeClick(buttonClicked)
     }
 
     Button(
