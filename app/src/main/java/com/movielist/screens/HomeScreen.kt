@@ -37,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -639,15 +640,29 @@ fun TheUsersYouFollowJustWatched (
         //Content
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp),
+            modifier = Modifier
+                .fillMaxWidth()
         ){
             if (listOfShows.isEmpty()) {
-                items (3) {
-                    Column (
-                        verticalArrangement = Arrangement.spacedBy(3.dp)
-                    ) {
-                        LoadingCard()
+                item () {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ){
+                        Text(
+                            "There doesn't seem to be anything here :(",
+                            fontFamily = fontFamily,
+                            fontSize = paragraphSize,
+                            fontWeight = weightRegular,
+                            color = LocalColor.current.quaternary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(vertical = 10.dp)
+                                .fillMaxWidth()
+                        )
                     }
+
                 }
             } else {
                 items (listOfShows.size) {i ->
