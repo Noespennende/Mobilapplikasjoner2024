@@ -64,6 +64,7 @@ import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.*
 import java.util.Calendar
+import kotlin.math.log
 import kotlin.random.Random
 
 @Composable
@@ -187,7 +188,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     handleProductionImageClick = handleProductionButtonClick,
                     handleProfilePictureClick = handleProfilePictureClick,
                     handleReviewClick = handleReviewClick,
-                    loadingIfListEmpty = true
+                    loadingIfListEmpty = true,
+                    loggedInUser = loggedInUser?: User("","","")
                 )
 
             }

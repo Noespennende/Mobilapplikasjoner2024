@@ -52,6 +52,7 @@ import com.movielist.model.Movie
 import com.movielist.model.Production
 import com.movielist.model.ProductionType
 import com.movielist.model.TVShow
+import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.bottomNavBarHeight
@@ -73,6 +74,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
     //val production by controllerViewModel.movieData.collectAsState()
     //val production by remember { mutableStateOf<Production?>(null) }
+    val loggedInUser = controllerViewModel.loggedInUser
     var memberOfUserList by remember { mutableStateOf<ListOptions?>(null) } /* <-ListOption enum som sier hvilken liste filmen/serien ligger i i logged inn users liste. Hvis den ikke ligger i en liste set den til null.*/
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
 
@@ -335,7 +337,8 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                             handleLikeClick(reviewID, productionType)
                         },
                         handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
+                        handleReviewClick = handleReviewClick,
+                        loggedInUser = loggedInUser?.value ?: User("","","")
                     )
                 }
             }

@@ -7,7 +7,6 @@ import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.FirestoreRepository
 import com.movielist.data.UUIDAdapter
 import com.movielist.model.Production
-import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.User
