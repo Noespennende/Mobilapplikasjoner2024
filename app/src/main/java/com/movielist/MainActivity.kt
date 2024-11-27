@@ -55,6 +55,8 @@ class MainActivity : ComponentActivity() {
         controllerViewModel.checkUserStatus()
 
         setContent {
+            controllerViewModel.checkForNewFollowers()
+
             ApplicationTheme {
 
                 val firebaseUser by controllerViewModel.currentFirebaseUser.collectAsState()

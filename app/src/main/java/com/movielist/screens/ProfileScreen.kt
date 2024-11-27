@@ -7,7 +7,6 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,10 +43,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.HamburgerButton
 import com.movielist.composables.LineDevider
 import com.movielist.composables.ListItemListSidesroller
 import com.movielist.composables.ProfileImage
@@ -60,17 +64,14 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
-import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.isAppInDarkTheme
-import com.movielist.ui.theme.topNavBaHeight
+import com.movielist.ui.theme.isAppInPortraitMode
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
-import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightLight
 import com.movielist.ui.theme.weightRegular
@@ -215,7 +216,6 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
         profileOwnersReviews.value = emptyList()
         if (userID != null) {
-
             controllerViewModel.loadProfileOwner(userID)
 
             profileOwnerLoaded.value = true
@@ -244,8 +244,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
     //Main Content
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
-            bottom = bottomNavBarHeight +20.dp
+            top = LocalConstraints.current.mainContentStart + 10.dp,
+            bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp
         ),
         verticalArrangement = Arrangement.spacedBy(15.dp)
     )
@@ -257,7 +257,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 Box(
                     modifier = Modifier
                         .padding(
-                            horizontal = horizontalPadding
+                            start = LocalConstraints.current.mainContentHorizontalPadding,
+                            end = LocalConstraints.current.mainContentHorizontalPaddingAlternative
                         )
                 )
                 {
@@ -285,7 +286,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleImageClick = handleProductionClick,
                     textModifier = Modifier
                         .padding(
-                            start = verticalPadding,
+                            start = LocalConstraints.current.mainContentHorizontalPadding,
                             bottom = 15.dp
                         )
 
@@ -298,7 +299,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
+                        .padding(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPaddingAlternative)
                 ){
                     LineDevider()
                 }
@@ -313,7 +314,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleImageClick = handleProductionClick,
                     textModifier = Modifier
                         .padding(
-                            start = horizontalPadding,
+                            start = LocalConstraints.current.mainContentHorizontalPadding,
                             bottom = 15.dp
                         )
                 )
@@ -325,7 +326,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
+                        .padding(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPaddingAlternative)
                 ){
                     LineDevider()
                 }
@@ -347,7 +348,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = horizontalPadding)
+                        .padding(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPaddingAlternative)
                 ){
                     LineDevider()
                 }
@@ -362,7 +363,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleProductionImageClick = handleProductionClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                    handleReviewClick = handleReviewClick,
+                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
 
                 )
             }
@@ -375,19 +377,29 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleLikeClick = handleReviewButtonLikeClick,
                     handleReviewClick = handleReviewClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleProductionImageClick = handleProductionClick
+                    handleProductionImageClick = handleProductionClick,
+                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
                 )
             }
         }
     }
 
-    //Navigation
-    TopNavBarProfilePage(
-        user = user,
-        handleSummaryClick = handleSummaryClick,
-        handleLibraryClick = handleLibraryClick,
-        handleReviewsClick = handleReviewsClick
-    )
+    if (isAppInPortraitMode()){
+        //Navigation
+        TopNavBarProfilePage(
+            user = user,
+            handleSummaryClick = handleSummaryClick,
+            handleLibraryClick = handleLibraryClick,
+            handleReviewsClick = handleReviewsClick
+        )
+    } else {
+        TopNavigationProfileScreenLandscape(
+            handleSummaryClick = handleSummaryClick,
+            handleLibraryClick = handleLibraryClick,
+            handleReviewsClick = handleReviewsClick
+        )
+    }
+
 }
 
 @Composable
@@ -466,7 +478,7 @@ fun ProfileCategoryOptions(
     //Graphics
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(horizontal = horizontalPadding)
+        contentPadding = PaddingValues(horizontal = LocalConstraints.current.mainContentHorizontalPadding)
     ){
         item {
             //Summary
@@ -966,7 +978,7 @@ fun StatisticsSection(
         verticalArrangement = Arrangement.spacedBy(15.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = horizontalPadding)
+            .padding(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPaddingAlternative)
     ) {
         //Header
         Text(
@@ -1218,4 +1230,126 @@ fun StatisticsList (
 
         }
     }
+}
+
+
+@Composable
+fun TopNavigationProfileScreenLandscape(
+    handleSummaryClick: () -> Unit,
+    handleLibraryClick: () -> Unit,
+    handleReviewsClick: () -> Unit
+){
+
+    var categoryDropDownExpanded by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp,
+                end = 80.dp
+            )
+    ) {
+
+        HamburgerButton(
+            sizeMultiplier = 2.3f,
+            handleHamburgerButtonClick = {
+                categoryDropDownExpanded = !categoryDropDownExpanded
+            }
+        )
+
+        Box(){
+            //CategoryDropdown
+            DropdownMenu(
+                expanded = categoryDropDownExpanded,
+                onDismissRequest = {categoryDropDownExpanded = false},
+                offset = DpOffset(x = (-230).dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
+                    .width(180.dp)
+            ) {
+
+                //Sorting Options
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Summary",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleSummaryClick()
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+                //Watching
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Library",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleLibraryClick()
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+
+                //Completed
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Reviews",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleReviewsClick()
+                        categoryDropDownExpanded = false
+                    }
+                )
+            }
+        }
+    }
+
 }

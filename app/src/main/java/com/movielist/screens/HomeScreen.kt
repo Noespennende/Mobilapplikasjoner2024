@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,6 +44,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.LineDevider
 import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
@@ -291,7 +293,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     listOfShows = top10Shows,
                     handleImageClick = handleProductionButtonClick,
                     textModifier = Modifier
-                        .padding(vertical = 10.dp, horizontal = horizontalPadding),
+                        .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding),
                     modifier = Modifier
                         .padding(top = verticalPadding)
 
@@ -329,15 +331,17 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     }
                 }
 
-                //Top reviews this week:
+
                 ReviewsSection(
                     reviewList = top10ReviewsListPastWeek,
                     header = "Top reviews this week",
                     handleLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionButtonClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                    handleReviewClick = handleReviewClick,
+                    loadingIfListEmpty = true
                 )
+
             }
 
             item {
@@ -388,7 +392,7 @@ fun CurrentlyWatchingScroller (
     //Graphics
     LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
     ) {
         if (listOfShows.isEmpty()) {
             items (3) {
@@ -631,12 +635,12 @@ fun TheUsersYouFollowJustWatched (
             fontWeight = weightBold,
             color = LocalColor.current.secondary,
             modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = horizontalPadding)
+                .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding)
         )
         //Content
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
         ){
             if (listOfShows.isEmpty()) {
                 items (3) {

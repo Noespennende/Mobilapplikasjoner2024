@@ -1,12 +1,10 @@
 package com.movielist.composables
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Ease
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.Easing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -74,9 +72,9 @@ import com.movielist.model.Production
 import com.movielist.model.ProductionType
 import com.movielist.model.ShowSortOptions
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.showImageHeight
@@ -239,8 +237,8 @@ fun LineDevider (
 }
 
 @Composable
-fun LineDeviderVertical (
-    color: Color = if(isAppInDarkTheme()) LocalColor.current.backgroundLight else LocalColor.current.backgroundAlternative,
+fun LineDividerVertical (
+    color: Color = LocalColor.current.secondary,
     strokeWith: Float = 5f,
     modifier: Modifier = Modifier
 )
@@ -643,7 +641,7 @@ fun ProductionListSidesroller (
         )
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPadding)
         ){
             items (listOfShows.size) {i ->
                 ProductionImage(
@@ -684,7 +682,7 @@ fun ListItemListSidesroller (
         )
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = horizontalPadding)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = LocalConstraints.current.mainContentHorizontalPadding)
         ){
             if(listOfShows.isNotEmpty()){
                 items (listOfShows.size) {i ->
@@ -783,7 +781,7 @@ fun YouTubeVideoEmbed(
     AndroidView(
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontal = LocalConstraints.current.mainContentHorizontalPadding)
         ,
         factory = { context ->
             YouTubePlayerView(context = context).apply {
@@ -1069,6 +1067,66 @@ fun SettingsButton(
             .width(15.dp * sizeMultiplier)
             .clickable {
                 handleSettingsButtonClick()
+            }
+    )
+}
+
+
+@Composable
+fun HamburgerButton(
+    modifier: Modifier = Modifier,
+    sizeMultiplier: Float = 1f,
+    iconColor: Color = LocalColor.current.backgroundLight,
+    backgroundColor: Color = LocalColor.current.primary,
+    handleHamburgerButtonClick: () -> Unit
+) {
+
+    Image(
+        painter = painterResource(R.drawable.hamburger),
+        contentDescription = "Settings and user info",
+        contentScale = ContentScale.Crop,
+        colorFilter = ColorFilter.tint(iconColor),
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(100)
+            )
+            .padding(5.dp)
+            .height(15.dp * sizeMultiplier)
+            .width(15.dp * sizeMultiplier)
+            .clickable {
+                handleHamburgerButtonClick()
+            }
+    )
+}
+
+
+@Composable
+fun SearchButton(
+    modifier: Modifier = Modifier,
+    sizeMultiplier: Float = 1f,
+    iconColor: Color = LocalColor.current.backgroundLight,
+    backgroundColor: Color = LocalColor.current.primary,
+    handleHamburgerButtonClick: () -> Unit
+) {
+
+    Image(
+        painter = painterResource(R.drawable.search),
+        contentDescription = "Settings and user info",
+        contentScale = ContentScale.Crop,
+        colorFilter = ColorFilter.tint(iconColor),
+        modifier = modifier
+            .clip(RoundedCornerShape(5.dp))
+            .background(
+                color = backgroundColor,
+                shape = RoundedCornerShape(100)
+            )
+            .padding(5.dp)
+            .height(15.dp * sizeMultiplier)
+            .width(15.dp * sizeMultiplier)
+            .clickable {
+                handleHamburgerButtonClick()
             }
     )
 }

@@ -3,7 +3,6 @@ package com.movielist.composables
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,14 +42,13 @@ import com.movielist.model.NavbarOptions
 import com.movielist.model.TopNavDropdownOptions
 import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.bottomNavBarHeight
-import com.movielist.ui.theme.bottomPhoneIconsOffset
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.topNavBaHeight
+import com.movielist.ui.theme.topNavBarHeight
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 
@@ -103,9 +101,9 @@ fun BottomNavBar(
                 .wrapContentHeight()
                 .align(Alignment.BottomCenter)
                 .padding(
-                    bottom = bottomPhoneIconsOffset -10.dp,
-                    start = horizontalPadding -10.dp,
-                    end = horizontalPadding -10.dp
+                    bottom = LocalConstraints.current.bottomUniversalNavbarContentStart,
+                    start = LocalConstraints.current.universalNavbarHorizontalPadding,
+                    end = LocalConstraints.current.universalNavbarHorizontalPadding
                 )
         ) {
             //Home button
@@ -332,7 +330,7 @@ fun BottomNavbarAndMobileIconsBackground (
             modifier = Modifier
                 .background(color)
                 .fillMaxWidth()
-                .height(bottomNavBarHeight)
+                .height(LocalConstraints.current.bottomUniversalNavbarHeight)
                 .align(Alignment.BottomCenter)
         )
     }
@@ -352,7 +350,7 @@ fun TopScreensNavbarBackground (
             modifier = Modifier
                 .background(color)
                 .fillMaxWidth()
-                .height((topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight)*sizeMultiplier)
+                .height((topPhoneIconsAndNavBarBackgroundHeight + topNavBarHeight)*sizeMultiplier)
                 .align(Alignment.TopCenter)
         )
     }
@@ -393,9 +391,11 @@ fun TopNav (
             verticalAlignment = Alignment.Bottom,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
-                .height(topPhoneIconsAndNavBarBackgroundHeight)
+                .height(LocalConstraints.current.topUniversalNavbarContentStart)
                 .fillMaxWidth()
-                .padding(bottom = 8.dp, start = horizontalPadding, end = horizontalPadding)
+                .padding(bottom = 8.dp,
+                    start = LocalConstraints.current.universalNavbarHorizontalPadding,
+                    end = LocalConstraints.current.universalNavbarHorizontalPadding)
         )
         {
             Logo(
@@ -451,7 +451,7 @@ fun TopNavBackground (
             modifier = Modifier
                 .background(color)
                 .fillMaxWidth()
-                .height(topPhoneIconsAndNavBarBackgroundHeight)
+                .height(LocalConstraints.current.topUniversalNavbarHeight)
                 .align(Alignment.TopCenter)
         )
     }

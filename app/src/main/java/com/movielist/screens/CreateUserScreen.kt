@@ -28,6 +28,7 @@ import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.controller.ControllerViewModel
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
@@ -72,6 +73,8 @@ fun CreateUserScreen (controllerViewModel: ControllerViewModel, navController: N
     var handleBackToLoginScreenClick: () -> Unit = {
         navController.navigate(Screen.LoginScreen.withArguments())
     }
+
+
 
 
     Column(

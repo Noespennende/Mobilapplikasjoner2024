@@ -53,10 +53,10 @@ import com.movielist.model.Production
 import com.movielist.model.ProductionType
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -683,7 +683,7 @@ fun productionDescription(
         textAlign = TextAlign.Start,
         color = LocalColor.current.secondary,
         modifier = modifier
-            .padding(horizontal = horizontalPadding)
+            .padding(horizontal = LocalConstraints.current.mainContentHorizontalPadding)
     )
 }
 
@@ -699,7 +699,7 @@ fun GenreSection(
 ){
     if (production!!.genre.size > 0){
         LazyRow (
-            contentPadding = PaddingValues(horizontal = horizontalPadding),
+            contentPadding = PaddingValues(horizontal = LocalConstraints.current.mainContentHorizontalPadding),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             modifier = modifier
                 .fillMaxWidth()
@@ -748,11 +748,11 @@ fun ActorsSection(
                 textAlign = TextAlign.Start,
                 color = LocalColor.current.secondary,
                 modifier = Modifier
-                    .padding(start = horizontalPadding, bottom = 10.dp)
+                    .padding(start = LocalConstraints.current.mainContentHorizontalPadding, bottom = 10.dp)
             )
 
             LazyRow (
-                contentPadding = PaddingValues(horizontal = horizontalPadding),
+                contentPadding = PaddingValues(horizontal = LocalConstraints.current.mainContentHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
 
                 ){
