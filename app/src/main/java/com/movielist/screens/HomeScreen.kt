@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -43,6 +44,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.LineDevider
 import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProductionListSidesroller
 import com.movielist.composables.ProfileImage
@@ -328,15 +330,17 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     }
                 }
 
-                //Top reviews this week:
+
                 ReviewsSection(
                     reviewList = top10ReviewsListPastWeek.value,
                     header = "Top reviews this week",
                     handleLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionButtonClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                    handleReviewClick = handleReviewClick,
+                    loadingIfListEmpty = true
                 )
+
             }
 
             item {

@@ -484,7 +484,8 @@ fun ReviewsSection(
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit,
     paddingStart: Dp = LocalConstraints.current.mainContentHorizontalPadding,
-    paddingEnd: Dp = LocalConstraints.current.mainContentHorizontalPadding
+    paddingEnd: Dp = LocalConstraints.current.mainContentHorizontalPadding,
+    loadingIfListEmpty: Boolean = false
 ) {
 
     val handleLikeButtonClick: (String) -> Unit = {reviewID ->
@@ -528,7 +529,19 @@ fun ReviewsSection(
                 )
                 LineDevider()
             }
-        } else {
+        } else if (loadingIfListEmpty){
+            Box(
+                modifier = Modifier
+                    .padding(
+                        top = 20.dp,
+                        bottom = 20.dp
+                    )
+            ){
+                LoadingCircle()
+            }
+
+        }
+        else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
