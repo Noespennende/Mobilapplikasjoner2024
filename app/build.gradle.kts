@@ -52,36 +52,6 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
-
-    // Må bygge en ny google-services.json fil, som inneholder api-nøkkelen.
-    // det vil si at google-services.json IKKE skal med i git, mens google-services-template.json
-    // må være med i git.
-    tasks.register("generateGoogleServicesJson") {
-        doLast {
-            // Lese API-nøkkel fra keys.properties
-            val propertiesFile = file("../keys.properties")
-            val properties = Properties().apply { load(propertiesFile.inputStream()) }
-            val apiKey = properties.getProperty("FIREBASE_API_KEY") ?: "default_value"
-
-            // Les malen
-            val templateFile = file("google-services-template.json")
-            var jsonText = templateFile.readText(Charsets.UTF_8)
-
-            // Erstatt plassen for API-nøkkelen med den faktiske nøkkelen
-            jsonText = jsonText.replace("REPLACE_WITH_API_KEY", apiKey)
-
-            // Lagre som google-services.json
-            val outputFile = file("google-services.json")
-            outputFile.writeText(jsonText, Charsets.UTF_8)
-        }
-    }
-
-    // Kjør oppgaven før preBuild
-    tasks.preBuild {
-        dependsOn("generateGoogleServicesJson")
-    }
-
-
 }
 
 dependencies {

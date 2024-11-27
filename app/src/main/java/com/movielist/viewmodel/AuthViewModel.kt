@@ -7,9 +7,9 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FireBaseAuth
-import com.movielist.data.addUserToDatabase
-import com.movielist.data.isUsernameUnique
+import com.movielist.data.FirestoreRepository
 import com.movielist.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +19,8 @@ class AuthViewModel : ViewModel() {
 
     // Instans av FirebaseAuth-hjelperklassen
     private val authHelper = FireBaseAuth()
+
+    private val firestoreRepository = FirestoreRepository(FirebaseFirestore.getInstance())
 
     /* Innloggingsstatus */
     // _ for å vise at den er privat, og kan kun endres/brukes internt
@@ -70,7 +72,7 @@ class AuthViewModel : ViewModel() {
             return
         }
 
-        isUsernameUnique(username) { isUnique ->
+        firestoreRepository.isUsernameUnique(username) { isUnique ->
             if (isUnique) {
 
                 auth.createUserWithEmailAndPassword(email, password)
@@ -99,7 +101,7 @@ class AuthViewModel : ViewModel() {
                                             droppedCollection = mutableListOf(),
                                             currentlyWatchingCollection = mutableListOf()
                                         )
-                                        addUserToDatabase(newUser)
+                                        firestoreRepository.addUserToDatabase(newUser)
 
                                         onSuccess("User created with UID: ${user.uid} and username: ${user.displayName}")
                                         Log.d("FirebaseAuth", "User created with UID: ${user.uid}")
