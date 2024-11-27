@@ -142,7 +142,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         }
     }
 
-    var popularReviewsThisMonthList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val popularReviewsThisMonthList by controllerViewModel.reviewTopMonth.collectAsState(emptyList())
+    // val popularReviewsAllTimeList by controllerViewModel.review.collectAsState(emptyList())
     var popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
 
@@ -152,7 +153,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
         val popularAllTime = controllerViewModel.getTop10ReviewsAllTime()
 
-        popularReviewsThisMonthList.value = popularThisMonthList
+        //popularReviewsThisMonthList.value = popularThisMonthList
 
         popularReviewsAllTimeList.value = popularAllTime
 
@@ -196,7 +197,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
     //Graphics:
 
-    if (popularReviewsThisMonthList.value.isEmpty()){
+    if (popularReviewsThisMonthList.isEmpty()){
         LoadingCircle()
     }
     else {
@@ -210,7 +211,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                 if (activeTab == ReviewsScreenTabs.SUMMARY) {
                     SummarySection(
                         friendsReviewsList = friendsReviewsList.value,
-                        topThisMonthList = popularReviewsThisMonthList.value,
+                        topThisMonthList = popularReviewsThisMonthList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
@@ -218,7 +219,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
                     TopThisMonthSection(
-                        topThisMonthList = popularReviewsThisMonthList.value,
+                        topThisMonthList = popularReviewsThisMonthList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,

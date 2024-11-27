@@ -235,7 +235,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
     }
 
-    var top10ReviewsListPastWeek = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val top10ReviewsListPastWeek by controllerViewModel.reviewTopWeek.collectAsState(emptyList())
+
 
 
     // Oppdateres/hentes hver gang Homescreen laster
@@ -243,7 +244,6 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     LaunchedEffect(Unit) {
         val topReviews = controllerViewModel.getTop10ReviewsPastWeek()
 
-        top10ReviewsListPastWeek.value = topReviews
     }
 
 
@@ -331,7 +331,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
                 //Top reviews this week:
                 ReviewsSection(
-                    reviewList = top10ReviewsListPastWeek.value,
+                    reviewList = top10ReviewsListPastWeek,
                     header = "Top reviews this week",
                     handleLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionButtonClick,
