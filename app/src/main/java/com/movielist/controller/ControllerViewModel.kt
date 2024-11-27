@@ -99,8 +99,8 @@ class ControllerViewModel(
         authViewModel.logOut()
     }
 
-    private val _filteredMediaData = MutableLiveData<List<Production>>()
-    val filteredMediaData: LiveData<List<Production>> get() = _filteredMediaData
+    private val _filteredMediaData = MutableStateFlow<List<Production>>(emptyList())
+    val filteredMediaData: StateFlow<List<Production>> get() = _filteredMediaData
 
     private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
     val searchResults: StateFlow<List<Production>> get() = _searchResult
@@ -131,7 +131,7 @@ class ControllerViewModel(
     }
 
 
-    init {
+    fun getPopularMoviesAndShows() {
         apiViewModel.getAllMedia()
 
         apiViewModel.mediaData.observeForever { mediaList ->
@@ -144,7 +144,9 @@ class ControllerViewModel(
                 }
             }
 
-            _filteredMediaData.postValue(convertedResults)
+            _filteredMediaData.value = convertedResults
+                .sortedByDescending { it.rating }
+                .take(10)
         }
     }
 
@@ -539,6 +541,7 @@ class ControllerViewModel(
     fun checkUserStatus() {
         authViewModel.checkUserStatus() // Kall autentiseringstatus
     }
+
 
     fun getAllMedia() {
         Log.d("ControllerViewModel", "getAllMedia called")

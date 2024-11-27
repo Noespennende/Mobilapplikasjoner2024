@@ -68,130 +68,13 @@ import kotlin.random.Random
 @Composable
 fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavController) {
 
-    //Temporary code: DELETE THIS CODE
-    val listItemList = mutableListOf<ListItem>()
-    for (i in 0..12) {
-        listItemList.add(
-            ListItem(
-                currentEpisode = i,
-                score = Random.nextInt(0, 10),
-                production = TVShow(
-                    imdbID = "123",
-                    title = "Silo",
-                    description = "TvShow Silo description here",
-                    genre = listOf("Action"),
-                    releaseDate = Calendar.getInstance(),
-                    actors = emptyList(),
-                    rating = 4,
-                    reviews = ArrayList(),
-                    posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                    episodes = listOf(
-                        "01", "02", "03", "04", "05", "06",
-                        "07", "08", "09", "10", "11", "12"
-                    ),
-                    seasons = listOf("1", "2", "3")
-                ),
-            )
-        )
-    }
-
-    val showList = mutableListOf<Production>()
-    /*
-    for (i in 0..12) {
-        showList.add(
-            TVShow(
-                imdbID = "123",
-                title = "Silo",
-                description = "TvShow Silo description here",
-                genre = listOf("Action"),
-                releaseDate = Calendar.getInstance(),
-                actors = emptyList(),
-                rating = 4,
-                reviews = ArrayList(),
-                posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-                episodes = listOf("01", "02", "03", "04", "05", "06",
-                    "07", "08", "09", "10", "11", "12"),
-                seasons = listOf("1", "2", "3")
-            )
-        )
-    }*/
-
-    val reviewList = mutableListOf<ReviewDTO>()
-
-    val reviewUser = User(
-        id = "IDfromFirebase",
-        userName = "UserN",
-        email = "user@email.com",
-        followingList = mutableListOf(),
-    )
-
-    val reviewProduction = TVShow(
-        imdbID = "123",
-        title = "Silo",
-        description = "TvShow Silo description here",
-        genre = listOf("Action"),
-        releaseDate = Calendar.getInstance(),
-        actors = emptyList(),
-        rating = 4,
-        reviews = ArrayList(),
-        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf(
-            "01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"
-        ),
-        seasons = listOf("1", "2", "3")
-    )
-
-    val reviewReview = Review(
-        score = Random.nextInt(0, 10),
-        reviewerID = reviewUser.id,
-        likes = Random.nextInt(0, 200),
-        productionID = reviewProduction.imdbID,
-        postDate = Calendar.getInstance(),
-        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-    )
-
-    // Populate reviewsList
-    for (i in 0..10) {
-        reviewList.add(
-            ReviewDTO(
-                reviewID = reviewUser.id,
-                score = reviewReview.score,
-                productionID = reviewReview.productionID,
-                reviewerID = reviewReview.reviewerID,
-                reviewBody = reviewReview.reviewBody,
-                postDate = reviewReview.postDate,
-                likes = reviewReview.likes,
-                reviewerUserName = reviewUser.userName,
-                reviewerProfileImage = reviewUser.profileImageID,
-                productionPosterUrl = reviewProduction.posterUrl,
-                productionTitle = reviewProduction.title,
-                productionReleaseDate = reviewProduction.releaseDate,
-                productionType = reviewProduction.type
-            )
-
-        )
-    }
-    val user = User(
-        id = "testid",
-        userName = "User Userson",
-        email = "test@email.no",
-        followingList = mutableListOf(),
-        myReviews = mutableListOf(),
-        favoriteCollection = mutableListOf(),
-        completedCollection = listItemList,
-        wantToWatchCollection = listItemList,
-        droppedCollection = listItemList,
-        currentlyWatchingCollection = listItemList
-    )
-
-    //^^^KODEN OVENFOR ER MIDLERTIDIG. SLETT DEN.^^^^
-
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val currentlyWatchingCollection: List<ListItem> =
         loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
+
+    val popularMoviesAndShows by controllerViewModel.filteredMediaData.collectAsState()
 
     val handleProductionButtonClick: (showID: String, productionType: ProductionType)
     -> Unit = { showID, productionType ->
@@ -246,6 +129,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     LaunchedEffect(Unit) {
         controllerViewModel.getTop10ReviewsPastWeek()
 
+        controllerViewModel.getPopularMoviesAndShows()
+
         Log.d("DEBUG", "UI: " + top10ReviewsListPastWeek.toString())
     }
 
@@ -270,28 +155,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
 
             item {
-                // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
-                // Funksjonen returnerer en liste med Show objekter.
-
-                // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
-                // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
-
-                //denne må stå her for å gjøre kallet til getAllMedia
-                var apiMovies = controllerViewModel.getAllMedia().toString()
-
-                var test = controllerViewModel.filteredMediaData.value
-
-                println("APIMOVIES 2: " + controllerViewModel.filteredMediaData.value)
-                test?.forEach { item -> showList.add(item) }
-
-                // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
-                var top10Shows = showList
-                    .sortedByDescending { it.rating }
-                    .take(10)
 
                 ProductionListSidesroller(
                     header = "Popular shows and movies",
-                    listOfShows = top10Shows,
+                    listOfShows = popularMoviesAndShows,
                     handleImageClick = handleProductionButtonClick,
                     textModifier = Modifier
                         .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding),
@@ -312,26 +179,6 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
             }
 
             item {
-
-                //TEMP KODE FLYTT UT
-                // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
-                // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
-
-                var reviewsList = mutableListOf<ReviewDTO>()
-                var reviewsListPastWeek = mutableListOf<ReviewDTO>()
-                val currentDate = Calendar.getInstance()
-                val pastWeek = currentDate.apply {
-                    add(Calendar.DATE, -7)
-                }
-
-                for (review in reviewList) {
-                    if (review.postDate >= pastWeek) {
-                        reviewsListPastWeek.add(review)
-                    } else {
-                        print("Review not posted within the past 7 days")
-                    }
-                }
-
 
                 ReviewsSection(
                     reviewList = top10ReviewsListPastWeek,
