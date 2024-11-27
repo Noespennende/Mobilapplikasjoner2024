@@ -146,21 +146,15 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     }
 
     val popularReviewsThisMonthList by controllerViewModel.reviewTopMonth.collectAsState(emptyList())
-    // val popularReviewsAllTimeList by controllerViewModel.review.collectAsState(emptyList())
-    var popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val popularReviewsAllTimeList by controllerViewModel.reviewTopAllTime.collectAsState(emptyList())
+
+    //val popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
 
     LaunchedEffect(Unit) {
 
-        val popularThisMonthList = controllerViewModel.getTop10ReviewsThisMonth()
-
-        val popularAllTime = controllerViewModel.getTop10ReviewsAllTime()
-
-        //popularReviewsThisMonthList.value = popularThisMonthList
-
-        popularReviewsAllTimeList.value = popularAllTime
-
-
+        controllerViewModel.getTop10ReviewsThisMonth()
+        controllerViewModel.getTop10ReviewsAllTime()
 
     }
 
@@ -227,7 +221,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
                     TopAllTimeSection(
-                        topAllTimeList = popularReviewsAllTimeList.value,
+                        topAllTimeList = popularReviewsAllTimeList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,

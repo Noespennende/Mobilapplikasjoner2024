@@ -244,8 +244,9 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
     // Oppdateres/hentes hver gang Homescreen laster
     // TODO: Hent når det har gått 24 timer siden sist henting i stedet (Oppdater Unit til noe annet)
     LaunchedEffect(Unit) {
-        val topReviews = controllerViewModel.getTop10ReviewsPastWeek()
+        controllerViewModel.getTop10ReviewsPastWeek()
 
+        Log.d("DEBUG", "UI: " + top10ReviewsListPastWeek.toString())
     }
 
 

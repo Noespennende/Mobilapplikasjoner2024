@@ -787,6 +787,9 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         val startOfPeriod = pastWeek.time
         val endOfPeriod = currentDate.time
 
+        Log.d("DEBUG", startOfPeriod.toString())
+        Log.d("DEBUG", endOfPeriod.toString())
+
         /**/
 
         try {

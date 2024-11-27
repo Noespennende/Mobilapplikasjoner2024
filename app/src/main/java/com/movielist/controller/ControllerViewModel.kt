@@ -1544,7 +1544,7 @@ class ControllerViewModel(
     val reviewTopWeek: StateFlow<List<ReviewDTO>> get() = _reviewTopWeek
 
     // Prøver paginering
-    suspend fun getTop10ReviewsAllTime(): List<ReviewDTO> {
+    suspend fun getTop10ReviewsAllTime() { // List<ReviewDTO>
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
         var lastVisible: Any? = null
         var hasMoreData = true
@@ -1573,7 +1573,7 @@ class ControllerViewModel(
             lastVisible = reviews.lastOrNull()?.postDate
         }
 
-        return reviewDTOList
+        _reviewTopAllTime.value = reviewDTOList
             .sortedByDescending { it.likes }
             .take(10)
     }
@@ -1602,8 +1602,8 @@ class ControllerViewModel(
             }
         }
 
-        Log.d("Reviews", reviewDTOList.toString())
-        _reviewTopMonth.value = reviewDTOList
+        Log.d("DEBUG", "GetTop10ReviewsPastWeek: " + reviewDTOList.toString())
+        _reviewTopWeek.value = reviewDTOList
             .sortedByDescending { it.score }
             .take(10)
     }
@@ -1632,7 +1632,7 @@ class ControllerViewModel(
             }
         }
 
-        _reviewTopWeek.value = reviewDTOList
+        _reviewTopMonth.value = reviewDTOList
             .sortedByDescending { it.likes }
             .take(10)
     }
