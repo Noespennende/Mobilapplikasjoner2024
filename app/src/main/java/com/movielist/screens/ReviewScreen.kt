@@ -28,8 +28,8 @@ import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ReviewDTO
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.fontFamily
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.weightBold
@@ -64,7 +64,7 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
 
     LazyColumn(
         contentPadding = PaddingValues(
-            horizontal = horizontalPadding,
+            horizontal = LocalConstraints.current.mainContentHorizontalPadding,
             vertical = topNavBarContentStart + 10.dp
         )
     ) {

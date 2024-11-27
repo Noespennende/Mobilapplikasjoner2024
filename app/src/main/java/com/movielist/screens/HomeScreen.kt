@@ -291,7 +291,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
                     listOfShows = top10Shows,
                     handleImageClick = handleProductionButtonClick,
                     textModifier = Modifier
-                        .padding(vertical = 10.dp, horizontal = horizontalPadding),
+                        .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding),
                     modifier = Modifier
                         .padding(top = verticalPadding)
 
@@ -388,7 +388,7 @@ fun CurrentlyWatchingScroller (
     //Graphics
     LazyRow (
         horizontalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+        contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
     ) {
         if (listOfShows.isEmpty()) {
             items (3) {
@@ -632,12 +632,12 @@ fun TheUsersYouFollowJustWatched (
             fontWeight = weightBold,
             color = LocalColor.current.secondary,
             modifier = Modifier
-                .padding(vertical = 10.dp, horizontal = horizontalPadding)
+                .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding)
         )
         //Content
         LazyRow (
             horizontalArrangement = Arrangement.spacedBy(15.dp),
-            contentPadding = PaddingValues(start = horizontalPadding, end = 0.dp)
+            contentPadding = PaddingValues(start = LocalConstraints.current.mainContentHorizontalPadding, end = 0.dp)
         ){
             if (listOfShows.isEmpty()) {
                 items (3) {

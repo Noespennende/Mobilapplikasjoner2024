@@ -1,7 +1,7 @@
 package com.movielist.screens
 
 
-import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,9 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,13 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.movielist.R
 import com.movielist.Screen
+import com.movielist.composables.HamburgerButton
 import com.movielist.composables.LineDevider
-import com.movielist.composables.LineDeviderVertical
+import com.movielist.composables.LineDividerVertical
 import com.movielist.composables.ProductionImage
 import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.ProfileImage
@@ -48,15 +52,13 @@ import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
-import com.movielist.ui.theme.bottomNavBarHeight
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
+import com.movielist.ui.theme.isAppInPortraitMode
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
-import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
 import java.util.Calendar
@@ -162,19 +164,16 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         uniqueToLoggedInUser.value = loggedInUserUnique
         uniqueToComparisonUser.value = comparisonUserUnique
 
-
-        Log.d("Profile", sharedShowsAndMovies.value.count().toString())
-
     }
 
 
     //Graphics
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + topNavBaHeight + 20.dp,
-            start = horizontalPadding,
-            end = horizontalPadding,
-            bottom = bottomNavBarHeight +20.dp
+            top = LocalConstraints.current.mainContentStart + 20.dp,
+            start = LocalConstraints.current.mainContentHorizontalPadding,
+            end = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
+            bottom =LocalConstraints.current.bottomUniversalNavbarHeight +20.dp
         ),
         verticalArrangement = Arrangement.spacedBy(5.dp)
         ,
@@ -182,6 +181,26 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
             .fillMaxSize()
     ) {
 
+        item {
+            if(!isAppInPortraitMode()){
+                comparisonUser?.let {
+                    loggedInUser?.let { it1 ->
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .padding(bottom = 10.dp)
+                        ){
+                            UserVsUserCard(
+                                loggedInUser = it1,
+                                comparisonUser = it,
+                                handleProfileImageClick = handleProfileImageClick
+                            )
+                        }
+
+                    }
+                }
+            }
+        }
         //Shared Shows and movies
         item {
             ComparisonScreenHeader(GenerateHeaderText(currentSortingOption))
@@ -201,7 +220,6 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
             )
 
         }
-
 
         //Unique to logged in user
         item {
@@ -248,15 +266,21 @@ fun ComparisonScreen (controllerViewModel: ControllerViewModel, navController: N
         }
     }
 
-    comparisonUser?.let {
-        loggedInUser?.let { it1 ->
-            TopNavBarComparisonScreen(
-            loggedInUser = it1,
-            comparisonUser = it,
-            handleSortChange = handleSortChange,
-            handleProfileImageClick = handleProfileImageClick
-        )
+    if(isAppInPortraitMode()) {
+        comparisonUser?.let {
+            loggedInUser?.let { it1 ->
+                TopNavBarComparisonScreen(
+                    loggedInUser = it1,
+                    comparisonUser = it,
+                    handleSortChange = handleSortChange,
+                    handleProfileImageClick = handleProfileImageClick
+                )
+            }
         }
+    } else {
+        TopNavigationComparisonScreenLandscape(
+            handleSortChange = handleSortChange
+        )
     }
 
 }
@@ -282,61 +306,73 @@ fun TopNavBarComparisonScreen(
             ProductionSortSelectButton(
                 handleSortChange = handleSortChange
             )
-            //Users
-            Row (
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                //LoggedInUserCard
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier
-                ) {
-                    Text(
-                        text = loggedInUser.userName,
-                        fontFamily = fontFamily,
-                        fontSize = headerSize,
-                        fontWeight = weightBold,
-                        color = LocalColor.current.secondary,
-                    )
-                    ProfileImage(
-                        imageID = loggedInUser.profileImageID,
-                        userName = loggedInUser.userName,
-                        handleProfileImageClick = {handleProfileImageClick(loggedInUser.id)}
-                    )
+            UserVsUserCard(
+                loggedInUser = loggedInUser,
+                comparisonUser = comparisonUser,
+                handleProfileImageClick = handleProfileImageClick
+            )
+        }
+    }
+}
 
-                }
+@Composable
+fun UserVsUserCard(
+    loggedInUser: User,
+    comparisonUser: User,
+    handleProfileImageClick: (userID: String) -> Unit
+){
+    //Users
+    Row (
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        //LoggedInUserCard
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier
+        ) {
+            Text(
+                text = loggedInUser.userName,
+                fontFamily = fontFamily,
+                fontSize = headerSize,
+                fontWeight = weightBold,
+                color = LocalColor.current.secondary,
+            )
+            ProfileImage(
+                imageID = loggedInUser.profileImageID,
+                userName = loggedInUser.userName,
+                handleProfileImageClick = {handleProfileImageClick(loggedInUser.id)}
+            )
 
-                //VerticalLineDevider
-                LineDeviderVertical(
-                    strokeWith = 9f,
-                    color = LocalColor.current.backgroundLight,
-                    modifier = Modifier
-                        .height(35.dp)
-                )
+        }
 
-                //Comparison User
-                Row (
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+        //VerticalLineDevider
+        LineDividerVertical(
+            strokeWith = 9f,
+            modifier = Modifier
+                .height(35.dp)
+        )
 
-                ) {
-                    ProfileImage(
-                        imageID = comparisonUser.profileImageID,
-                        userName = comparisonUser.userName,
-                        handleProfileImageClick = {handleProfileImageClick(comparisonUser.id)}
-                    )
-                    Text(
-                        text = comparisonUser.userName,
-                        fontFamily = fontFamily,
-                        fontSize = headerSize,
-                        fontWeight = weightBold,
-                        color = LocalColor.current.secondary,
-                    )
-                }
-            }
+        //Comparison User
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+
+        ) {
+            ProfileImage(
+                imageID = comparisonUser.profileImageID,
+                userName = comparisonUser.userName,
+                handleProfileImageClick = {handleProfileImageClick(comparisonUser.id)}
+            )
+            Text(
+                text = comparisonUser.userName,
+                fontFamily = fontFamily,
+                fontSize = headerSize,
+                fontWeight = weightBold,
+                color = LocalColor.current.secondary,
+            )
         }
     }
 }
@@ -436,7 +472,7 @@ fun ComparisonCard (
         }
         //Comparison Section
         Row(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
                 .fillMaxWidth()
         ){
@@ -445,7 +481,7 @@ fun ComparisonCard (
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.Bottom,
                 modifier = Modifier
-                    .fillMaxWidth(.385f)
+                    .fillMaxWidth(if(isAppInPortraitMode()) .33f else .40f)
                     .height(90.dp)
             ) {
                 RatingsGraphics(
@@ -481,6 +517,7 @@ fun ComparisonCard (
                 imageDescription = listItemForLoggedInUser.production.title,
                 sizeMultiplier = .7f,
                 modifier = Modifier
+                    .padding(horizontal = 20.dp)
                     .clickable {
                         handleProductionImageClick(listItemForLoggedInUser.production.imdbID, listItemForLoggedInUser.production.type)
                     }
@@ -529,6 +566,125 @@ fun ComparisonCard (
         visible = ratingsSliderVisible,
         onValueChangeFinished = handleRatingsChange
     )
+}
+
+@Composable
+fun TopNavigationComparisonScreenLandscape(
+    handleSortChange: (activeSortCategory: ShowSortOptions) -> Unit
+){
+
+    var categoryDropDownExpanded by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.BottomEnd,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                bottom = LocalConstraints.current.bottomUniversalNavbarHeight + 20.dp,
+                end = 80.dp
+            )
+    ) {
+
+        HamburgerButton(
+            sizeMultiplier = 2.3f,
+            handleHamburgerButtonClick = {
+                categoryDropDownExpanded = !categoryDropDownExpanded
+            }
+        )
+
+        Box(){
+            //CategoryDropdown
+            DropdownMenu(
+                expanded = categoryDropDownExpanded,
+                onDismissRequest = {categoryDropDownExpanded = false},
+                offset = DpOffset(x = (-230).dp, y= 0.dp),
+                modifier = Modifier
+                    .background(color = if(isAppInDarkTheme()){ LocalColor.current.tertiary} else {LocalColor.current.primary})
+                    .width(180.dp)
+            ) {
+
+                //Sorting Options
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Movies and Shows",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleSortChange(ShowSortOptions.MOVIESANDSHOWS)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+                //Watching
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Movies",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleSortChange(ShowSortOptions.MOVIES)
+                        categoryDropDownExpanded = false
+                    }
+                )
+
+
+                //Completed
+                DropdownMenuItem(
+                    text = {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                        ){
+                            //MENU ITEM TEXT
+                            Text(
+                                text = "Shows",
+                                fontSize = headerSize,
+                                fontWeight = weightBold,
+                                fontFamily = fontFamily,
+                                color = if(isAppInDarkTheme()){ LocalColor.current.secondary} else {LocalColor.current.backgroundLight},
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                            )
+                        }
+                    },
+                    onClick = {
+                        //On click logic for dropdown menu
+                        handleSortChange(ShowSortOptions.SHOWS)
+                        categoryDropDownExpanded = false
+                    }
+                )
+            }
+        }
+    }
+
 }
 
 

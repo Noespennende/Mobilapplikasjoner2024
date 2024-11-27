@@ -1,5 +1,6 @@
 package com.movielist.controller
 
+import android.app.NotificationManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -1928,7 +1929,7 @@ class ControllerViewModel(
         LaunchedEffect(Unit) {
             while(true){
                 val currentLocalFollowerCount = localStorageFollowerCount
-                val firebaseFollowerCount = 0 /* <- Firebase viewmodel funksjon her*/
+                val firebaseFollowerCount = getUserFollowingCount()
 
                 //Check to see if the follower count has changed since last loop
                 if (currentLocalFollowerCount < firebaseFollowerCount) {
@@ -1938,7 +1939,8 @@ class ControllerViewModel(
                     PostNotification(
                         context = context,
                         contentTitle = "New follower" + if (amountOfFollowers > 1) "s" else "",
-                        contentText = "You have ${amountOfFollowers} new follower" + if (amountOfFollowers > 1) "s" else ""
+                        contentText = "You have ${amountOfFollowers} new follower" + if (amountOfFollowers > 1) "s" else "",
+                        importance = NotificationManager.IMPORTANCE_LOW
                     )
                     outdatedLocalData = true
                 } else if (
@@ -1957,7 +1959,8 @@ class ControllerViewModel(
                 }
 
                 //Delay for 30 minutes before next check
-                delay(30 * 60 * 1000L)
+
+                delay(5 * 60 * 1000L)
             }
         }
     }

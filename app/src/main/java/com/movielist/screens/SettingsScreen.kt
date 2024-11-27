@@ -67,11 +67,11 @@ import com.movielist.data.LocalStorageKeys
 import com.movielist.model.LocationService
 import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.paragraphSize
 import com.movielist.ui.theme.topPhoneIconsAndNavBarBackgroundHeight
@@ -185,8 +185,8 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         contentPadding = PaddingValues(
             top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
             bottom = bottomNavBarHeight +20.dp,
-            start = horizontalPadding,
-            end = horizontalPadding
+            start = LocalConstraints.current.mainContentHorizontalPadding,
+            end = LocalConstraints.current.mainContentHorizontalPadding
         ),
         verticalArrangement = Arrangement.spacedBy(15.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

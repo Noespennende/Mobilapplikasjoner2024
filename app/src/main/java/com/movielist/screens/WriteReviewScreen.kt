@@ -37,6 +37,7 @@ import com.movielist.composables.RatingsGraphics
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.Production
 import com.movielist.ui.theme.LocalColor
+import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.bottomNavBarHeight
 import com.movielist.ui.theme.fontFamily
@@ -50,6 +51,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.reflect.jvm.internal.impl.descriptors.Visibilities.Local
 
 @Composable
 fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: NavController, productionID: String?, productionType: String?){
@@ -125,10 +127,10 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
     //Grafikk
     LazyColumn(
         contentPadding = PaddingValues(
-            top = topPhoneIconsAndNavBarBackgroundHeight + 20.dp,
-            bottom = bottomNavBarHeight +20.dp,
-            start = verticalPadding,
-            end = verticalPadding
+            top = LocalConstraints.current.mainContentStart +20.dp,
+            bottom = LocalConstraints.current.bottomUniversalNavbarHeight +20.dp,
+            start = LocalConstraints.current.mainContentHorizontalPadding,
+            end = LocalConstraints.current.mainContentHorizontalPadding
         ),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
