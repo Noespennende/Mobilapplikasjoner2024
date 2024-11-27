@@ -84,7 +84,7 @@ fun SearchPage (controllerViewModel: ControllerViewModel, navController: NavCont
     LazyVerticalGrid(
         columns = GridCells.Adaptive(minSize = showImageWith),
         contentPadding = PaddingValues(
-            top = LocalConstraints.current.mainContentStart + if(isAppInPortraitMode()){ 180.dp} else{0.dp},
+            top = LocalConstraints.current.mainContentStart + if(isAppInPortraitMode()){ 90.dp} else{0.dp},
             start = LocalConstraints.current.mainContentHorizontalPadding,
             end = LocalConstraints.current.mainContentHorizontalPadding,
             bottom = bottomNavBarHeight + 20.dp
