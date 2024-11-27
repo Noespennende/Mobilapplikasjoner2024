@@ -341,7 +341,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleProductionImageClick = handleProductionClick,
                     handleProfilePictureClick = handleProfilePictureClick,
                     handleReviewClick = handleReviewClick,
-                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
+                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
+                    loggedInUser = loggedInUser ?: User("","","")
 
                 )
             }
@@ -355,7 +356,8 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
                     handleReviewClick = handleReviewClick,
                     handleProfilePictureClick = handleProfilePictureClick,
                     handleProductionImageClick = handleProductionClick,
-                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
+                    paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
+                    loggedInUser = loggedInUser ?: User("","","")
                 )
             }
         }

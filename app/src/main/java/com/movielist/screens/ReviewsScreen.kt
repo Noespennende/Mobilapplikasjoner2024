@@ -66,6 +66,7 @@ import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
+import com.movielist.viewmodel.ReviewViewModel
 import java.util.Calendar
 import kotlin.random.Random
 
@@ -75,7 +76,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
     var friendsReviewsList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
     val friendsReviewsListLastUpdatedTime = remember { mutableLongStateOf(System.currentTimeMillis()) }
-
+    val loggedInUser = controllerViewModel.loggedInUser
     LaunchedEffect(Unit) {
 
         val currentTime = System.currentTimeMillis()
@@ -111,12 +112,30 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
 
     val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
+        val loggedInUserId = controllerViewModel.loggedInUser.value?.id
+        if (loggedInUserId != null) {
+
+            Log.d("ReviewLiked", "${review?.likedByUsers}\n user ${loggedInUserId}")
+            val isAlreadyLiked = review?.likedByUsers?.contains(loggedInUserId) == true
+            Log.d("REVIEWLIKED ", "${isAlreadyLiked}")
+            if (!isAlreadyLiked) {
+                controllerViewModel.updateReviewLikes(reviewID, productionType.name)
+            } else {
+                Log.d("ReviewLike", "User has already liked this review.")
+            }
+        } else {
+            Log.e("ReviewLike", "User not logged in. Cannot like the review.")
+        }
+    }
+
+    /*
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
 
         Log.d("ReviewID", "Review ID: $review")
 
 
          controllerViewModel.updateReviewLikes(reviewID, productionType.name)
-    }
+    }*/
 
     val handleProductionClick: (productionID: String, productionType: ProductionType)
         -> Unit = {productionID, productionType ->
@@ -163,6 +182,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
                         handleReviewClick = handleReviewClick,
+                        loggedInUser = loggedInUser?.value ?: User("","","")
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
                     TopThisMonthSection(
@@ -170,7 +190,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
+                        handleReviewClick = handleReviewClick,
+                        loggedInUser = loggedInUser?.value ?: User("","","")
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
                     TopAllTimeSection(
@@ -178,7 +199,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
-                        handleReviewClick = handleReviewClick
+                        handleReviewClick = handleReviewClick,
+                        loggedInUser = loggedInUser?.value ?: User("","","")
                     )
                 }
 
@@ -207,7 +229,8 @@ fun SummarySection (
     handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
-    handleReviewClick: (reviewID: String) -> Unit
+    handleReviewClick: (reviewID: String) -> Unit,
+    loggedInUser: User
 ){
     val handleReviewLikeButtonClick: (String, ProductionType) -> Unit = {reviewID, productionType ->
         handleReviewLikeClick(reviewID, productionType )
@@ -224,7 +247,8 @@ fun SummarySection (
             handleProductionImageClick = handleProductionImageClick,
             handleProfilePictureClick = handleProfilePictureClick,
             handleReviewClick = handleReviewClick,
-            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
+            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
+            loggedInUser = loggedInUser
         )
         //Popular reviews this month section
         ReviewsSection(
@@ -234,7 +258,8 @@ fun SummarySection (
             handleProductionImageClick = handleProductionImageClick,
             handleProfilePictureClick = handleProfilePictureClick,
             handleReviewClick = handleReviewClick,
-            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative
+            paddingEnd = LocalConstraints.current.mainContentHorizontalPaddingAlternative,
+            loggedInUser = loggedInUser
         )
     }
 }
@@ -245,7 +270,8 @@ fun TopThisMonthSection (
     handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
-    handleReviewClick: (reviewID: String) -> Unit
+    handleReviewClick: (reviewID: String) -> Unit,
+    loggedInUser: User
 ){
     val handleReviewButtonLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = {reviewID,productionType ->
         handleReviewLikeClick(reviewID,productionType)
@@ -258,7 +284,8 @@ fun TopThisMonthSection (
         handleLikeClick = handleReviewButtonLikeClick,
         handleProductionImageClick = handleProductionImageClick,
         handleProfilePictureClick = handleProfilePictureClick,
-        handleReviewClick = handleReviewClick
+        handleReviewClick = handleReviewClick,
+        loggedInUser = loggedInUser
     )
 }
 
@@ -268,7 +295,8 @@ fun TopAllTimeSection (
     handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
-    handleReviewClick: (reviewID: String) -> Unit
+    handleReviewClick: (reviewID: String) -> Unit,
+    loggedInUser: User
 ){
     val handleReviewButtonLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
         handleReviewLikeClick(reviewID,productionType)
@@ -281,7 +309,8 @@ fun TopAllTimeSection (
         handleLikeClick = handleReviewButtonLikeClick,
         handleProductionImageClick = handleProductionImageClick,
         handleProfilePictureClick = handleProfilePictureClick,
-        handleReviewClick = handleReviewClick
+        handleReviewClick = handleReviewClick,
+        loggedInUser = loggedInUser
     )
 }
 
@@ -439,7 +468,8 @@ fun ReviewsSection(
     handleReviewClick: (reviewID: String) -> Unit,
     paddingStart: Dp = LocalConstraints.current.mainContentHorizontalPadding,
     paddingEnd: Dp = LocalConstraints.current.mainContentHorizontalPadding,
-    loadingIfListEmpty: Boolean = false
+    loadingIfListEmpty: Boolean = false,
+    loggedInUser: User
 ) {
 
     val handleLikeButtonClick: (String, ProductionType) -> Unit = {reviewID, productionType ->
@@ -479,7 +509,8 @@ fun ReviewsSection(
                     handleLikeClick = handleLikeButtonClick,
                     handleProductionImageClick = handleProductionImageClick,
                     handleProfilePictureClick = handleProfilePictureClick,
-                    handleReviewClick = handleReviewClick
+                    handleReviewClick = handleReviewClick,
+                    loggedInUser = loggedInUser
                 )
                 LineDevider()
             }
@@ -529,7 +560,8 @@ fun ReviewSummary (
     handleLikeClick: (String, ProductionType) -> Unit,
     handleProductionImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
-    handleReviewClick: (reviewID: String) -> Unit
+    handleReviewClick: (reviewID: String) -> Unit,
+    loggedInUser: User
 ) {
     val handleLikeButtonClick: () -> Unit = {
         handleLikeClick(review.reviewID.toString(), review.productionType)
@@ -703,6 +735,7 @@ fun ReviewSummary (
             contentAlignment = Alignment.Center
         ){
             LikeButton(
+                liked = review.likedByUsers.contains(loggedInUser.id),
                 handleLikeClick = { liked ->
                     if (liked){
                         likes += 1

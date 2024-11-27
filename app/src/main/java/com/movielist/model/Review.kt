@@ -11,7 +11,8 @@ data class Review(
     val productionID: String,
     val reviewBody: String,
     val postDate: Calendar = Calendar.getInstance(),
-    var likes: Long = 0
+    var likes: Long = 0,
+    var likedByUsers: List<String> = emptyList()
 ) {
 
     fun toMap(): Map<String, Any> {
@@ -22,20 +23,22 @@ data class Review(
             "productionID" to productionID,
             "reviewBody" to reviewBody,
             "postDate" to Timestamp(postDate.time),
-            "likes" to likes
+            "likes" to likes,
+            "likedByUsers" to likedByUsers
         )
     }
 }
 
 
 data class ReviewDTO(
-    val reviewID: String, //UUID = UUID.randomUUID(),
+    val reviewID: String,
     val score: Int,
     val reviewerID: String,
     val productionID: String,
     val reviewBody: String,
     val postDate: Calendar = Calendar.getInstance(),
     var likes: Long = 0,
+    val likedByUsers: List<String?> = emptyList(), // Lagrer hvem som har likt
     val reviewerUserName: String,
     val reviewerProfileImage: String?,
     val productionPosterUrl: String?,

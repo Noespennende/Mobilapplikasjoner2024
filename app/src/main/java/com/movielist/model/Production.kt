@@ -10,7 +10,6 @@ sealed class Production(
     open val releaseDate: Calendar = Calendar.getInstance(),
     open val actors: List<String> = emptyList(),
     open val rating: Int? = null,
-    open val reviews: List<String> = emptyList(),
     open val posterUrl: String? = null,
     open val trailerUrl: String? = null,
 

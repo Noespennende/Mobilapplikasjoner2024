@@ -131,25 +131,31 @@ class ControllerViewModel(
     fun updateReviewLikes(reviewID: String, productionType: String) {
         viewModelScope.launch {
             try {
-                val (collectionType, productionId, entil) = reviewViewModel.splitReviewID(reviewID)
-                val currentReviewMap = firestoreRepository.getReviewById(reviewID, collectionType, productionId )
+                val userId = loggedInUser.value?.id
+                val (collectionType, productionId, _) = reviewViewModel.splitReviewID(reviewID)
+                val currentReviewMap = firestoreRepository.getReviewById(reviewID, collectionType, productionId)
 
-                Log.d("ControllerViewModel", "Current review map: ${currentReviewMap.toString()}")
                 val likes = currentReviewMap?.get("likes") as Long
-
+                Log.d("CurrentReviews", "${currentReviewMap}")
                 val newLikes = likes + 1
 
-                Log.d("ReviewLikes1", "${likes}")
+                val collection = when(collectionType){
+                    "RMOV" -> "movieReviews"
+                    "RTV" -> "tvShowReviews"
+                    else -> {""}
+                }
 
-                val productionType =  when (collectionType) {
-                   "RMOV" -> "movieReviews"
-                   "RTV" -> "tvShowReviews"
-                   else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
-               }
-                val isUpdated = firestoreRepository.updateReview(reviewID, productionType, productionId, newLikes )
-                Log.d("ReviewLikes", "${newLikes}")
-                if (isUpdated){
-                    val updatedReview = singleReviewDTOData.value?.copy(likes = newLikes)
+                val isUpdated = userId?.let {
+                    firestoreRepository.updateReview(reviewID, collection, productionId, newLikes,
+                        it
+                    )
+                }
+                if (isUpdated == true) {
+                    val likedByUsers = currentReviewMap["likedByUsers"] as? List<String> ?: emptyList()
+                    val updatedReview = singleReviewDTOData.value?.copy(
+                        likes = newLikes,
+                        likedByUsers = likedByUsers + userId
+                    )
                     _singleReviewDTOData.value = updatedReview
                 }
             } catch (e: Exception) {
@@ -157,6 +163,7 @@ class ControllerViewModel(
             }
         }
     }
+
 
 
 

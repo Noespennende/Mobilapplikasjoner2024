@@ -60,29 +60,36 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
     }
 
 
-    suspend fun updateReview(reviewID: String, productionType: String, productionID: String, newLikes: Long): Boolean {
+    suspend fun updateReview(reviewID: String, productionType: String, productionID: String, newLikes: Long, userID: String): Boolean {
+        return try {
+            val pathProduction = "reviews/$productionType/$productionID"
+            val reviewDocument = db.collection(pathProduction).document(reviewID)
 
-            return try {
+            val reviewData = reviewDocument.get().await()
 
-                val pathProduction = "reviews/$productionType/$productionID"
+            val likedByUsers = reviewData.get("likedByUsers") as? List<String> ?: emptyList()
 
-                val reviewDocument = db.collection(pathProduction)
-                    .document(reviewID)
 
-                val reviewData = reviewDocument.get().await()
-
-                reviewDocument.update(
-                    "likes", newLikes,
-                    "lastUpdated", System.currentTimeMillis()
-                ).await()
-
-                Log.d("FirestoreRepository", "Review updated successfully.")
-                true
-            } catch (exception: Exception) {
-                Log.e("FirestoreRepository", "Error while updating review: $exception")
-                false
+            if (userID in likedByUsers) {
+                Log.d("FirestoreRepository", "User $userID has already liked this review.")
+                return false
             }
+
+            reviewDocument.update(
+                mapOf(
+                    "likes" to newLikes,
+                    "likedByUsers" to likedByUsers + userID,
+                    "lastUpdated" to System.currentTimeMillis()
+                )
+            ).await()
+
+            Log.d("FirestoreRepository", "Review updated successfully.")
+            true
+        } catch (exception: Exception) {
+            Log.e("FirestoreRepository", "Error while updating review: $exception")
+            false
         }
+    }
 
 
     suspend fun getReviewsById(reviewID: String): ReviewDTO? {
@@ -609,7 +616,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "releaseDate" to production.releaseDate.time, // Konverter til long
                 "actors" to production.actors,
                 "rating" to production.rating,
-                "reviews" to production.reviews,
                 "posterUrl" to production.posterUrl,
                 "lengthMinutes" to production.lengthMinutes,
                 "trailerUrl" to production.trailerUrl
@@ -623,7 +629,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "releaseDate" to production.releaseDate.time, // Konverter til long
                 "actors" to production.actors,
                 "rating" to production.rating,
-                "reviews" to production.reviews,
                 "posterUrl" to production.posterUrl,
                 "episodes" to production.episodes,
                 "seasons" to production.seasons
