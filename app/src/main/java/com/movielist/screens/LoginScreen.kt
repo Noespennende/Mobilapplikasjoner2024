@@ -26,7 +26,6 @@ import androidx.navigation.NavController
 import com.movielist.Screen
 import com.movielist.composables.LogoWithName
 import com.movielist.controller.ControllerViewModel
-import com.movielist.data.logInWithEmailAndPassword
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalTextFieldColors
 import com.movielist.ui.theme.fontFamily
@@ -130,7 +129,7 @@ fun LoginPage (controllerViewModel: ControllerViewModel, navController: NavContr
                     .clickable {
                         //On login click logic
                         //errorText = "Wrong email or password"
-                        logInWithEmailAndPassword(email, password, {
+                        controllerViewModel.logInWithEmailAndPassword(email, password, {
                             // Hvis innloggingen er vellykket, kaller vi callback
 
                             controllerViewModel.checkUserStatus()

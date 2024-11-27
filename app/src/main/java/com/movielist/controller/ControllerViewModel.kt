@@ -94,6 +94,11 @@ class ControllerViewModel(
         authViewModel.logOut()
     }
 
+    fun logInWithEmailAndPassword(email: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        firestoreRepository.logInWithEmailAndPassword(email, password, onSuccess, onFailure)
+    }
+
+
     private val _filteredMediaData = MutableStateFlow<List<Production>>(emptyList())
     val filteredMediaData: StateFlow<List<Production>> get() = _filteredMediaData
 
@@ -136,7 +141,7 @@ class ControllerViewModel(
                 val currentReviewMap = firestoreRepository.getReviewById(reviewID, collectionType, productionId)
 
                 val likes = currentReviewMap?.get("likes") as Long
-                Log.d("CurrentReviews", "${currentReviewMap}")
+
                 val newLikes = likes + 1
 
                 val collection = when(collectionType){
@@ -207,12 +212,10 @@ class ControllerViewModel(
     val profileBelongsToLoggedInUser: StateFlow<Boolean> get() = _profileBelongsToLoggedInUser
 
     suspend fun loadProfileOwner(userID: String) {
-        Log.d("Profile", "Loading profile for userID: $userID")
+
         _profileOwner.value = if (userID == loggedInUser.value?.id) {
 
             _profileBelongsToLoggedInUser.value = true
-            Log.d("Profile", "Profile owner is the logged-in user.")
-
 
             loggedInUser.value
 
@@ -221,7 +224,7 @@ class ControllerViewModel(
             _profileBelongsToLoggedInUser.value = false
             setOtherUser(userID)
             val other = otherUser.firstOrNull { it?.id == userID }
-            Log.d("Profile", "Found other user: ${other?.userName}")
+
             other
         }
 
@@ -255,12 +258,8 @@ class ControllerViewModel(
     }
 
     fun getMovieInListsCount(): Int {
-        val user = loggedInUser.value
+        val user = loggedInUser.value ?: return 0
 
-        if (user == null) {
-            Log.d("MovieLists", "User is null, returning count as 0")
-            return 0
-        }
         val uniqueMovieTitles = mutableSetOf<String>()
 
         user.completedCollection.filter { it.production.type == ProductionType.MOVIE }
@@ -279,12 +278,7 @@ class ControllerViewModel(
     }
 
     fun getFilteredUserProductions(showSortOption: ShowSortOptions): List<ListItem> {
-        val user = loggedInUser.value
-
-        if (user == null) {
-            Log.d("Controller", "User data is not loaded yet.")
-            return emptyList()
-        }
+        val user = loggedInUser.value ?: return emptyList()
 
         val allProductions = (user.completedCollection +
                 user.wantToWatchCollection +
@@ -303,7 +297,7 @@ class ControllerViewModel(
     fun getShowsInListsCount(): Int {
         val user = loggedInUser.value
         if (user == null) {
-            Log.d("MovieLists", "User is null, returning count as 0")
+
             return 0
         }
         val uniqueShowTitles = mutableSetOf<String>()
@@ -328,16 +322,16 @@ class ControllerViewModel(
         val user = loggedInUser.value
 
         if (user != null) {
-            Log.d("FollowerList", "Attempting to add user ${otherUser.id} to ${user.id}'s following list.")
+
             val updatedOtherUserFollowerList = otherUser.followingMeList.toMutableList()
             val updatedFollowerList = user.followingList.toMutableList().apply {
 
                 if (!contains(otherUser.id)) {
                     add(otherUser.id)
                     updatedOtherUserFollowerList.add(user.id)
-                    Log.d("FollowerList", "User ${otherUser.id} successfully added to ${user.id}'s following list.")
+
                 } else {
-                    Log.d("FollowerList", "User ${otherUser.id} is already in the following list.")
+
                 }
             }
             val updatedOtherUser = otherUser.copy(followingMeList = updatedOtherUserFollowerList)
@@ -345,9 +339,6 @@ class ControllerViewModel(
 
             userViewModel.updateFollowingForUser(updatedUser, updatedOtherUser)
 
-
-            Log.d("FollowerList", "Updated USER following list after addition: ${updatedFollowerList}")
-            Log.d("FollowerList", "\nUpdated OTHERUSER followingList after addition: ${updatedOtherUserFollowerList}")
         }
     }
 
@@ -355,8 +346,6 @@ class ControllerViewModel(
         val user = loggedInUser.value
 
         if (user != null) {
-            Log.d("FollowerList", "Attempting to remove user ${otherUser.id} from ${user.id}'s following list.")
-
 
             val updatedFollowerList = user.followingList.toMutableList().apply {
                 removeAll { it == otherUser.id }
@@ -366,7 +355,6 @@ class ControllerViewModel(
 
             userViewModel.updateLoggedInUser(updatedUser)
 
-            Log.d("FollowerList", "Updated USER following list after removal: ${updatedFollowerList}")
         }
     }
 
@@ -428,7 +416,7 @@ class ControllerViewModel(
         val comparingUserProductions = comparingUser?.getAllMoviesAndShows2()
 
         if (loggedInUserProductions != null) {
-            Log.d("Profile", "we're in: ${loggedInUserProductions.count()} + ${comparingUserProductions?.count()}")
+
             val sharedProductions: Map<ListItem, ListItem> = loggedInUserProductions.associateWith { loggedInUserProduction ->
                 comparingUserProductions?.find { it.production.imdbID == loggedInUserProduction.production.imdbID }
             }.filterValues { it != null } as Map<ListItem, ListItem>
@@ -499,7 +487,7 @@ class ControllerViewModel(
 
                 }
             } catch (e: Exception) {
-                Log.e("SearchViewModel", "Error searching media: ${e.message}")
+
             }
         }
     }
@@ -547,7 +535,6 @@ class ControllerViewModel(
                 val videoKey = result.movieVideoData?.firstOrNull { it.name == "Official Trailer" }?.key
                 val trailerUrl = videoKey?.let { "https://www.youtube.com/watch?v=$it" }
 
-                Log.d("Cott", "${result.movieData.title} + ${videoKey} + ${trailerUrl}")
                 convertApiMovieResponseToMovie(result.movieData, credits, trailerUrl)
             }
 
@@ -735,7 +722,6 @@ class ControllerViewModel(
 
             if (sourceCollection == null) {
 
-                Log.d("ControllerViewModel", "sourceCollection is RemoveFromList for listItem")
                 return@launch
             }
 
@@ -749,7 +735,7 @@ class ControllerViewModel(
             if (userID != null) {
                 when (production) {
                     is TVShow -> {
-                        Log.d("ControllerViewModel", "sourceCollection: $sourceCollection")
+
                         val productionTotalEpisode = production.episodes.size
 
                         val productionIsComplete = watchedEpisodeCount == productionTotalEpisode
@@ -872,7 +858,6 @@ class ControllerViewModel(
 
             if (sourceCollection == null) {
 
-                Log.d("ControllerViewModel", "sourceCollection is RemoveFromList for listItem")
                 return@launch
             }
 
@@ -931,10 +916,9 @@ class ControllerViewModel(
                     }
                 }
 
-                // Oppdater StateFlow
                 _friendsWatchedList.value = recentFriendsWatched
             } catch (e: Exception) {
-                // Håndter eventuelle feil her
+
                 Log.e("UserViewModel", "Failed to fetch user's friends", e)
             } finally {
                 _friendsJustWatchedLoading.value = false
@@ -989,11 +973,10 @@ class ControllerViewModel(
         val user = loggedInUser.value
 
         if (userID.isNullOrEmpty() || user == null) {
-            Log.e("UserViewModel", "UserID or user data is null.")
+
             return
         }
 
-        // Finn riktig listItem i de forskjellige samlingene
         var listItem = findProductionInUsersCollection(production.imdbID)
 
         // Sjekk hvilken samling listItem tilhører (kilden)
@@ -1009,9 +992,6 @@ class ControllerViewModel(
 
             listItem = ListItem(production = production)
 
-            Log.d("UserViewModel", targetCollection)
-
-            Log.e("UserViewModel", "List item with productionID: ${production.imdbID} not found in any collection.")
         }
 
         if (sourceCollection == targetCollection) {
@@ -1136,7 +1116,6 @@ class ControllerViewModel(
             }
         }
 
-        Log.d("DEBUG", "GetTop10ReviewsPastWeek: " + reviewDTOList.toString())
         _reviewTopWeek.value = reviewDTOList
             .sortedByDescending { it.score }
             .take(10)
@@ -1185,7 +1164,6 @@ class ControllerViewModel(
                     ProductionType.TVSHOW -> getTVShowByIdAsync(productionID)
                 }
                 if (production == null) {
-                    Log.d("GetReviews", "Production data is null, aborting.")
                     return@launch
                 }
 
@@ -1197,12 +1175,10 @@ class ControllerViewModel(
 
                 val reviewDTO = reviewViewModel.createReviewDTO(reviewObject, reviewer, production)
 
-                Log.d("Review", "her er jeg getReviewById - $reviewID $productionID")
                 _singleReviewDTOData.value = reviewDTO
 
             } catch (exception: Exception) {
 
-                Log.d("Controller-getReviewById", "Failed to fetch reviews: $exception")
                 _reviewDTOs.value = emptyList()
             }
         }
@@ -1217,7 +1193,6 @@ class ControllerViewModel(
                     reviewViewModel.getReviewsByProduction(productionID, productionType)
                 }
 
-                Log.d("DEBUG", "Fetched ${reviewObjects.size} reviews for ProductionType: $productionType")
 
                 // Hent produksjonsdata asynkront
                 val production = withContext(Dispatchers.IO) {
@@ -1229,7 +1204,7 @@ class ControllerViewModel(
                 }
 
                 if (production == null) {
-                    Log.d("DEBUG", "Production data is null, aborting.")
+
                     _reviewDTOs.value = emptyList()
                     return@launch
                 }
@@ -1249,9 +1224,9 @@ class ControllerViewModel(
                 }
 
                 _reviewDTOs.value = reviewDTOs
-                Log.d("DEBUG", "Updated StateFlow with ${reviewDTOs.size} reviews")
+
             } catch (exception: Exception) {
-                Log.e("DEBUG", "Failed to fetch reviews: $exception", exception)
+
                 _reviewDTOs.value = emptyList()
             }
         }
@@ -1274,12 +1249,8 @@ class ControllerViewModel(
 
             if (!reviewID.isNullOrEmpty()) {
                 production?.let {
-                        Log.d("Review", "Yuhuu" + (production?.imdbID ?: "production null"))
 
                     getReviewById(reviewID, it.type, it.imdbID)
-                    Log.d("Review", "loadReviewData $reviewID ${it.type} ${it.imdbID}")
-
-                    Log.d("Review", "Yuhuu" + it.imdbID)
                 }
             }
         }
@@ -1315,9 +1286,7 @@ class ControllerViewModel(
 
                 val deferredReviews = reviewIDs.map { reviewID ->
                     async {
-                        Log.d("tester", "reviewID: $reviewID")
                         val (collectionType, productionID, uuid) = reviewViewModel.splitReviewID(reviewID)
-                        Log.d("tester", "collectionType $reviewID : $collectionType")
 
                         val collectionID = try {
                             when (collectionType) {
@@ -1326,7 +1295,6 @@ class ControllerViewModel(
                                 else -> throw IllegalArgumentException("Invalid collectionType: $collectionType")
                             }
                         } catch (e: IllegalArgumentException) {
-                            Log.e("Firestore", "Invalid collection type for reviewID: $reviewID")
                             return@async null
                         }
 
@@ -1345,18 +1313,14 @@ class ControllerViewModel(
 
                             production?.let { deferredProduction ->
 
-                                Log.d("tester", "Calling await for productionID: $productionID")
                                 val prod = deferredProduction.await()
-                                Log.d("tester", "Completed await for productionID: $productionID")
-
-                                Log.d("tester", "prod: " + prod.toString())
 
                                 if (prod != null) {
                                     reviewDTO = user?.let {
                                         reviewViewModel.createReviewDTO(reviewObject, it, prod)
                                     }
                                 } else {
-                                    Log.e("tester", "Prod is null for productionID: $productionID")
+                                    Log.e("ControllerViewModel", "Prod is null for productionID: $productionID")
                                 }
                             }
                             reviewDTO
@@ -1364,13 +1328,10 @@ class ControllerViewModel(
                     }
                 }
 
-                // Vent på at alle asynkrone operasjoner skal være ferdige og samle resultatene
                 val results = deferredReviews.awaitAll()
 
-                Log.d("tester", "Results received: ${results.size}")
                 results.forEach {
 
-                    Log.d("tester", "Result: $it")
                     if (it != null) {
                         reviewDTOList.addAll(it)
                     }
@@ -1382,7 +1343,6 @@ class ControllerViewModel(
     }
 
     suspend fun getMovieByIdAsync(id: String): Production? {
-        Log.d("ViewModel", "getMovieById called with id: $id")
 
         // Start API-kallet for å hente filmen
         val result = apiViewModel.getMovieDetailsTry(id)
@@ -1395,7 +1355,6 @@ class ControllerViewModel(
             // Hvis movieResponse er null, returner null
             val production = movieResponse?.let { convertResponseToProduction(it) }
 
-            Log.d("Controller", "Returning production: $production")
             production
 
         } catch (e: Exception) {
@@ -1405,7 +1364,6 @@ class ControllerViewModel(
     }
 
     suspend fun getTVShowByIdAsync(id: String): Production? {
-        Log.d("Controller", "getTVShowByIdAsync called with id: $id")
 
         val result = apiViewModel.getShowDetailsTry(id)
 
@@ -1418,7 +1376,6 @@ class ControllerViewModel(
             production
 
         } catch (e: Exception) {
-            Log.e("Controller_getTVShowByIdAsync", "Error fetching show data", e)
             null
         }
     }

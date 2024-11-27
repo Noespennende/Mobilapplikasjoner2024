@@ -20,6 +20,57 @@ import java.util.UUID
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
+
+    fun logInWithEmailAndPassword(email: String, password: String, onSuccess: () -> Unit, onFailure: (String) -> Unit) {
+        val auth = FirebaseAuth.getInstance()
+
+        auth.signInWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess()
+                } else {
+                    onFailure(task.exception?.message ?: "Innlogging mislyktes.")
+                }
+            }
+    }
+
+
+    fun isUsernameUnique(username: String, onResult: (Boolean) -> Unit) {
+
+        val db = Firebase.firestore
+
+        db.collection("users")
+            .whereEqualTo("userName", username)
+            .get()
+            .addOnSuccessListener { documents ->
+                if (documents.isEmpty) {
+                    onResult(true)
+                    Log.d("Testing", "YEY username is free!")
+                } else {
+                    onResult(false)
+                    Log.d("Testing", "Username already exists")
+                }
+            }
+    }
+
+    fun addUserToDatabase(user: User) {
+
+        Log.d("Firestore", "username is free!")
+        val db = Firebase.firestore
+
+        db.collection("users")
+            .document(user.id)
+            .set(user)
+            .addOnSuccessListener {
+                Log.d("Firestore", "user successfully written")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error writing user", e)
+            }
+
+    }
+
+
     fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
 
         val db = Firebase.firestore
