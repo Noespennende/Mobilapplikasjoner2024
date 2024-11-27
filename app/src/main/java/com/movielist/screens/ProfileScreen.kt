@@ -415,7 +415,7 @@ fun UsernameHeadline (
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = if(isAppInPortraitMode())LocalConstraints.current.topUniversalNavbarContentStart else 8.dp )
+            .padding(top = if(isAppInPortraitMode())LocalConstraints.current.topLocalScreenNavbarContentStart else 8.dp )
     ){
         ProfileImage(
             imageID = user.profileImageID,

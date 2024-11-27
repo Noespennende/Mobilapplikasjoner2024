@@ -49,11 +49,9 @@ import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ProductionType
-import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ReviewsScreenTabs
 import com.movielist.model.ShowSortOptions
-import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalConstraints
@@ -66,9 +64,7 @@ import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
 import com.movielist.ui.theme.weightRegular
-import com.movielist.viewmodel.ReviewViewModel
 import java.util.Calendar
-import kotlin.random.Random
 
 
 @Composable
@@ -127,15 +123,6 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
             Log.e("ReviewLike", "User not logged in. Cannot like the review.")
         }
     }
-
-    /*
-    val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
-
-        Log.d("ReviewID", "Review ID: $review")
-
-
-         controllerViewModel.updateReviewLikes(reviewID, productionType.name)
-    }*/
 
     val handleProductionClick: (productionID: String, productionType: ProductionType)
         -> Unit = {productionID, productionType ->
@@ -326,7 +313,6 @@ fun TopNavBarReviewPage(
             .wrapContentSize()
     ){
         TopScreensNavbarBackground(
-            sizeMultiplier = .8f
         )
         Column(
             verticalArrangement = Arrangement.spacedBy(10.dp),
