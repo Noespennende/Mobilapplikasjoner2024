@@ -56,7 +56,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
+
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -463,32 +463,6 @@ class ControllerViewModel(
         }
     }
 
-
-
-    fun searchMultibleMedia(query: String) {
-        apiViewModel.searchMulti(query)
-
-        viewModelScope.launch {
-            try {
-                apiViewModel.searchResults.collect { searchResultsList ->
-
-                    val convertedSearchResults = searchResultsList.map { media ->
-                        if (media.mediaType.equals("movie", ignoreCase = true)) {
-                            convertToMovie(media)
-                        } else {
-                            convertToTVShow(media)
-                        }
-                    }
-
-                    _searchResult.value = convertedSearchResults
-                    Log.d("ControllerViewModel", "Search results updated: $convertedSearchResults")
-                }
-            } catch (e: Exception) {
-                Log.e("ControllerViewModel", "Error collecting search results", e)
-            }
-        }
-    }
-
     private fun convertToMovie(media: AllMedia): Movie{
         return(Movie(
             imdbID = media.id.toString(),
@@ -515,78 +489,12 @@ class ControllerViewModel(
         )
     }
 
-
-
-    init {
-
-        apiViewModel.mediaData.observeForever { mediaList ->
-            Log.d("ControllerViewModel", "Updated media data: $mediaList")
-        }
-    }
-
-    val test = apiViewModel.mediaData.value.toString()
-
-    init {
-        Log.d("ControllerViewModel", "Value of test: $test")
-    }
     fun setOtherUser(uid: String) {
         userViewModel.setOtherUser(uid)
     }
 
     fun checkUserStatus() {
         authViewModel.checkUserStatus() // Kall autentiseringstatus
-    }
-
-    private val _singleProductionData = MutableStateFlow<Production?>(null)
-    val singleProductionData: MutableStateFlow<Production?> get() = _singleProductionData
-
-    fun nullifySingleProductionData() {
-        _singleProductionData.value = null
-    }
-
-
-    fun setMovieById(id: String) {
-        Log.d("Controller", "setMovieById called with id: $id")
-
-        viewModelScope.launch {
-
-            try {
-                nullifySingleProductionData()
-                apiViewModel.getMovieDetails(id)
-
-                apiViewModel.movieData.collect { movieResponse ->
-                    val production = movieResponse?.let { convertResponseToProduction(it) }
-                    Log.d("Controller", "Observed production: $production")
-                    _singleProductionData.update { production }
-                }
-
-            } catch(e: Exception) {
-                Log.e("Controller", "Error collecting Movie data", e)
-            }
-        }
-    }
-
-    fun setTVShowById(id: String) {
-        Log.d("Controller", "getTVShowById called with id: $id")
-
-
-        viewModelScope.launch {
-
-            try {
-                nullifySingleProductionData()
-                apiViewModel.getShowDetails(id)
-                apiViewModel.showData.collect { showResponse ->
-                    val production = showResponse?.let { convertResponseToProduction(it) }
-                    Log.d("Controller", "Observed production: $production")
-                    if (production != null) {
-                        Log.d("Controller", "${production.trailerUrl}")
-                    }
-                    _singleProductionData.update { production }
-                }
-            } catch (e: Exception) {
-                Log.e("Controller", "Error collecting TV show data", e)
-            }
-        }
     }
 
     private fun convertResponseToProduction(result: ApiProductionResponse): Production {
@@ -674,105 +582,6 @@ class ControllerViewModel(
         )
     }
 
-
-
-    // This function is for testing purposes - DELETE LATER
-    fun addToShowTest() {
-        val loggedInUserId = currentFirebaseUser.value?.uid
-        if (loggedInUserId != null) {
-            val newListItem = ListItem(
-                currentEpisode = 5,
-                score = 7,
-                production = TVShow(
-                    imdbID = "tt3205802",
-                    title = "How to Get Away with Murder",
-                    description = "Annalise discovers there’s a surprise witness that threatens her case. Meanwhile, Connor tries to persuade the K3 to go along with a new plan. Elsewhere, a lie between Frank and Bonnie threatens their relationship as Annalise’s killer is finally revealed.",
-                    genre = listOf("Crime", "Drama", "Mystery"),
-                    releaseDate = Calendar.getInstance().apply {
-                        set(Calendar.YEAR, 2014)
-                        set(Calendar.MONTH, Calendar.SEPTEMBER) // Remember that months are 0-indexed
-                        set(Calendar.DAY_OF_MONTH, 25)
-                    },
-                    episodes = listOf("101", "102", "103", "104", "201", "202", "203", "204"),
-                    seasons = listOf("01", "02"),
-                    actors = listOf(),
-                    rating = 7,
-                    reviews = listOf("reviewid0300", "reviewid0431"),
-                    posterUrl = "https://image.tmdb.org/t/p/w500/bJs8Y6T88NcgksxA8UaVl4YX8p8.jpg"
-                )
-            )
-
-            /*
-            addCurrentlyWatchingShow(
-                userID = loggedInUserId,
-                listItem = newListItem,
-                onSuccess = {
-                    Log.d("Controller", "Show added to currently watching list successfully.")
-                },
-                onFailure = { errorMessage ->
-                    Log.e("Controller", "Failed to add show: $errorMessage")
-                }
-            )
-             */
-        } else {
-            Log.w("Controller", "User is not logged in.")
-        }
-    }
-
-    fun getCurrentlyWatchingShows(): MutableList<ListItem>? {
-        return loggedInUser.value?.currentlyWatchingCollection
-
-    }
-
-    fun getCompletedShows(): MutableList<ListItem>?{
-        return loggedInUser.value?.completedCollection
-    }
-
-    fun getDroppedShows(): MutableList<ListItem>?{
-        return loggedInUser.value?.droppedCollection
-        }
-
-    fun getWantToWatchList(): MutableList<ListItem>?{
-        return loggedInUser.value?.wantToWatchCollection
-    }
-
-    fun getFavoritesList(): MutableList<ListItem>?{
-        return loggedInUser.value?.favoriteCollection
-    }
-
-    /* // Nå er myReviews en liste med Review-IDer. Logikken må ta hensyn til å returnere ReviewDTO objekter, og ikke rene Review objekter
-    fun getAllReviewsWrittenByLoggedInUser(): List<Review>{
-        return loggedInUser.value?.myReviews ?: emptyList()
-    }
-    */
-
-    /* // Nå er myReviews en liste med Review-IDer. Logikken må ta hensyn til å returnere ReviewDTO objekter, og ikke rene Review objekter
-    fun getTopTenReviewsWrittenByLoggedInUser(): List<Review> {
-        return getAllReviewsWrittenByLoggedInUser().sortedByDescending { it.likes }.take(10)
-    }
-    */
-
-    //funksjon når allUsers er implementert
-
-    /*fun getMostPopularReviewsLastMonth(): List<Review>{
-        val lastMonth = Calendar.getInstance().apply { add(Calendar.MONTH, -1) }
-
-        val allUsers = getAllUsers()
-
-        val reviews = allUsers.map{user -> user.reviews}
-
-        return reviews.filter{review-> review.postDate.after(lastMonth)}.sortedByDescending{review -> review.likes}.take()
-    }
-
-    fun getTopTenReviewsLastMonth(): List<Review>{
-        val AllReviews = getMostPopularReviewsLastMonth()
-
-        return allReviews.take(10)
-    }*/
-
-    //fun productionReviewsAscending(production: Production): List<Review>{}
-
-
     fun genrePercentageMovie(): Map<String, Int>{
         val moviesWatched = (
                 (loggedInUser.value?.wantToWatchCollection ?: emptyList()) +
@@ -834,216 +643,6 @@ class ControllerViewModel(
                 0
             }
 
-        }
-    }
-
-    fun getMostRecentProductionFromFriends(): List<ListItem> {
-        val friendProductionsWatched = mutableListOf<ListItem>()
-
-        loggedInUser.value?.followingList?.forEach { friend ->
-            //friend.favoriteCollection.forEach { friendProductionsWatched.add(it) }
-            //friend.completedCollection.forEach { friendProductionsWatched.add(it) }
-            //friend.wantToWatchCollection.forEach { friendProductionsWatched.add(it) }
-            //friend.droppedCollection.forEach { friendProductionsWatched.add(it) }
-            //friend.currentlyWatchingCollection.forEach { friendProductionsWatched.add(it) }
-
-        }
-
-        return friendProductionsWatched.sortedByDescending { it.lastUpdated }.take(10)
-
-    }
-
-    fun getTopTenProductions(production: List<Production>): List<Production>{
-        return production.filter { it.rating != null }.sortedByDescending { it.rating }.take(10)
-    }
-
-    /*
-    fun getTenReviewsWithMostLikes(production: Production): List<String>{
-        val theTimeNow = Calendar.getInstance()
-        val sevenDaysFromNow = theTimeNow.add(Calendar.DAY_OF_MONTH, 7)
-
-        return production.reviews.filter { it.postDate.after(sevenDaysFromNow) }
-
-    }*/
-
-    fun getCommonMoviesInWantToWatchList(): MutableList<ListItem> {
-        val commonMoviesInWatchList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getWantToWatchList()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.wantToWatchCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-
-        val otherUserIds = otherUserCollection.map { it.id }.toSet()
-
-        for (show in loggedInUserCollection) {
-            for(otherShow in otherUserCollection)
-                if (show.id == otherShow.id && commonMoviesInWatchList.none { it.id == show.id }) {
-                commonMoviesInWatchList.add(show)
-            }
-        }
-
-        return commonMoviesInWatchList
-    }
-
-    fun getCommonMoviesInCompletedList(): MutableList<ListItem> {
-        val commonMoviesInCompletedList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getCompletedShows()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.completedCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-
-        for (show in loggedInUserCollection) {
-            for (otherShow in otherUserCollection) {
-                if (show.id == otherShow.id && commonMoviesInCompletedList.none { it.id == show.id }) {
-                    commonMoviesInCompletedList.add(show)
-                }
-            }
-        }
-        return commonMoviesInCompletedList
-    }
-
-
-    fun getCommonFavoritesList(): MutableList<ListItem>{
-        val commonMoviesInFavoritesList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type == ProductionType.MOVIE } ?: emptyList()
-
-        for (show in loggedInUserCollection){
-            for(otherShow in otherUserCollection){
-                if (show.id == otherShow.id && commonMoviesInFavoritesList.none { it.id == show.id }){
-                    commonMoviesInFavoritesList.add(show)
-                }
-            }
-        }
-        return commonMoviesInFavoritesList
-    }
-
-    fun getCommonCompletedShowsList() : MutableList<ListItem>{
-        val commonShowsInCompletedList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-
-        for (show in loggedInUserCollection){
-            for(otherShow in otherUserCollection){
-                if (show.id == otherShow.id && commonShowsInCompletedList.none { it.id == show.id }){
-                    commonShowsInCompletedList.add(show)
-                }
-            }
-        }
-        return commonShowsInCompletedList
-    }
-
-    fun getCommonWantToWatchShowsList() : MutableList<ListItem>{
-        val commonShowsInWantToWatchList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-
-        for (show in loggedInUserCollection){
-            for(otherShow in otherUserCollection){
-                if (show.id == otherShow.id && commonShowsInWantToWatchList.none { it.id == show.id }){
-
-                    commonShowsInWantToWatchList.add(show)
-                }
-            }
-        }
-        return commonShowsInWantToWatchList
-    }
-
-    fun getCommonFavoriteShowsList() : MutableList<ListItem>{
-        val commonShowsInFavoritesList = mutableListOf<ListItem>()
-
-        val loggedInUserCollection = getFavoritesList()?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-        val otherUserCollection = otherUser.value?.favoriteCollection?.filter { it.production.type != ProductionType.MOVIE } ?: emptyList()
-
-        for (show in loggedInUserCollection){
-            for(otherShow in otherUserCollection){
-                if (show.id == otherShow.id){
-                    commonShowsInFavoritesList.add(show)
-                }
-            }
-        }
-        return commonShowsInFavoritesList
-    }
-
-
-
-    fun addProductionToWantToWatchList(production: Production) {
-        val user = loggedInUser.value
-        if (user != null) {
-            val listItem = ListItem(
-                currentEpisode = if (production is TVShow) 0 else -1,
-                score = 0,
-                production = production,
-                lastUpdated = Calendar.getInstance()
-            )
-            user.wantToWatchCollection.add(listItem)
-        } else {
-            println("User is not logged in.")
-        }
-    }
-
-
-    fun addProductionToCompletedShows(production: Production) {
-        val user = loggedInUser.value
-        if (user != null) {
-            val listItem = ListItem(
-                currentEpisode = if (production is TVShow) production.episodes.size else -1,
-                score = 0,
-                production = production,
-                lastUpdated = Calendar.getInstance()
-            )
-            user.completedCollection.add(listItem)
-        } else {
-            println("User is not logged in.")
-        }
-    }
-
-
-    fun addProductionToCurrentlyWatchingShows(production: Production) {
-        val user = loggedInUser.value
-        if (user != null) {
-            val listItem = ListItem(
-                currentEpisode = if (production is TVShow) 1 else -1,
-                score = 0,
-                production = production,
-                lastUpdated = Calendar.getInstance()
-            )
-            user.currentlyWatchingCollection.add(listItem)
-        } else {
-            println("User is not logged in.")
-        }
-    }
-
-
-    fun addProductionToDroppedShows(production: Production) {
-        val user = loggedInUser.value
-        if (user != null) {
-            val listItem = ListItem(
-                currentEpisode = if (production is TVShow) 0 else -1,
-                score = 0,
-                production = production,
-                lastUpdated = Calendar.getInstance()
-            )
-            user.droppedCollection.add(listItem)
-        } else {
-            println("User is not logged in.")
-        }
-    }
-
-
-    fun addProductionToFavoriteCollection(production: Production) {
-        val user = loggedInUser.value
-        if (user != null) {
-            val listItem = ListItem(
-                currentEpisode = if (production is TVShow) 0 else -1,
-                score = 0,
-                production = production,
-                lastUpdated = Calendar.getInstance()
-            )
-            user.favoriteCollection.add(listItem)
-        } else {
-            println("User is not logged in.")
         }
     }
 
@@ -1246,16 +845,11 @@ class ControllerViewModel(
         }
     }
 
-
-
-
     private val _friendsWatchedList = MutableStateFlow<List<ListItem>>(emptyList())
     val friendsWatchedList: StateFlow<List<ListItem>> get() = _friendsWatchedList
 
     private val _friendsJustWatchedLoading = MutableLiveData<Boolean>(true)
     val friendsJustWatchedLoading: LiveData<Boolean> get() = _friendsJustWatchedLoading
-
-
 
     init {
         // Lytt etter endringer i loggedInUser og kall getProductionsFromFriendsWatchedList når den er oppdatert
@@ -1266,7 +860,6 @@ class ControllerViewModel(
                 }
             }
         }
-
     }
 
     private fun getProductionsFromFriendsWatchedList() {
@@ -1415,14 +1008,6 @@ class ControllerViewModel(
         }
     }
 
-    fun isInCurrentlyWatching(productionID: String) : Boolean {
-
-        val user = loggedInUser.value
-        val listItem = user?.currentlyWatchingCollection?.find { it.production.imdbID == productionID }
-
-        return listItem != null
-    }
-
     private val _singleReviewDTOData = MutableStateFlow<ReviewDTO?>(null)
     val singleReviewDTOData: MutableStateFlow<ReviewDTO?> get() = _singleReviewDTOData
 
@@ -1436,7 +1021,6 @@ class ControllerViewModel(
     fun nullifySingleReviewDTOData() {
         _singleReviewDTOData.value = null
     }
-
 
     private val _reviewTopAllTime = MutableStateFlow<List<ReviewDTO>>(emptyList())
     val reviewTopAllTime: StateFlow<List<ReviewDTO>> get() = _reviewTopAllTime
@@ -1482,7 +1066,6 @@ class ControllerViewModel(
             .take(10)
     }
 
-    
     suspend fun getTop10ReviewsPastWeek() { //: List<ReviewDTO>
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 
@@ -1511,8 +1094,6 @@ class ControllerViewModel(
             .sortedByDescending { it.score }
             .take(10)
     }
-
-
 
     suspend fun getTop10ReviewsThisMonth() { // : List<ReviewDTO>
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
@@ -1632,12 +1213,10 @@ class ControllerViewModel(
         }
     }
 
-
     fun loadReviewData(reviewID: String?) {
         viewModelScope.launch {
 
             nullifySingleReviewDTOData()
-            nullifySingleProductionData()
 
             val (collectionType, productionID, _) =
                 if (reviewID != null) reviewViewModel.splitReviewID(reviewID)
@@ -1684,7 +1263,6 @@ class ControllerViewModel(
 
         return friendsReviewsDTO
     }
-
 
     private suspend fun getReviewsByUser(reviewIDs: List<String>, userID: String): List<ReviewDTO> {
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
@@ -1759,7 +1337,6 @@ class ControllerViewModel(
             }
         }
     }
-
 
     suspend fun getMovieByIdAsync(id: String): Production? {
         Log.d("ViewModel", "getMovieById called with id: $id")
@@ -1848,10 +1425,6 @@ class ControllerViewModel(
        return "${collectionID}_${productionID}_${UUID.randomUUID()}"
     }
 
-    private val _snackBarStatus = MutableStateFlow<Status?>(null)
-    val snackBarStatus: StateFlow<Status?> = _snackBarStatus
-
-
     private fun bitmapToUri(context: Context, bitmap: Bitmap): Uri {
         val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
         FileOutputStream(file).use { outputStream ->
@@ -1877,14 +1450,7 @@ class ControllerViewModel(
     fun handleAlbumPickProfileImage(imageUri: Uri) {
 
         viewModelScope.launch {
-            try {
-
-                userViewModel.updateProfileImage(imageUri)
-
-                _snackBarStatus.value = Status.Success
-            } catch (e: Exception) {
-                _snackBarStatus.value = Status.Error(e.message ?: "Noe gikk galt")
-            }
+            userViewModel.updateProfileImage(imageUri)
         }
     }
 
@@ -1899,9 +1465,6 @@ class ControllerViewModel(
             try {
                 userViewModel.updateProfileImage(imageUri)
 
-                _snackBarStatus.value = Status.Success
-            } catch (e: Exception) {
-                _snackBarStatus.value = Status.Error(e.message ?: "Noe gikk galt")
             } finally {
 
                 imageUri.path?.let {
@@ -1912,17 +1475,6 @@ class ControllerViewModel(
             }
         }
     }
-
-    fun clearSnackbarMessage() {
-        _snackBarStatus.value = null
-    }
-
-    sealed class Status {
-        object Success : Status()
-        data class Error(val message: String) : Status()
-    }
-
-
 
     fun createUserWithEmailAndPassword(
         username: String,

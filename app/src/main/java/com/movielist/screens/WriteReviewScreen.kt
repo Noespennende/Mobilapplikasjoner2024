@@ -77,7 +77,6 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
 
             Log.d("DEBUG", "Movie data: $production")
             if (productionID.isNotEmpty()) {
-                controllerViewModel.nullifySingleProductionData()
 
                 when (productionType) {
                     "MOVIE" -> {

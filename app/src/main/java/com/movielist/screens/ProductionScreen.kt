@@ -96,9 +96,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         // Håndter produksjonsdata basert på productionType
         if (newProductionID.isNotEmpty()) {
 
-            // Nullifiser produksjonsdata før henting
-            controllerViewModel.nullifySingleProductionData()
-
             Log.d("DEBUG", "productionType: $productionType")
              }
             when (productionType) {
@@ -110,16 +107,6 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
                 "TVSHOW" -> {
                     production.value = controllerViewModel.getTVShowByIdAsync(newProductionID)
                     //controllerViewModel.setTVShowById(productionID)
-                }
-                else -> {
-                    // Hvis productionType ikke er Movie eller TVShow, nullifiser data
-                    // Hvis noe går galt, så ønsker vi ikke å vise siste production objekt,
-                    // men kanskje en error side eller noe slikt?
-                    // Passer på at  if (production == null) trigges i LazyColumn
-                    controllerViewModel.nullifySingleProductionData()
-                    Log.d("problem", "nå er jeg her")
-                    Log.d("problem", "$productionType")
-
                 }
             }
 

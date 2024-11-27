@@ -92,11 +92,6 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val user = loggedInUser as User
 
-
-    /* Noe med noe popup beskjed - Snackbar? */
-
-    val snackbarHostState = remember { SnackbarHostState() }
-    val snackBarStatus by controllerViewModel.snackBarStatus.collectAsState()
     val scope = rememberCoroutineScope()
 
     //Local storage of color theme settings
@@ -113,19 +108,6 @@ fun SettingsScreen (controllerViewModel: ControllerViewModel, navController: Nav
         }
     }
 
-
-    LaunchedEffect(snackBarStatus) {
-        when (snackBarStatus) {
-            is ControllerViewModel.Status.Success -> {
-                snackbarHostState.showSnackbar("Profilbilde oppdatert!")
-            }
-            is ControllerViewModel.Status.Error -> {
-                val errorMessage = (snackBarStatus as ControllerViewModel.Status.Error).message
-                snackbarHostState.showSnackbar("Feil: $errorMessage")
-            }
-            null -> { }
-        }
-    }
 
     val handleAddImageFromPhoneClick: (imageUri: Uri?) -> Unit = { imageUri ->
         if (imageUri != null) {
