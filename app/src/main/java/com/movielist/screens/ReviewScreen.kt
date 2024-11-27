@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -93,7 +94,7 @@ fun Review(
     handleUserClick: (String) -> Unit,
     handleProductionClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
-    var likes by remember { mutableIntStateOf(reviewDTO?.likes ?: 0) }
+    var likes by remember { mutableIntStateOf(reviewDTO?.likes?.toInt() ?: 0) }
     //Main container
     Column {
         if (reviewDTO != null) {
