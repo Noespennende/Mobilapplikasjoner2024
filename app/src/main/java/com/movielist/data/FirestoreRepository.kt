@@ -1,24 +1,28 @@
 package com.movielist.data
 
+import android.net.Uri
 import android.util.Log
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import com.movielist.model.Episode
+import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.ProductionType
+import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import kotlinx.coroutines.tasks.await
 import java.util.Calendar
+import java.util.UUID
 
 class FirestoreRepository(private val db: FirebaseFirestore) {
 
     fun getUserInfo(userID: String, onSuccess: (Map<String, String?>) -> Unit) {
 
         val db = Firebase.firestore
-
 
 
         //val docRef: DocumentReference = FirebaseFirestore.getInstance().document("users/testuser")
@@ -35,7 +39,10 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 val firstName = document.getString("firstName")
                 val lastName = document.getString("lastName")
 
-                Log.d("FirebaseSuccess", "Document ID: $documentID, First Name: $firstName, Last Name: $lastName")
+                Log.d(
+                    "FirebaseSuccess",
+                    "Document ID: $documentID, First Name: $firstName, Last Name: $lastName"
+                )
 
                 val userData = mapOf(
                     "documentID" to documentID,
@@ -50,6 +57,91 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 Log.w("FirebaseFailure", "Error getting document", exception)
             }
 
+    }
+
+
+    suspend fun updateReview(reviewID: String, productionType: String, productionID: String, newLikes: Long, userID: String): Boolean {
+        return try {
+            val pathProduction = "reviews/$productionType/$productionID"
+            val reviewDocument = db.collection(pathProduction).document(reviewID)
+
+            val reviewData = reviewDocument.get().await()
+
+            // Hent eksisterende "likedByUsers"-liste fra dokumentet
+            val likedByUsers = reviewData.get("likedByUsers") as? List<String> ?: emptyList()
+
+            // Hvis brukeren allerede har likt, returner tidlig
+            if (userID in likedByUsers) {
+                Log.d("FirestoreRepository", "User $userID has already liked this review.")
+                return false
+            }
+
+            // Oppdater "likes"-tall og "likedByUsers"-liste
+            reviewDocument.update(
+                mapOf(
+                    "likes" to newLikes,
+                    "likedByUsers" to likedByUsers + userID, // Legg til brukeren i listen
+                    "lastUpdated" to System.currentTimeMillis()
+                )
+            ).await()
+
+            Log.d("FirestoreRepository", "Review updated successfully.")
+            true
+        } catch (exception: Exception) {
+            Log.e("FirestoreRepository", "Error while updating review: $exception")
+            false
+        }
+    }
+
+
+    suspend fun getReviewsById(reviewID: String): ReviewDTO? {
+        return try {
+            val docSnapshot = db.collection("reviews").document(reviewID).get().await()
+
+
+            if (docSnapshot.exists()) {
+                docSnapshot.toObject(ReviewDTO::class.java)
+
+            } else {
+                Log.e("FirestoreRepository", "Review not found with ID: $reviewID")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("FirestoreRepository", "Error fetching review: $e")
+            null
+        }
+    }
+
+    fun updateUser(user: User) {
+        val userRef = db.collection("users").document(user.id)
+
+        userRef.update("followingList", user.followingList)
+            .addOnSuccessListener {
+                Log.d("Firebase", "User ${user.id} updated successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firebase", "Error updating user ${user.id}", e)
+            }
+    }
+
+    fun updateFollowUser(user: User, otherUser: User) {
+        val userRef = db.collection("users").document(user.id)
+        val otherUserRef = db.collection("users").document(otherUser.id)
+
+        userRef.update("followingList", user.followingList)
+            .addOnSuccessListener {
+                Log.d("Firebase", "User ${user.id} updated successfully")
+            }
+            .addOnFailureListener { e ->
+                Log.w("Firebase", "Error updating user ${user.id}", e)
+            }
+
+        otherUserRef.update("followingMeList", otherUser.followingMeList).addOnSuccessListener {
+            Log.d("Firebase", "User ${otherUser.id} updated successfully")
+        }
+        .addOnFailureListener{ e ->
+            Log.w("Firebase", "Error updating user: ${otherUser.id}")
+        }
     }
 
     fun updateUserField(userId: String, updates: Map<String, Any>) {
@@ -111,27 +203,28 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
             }
     }
 
-    suspend fun fetchAllUsers():List<Map<String, Any>>?{
+    suspend fun fetchAllUsers(): List<Map<String, Any>>? {
         val db = Firebase.firestore
 
         return try {
             val document = db.collection("users").get().await()
 
-            val users = document.documents.map { document->
+            val users = document.documents.map { document ->
                 document.data ?: emptyMap()
             }
 
             users
-        }catch (exception: Exception) {
+        } catch (exception: Exception) {
             Log.w("FirebaseFailure", "Error getting document", exception)
             null
         }
     }
 
-    suspend fun fetchUsersFromFirebase(query: String): List<User>? {
+    suspend fun fetchUsersFromFirebase(query: String): List<Map<String, Any>>? {
         val db = Firebase.firestore
 
         return try {
+            // Hent brukere fra Firebase som matcher søket
             val querySnapshot = db.collection("users")
                 .whereGreaterThanOrEqualTo("userName", query)
                 .whereLessThanOrEqualTo("userName", query)
@@ -139,26 +232,14 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 .await()
 
             querySnapshot.documents.map { document ->
-                val email = document.getString("email") ?: ""
-                val userName = document.getString("userName") ?: ""
-
-                val profileImageID = document.get("profileImageID")
-                val profileImageIDString = when (profileImageID) {
-                    is String -> profileImageID
-                    else -> ""
-                }
-
-                User(
-                    email = email,
-                    userName = userName,
-                    profileImageID = profileImageIDString
-                )
+                document.data ?: emptyMap()
             }
         } catch (exception: Exception) {
             Log.w("FirebaseFailure", "Error fetching users", exception)
             null
         }
     }
+
 
     suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
         val db = Firebase.firestore
@@ -198,6 +279,171 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+    fun addToFavorites(
+        userID: String,
+        listItemMap: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userDoc = Firebase.firestore.collection("users").document(userID)
+
+        Log.d("FirestoreUpdate", "Adding to favoriteCollection: $listItemMap")
+
+        userDoc.update("favoriteCollection", FieldValue.arrayUnion(listItemMap))
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { e -> onFailure(e) }
+    }
+
+    fun removeFromFavorites(
+        userID: String,
+        listItem: ListItem,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit,
+        onNotFound: () -> Unit
+    ) {
+        removeFromCollectionHelper(userID, listItem, "favoriteCollection", onSuccess, onFailure, onNotFound)
+    }
+
+    fun batchUpdateFavoriteStatusAllCollections(
+        userID: String,
+        listItemID: String,
+        isFavorite: Boolean,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val userDocRef = db.collection("users").document(userID)
+
+        val collections = listOf("completedCollection", "currentlyWatchingCollection", "droppedCollection", "favoriteCollection", "wantToWatchCollection")
+
+        val batch = db.batch()
+
+        // Gå gjennom alle kolleksjon og finn og oppdater listItem
+        collections.forEach { collection ->
+            userDocRef.get()
+                .addOnSuccessListener { document ->
+                    val collectionList = document.get(collection) as? List<Map<String, Any>> ?: emptyList()
+
+                    val updatedCollection = collectionList.map { item ->
+                        if (item["id"] == listItemID) {
+                            // Her oppdaterer vi kun "loggedInUsersFavorite"
+                            item.toMutableMap().apply { put("loggedInUsersFavorite", isFavorite) }
+                        } else {
+                            item
+                        }
+                    }
+
+                    // Hvis det er en endring, legg til oppdateringen i batchen
+                    if (updatedCollection != collectionList) {
+                        val updateData = mapOf(collection to updatedCollection)
+                        batch.update(userDocRef, updateData)
+                        Log.d("Firestore", "$collection updated in batch")
+                    }
+
+                    // Når alle oppdateringene er samlet, commit batchen
+                    if (collections.indexOf(collection) == collections.size - 1) {
+                        batch.commit()
+                            .addOnSuccessListener {
+                                Log.d("Firestore", "Batch update completed successfully.")
+                                onSuccess()
+                            }
+                            .addOnFailureListener { exception ->
+                                Log.e("Firestore", "Error committing batch update", exception)
+                                onFailure(exception)
+                            }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("Firestore", "Error fetching document for $collection", exception)
+                    onFailure(exception)
+                }
+        }
+    }
+
+    fun updateCurrentEpisodeField(
+        userID: String,
+        listItemID: String,
+        currentEpisodeValue: Int,
+        collection: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        val userDocRef = db.collection("users").document(userID)
+
+
+        userDocRef.get()
+            .addOnSuccessListener { document ->
+
+                val collectionList = document.get(collection) as? List<Map<String, Any>> ?: emptyList()
+
+                val updatedCollection = collectionList.map { item ->
+                    if (item["id"] == listItemID) {
+
+                        item.toMutableMap().apply { put("currentEpisode", currentEpisodeValue) }
+                    } else {
+                        item
+                    }
+                }
+
+                val updateData = mapOf(collection to updatedCollection)
+                userDocRef.update(updateData)
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "$collection updated successfully.")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Firestore", "Error updating $collection", exception)
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error fetching document for $collection", exception)
+                onFailure(exception)
+            }
+    }
+
+
+    fun updateScoreField(
+        userID: String,
+        listItemID: String,
+        score: Int,
+        collection: String,
+        onSuccess: () -> Unit = {},
+        onFailure: (Exception) -> Unit = {}
+    ) {
+        val userDocRef = db.collection("users").document(userID)
+
+
+        userDocRef.get()
+            .addOnSuccessListener { document ->
+
+                val collectionList = document.get(collection) as? List<Map<String, Any>> ?: emptyList()
+
+                val updatedCollection = collectionList.map { item ->
+                    if (item["id"] == listItemID) {
+
+                        item.toMutableMap().apply { put("score", score) }
+                    } else {
+                        item
+                    }
+                }
+
+                val updateData = mapOf(collection to updatedCollection)
+                userDocRef.update(updateData)
+                    .addOnSuccessListener {
+                        Log.d("Firestore", "$collection updated successfully.")
+                        onSuccess()
+                    }
+                    .addOnFailureListener { exception ->
+                        Log.e("Firestore", "Error updating $collection", exception)
+                        onFailure(exception)
+                    }
+            }
+            .addOnFailureListener { exception ->
+                Log.e("Firestore", "Error fetching document for $collection", exception)
+                onFailure(exception)
+            }
+    }
+    
     // Spesifikke funksjoner for hver samling
     private fun addToCompletedCollection(
         userID: String,
@@ -444,8 +690,8 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         val db = FirebaseFirestore.getInstance()
 
         val collection = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            "MOVIE" -> "movieReviews"
+            "TVSHOW" -> "tvShowReviews"
             else -> null
         }
 
@@ -478,8 +724,8 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
         // Bestem hvilken samling som skal brukes basert på productionType
         val collectionType = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            "RMOV" -> "movieReviews"
+            "RTV" -> "tvShowReviews"
             else -> {
                 throw IllegalArgumentException("Invalid production type: $productionType")
             }
@@ -495,9 +741,11 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
             // Hent anmeldelsen fra dokumentet
             val reviewData = reviewDocument.get().await()
-
+            Log.d("ReviewData", "${reviewData}")
+            Log.d("ReviewData", "${reviewData.data}")
             if (reviewData.exists()) {
                 reviewData.data  // Returner anmeldelsesdataene som et Map<String, Any>
+
 
             } else {
                 Log.d("Firestore-Reviews", "Review not found")
@@ -543,6 +791,55 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
         // Returner listen med dokumenter som Map<String, Any>
         return reviewsList
+    }
+
+    // Prøvd paginering
+    suspend fun getReviewsAllTime(pageSize: Long, lastVisible: Any?): Pair<List<Map<String, Any>>, Boolean> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+        var hasMoreData = false
+
+        try {
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+                    for (productionID in productionIDs) {
+                        var query = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .orderBy("postDate")
+                            .limit(pageSize)
+
+                        lastVisible?.let {
+                            query = query.startAfter(it)
+                        }
+
+                        val reviews = query.get().await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+
+                        if (reviews.size() == pageSize.toInt()) {
+                            hasMoreData = true
+                        }
+                    }
+                }
+            }
+
+            return Pair(allReviews, hasMoreData)
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     suspend fun getReviewsFromPastWeek(): List<Map<String, Any>> {
@@ -683,5 +980,96 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
+
+    suspend fun publishReview(
+        collectionID: String,
+        productionID: String,
+        reviewID: String,
+        reviewData: Map<String, Any>,
+        onSuccess: () -> Unit
+    ) {
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+            db.collection("reviews")
+                .document(collectionID)
+                .collection(productionID)
+                .document(reviewID)
+                .set(reviewData)
+                .await()
+
+            val collectionDoc = db.collection("reviews").document(collectionID).get().await()
+
+            if (collectionDoc.exists()) {
+                val productions = collectionDoc.get("productionIDs") as? List<String> ?: emptyList()
+
+                if (!productions.contains(productionID)) {
+                    val updatedProductions = productions.toMutableList().apply { add(productionID) }
+
+                    db.collection("reviews")
+                        .document(collectionID)
+                        .update("productionIDs", updatedProductions)
+                        .await()
+
+                    Log.d("Firestore-Review", "ProductionID $productionID lagt til i productions.")
+                }
+            }
+
+            onSuccess()
+
+            Log.d("Firestore-Review", "Anmeldelse med ID $reviewID opprettet/oppdatert.")
+        } catch (e: Exception) {
+
+            Log.e("Firestore-Review", "Feil ved opprettelse av anmeldelse: $e")
+        }
+    }
+
+    suspend fun addReviewToUser(userID: String, reviewID: String) {
+        val db = FirebaseFirestore.getInstance()
+
+        try {
+
+            db.collection("users")
+                .document(userID)
+                .update("myReviews", FieldValue.arrayUnion(reviewID))
+                .await()
+
+            Log.d("Firestore-User", "ReviewID $reviewID lagt til i myReviews for bruker $userID.")
+        } catch (e: Exception) {
+
+            Log.e("Firestore-User", "Feil ved oppdatering av myReviews: $e")
+        }
+    }
+
+
+    suspend fun uploadProfileImage(imageUri: Uri?): String {
+        if (imageUri == null) throw IllegalArgumentException("Ingen bilde valgt")
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val storageRef = FirebaseStorage.getInstance().reference
+
+        val imageRef = storageRef.child("profile_pictures/$userId/${UUID.randomUUID()}.jpg")
+
+        // Laster opp bilde
+        imageRef.putFile(imageUri).await()
+
+        // Returnerer URL-en
+        return imageRef.downloadUrl.await().toString()
+    }
+
+    suspend fun saveImageUrlToUserDoc(imageUrl: String) {
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+            ?: throw IllegalStateException("Bruker er ikke logget inn")
+
+        val db = FirebaseFirestore.getInstance()
+
+        val userDocRef = db.collection("users").document(userId)
+        val userProfileData = mapOf("profileImageID" to imageUrl)
+
+        userDocRef.update(userProfileData).await()
+    }
 
 }

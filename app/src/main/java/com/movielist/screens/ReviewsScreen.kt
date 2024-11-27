@@ -164,9 +164,38 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current sort option*/
     var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
 
+<<<<<<< Updated upstream
     val handleReviewLikeButtonClick: (reviewID: String) -> Unit = {reviewID ->
         //Kontroller håndtering av liking av en review her
     }
+=======
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
+        val loggedInUserId = controllerViewModel.loggedInUser.value?.id
+
+        if (loggedInUserId != null) {
+            // Sjekk om brukeren allerede har likt anmeldelsen
+            val isAlreadyLiked = review?.likedByUsers?.contains(loggedInUserId) == true
+
+            if (!isAlreadyLiked) {
+                // Brukeren har ikke likt anmeldelsen - oppdater likes
+                controllerViewModel.updateReviewLikes(reviewID, productionType.name)
+            } else {
+                Log.d("ReviewLike", "User has already liked this review.")
+            }
+        } else {
+            Log.e("ReviewLike", "User not logged in. Cannot like the review.")
+        }
+    }
+
+
+
+        /*
+        Log.d("ReviewID", "Review ID: $review")
+
+
+         controllerViewModel.updateReviewLikes(reviewID, productionType.name)*/
+
+>>>>>>> Stashed changes
 
     val handleProductionClick: (productionID: String, productionType: String)
         -> Unit = {productionID, productionType ->

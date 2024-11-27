@@ -69,7 +69,69 @@ class ControllerViewModel(
     val searchResults: StateFlow<List<Production>> get() = _searchResult
 
 
+<<<<<<< Updated upstream
     init {
+=======
+    fun updateDisplayedList(activeCategory: ListOptions, activeSortOption: ShowSortOptions) {
+        val user = loggedInUser.value
+        if (user == null) {
+            _displayedList.value = emptyList()
+            return
+        }
+
+        val list = when (activeCategory) {
+            ListOptions.WATCHING -> user.currentlyWatchingCollection
+            ListOptions.COMPLETED -> user.completedCollection
+            ListOptions.WANTTOWATCH -> user.wantToWatchCollection
+            ListOptions.DROPPED -> user.droppedCollection
+            else -> emptyList()
+        }
+
+            ShowSortOptions.MOVIESANDSHOWS -> list
+            ShowSortOptions.MOVIES -> list.filter { it.production.type == ProductionType.MOVIE }
+            ShowSortOptions.SHOWS -> list.filter { it.production.type == ProductionType.TVSHOW }
+        }
+    }
+
+
+
+
+    fun updateReviewLikes(reviewID: String, productionType: String) {
+        viewModelScope.launch {
+            try {
+                val userId = loggedInUser.value?.id
+                val (collectionType, productionId, _) = reviewViewModel.splitReviewID(reviewID)
+                val currentReviewMap = firestoreRepository.getReviewById(reviewID, collectionType, productionId)
+
+                val likes = currentReviewMap?.get("likes") as Long
+
+                val newLikes = likes + 1
+
+
+                val isUpdated = userId?.let {
+                    firestoreRepository.updateReview(reviewID, productionType, productionId, newLikes,
+                        it
+                    )
+                }
+                if (isUpdated == true) {
+                    val likedByUsers = currentReviewMap["likedByUsers"] as? List<String> ?: emptyList()
+                    val updatedReview = singleReviewDTOData.value?.copy(
+                        likes = newLikes,
+                        likedByUsers = likedByUsers + userId
+                    )
+                    _singleReviewDTOData.value = updatedReview
+                }
+            } catch (e: Exception) {
+                Log.e("ControllerViewModel", "Error updating review: $e")
+            }
+        }
+    }
+
+
+
+    fun getPopularMoviesAndShows() {
+        apiViewModel.getAllMedia()
+>>>>>>> Stashed changes
 
         apiViewModel.mediaData.observeForever { mediaList ->
 
