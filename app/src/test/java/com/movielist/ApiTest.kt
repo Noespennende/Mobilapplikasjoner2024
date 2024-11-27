@@ -24,10 +24,23 @@ class ApiTest {
     }
 
     @Test
+    fun `getAllMedia returns data`() = runBlocking {
+        val response = apiService.getAllMedia().execute()
+        assert(response.body()?.results?.isNotEmpty() == true)
+    }
+
+    @Test
     fun `getMovie returns 200 for valid movie ID`() = runBlocking {
         val validMovieId = "933260"
         val response = apiService.getMovie(validMovieId).execute()
         assertEquals(200, response.code())
+        assert(response.body()?.id == validMovieId.toInt())
+    }
+
+    @Test
+    fun `getMovie returns data for specified movie ID`() = runBlocking {
+        val validMovieId = "933260"
+        val response = apiService.getMovie(validMovieId).execute()
         assert(response.body()?.id == validMovieId.toInt())
     }
 
@@ -43,6 +56,13 @@ class ApiTest {
         val validShowId = "94722"
         val response = apiService.getShow(validShowId).execute()
         assertEquals(200, response.code())
+    }
+
+    @Test
+    fun `getShow returns data for specified show ID`() = runBlocking {
+        val validShowId = "94722"
+        val response = apiService.getShow(validShowId).execute()
+        assert(response.body()?.id == validShowId)
     }
 
     @Test
@@ -88,6 +108,13 @@ class ApiTest {
 
     @Test
     fun `getMovieCredits returns 200 for valid movie ID`() = runBlocking {
+        val validMovieId = "933260"
+        val response = apiService.getMovieCredits(validMovieId).execute()
+        assert(response.body()?.id == validMovieId.toInt())
+    }
+
+    @Test
+    fun `getMovieCredits returns data for specified movie ID`() = runBlocking {
         val validMovieId = "933260"
         val response = apiService.getMovieCredits(validMovieId).execute()
         assertEquals(200, response.code())
