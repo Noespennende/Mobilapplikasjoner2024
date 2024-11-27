@@ -775,7 +775,7 @@ fun YouTubeVideoEmbed(
     lifeCycleOwner: LifecycleOwner,
     modifier: Modifier = Modifier
 ){
-    // Passer på at urlen som brukes er up-to-date med den som kommer inn
+
     val currentVideoUrl by rememberUpdatedState(videoUrl)
 
     AndroidView(
@@ -788,7 +788,7 @@ fun YouTubeVideoEmbed(
                 lifeCycleOwner.lifecycle.addObserver(this)
                 addYouTubePlayerListener(object: AbstractYouTubePlayerListener(){
                     override fun onReady(youTubePlayer: YouTubePlayer) {
-                        youTubePlayer.loadVideo(currentVideoUrl, 0f)
+                        youTubePlayer.cueVideo(currentVideoUrl, 0f)
                     }
                 })
             }
