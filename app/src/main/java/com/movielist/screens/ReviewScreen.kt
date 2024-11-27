@@ -47,7 +47,6 @@ fun ReviewScreen (controllerViewModel: ControllerViewModel, navController: NavCo
     //val productionID by remember { mutableStateOf("") }
 
     val reviewDTO by controllerViewModel.singleReviewDTOData.collectAsState()
-    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     LaunchedEffect(reviewID) {
         controllerViewModel.loadReviewData(reviewID)

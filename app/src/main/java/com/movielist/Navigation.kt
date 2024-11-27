@@ -300,7 +300,7 @@ fun Navigation (controllerViewModel: ControllerViewModel, localStorage: DataStor
             WriteReviewScreen(
                 controllerViewModel,
                 navController,
-                productionID = entry.arguments?.getString("roductionID"),
+                productionID = entry.arguments?.getString("productionID"),
                 productionType = entry.arguments?.getString("productionType")
             )
             handleScreenNameChange(Screens.WRITEREVIEW)

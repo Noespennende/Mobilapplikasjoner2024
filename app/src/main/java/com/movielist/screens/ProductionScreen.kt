@@ -77,7 +77,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
 
     val listOfReviews by controllerViewModel.reviewDTOs.collectAsState(emptyList()) /* <-Liste med Review objekter med alle reviews av filmen/serien*/
-    var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
+    val newProductionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
     //val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
@@ -94,7 +94,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
 
         // Håndter produksjonsdata basert på productionType
-        if (productionID.isNotEmpty()) {
+        if (newProductionID.isNotEmpty()) {
 
             // Nullifiser produksjonsdata før henting
             controllerViewModel.nullifySingleProductionData()
@@ -103,12 +103,12 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
              }
             when (productionType) {
                 "MOVIE" -> {
-                production.value = controllerViewModel.getMovieByIdAsync(productionID)
+                production.value = controllerViewModel.getMovieByIdAsync(newProductionID)
                 //controllerViewModel.setMovieById(productionID)
                     Log.d("problem", "her er: " + production.value)
                 }
                 "TVSHOW" -> {
-                    production.value = controllerViewModel.getTVShowByIdAsync(productionID)
+                    production.value = controllerViewModel.getTVShowByIdAsync(newProductionID)
                     //controllerViewModel.setTVShowById(productionID)
                 }
                 else -> {
@@ -125,7 +125,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
             Log.d("GetReviews", "listOfReviews has now ${listOfReviews?.size} reviews")
 
-            usersListItem = controllerViewModel.findProductionInUsersCollection(productionID)
+            usersListItem = controllerViewModel.findProductionInUsersCollection(newProductionID)
 
             userScore = usersListItem?.score ?: 0
 
@@ -144,7 +144,7 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     LaunchedEffect(production.value) {
 
             if (productionType != null) {
-                controllerViewModel.getReviewByProduction(productionID, productionType)
+                controllerViewModel.getReviewByProduction(newProductionID, productionType)
             }
 
     }
@@ -164,13 +164,15 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         memberOfUserList = userListCategory
         //Kontroller kall her:
 
-        when (userListCategory) {
-            ListOptions.WATCHING -> controllerViewModel.addOrMoveToUsersCollection(productionID, "currentlyWatchingCollection")
-            ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "completedCollection")
-            ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(productionID, "wantToWatchCollection")
-            ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "droppedCollection")
-            ListOptions.REMOVEFROMLIST -> controllerViewModel.removeProductionFromCollections(productionID)
-            null -> {}
+        if (production.value != null) {
+            when (userListCategory) {
+                ListOptions.WATCHING -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "currentlyWatchingCollection")
+                ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "completedCollection")
+                ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "wantToWatchCollection")
+                ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "droppedCollection")
+                ListOptions.REMOVEFROMLIST -> controllerViewModel.removeProductionFromCollections(newProductionID)
+                null -> {}
+            }
         }
     }
 
@@ -193,7 +195,10 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     }
 
     val handleWriteAReviewClick: () -> Unit = {
-        navController.navigate(Screen.WriteReviewScreen.withArguments(productionID, productionType.toString()))
+        if (productionType != null && newProductionID.isNotEmpty()) {
+            navController.navigate(Screen.WriteReviewScreen.withArguments(newProductionID, productionType))
+        }
+
     }
 
 

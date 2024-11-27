@@ -12,7 +12,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.net.toUri
@@ -55,9 +54,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -71,7 +67,6 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlin.math.log
 
 
 class ControllerViewModel(
@@ -542,52 +537,6 @@ class ControllerViewModel(
         authViewModel.checkUserStatus() // Kall autentiseringstatus
     }
 
-
-    fun getAllMedia() {
-        Log.d("ControllerViewModel", "getAllMedia called")
-        apiViewModel.getAllMedia()
-    }
-
-    fun getMovie(movieId: String) {
-        Log.d("ControllerViewModel", "getMovie called")
-        apiViewModel.getMovie(movieId)
-    }
-
-    fun getShow(seriesId: String) {
-        Log.d("ControllerViewModel", "getShow called")
-        apiViewModel.getShow(seriesId)
-    }
-
-    fun getShowSeason(seriesId: String, seasonNumber: String) {
-        Log.d("ControllerViewModel", "getShowSeason called")
-        apiViewModel.getShowSeason(seriesId, seasonNumber)
-    }
-
-    fun getShowEpisode(seriesId: String, seasonNumber: String, episodeNumber: String) {
-        Log.d("ControllerViewModel", "getShowEpisode called")
-        apiViewModel.getShowEpisode(seriesId, seasonNumber, episodeNumber)
-    }
-
-    fun getMovieCredits(movieId: String) {
-        Log.d("ControllerViewModel", "getMovieCredits called")
-        apiViewModel.getMovieCredits(movieId)
-    }
-
-    fun getShowCredits(seriesId: String) {
-        Log.d("ControllerViewModel", "getShowCredits called")
-        apiViewModel.getShowCredits(seriesId)
-    }
-
-    fun getMovieVideo(movieId: String) {
-        Log.d("ControllerViewModel", "getMovieVideo called")
-        apiViewModel.getMovieVideo(movieId)
-    }
-
-    fun getShowVideo(seriesId: String) {
-        Log.d("ControllerViewModel", "getShowVideo called")
-        apiViewModel.getShowVideo(seriesId)
-    }
-
     private val _singleProductionData = MutableStateFlow<Production?>(null)
     val singleProductionData: MutableStateFlow<Production?> get() = _singleProductionData
 
@@ -595,53 +544,6 @@ class ControllerViewModel(
         _singleProductionData.value = null
     }
 
-    private suspend fun fetchAdditionalMovieData(movieId: String): Pair<List<String>, String?> {
-        return try {
-            val credits = fetchMovieCredits(movieId)
-            val videoKey = fetchMovieVideo(movieId)
-            val trailerUrl = videoKey?.let { "https://www.youtube.com/watch?v=$it" }
-            Pair(credits, trailerUrl)
-        } catch (e: Exception) {
-            Log.e("ControllerViewModel", "Error fetching movie data for movieId: $movieId", e)
-            Pair(emptyList(), null)
-        }
-    }
-
-    private suspend fun fetchAdditionalShowData(seriesId: String): Pair<List<String>, String?> {
-        return try {
-            val credits = fetchShowCredits(seriesId)
-            val videoKey = fetchShowVideo(seriesId)
-            val trailerUrl = videoKey?.let { "https://www.youtube.com/watch?v=$it" }
-            Pair(credits, trailerUrl)
-        } catch (e: Exception) {
-            Log.e("ControllerViewModel", "Error fetching show data for seriesId: $seriesId", e)
-            Pair(emptyList(), null)
-        }
-    }
-
-    private suspend fun fetchMovieCredits(movieId: String): List<String> {
-        apiViewModel.getMovieCredits(movieId)
-        return apiViewModel.movieCreditData.firstOrNull()?.cast?.map { it.name.orEmpty() } ?: emptyList()
-    }
-
-    private suspend fun fetchMovieVideo(movieId: String): String? {
-        apiViewModel.getMovieVideo(movieId)
-        return apiViewModel.movieVideoData.firstOrNull()
-            ?.firstOrNull { it.type == "Trailer" && it.name == "Official Trailer" }
-            ?.key
-    }
-
-    private suspend fun fetchShowCredits(seriesId: String): List<String> {
-        apiViewModel.getShowCredits(seriesId)
-        return apiViewModel.showCreditData.firstOrNull()?.cast?.map { it.name.orEmpty() } ?: emptyList()
-    }
-
-    private suspend fun fetchShowVideo(seriesId: String): String? {
-        apiViewModel.getShowVideo(seriesId)
-        return apiViewModel.showVideoData.firstOrNull()
-            ?.firstOrNull { it.type == "Trailer" && it.name == "Official Trailer" }
-            ?.key
-    }
 
     fun setMovieById(id: String) {
         Log.d("Controller", "setMovieById called with id: $id")
@@ -652,7 +554,7 @@ class ControllerViewModel(
                 nullifySingleProductionData()
                 apiViewModel.getMovieDetails(id)
 
-                apiViewModel.movieDataTest.collect { movieResponse ->
+                apiViewModel.movieData.collect { movieResponse ->
                     val production = movieResponse?.let { convertResponseToProduction(it) }
                     Log.d("Controller", "Observed production: $production")
                     _singleProductionData.update { production }
@@ -673,7 +575,7 @@ class ControllerViewModel(
             try {
                 nullifySingleProductionData()
                 apiViewModel.getShowDetails(id)
-                apiViewModel.showDataTest.collect { showResponse ->
+                apiViewModel.showData.collect { showResponse ->
                     val production = showResponse?.let { convertResponseToProduction(it) }
                     Log.d("Controller", "Observed production: $production")
                     if (production != null) {
@@ -1441,7 +1343,7 @@ class ControllerViewModel(
         return listItem
     }
 
-    fun addOrMoveToUsersCollection(productionID: String, targetCollection: String) {
+    fun addOrMoveToUsersCollection(production: Production, targetCollection: String) {
 
         val userID = loggedInUser.value?.id
         val user = loggedInUser.value
@@ -1452,7 +1354,7 @@ class ControllerViewModel(
         }
 
         // Finn riktig listItem i de forskjellige samlingene
-        var listItem = findProductionInUsersCollection(productionID)
+        var listItem = findProductionInUsersCollection(production.imdbID)
 
         // Sjekk hvilken samling listItem tilhører (kilden)
         val sourceCollection = when {
@@ -1465,23 +1367,18 @@ class ControllerViewModel(
 
         if (listItem == null) {
 
-            val productionData = singleProductionData.value
-            if (productionData != null) {
-                listItem = ListItem(production = productionData)
+            listItem = ListItem(production = production)
 
-                Log.d("UserViewModel", "$targetCollection")
-            }
+            Log.d("UserViewModel", targetCollection)
 
-            Log.e("UserViewModel", "List item with productionID: $productionID not found in any collection.")
+            Log.e("UserViewModel", "List item with productionID: ${production.imdbID} not found in any collection.")
         }
 
         if (sourceCollection == targetCollection) {
             Log.e("UserViewModel", "source and target collection is the same")
         }
 
-        if (listItem != null) {
-            userViewModel.addOrMoveToUsersCollection(userID, listItem, sourceCollection, targetCollection)
-        }
+        userViewModel.addOrMoveToUsersCollection(userID, listItem, sourceCollection, targetCollection)
     }
 
     fun removeProductionFromCollections(productionID: String) {

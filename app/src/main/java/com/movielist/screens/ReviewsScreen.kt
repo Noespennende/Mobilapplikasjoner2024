@@ -162,7 +162,6 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     val productionID by remember { mutableStateOf("") }
 
     val review by controllerViewModel.singleReviewDTOData.collectAsState()
-    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
 
