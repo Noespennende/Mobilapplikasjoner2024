@@ -145,17 +145,22 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     }
 
     var popularReviewsThisMonthList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    var popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
 
     LaunchedEffect(Unit) {
 
         val popularThisMonthList = controllerViewModel.getTop10ReviewsThisMonth()
 
+        val popularAllTime = controllerViewModel.getTop10ReviewsAllTime()
+
         popularReviewsThisMonthList.value = popularThisMonthList
 
-    }
+        popularReviewsAllTimeList.value = popularAllTime
 
-    var popularReviewsAllTimeList = reviewsList
+
+
+    }
 
     val productionType by remember { mutableStateOf("Movie") }
     val productionID by remember { mutableStateOf("") }
@@ -220,7 +225,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
                     TopAllTimeSection(
-                        topAllTimeList = popularReviewsAllTimeList,
+                        topAllTimeList = popularReviewsAllTimeList.value,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
@@ -309,7 +314,7 @@ fun TopThisMonthSection (
 
 @Composable
 fun TopAllTimeSection (
-    topAllTimeList: MutableList<ReviewDTO>,
+    topAllTimeList: List<ReviewDTO>,
     handleReviewLikeClick: (reviewID: String) -> Unit,
     handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,

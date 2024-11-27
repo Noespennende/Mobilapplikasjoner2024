@@ -51,7 +51,6 @@ import com.movielist.composables.RatingSlider
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -402,7 +401,6 @@ fun CurrentlyWatchingScroller (
                     showLength = when (listOfShows[i].production) {
                         is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                         is Movie -> 1 // Returnerer lengden i minutter som Int
-                        is Episode -> 1
                         else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                     },
                     onMarkAsWatched = mostRecentButtonClick,// Registrerer når "Mark as Watched" er trykket
@@ -669,7 +667,6 @@ fun TheUsersYouFollowJustWatched (
                             showLenght = when (listOfShows[i].production) {
                                 is TVShow -> (listOfShows[i].production as TVShow).episodes.size // Returnerer antall episoder som Int
                                 is Movie -> 1
-                                is Episode -> 1
                                 else -> 0 // En fallback-verdi hvis det ikke er en TvShow, Movie eller Episode
                             },
                             score = listOfShows[i].score

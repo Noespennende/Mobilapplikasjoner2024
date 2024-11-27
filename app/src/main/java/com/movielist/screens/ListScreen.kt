@@ -49,7 +49,6 @@ import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.RatingSlider
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
@@ -101,12 +100,10 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current production sorting: Movies and shows, movies, shows*/
 
-    val displayedList = when (activeCategory) {
-        ListOptions.WATCHING -> currentlyWatchingCollection
-        ListOptions.COMPLETED -> completedCollection
-        ListOptions.WANTTOWATCH -> wantToWatchCollection
-        ListOptions.DROPPED -> droppedCollection
-        ListOptions.REMOVEFROMLIST -> TODO()
+    val displayedList by controllerViewModel.displayedList.collectAsState()
+
+    LaunchedEffect(activeCategory, activeSortOption) {
+        controllerViewModel.updateDisplayedList(activeCategory, activeSortOption)
     }
 
     val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
@@ -115,7 +112,7 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
 
     val handleSortingChange: (sortOption: ShowSortOptions) -> Unit = {sortOption ->
         activeSortOption = sortOption
-        //Kontroller funksjon for å håndtere sorting
+        controllerViewModel.getFilteredUserProductions(activeSortOption)
     }
 
     val handleListItemRatingsChange: (listItem: ListItem, score: Int) -> Unit = { listItem, score ->
@@ -614,8 +611,6 @@ fun ListPageListItem (
                                             }
 
                                         }
-
-                                        is Episode -> TODO()
                                     }
                                 }
                         ){

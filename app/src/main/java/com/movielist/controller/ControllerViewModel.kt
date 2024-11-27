@@ -31,8 +31,8 @@ import com.movielist.model.ApiMovieResponse
 import com.movielist.model.ApiProductionResponse
 import com.movielist.model.ApiShowResponse
 import com.movielist.model.FollowStatus
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
+import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.MovieResponse
 import com.movielist.model.PostNotification
@@ -41,6 +41,7 @@ import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ShowResponse
 import com.movielist.model.SearchSortOptions
+import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.model.User
 import com.movielist.viewmodel.ApiViewModel
@@ -99,8 +100,34 @@ class ControllerViewModel(
     private val _searchResult = MutableStateFlow<List<Production>>(emptyList())
     val searchResults: StateFlow<List<Production>> get() = _searchResult
 
+    private val _displayedList = MutableStateFlow<List<ListItem>>(emptyList())
+    val displayedList: StateFlow<List<ListItem>> = _displayedList
+
+    fun updateDisplayedList(activeCategory: ListOptions, activeSortOption: ShowSortOptions) {
+        val user = loggedInUser.value
+        if (user == null) {
+            _displayedList.value = emptyList()
+            return
+        }
+
+        val list = when (activeCategory) {
+            ListOptions.WATCHING -> user.currentlyWatchingCollection
+            ListOptions.COMPLETED -> user.completedCollection
+            ListOptions.WANTTOWATCH -> user.wantToWatchCollection
+            ListOptions.DROPPED -> user.droppedCollection
+            else -> emptyList()
+        }
+
+        _displayedList.value = when (activeSortOption) {
+            ShowSortOptions.MOVIESANDSHOWS -> list
+            ShowSortOptions.MOVIES -> list.filter { it.production.type == "Movie" }
+            ShowSortOptions.SHOWS -> list.filter { it.production.type == "TVShow" }
+        }
+    }
+
 
     init {
+        apiViewModel.getAllMedia()
 
         apiViewModel.mediaData.observeForever { mediaList ->
 
@@ -115,14 +142,15 @@ class ControllerViewModel(
             _filteredMediaData.postValue(convertedResults)
         }
     }
+
     private val _userSearchResults = MutableStateFlow<List<User>>(emptyList())
     val userSearchResults: StateFlow<List<User>> = _userSearchResults
 
     fun searchUsers(query: String) {
         viewModelScope.launch {
             try {
-                val users = firestoreRepository.fetchUsersFromFirebase(query)
-                _userSearchResults.value = users ?: emptyList()
+                val users = userViewModel.fetchUsersFromFirebase(query)
+                _userSearchResults.value = users
             } catch (e: Exception) {
                 _userSearchResults.value = emptyList()
             }
@@ -132,17 +160,19 @@ class ControllerViewModel(
     private val _profileOwner = MutableStateFlow<User?>(null)
     val profileOwner: StateFlow<User?> get() = _profileOwner
 
-    private val _profileBelongsToLoggedInUser = MutableStateFlow<Boolean>(true)
+    private val _profileBelongsToLoggedInUser = MutableStateFlow(false)
     val profileBelongsToLoggedInUser: StateFlow<Boolean> get() = _profileBelongsToLoggedInUser
 
     suspend fun loadProfileOwner(userID: String) {
         Log.d("Profile", "Loading profile for userID: $userID")
-
         _profileOwner.value = if (userID == loggedInUser.value?.id) {
 
             _profileBelongsToLoggedInUser.value = true
             Log.d("Profile", "Profile owner is the logged-in user.")
+
+
             loggedInUser.value
+
         } else {
 
             _profileBelongsToLoggedInUser.value = false
@@ -151,6 +181,7 @@ class ControllerViewModel(
             Log.d("Profile", "Found other user: ${other?.userName}")
             other
         }
+
     }
 
     fun determineFollowStatus(): FollowStatus {
@@ -202,6 +233,28 @@ class ControllerViewModel(
 
         return uniqueMovieTitles.size
 
+    }
+
+    fun getFilteredUserProductions(showSortOption: ShowSortOptions): List<ListItem> {
+        val user = loggedInUser.value
+
+        if (user == null) {
+            Log.d("Controller", "User data is not loaded yet.")
+            return emptyList()
+        }
+
+        val allProductions = (user.completedCollection +
+                user.wantToWatchCollection +
+                user.currentlyWatchingCollection +
+                user.favoriteCollection +
+                user.droppedCollection)
+
+
+        return when (showSortOption) {
+            ShowSortOptions.MOVIESANDSHOWS -> allProductions
+            ShowSortOptions.MOVIES -> allProductions.filter { it.production.type == "Movie" }
+            ShowSortOptions.SHOWS -> allProductions.filter { it.production.type == "TVShow" }
+        }
     }
 
     fun getShowsInListsCount(): Int {
@@ -366,7 +419,7 @@ class ControllerViewModel(
 
         if (sortOptions == SearchSortOptions.USER) {
             viewModelScope.launch {
-                userViewModel.searchUsers(query)
+                userViewModel.fetchUsersFromFirebase(query)
             }
         }
 
@@ -1256,8 +1309,6 @@ class ControllerViewModel(
 
                         }
                     }
-
-                    is Episode -> TODO()
                 }
             }
         }
@@ -1481,6 +1532,42 @@ class ControllerViewModel(
         _singleReviewDTOData.value = null
     }
 
+    // Prøver paginering
+    suspend fun getTop10ReviewsAllTime(): List<ReviewDTO> {
+        val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
+        var lastVisible: Any? = null
+        var hasMoreData = true
+
+
+        while (hasMoreData) {
+
+            val (reviews, hasMore) = reviewViewModel.getReviewsAllTime(pageSize = 10, lastVisible = lastVisible)
+
+            for (review in reviews) {
+                val (collectionType, _, _) = reviewViewModel.splitReviewID(review.reviewID)
+
+                val user = userViewModel.getUser(review.reviewerID)
+                if (user != null) {
+                    val production = when (collectionType) {
+                        "RMOV" -> getMovieByIdAsync(review.productionID)
+                        "RTV" -> getTVShowByIdAsync(review.productionID)
+                        else -> null
+                    }
+                    val reviewDTO = production?.let { reviewViewModel.createReviewDTO(review, user, it) }
+                    reviewDTO?.let { reviewDTOList.add(it) }
+                }
+            }
+
+            hasMoreData = hasMore
+            lastVisible = reviews.lastOrNull()?.postDate
+        }
+
+        return reviewDTOList
+            .sortedByDescending { it.likes }
+            .take(10)
+    }
+
+    
     suspend fun getTop10ReviewsPastWeek(): List<ReviewDTO> {
         val reviewDTOList: MutableList<ReviewDTO> = mutableListOf()
 

@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.movielist.data.FirebaseTimestampAdapter
 import com.movielist.data.UUIDAdapter
 import com.movielist.data.FirestoreRepository
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
@@ -41,10 +40,24 @@ class UserViewModel : ViewModel() {
 
 
 
-    suspend fun searchUsers(query: String) {
-        val users = firestoreRepository.fetchUsersFromFirebase(query)
-        _searchResults.value = users ?: emptyList()
+    suspend fun fetchUsersFromFirebase(query: String): List<User> {
+
+        val usersMaps = firestoreRepository.fetchUsersFromFirebase(query)
+
+        var listOfUsers = mutableListOf<User>()
+        if (usersMaps != null) {
+            for (userMap in usersMaps) {
+                val userObject = convertUserJsonToUserObject(userMap)
+
+                if (userObject != null) {
+                    listOfUsers.add(userObject)
+                }
+            }
+        }
+
+        return  listOfUsers.toList()
     }
+
 
     fun updateLoggedInUser(updatedUser: User) {
         viewModelScope.launch {
@@ -413,7 +426,6 @@ class UserViewModel : ViewModel() {
                 PolymorphicJsonAdapterFactory.of(Production::class.java, "type")
                     .withSubtype(Movie::class.java, "Movie")
                     .withSubtype(TVShow::class.java, "TVShow")
-                    .withSubtype(Episode::class.java, "Episode")
             )
             .add(FirebaseTimestampAdapter())  // Adapter for Firestore Timestamps
             .add(UUIDAdapter())  // Adapter for UUID

@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -134,9 +135,11 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
     val profileOwner = controllerViewModel.profileOwner.collectAsState().value
 
+    val profileOwnerLoaded = remember { mutableStateOf(false) }
+
     var profileBelongsToLoggedInUser by remember { mutableStateOf(true) } /* <-- Kontroller funksjon som gir bolean verdi true/false basert på om dette stemmer*/
 
-    val profileOwnersReviews = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) } /*<- List of reviews by the profile owner,  replace with list gotten by controller*/
+    val profileOwnersReviews = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) }/*<- List of reviews by the profile owner,  replace with list gotten by controller*/
 
     val usersFavoriteMovies = controllerViewModel.getUsersFavoriteMovies(profileOwner)
 
@@ -207,44 +210,33 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
 
     LaunchedEffect(userID) {
+        profileOwnerLoaded.value = false
 
         profileOwnersReviews.value = emptyList()
         if (userID != null) {
             controllerViewModel.loadProfileOwner(userID)
+
+            profileOwnerLoaded.value = true
         }
     }
 
-    LaunchedEffect(profileOwner) {
-        // Denne koden vil kun kjøres når profileOwner har en ikke-null verdi
-        profileOwner?.let { owner ->
+    LaunchedEffect(profileOwnerLoaded.value) {
 
-            Log.d("tester", "kjører jeg?")
-            // Sørg for at korutinen ikke blir kansellert før den er ferdig
-            val reviewIds = owner.myReviews.joinToString(", ") { it }
-            profileBelongsToLoggedInUser = owner.id == loggedInUser?.id
 
-            Log.d("tester", "owner.myReviews: ${owner.myReviews}")
+        if (profileOwnerLoaded.value) {
 
-            // Kall den suspend-funksjonen på en korrekt måte
-            val reviews = controllerViewModel.getUsersReviews(owner)
+            profileOwnersReviews.value = emptyList()
+            profileOwner?.let { owner ->
 
-            Log.d("tester", "Reviews size: ${reviews.size}")
-            Log.d("tester", "Reviews: ${reviews.joinToString { it.reviewID }}")
+                profileBelongsToLoggedInUser = owner.id == loggedInUser?.id
 
-            if (reviews.isEmpty()) {
-                Log.d("tester", "No reviews found")
-            } else {
-                Log.d("tester", "Fetched Reviews: ${reviews.joinToString { it.reviewID }}")
+                val reviews = controllerViewModel.getUsersReviews(owner)
+
+                profileOwnersReviews.value = reviews
+
             }
-
-            profileOwnersReviews.value = reviews
-
-            Log.d("tester", "profileOwnerReviews: " + profileOwnersReviews)
-        } ?: run {
-            Log.d("ProfileOwner", "ProfileOwner is null")
         }
     }
-
 
     //Graphics
     //Main Content

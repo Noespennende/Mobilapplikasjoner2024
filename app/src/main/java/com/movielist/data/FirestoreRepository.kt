@@ -5,11 +5,11 @@ import android.util.Log
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
-import com.movielist.model.Episode
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.TVShow
@@ -167,10 +167,11 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         }
     }
 
-    suspend fun fetchUsersFromFirebase(query: String): List<User>? {
+    suspend fun fetchUsersFromFirebase(query: String): List<Map<String, Any>>? {
         val db = Firebase.firestore
 
         return try {
+            // Hent brukere fra Firebase som matcher søket
             val querySnapshot = db.collection("users")
                 .whereGreaterThanOrEqualTo("userName", query)
                 .whereLessThanOrEqualTo("userName", query)
@@ -178,26 +179,14 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 .await()
 
             querySnapshot.documents.map { document ->
-                val email = document.getString("email") ?: ""
-                val userName = document.getString("userName") ?: ""
-
-                val profileImageID = document.get("profileImageID")
-                val profileImageIDString = when (profileImageID) {
-                    is String -> profileImageID
-                    else -> ""
-                }
-
-                User(
-                    email = email,
-                    userName = userName,
-                    profileImageID = profileImageIDString
-                )
+                document.data ?: emptyMap()
             }
         } catch (exception: Exception) {
             Log.w("FirebaseFailure", "Error fetching users", exception)
             null
         }
     }
+
 
     suspend fun fetchFirebaseUser(userID: String): Map<String, Any>? {
         val db = Firebase.firestore
@@ -581,21 +570,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "lengthMinutes" to production.lengthMinutes,
                 "trailerUrl" to production.trailerUrl
             )
-            is Episode -> mapOf(
-                "type" to production.type,
-                "imdbID" to production.imdbID,
-                "title" to production.title,
-                "description" to production.description,
-                "genre" to production.genre,
-                "releaseDate" to production.releaseDate.time, // Konverter til long
-                "actors" to production.actors,
-                "rating" to production.rating,
-                "reviews" to production.reviews,
-                "posterUrl" to production.posterUrl,
-                "lengthMinutes" to production.lengthMinutes,
-                "seasonNr" to production.seasonNr,
-                "episodeNr" to production.episodeNr
-            )
             is TVShow -> mapOf(
                 "type" to production.type,
                 "imdbID" to production.imdbID,
@@ -747,6 +721,55 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
 
         // Returner listen med dokumenter som Map<String, Any>
         return reviewsList
+    }
+
+    // Prøvd paginering
+    suspend fun getReviewsAllTime(pageSize: Long, lastVisible: Any?): Pair<List<Map<String, Any>>, Boolean> {
+        val db = FirebaseFirestore.getInstance()
+        val allReviews = mutableListOf<Map<String, Any>>()
+        var hasMoreData = false
+
+        try {
+            val topLevelCollections = listOf("movieReviews", "tvShowReviews")
+
+            for (collection in topLevelCollections) {
+                val metaDocument = db.collection("reviews")
+                    .document(collection)
+                    .get()
+                    .await()
+
+                if (metaDocument.exists()) {
+                    val productionIDs = metaDocument.get("productionIDs") as? List<*>
+                        ?: emptyList<String>()
+
+                    for (productionID in productionIDs) {
+                        var query = db.collection("reviews")
+                            .document(collection)
+                            .collection(productionID.toString())
+                            .orderBy("postDate")
+                            .limit(pageSize)
+
+                        lastVisible?.let {
+                            query = query.startAfter(it)
+                        }
+
+                        val reviews = query.get().await()
+
+                        for (review in reviews.documents) {
+                            review.data?.let { allReviews.add(it) }
+                        }
+
+                        if (reviews.size() == pageSize.toInt()) {
+                            hasMoreData = true
+                        }
+                    }
+                }
+            }
+
+            return Pair(allReviews, hasMoreData)
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     suspend fun getReviewsFromPastWeek(): List<Map<String, Any>> {
