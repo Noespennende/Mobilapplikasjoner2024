@@ -50,6 +50,7 @@ import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalConstraints
@@ -76,10 +77,11 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     var userScore by remember { mutableIntStateOf(0) } /* <-Int fra 1-10 som sier hvilken rating logged inn user har gitt filmen/serien. Hvis loggedInUser ikke har ratet serien sett verdien til 0*/
 
     val listOfReviews by controllerViewModel.reviewDTOs.collectAsState(emptyList()) /* <-Liste med Review objekter med alle reviews av filmen/serien*/
-    var productionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
+    val newProductionID by remember { mutableStateOf(productionID.orEmpty()) } /* <- Denne variablen holder på ID til filmen eller serien som skal hentes ut*/
 
     /* Lytter etter endring i movieData fra ControllerViewModel */
-    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    //val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
+    val production = remember { mutableStateOf<Production?>(null) }
 
     var usersListItem by remember { mutableStateOf<ListItem?>(null) }
 
@@ -92,31 +94,25 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
 
 
         // Håndter produksjonsdata basert på productionType
-        if (productionID.isNotEmpty()) {
+        if (newProductionID.isNotEmpty()) {
 
-            // Nullifiser produksjonsdata før henting
-            controllerViewModel.nullifySingleProductionData()
-
+            Log.d("DEBUG", "productionType: $productionType")
+             }
             when (productionType) {
-                "Movie" -> {
-                    controllerViewModel.setMovieById(productionID)
+                "MOVIE" -> {
+                production.value = controllerViewModel.getMovieByIdAsync(newProductionID)
+                //controllerViewModel.setMovieById(productionID)
+                    Log.d("problem", "her er: " + production.value)
                 }
-                "TVShow" -> {
-                    controllerViewModel.setTVShowById(productionID)
-                }
-                else -> {
-                    // Hvis productionType ikke er Movie eller TVShow, nullifiser data
-                    // Hvis noe går galt, så ønsker vi ikke å vise siste production objekt,
-                    // men kanskje en error side eller noe slikt?
-                    // Passer på at  if (production == null) trigges i LazyColumn
-                    controllerViewModel.nullifySingleProductionData()
-
+                "TVSHOW" -> {
+                    production.value = controllerViewModel.getTVShowByIdAsync(newProductionID)
+                    //controllerViewModel.setTVShowById(productionID)
                 }
             }
 
             Log.d("GetReviews", "listOfReviews has now ${listOfReviews?.size} reviews")
 
-            usersListItem = controllerViewModel.findProductionInUsersCollection(productionID)
+            usersListItem = controllerViewModel.findProductionInUsersCollection(newProductionID)
 
             userScore = usersListItem?.score ?: 0
 
@@ -131,12 +127,11 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             }
 
         }
-    }
 
-    LaunchedEffect(production) {
+    LaunchedEffect(production.value) {
 
             if (productionType != null) {
-                controllerViewModel.getReviewByProduction(productionID, productionType)
+                controllerViewModel.getReviewByProduction(newProductionID, productionType)
             }
 
     }
@@ -156,24 +151,26 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
         memberOfUserList = userListCategory
         //Kontroller kall her:
 
-        when (userListCategory) {
-            ListOptions.WATCHING -> controllerViewModel.addOrMoveToUsersCollection(productionID, "currentlyWatchingCollection")
-            ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "completedCollection")
-            ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(productionID, "wantToWatchCollection")
-            ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(productionID, "droppedCollection")
-            ListOptions.REMOVEFROMLIST -> controllerViewModel.removeProductionFromCollections(productionID)
-            null -> {}
+        if (production.value != null) {
+            when (userListCategory) {
+                ListOptions.WATCHING -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "currentlyWatchingCollection")
+                ListOptions.COMPLETED -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "completedCollection")
+                ListOptions.WANTTOWATCH -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "wantToWatchCollection")
+                ListOptions.DROPPED -> controllerViewModel.addOrMoveToUsersCollection(production.value!!, "droppedCollection")
+                ListOptions.REMOVEFROMLIST -> controllerViewModel.removeProductionFromCollections(newProductionID)
+                null -> {}
+            }
         }
     }
 
-    val handleLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+    val handleLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
         Log.d("Temp", "Temp")
         //Kontroller kall her:
     }
 
-    val handleProductionClick: (productionID: String, productionType: String)
+    val handleProductionClick: (productionID: String, productionType: ProductionType)
     -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
 
     val handleProfilePictureClick: (profileID: String) -> Unit = {profileID ->
@@ -185,12 +182,15 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
     }
 
     val handleWriteAReviewClick: () -> Unit = {
-        navController.navigate(Screen.WriteReviewScreen.withArguments(productionID, productionType.toString()))
+        if (productionType != null && newProductionID.isNotEmpty()) {
+            navController.navigate(Screen.WriteReviewScreen.withArguments(newProductionID, productionType))
+        }
+
     }
 
 
 
-    if (production == null){
+    if (production.value == null){
         LoadingCircle()
     } else {
         //Graphics:
@@ -202,149 +202,143 @@ fun ProductionScreen (navController: NavController, controllerViewModel: Control
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             //Top info
-            if (production == null) {
-                item {
-                    Text(text = "Loading...")
-                }
-            } else {
-                item {
-                    production?.let { production ->
-                        ProductionScreenImageAndName(
-                            production = production,
-                        )
-                    }
-                }
 
-                item {
-                    LineDevider()
-                }
-
-                //User score and list option
-                item {
-                    ListInfo(
-                        memberOfUserList = memberOfUserList,
-                        userScore = userScore,
-                        handleScoreChange = { score ->
-                            handleScoreChange(score)
-                        },
-                        handleUserListChange = { listOption ->
-                            handleUserListCategoryChange(listOption)
-                        }
-
+            item {
+                production.value?.let { production ->
+                    ProductionScreenImageAndName(
+                        production = production,
                     )
                 }
+            }
 
-                item {
-                    LineDevider()
-                }
+            item {
+                LineDevider()
+            }
 
-
-                //Stat stection
-                item {
-                    production?.let { production ->
-                        StatsSection(
-                            production = production,
-                        )
-                    }
-                }
-
-                item {
-                    LineDevider()
-                }
-
-                item {
-                    production?.let { production ->
-                        GenreSection(
-                            production = production
-                        )
-                    }
-                }
-
-                production?.let { production ->
-                    //Youtube trailer embed
-                    item {
-                        val trailerUrl = production.trailerUrl
-                        if (trailerUrl != null && trailerUrl.lowercase().contains("youtube")) {
-                            YouTubeVideoEmbed(
-                                videoUrl = ExtractYoutubeVideoIDFromUrl(trailerUrl),
-                                lifeCycleOwner = LocalLifecycleOwner.current
-                            )
-                        }
-                    }
-                }
-
-                //Project desciption
-                item {
-                    production?.let { production ->
-                        productionDescription(
-                            description = production.description
-                        )
-                    }
-                }
-
-                //Project desciption
-                item {
-                    production?.let { production ->
-                        ActorsSection(
-                            production = production
-                        )
-                    }
-                }
-
-                item {
-                    //Write a review button
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 10.dp)
-                    ) {
-                        //Write a review button
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .height(50.dp)
-                                .width(150.dp)
-                                .padding(vertical = 5.dp)
-                                .background(
-                                    color = if (isAppInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.primary,
-                                    shape = RoundedCornerShape(5.dp)
-                                )
-                                .clickable {
-                                    handleWriteAReviewClick()
-                                }
-                        ) {
-                            //BUTTON TEXT
-                            Text(
-                                text = "Write a review",
-                                fontSize = headerSize,
-                                fontWeight = weightBold,
-                                fontFamily = fontFamily,
-                                color = if (isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
-                                textAlign = TextAlign.Center
-                            )
-                        }
+            //User score and list option
+            item {
+                ListInfo(
+                    memberOfUserList = memberOfUserList,
+                    userScore = userScore,
+                    handleScoreChange = { score ->
+                        handleScoreChange(score)
+                    },
+                    handleUserListChange = { listOption ->
+                        handleUserListCategoryChange(listOption)
                     }
 
-                }
+                )
+            }
 
-                //Project reviews
+            item {
+                LineDevider()
+            }
+
+
+            //Stat stection
+            item {
+                production.value?.let { production ->
+                    StatsSection(
+                        production = production,
+                    )
+                }
+            }
+
+            item {
+                LineDevider()
+            }
+
+            item {
+                production.value?.let { production ->
+                    GenreSection(
+                        production = production
+                    )
+                }
+            }
+
+            production.value?.let { production ->
+                //Youtube trailer embed
                 item {
-                    production?.let { production ->
-                        ReviewsSection(
-                            reviewList = listOfReviews,
-                            header = "Reviews for " + production.title,
-                            handleProductionImageClick = handleProductionClick,
-                            handleLikeClick = { reviewID, productionType ->
-                                handleLikeClick(reviewID, productionType)
-                            },
-                            handleProfilePictureClick = handleProfilePictureClick,
-                            handleReviewClick = handleReviewClick
+                    val trailerUrl = production.trailerUrl
+                    if (trailerUrl != null && trailerUrl.lowercase().contains("youtube")) {
+                        YouTubeVideoEmbed(
+                            videoUrl = ExtractYoutubeVideoIDFromUrl(trailerUrl),
+                            lifeCycleOwner = LocalLifecycleOwner.current
                         )
                     }
                 }
             }
 
+            //Project desciption
+            item {
+                production.value?.let { production ->
+                    productionDescription(
+                        description = production.description
+                    )
+                }
+            }
+
+            //Project desciption
+            item {
+                production.value?.let { production ->
+                    ActorsSection(
+                        production = production
+                    )
+                }
+            }
+
+            item {
+                //Write a review button
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                ) {
+                    //Write a review button
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(150.dp)
+                            .padding(vertical = 5.dp)
+                            .background(
+                                color = if (isAppInDarkTheme()) LocalColor.current.tertiary else LocalColor.current.primary,
+                                shape = RoundedCornerShape(5.dp)
+                            )
+                            .clickable {
+                                handleWriteAReviewClick()
+                            }
+                    ) {
+                        //BUTTON TEXT
+                        Text(
+                            text = "Write a review",
+                            fontSize = headerSize,
+                            fontWeight = weightBold,
+                            fontFamily = fontFamily,
+                            color = if (isAppInDarkTheme()) LocalColor.current.secondary else LocalColor.current.backgroundLight,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+            }
+
+            //Project reviews
+            item {
+                production.value?.let { production ->
+                    ReviewsSection(
+                        reviewList = listOfReviews,
+                        header = "Reviews for " + production.title,
+                        handleProductionImageClick = handleProductionClick,
+                        handleLikeClick = { reviewID, productionType ->
+                            handleLikeClick(reviewID, productionType)
+                        },
+                        handleProfilePictureClick = handleProfilePictureClick,
+                        handleReviewClick = handleReviewClick
+                    )
+                }
+            }
         }
     }
 
@@ -399,7 +393,7 @@ fun StatsSection(
     production: Production,
 ){
 
-    var productionAsType = if(production != null && production.type == "Movie") {production as Movie} else {production as TVShow}
+    var productionAsType = if(production != null && production.type == ProductionType.MOVIE) {production as Movie} else {production as TVShow}
     val formattedScore = if(production.rating != null){production.rating as Int} else {0}
 
     Row(

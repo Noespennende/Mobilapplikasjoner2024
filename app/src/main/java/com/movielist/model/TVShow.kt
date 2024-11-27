@@ -20,7 +20,7 @@ data class TVShow(
 ) : Production() {
 
     // Type skal ikke kunne forandres i konstruktør
-    override val type: String = "TVShow"
+    override val type: ProductionType = ProductionType.TVSHOW
 
     override fun toMap(): Map<String, Any> {
         val map = mutableMapOf<String, Any>()

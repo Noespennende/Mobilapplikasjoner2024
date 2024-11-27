@@ -16,7 +16,7 @@ sealed class Production(
 
 ) {
 
-    abstract val type: String
+    abstract val type: ProductionType
 
     abstract fun toMap(): Map<String, Any>
 }

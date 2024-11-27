@@ -120,7 +120,7 @@ data class User (
     }
 
     fun isMovie(production: Production): Boolean {
-        return production.type.lowercase() == "movie"
+        return production.type == ProductionType.MOVIE
     }
 
     fun getAllMoviesAndShows2(): List<ListItem> {

@@ -52,6 +52,7 @@ import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.ListOptions
 import com.movielist.model.Movie
+import com.movielist.model.ProductionType
 import com.movielist.model.ShowSortOptions
 import com.movielist.model.TVShow
 import com.movielist.ui.theme.LocalColor
@@ -106,8 +107,8 @@ fun ListScreen (controllerViewModel: ControllerViewModel, navController: NavHost
         controllerViewModel.updateDisplayedList(activeCategory, activeSortOption)
     }
 
-    val handleProductionClick: (productionID: String, productionType: String) -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+    val handleProductionClick: (productionID: String, productionType: ProductionType) -> Unit = {productionID, productionType ->
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
 
     val handleSortingChange: (sortOption: ShowSortOptions) -> Unit = {sortOption ->
@@ -364,7 +365,7 @@ fun ListCategoryOptions (
 fun ListPageList (
     loggedInUsersList: Boolean,
     listItemList: List<ListItem>,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleListItemRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleListItemFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleCompareUserClick: () -> Unit,
@@ -429,7 +430,7 @@ fun ListPageList (
 fun ListPageListItem (
     listItem: ListItem,
     loggedInUsersList: Boolean,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleListItemRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleFavoriteClick: (listItem: ListItem, favorite: Boolean) -> Unit,
     handleEpisodeCountChange: (listItem: ListItem, episodeCount: Int, isPlus: Boolean)  -> Unit,

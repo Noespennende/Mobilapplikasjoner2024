@@ -1,5 +1,6 @@
 package com.movielist.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -60,40 +61,34 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
     val date = Calendar.getInstance().time
     var errorMessage by remember { mutableStateOf("") }
 
-    val production by controllerViewModel.singleProductionData.collectAsState()
-    val updatedProductionID by remember { mutableStateOf(productionID.orEmpty()) }
+    val productionID by remember { mutableStateOf(productionID.orEmpty()) }
 
     //Review content
     var reviewText by remember { mutableStateOf("") }
     var reviewScore by remember { mutableIntStateOf(0) }
 
+    val production = remember { mutableStateOf<Production?>(null) }
 
-    // Håndter produksjonsdata basert på productionType
-    if (updatedProductionID.isNotEmpty()) {
-        // Nullifiser produksjonsdata før henting
-        controllerViewModel.nullifySingleProductionData()
-        when (productionType) {
-            "Movie" -> {
-                controllerViewModel.setMovieById(updatedProductionID)
-            }
-            "TVShow" -> {
-                controllerViewModel.setTVShowById(updatedProductionID)
-            }
-            else -> {
-                // Hvis productionType ikke er Movie eller TVShow, nullifiser data
-                // Hvis noe går galt, så ønsker vi ikke å vise siste production objekt,
-                // men kanskje en error side eller noe slikt?
-                // Passer på at  if (production == null) trigges i LazyColumn
-                controllerViewModel.nullifySingleProductionData()
 
-            }
-        }
-    }
-    LaunchedEffect(production) {
-        // Venter med å hente reviews til production er oppdatert
+    LaunchedEffect(productionID) {
 
-        if (productionType != null) {
-            controllerViewModel.getReviewByProduction(updatedProductionID, productionType)
+        Log.d("DEBUG", "productionid: $productionID")
+        if (productionID != null) {
+
+            Log.d("DEBUG", "Movie data: $production")
+            if (productionID.isNotEmpty()) {
+
+                when (productionType) {
+                    "MOVIE" -> {
+                        production.value = controllerViewModel.getMovieByIdAsync(productionID)
+                        Log.d("DEBUG", "Movie data: $production")
+                    }
+                    "TVSHOW" -> {
+                        production.value = controllerViewModel.getTVShowByIdAsync(productionID)
+                        Log.d("DEBUG", "TV Show data: $production")
+                    }
+                }
+            }
         }
     }
 
@@ -110,11 +105,11 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
             errorMessage = "Review must be at least 5 characters long!"
         } else {
 
-            production?.let {
+            production.value?.let {
                 controllerViewModel.publishReview(
                     it, reviewText, reviewScore,
                     onSuccess = {
-                        navController.navigate(Screen.ProductionScreen.withArguments(updatedProductionID, productionType.toString()))
+                        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.toString()))
                     })
             }
 
@@ -136,8 +131,8 @@ fun WriteReviewScreen(controllerViewModel: ControllerViewModel, navController: N
     ) {
         item {
 
-            if (production != null) {
-                production?.let { production ->
+            if (production.value != null) {
+                production.value?.let { production ->
                     WriteReviewScreenImageAndName(
                         production = production,
                     )

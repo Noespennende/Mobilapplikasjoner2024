@@ -57,6 +57,7 @@ import com.movielist.controller.ControllerViewModel
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
 import com.movielist.model.Production
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
@@ -67,23 +68,21 @@ import kotlin.random.Random
 
 @Composable
 fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavController) {
-    val showList = mutableListOf<Production>()
-    val reviewList = mutableListOf<ReviewDTO>()
-
-
 
     val loggedInUser by controllerViewModel.loggedInUser.collectAsState()
     val currentlyWatchingCollection: List<ListItem> =
         loggedInUser?.currentlyWatchingCollection ?: emptyList()
     val friendsWatchedList by controllerViewModel.friendsWatchedList.collectAsState()
 
-    val handleProductionButtonClick: (showID: String, productionType: String)
+    val popularMoviesAndShows by controllerViewModel.filteredMediaData.collectAsState()
+
+    val handleProductionButtonClick: (showID: String, productionType: ProductionType)
     -> Unit = { showID, productionType ->
         Log.d("Test", "$showID $productionType")
-        navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(showID, productionType.name))
     }
 
-    val handleReviewLikeButtonClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
         //Kontroller funksjon for å håndtere en review like hær
     }
 
@@ -121,15 +120,18 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
     }
 
-    var top10ReviewsListPastWeek = remember { mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val top10ReviewsListPastWeek by controllerViewModel.reviewTopWeek.collectAsState(emptyList())
+
 
 
     // Oppdateres/hentes hver gang Homescreen laster
     // TODO: Hent når det har gått 24 timer siden sist henting i stedet (Oppdater Unit til noe annet)
     LaunchedEffect(Unit) {
-        val topReviews = controllerViewModel.getTop10ReviewsPastWeek()
+        controllerViewModel.getTop10ReviewsPastWeek()
 
-        top10ReviewsListPastWeek.value = topReviews
+        controllerViewModel.getPopularMoviesAndShows()
+
+        Log.d("DEBUG", "UI: " + top10ReviewsListPastWeek.toString())
     }
 
 
@@ -153,28 +155,10 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
 
             item {
-                // Funksjon som returnerer de 10 mest populære filmene og seriene i appen.
-                // Funksjonen returnerer en liste med Show objekter.
-
-                // Gjorde om slik at funksjonen tar imot Production objekter istedenfor Show objekter
-                // Manglet viss data i Show data klassen og ville ikke styre for mye rundt, kan endre hva som tas inn senere
-
-                //denne må stå her for å gjøre kallet til getAllMedia
-                //var apiMovies = controllerViewModel.getAllMedia().toString()
-
-                var test = controllerViewModel.filteredMediaData.value
-
-                println("APIMOVIES 2: " + controllerViewModel.filteredMediaData.value)
-                test?.forEach { item -> showList.add(item) }
-
-                // Kan slenge alt inn i variebelet ovenfor, mest for logisk navngivning atm.
-                var top10Shows = showList
-                    .sortedByDescending { it.rating }
-                    .take(10)
 
                 ProductionListSidesroller(
                     header = "Popular shows and movies",
-                    listOfShows = top10Shows,
+                    listOfShows = popularMoviesAndShows,
                     handleImageClick = handleProductionButtonClick,
                     textModifier = Modifier
                         .padding(vertical = 10.dp, horizontal = LocalConstraints.current.mainContentHorizontalPadding),
@@ -196,28 +180,8 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 
             item {
 
-                //TEMP KODE FLYTT UT
-                // Funksjon som returnerer de 10 reviewene som har fått flest likes den siste uken.
-                // Funksjonen returnerer en liste med Review objekter som  er sortert fra flest til ferrest likes.
-
-                var reviewsList = mutableListOf<ReviewDTO>()
-                var reviewsListPastWeek = mutableListOf<ReviewDTO>()
-                val currentDate = Calendar.getInstance()
-                val pastWeek = currentDate.apply {
-                    add(Calendar.DATE, -7)
-                }
-
-                for (review in reviewList) {
-                    if (review.postDate >= pastWeek) {
-                        reviewsListPastWeek.add(review)
-                    } else {
-                        print("Review not posted within the past 7 days")
-                    }
-                }
-
-
                 ReviewsSection(
-                    reviewList = top10ReviewsListPastWeek.value,
+                    reviewList = top10ReviewsListPastWeek,
                     header = "Top reviews this week",
                     handleLikeClick = handleReviewLikeButtonClick,
                     handleProductionImageClick = handleProductionButtonClick,
@@ -242,7 +206,7 @@ fun HomeScreen(controllerViewModel: ControllerViewModel, navController: NavContr
 @Composable
 fun CurrentlyWatchingScroller (
     listOfShows: List<ListItem>,
-    onImageClick: (showID: String, productionType: String) -> Unit,
+    onImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleRatingChange: (listItem: ListItem, score: Int) -> Unit,
     handleMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int)  -> Unit
 ) {
@@ -352,7 +316,7 @@ fun CurrentlyWatchingCard(
     showLength: Int?,
     modifier: Modifier = Modifier,
     onMarkAsWatched: (listItem: ListItem, watchedEpisodesCount: Int, showLength: Int) -> Unit,
-    onImageClick: (showID: String, productionType: String) -> Unit,
+    onImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleRatingChange: (listItem: ListItem, score: Int) -> Unit
 ) {
     
@@ -497,9 +461,9 @@ fun CurrentlyWatchingCard(
 @Composable
 fun TheUsersYouFollowJustWatched (
     listOfShows: MutableList<ListItem>,
-    handleShowButtonClick: (showID: String, productionType: String) -> Unit
+    handleShowButtonClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
-    val handleShowClick: (showID: String, productionType: String)
+    val handleShowClick: (showID: String, productionType: ProductionType)
     -> Unit = { showID, productionType ->
         handleShowButtonClick(showID, productionType)
     }

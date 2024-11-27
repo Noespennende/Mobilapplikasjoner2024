@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,8 +44,10 @@ import com.movielist.composables.LoadingCircle
 import com.movielist.composables.ProfileImage
 import com.movielist.composables.RatingsGraphics
 import com.movielist.composables.ProductionImage
+import com.movielist.composables.ProductionSortSelectButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.ReviewsScreenTabs
@@ -55,11 +58,9 @@ import com.movielist.ui.theme.LocalColor
 import com.movielist.ui.theme.LocalConstraints
 import com.movielist.ui.theme.fontFamily
 import com.movielist.ui.theme.headerSize
-import com.movielist.ui.theme.horizontalPadding
 import com.movielist.ui.theme.isAppInDarkTheme
 import com.movielist.ui.theme.isAppInPortraitMode
 import com.movielist.ui.theme.paragraphSize
-import com.movielist.ui.theme.topNavBaHeight
 import com.movielist.ui.theme.topNavBarContentStart
 import com.movielist.ui.theme.verticalPadding
 import com.movielist.ui.theme.weightBold
@@ -70,66 +71,6 @@ import kotlin.random.Random
 
 @Composable
 fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavController) {
-
-    //TEMP CODE DELETE THIS:
-    var reviewsList  = mutableListOf<ReviewDTO>()
-
-    val reviewUser = User(
-        id = "IDfromFirebase",
-        userName = "UserN",
-        email = "user@email.com",
-        followingList = mutableListOf(),
-    )
-
-    val reviewProduction = TVShow(
-        imdbID = "123",
-        title = "Silo",
-        description = "TvShow Silo description here",
-        genre = listOf("Action"),
-        releaseDate = Calendar.getInstance(),
-        actors = emptyList(),
-        rating = 4,
-        reviews = ArrayList(),
-        posterUrl = "https://image.tmdb.org/t/p/w500/2asxdpNtVQhbuUJlNSQec1eprP.jpg",
-        episodes = listOf("01", "02", "03", "04", "05", "06",
-            "07", "08", "09", "10", "11", "12"),
-        seasons = listOf("1", "2", "3")
-    )
-
-    val reviewReview = Review(
-        score = Random.nextInt(0, 10),
-        reviewerID = reviewUser.id,
-        likes = Random.nextInt(0, 200),
-        productionID = reviewProduction.imdbID,
-        postDate = Calendar.getInstance(),
-        reviewBody = "This is a review of a show. Look how good the show is, it's very good or it might not be very good."
-    )
-
-    // Populate reviewsList
-    for (i in 0..10) {
-        reviewsList.add(
-            ReviewDTO(
-                reviewID = reviewUser.id,
-                score = reviewReview.score,
-                productionID = reviewReview.productionID,
-                reviewerID = reviewReview.reviewerID,
-                reviewBody = reviewReview.reviewBody,
-                postDate = reviewReview.postDate,
-                likes = reviewReview.likes,
-                reviewerUserName = reviewUser.userName,
-                reviewerProfileImage = reviewUser.profileImageID,
-                productionPosterUrl = reviewProduction.posterUrl,
-                productionTitle = reviewProduction.title,
-                productionReleaseDate = reviewProduction.releaseDate,
-                productionType = reviewProduction.type
-            )
-
-        )
-    }
-
-    //Temp code delete the code above
-
-    //function variables:
 
     var friendsReviewsList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
     val friendsReviewsListLastUpdatedTime = remember { mutableLongStateOf(System.currentTimeMillis()) }
@@ -147,21 +88,16 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
         }
     }
 
-    var popularReviewsThisMonthList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
-    var popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
+    val popularReviewsThisMonthList by controllerViewModel.reviewTopMonth.collectAsState(emptyList())
+    val popularReviewsAllTimeList by controllerViewModel.reviewTopAllTime.collectAsState(emptyList())
+
+    //val popularReviewsAllTimeList = remember {  mutableStateOf<List<ReviewDTO>>(emptyList()) }
 
 
     LaunchedEffect(Unit) {
 
-        val popularThisMonthList = controllerViewModel.getTop10ReviewsThisMonth()
-
-        val popularAllTime = controllerViewModel.getTop10ReviewsAllTime()
-
-        popularReviewsThisMonthList.value = popularThisMonthList
-
-        popularReviewsAllTimeList.value = popularAllTime
-
-
+        controllerViewModel.getTop10ReviewsThisMonth()
+        controllerViewModel.getTop10ReviewsAllTime()
 
     }
 
@@ -169,22 +105,21 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
     val productionID by remember { mutableStateOf("") }
 
     val review by controllerViewModel.singleReviewDTOData.collectAsState()
-    val production by controllerViewModel.singleProductionData.collectAsState() /* <- Film eller TVserie objekt av filmen/serien som matcher ID i variablen over*/
 
     var activeSortOption by remember { mutableStateOf<ShowSortOptions>(ShowSortOptions.MOVIESANDSHOWS) } /*<- Current sort option*/
     var activeTab by remember { mutableStateOf<ReviewsScreenTabs>(ReviewsScreenTabs.SUMMARY) } /*<- Active tab */
 
-    val handleReviewLikeButtonClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+    val handleReviewLikeButtonClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
 
         Log.d("ReviewID", "Review ID: $review")
 
 
-         controllerViewModel.updateReviewLikes(reviewID, productionType)
+         controllerViewModel.updateReviewLikes(reviewID, productionType.name)
     }
 
-    val handleProductionClick: (productionID: String, productionType: String)
+    val handleProductionClick: (productionID: String, productionType: ProductionType)
         -> Unit = {productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
     val handleProfilePictureClick: (userID: String) -> Unit =  {userID ->
         navController.navigate(Screen.ProfileScreen.withArguments(userID))
@@ -205,7 +140,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
     //Graphics:
 
-    if (popularReviewsThisMonthList.value.isEmpty()){
+    if (popularReviewsThisMonthList.isEmpty()){
         LoadingCircle()
     }
     else {
@@ -222,7 +157,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                 if (activeTab == ReviewsScreenTabs.SUMMARY) {
                     SummarySection(
                         friendsReviewsList = friendsReviewsList.value,
-                        topThisMonthList = popularReviewsThisMonthList.value,
+                        topThisMonthList = popularReviewsThisMonthList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
@@ -230,7 +165,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPTHISMONTH) {
                     TopThisMonthSection(
-                        topThisMonthList = popularReviewsThisMonthList.value,
+                        topThisMonthList = popularReviewsThisMonthList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
@@ -238,7 +173,7 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
                     )
                 } else if (activeTab == ReviewsScreenTabs.TOPALLTIME) {
                     TopAllTimeSection(
-                        topAllTimeList = popularReviewsAllTimeList.value,
+                        topAllTimeList = popularReviewsAllTimeList,
                         handleReviewLikeClick = handleReviewLikeButtonClick,
                         handleProductionImageClick = handleProductionClick,
                         handleProfilePictureClick = handleProfilePictureClick,
@@ -252,7 +187,8 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 
         if (isAppInPortraitMode()){
             TopNavBarReviewPage(
-                handleTabChange = handleTabChange
+                handleTabChange = handleTabChange,
+                handleSortChange = handleSortChange
             )
         } else {
             topNavigationReviewsScreenLandscape(
@@ -267,12 +203,12 @@ fun ReviewsScreen (controllerViewModel: ControllerViewModel, navController: NavC
 fun SummarySection (
     friendsReviewsList: List<ReviewDTO>,
     topThisMonthList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewLikeButtonClick: (String, String) -> Unit = {reviewID, productionType ->
+    val handleReviewLikeButtonClick: (String, ProductionType) -> Unit = {reviewID, productionType ->
         handleReviewLikeClick(reviewID, productionType )
     }
 
@@ -305,12 +241,12 @@ fun SummarySection (
 @Composable
 fun TopThisMonthSection (
     topThisMonthList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = {reviewID,productionType ->
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = {reviewID,productionType ->
         handleReviewLikeClick(reviewID,productionType)
     }
 
@@ -328,12 +264,12 @@ fun TopThisMonthSection (
 @Composable
 fun TopAllTimeSection (
     topAllTimeList: List<ReviewDTO>,
-    handleReviewLikeClick: (reviewID: String, productionType: String) -> Unit,
-    handleProductionImageClick: (productionID: String, productionType: String) -> Unit,
+    handleReviewLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
+    handleProductionImageClick: (productionID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ){
-    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
         handleReviewLikeClick(reviewID,productionType)
     }
 
@@ -496,8 +432,8 @@ fun ReviewCategoryOptions (
 fun ReviewsSection(
     reviewList: List<ReviewDTO>,
     header: String,
-    handleLikeClick: (reviewID: String, productionType: String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleLikeClick: (reviewID: String, productionType: ProductionType) -> Unit,
+    handleProductionImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit,
     paddingStart: Dp = LocalConstraints.current.mainContentHorizontalPadding,
@@ -505,7 +441,7 @@ fun ReviewsSection(
     loadingIfListEmpty: Boolean = false
 ) {
 
-    val handleLikeButtonClick: (String, String) -> Unit = {reviewID, productionType ->
+    val handleLikeButtonClick: (String, ProductionType) -> Unit = {reviewID, productionType ->
         handleLikeClick(reviewID, productionType)
     }
 
@@ -589,8 +525,8 @@ fun ReviewsSection(
 @Composable
 fun ReviewSummary (
     review: ReviewDTO,
-    handleLikeClick: (String, String) -> Unit,
-    handleProductionImageClick: (showID: String, productionType: String) -> Unit,
+    handleLikeClick: (String, ProductionType) -> Unit,
+    handleProductionImageClick: (showID: String, productionType: ProductionType) -> Unit,
     handleProfilePictureClick: (userID: String) -> Unit,
     handleReviewClick: (reviewID: String) -> Unit
 ) {

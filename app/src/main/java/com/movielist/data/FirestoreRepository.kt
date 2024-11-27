@@ -10,6 +10,7 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.FirebaseStorage
 import com.movielist.model.ListItem
 import com.movielist.model.Movie
+import com.movielist.model.ProductionType
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
 import com.movielist.model.User
@@ -665,8 +666,8 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
         val db = FirebaseFirestore.getInstance()
 
         val collection = when (productionType) {
-            "Movie" -> "movieReviews"
-            "TVShow" -> "tvShowReviews"
+            "MOVIE" -> "movieReviews"
+            "TVSHOW" -> "tvShowReviews"
             else -> null
         }
 

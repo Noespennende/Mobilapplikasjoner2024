@@ -58,6 +58,8 @@ import com.movielist.composables.SettingsButton
 import com.movielist.composables.TopScreensNavbarBackground
 import com.movielist.controller.ControllerViewModel
 import com.movielist.model.FollowStatus
+import com.movielist.model.ListItem
+import com.movielist.model.ProductionType
 import com.movielist.model.Review
 import com.movielist.model.ReviewDTO
 import com.movielist.model.TVShow
@@ -91,9 +93,9 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
 
 
 
-    val handleProductionClick: (productionID: String, productionType: String)
+    val handleProductionClick: (productionID: String, productionType: ProductionType)
     -> Unit = { productionID, productionType ->
-        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType))
+        navController.navigate(Screen.ProductionScreen.withArguments(productionID, productionType.name))
     }
 
 
@@ -140,7 +142,7 @@ fun ProfilePage (controllerViewModel: ControllerViewModel, navController: NavCon
         mutableStateOf(true)
     }
 
-    val handleReviewButtonLikeClick: (reviewID: String, productionType: String) -> Unit = { reviewID, productionType ->  
+    val handleReviewButtonLikeClick: (reviewID: String, productionType: ProductionType) -> Unit = { reviewID, productionType ->
         //Kontroller funksjon her
     }
 
