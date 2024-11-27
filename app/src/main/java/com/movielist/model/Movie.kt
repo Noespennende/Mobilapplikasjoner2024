@@ -11,7 +11,6 @@ data class Movie(
     override val releaseDate: Calendar = Calendar.getInstance(),
     override val actors: List<String> = emptyList(), // Listen skal ikke endres i appen - data kommer fra API
     override val rating: Int? = null,
-    override val reviews: List<String> = emptyList(), // Så bruker kan se anmeldelsen sin *umiddelbart*
     override val posterUrl: String? = null,
     override val trailerUrl: String = "",
 
@@ -34,7 +33,6 @@ data class Movie(
         releaseDate.let { map["releaseDate"] = it.timeInMillis }
         actors.let { map["actors"] = it }
         rating?.let { map["rating"] = it }
-        reviews.let { map["reviews"] = it }
         posterUrl?.let { map["posterUrl"] = it }
         type.let { map["type"] = it }
         trailerUrl.let { map["trailerUrl"] = it }

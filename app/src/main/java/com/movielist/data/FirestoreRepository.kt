@@ -609,7 +609,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "releaseDate" to production.releaseDate.time, // Konverter til long
                 "actors" to production.actors,
                 "rating" to production.rating,
-                "reviews" to production.reviews,
                 "posterUrl" to production.posterUrl,
                 "lengthMinutes" to production.lengthMinutes,
                 "trailerUrl" to production.trailerUrl
@@ -623,7 +622,6 @@ class FirestoreRepository(private val db: FirebaseFirestore) {
                 "releaseDate" to production.releaseDate.time, // Konverter til long
                 "actors" to production.actors,
                 "rating" to production.rating,
-                "reviews" to production.reviews,
                 "posterUrl" to production.posterUrl,
                 "episodes" to production.episodes,
                 "seasons" to production.seasons

@@ -535,7 +535,7 @@ fun ReviewSummary (
         handleLikeClick(review.reviewID.toString(), review.productionType)
     }
 
-    var likes by remember { mutableIntStateOf(review.likes) }
+    var likes by remember { mutableIntStateOf(review.likes.toInt()) }
 
     //Main container
     Column (

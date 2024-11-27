@@ -93,7 +93,7 @@ fun Review(
     handleUserClick: (String) -> Unit,
     handleProductionClick: (showID: String, productionType: ProductionType) -> Unit
 ) {
-    var likes by remember { mutableIntStateOf(reviewDTO?.likes ?: 0) }
+    var likes by remember { mutableIntStateOf((reviewDTO?.likes ?: 0).toInt()) }
     //Main container
     Column {
         if (reviewDTO != null) {
